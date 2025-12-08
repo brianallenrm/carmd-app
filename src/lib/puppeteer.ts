@@ -18,7 +18,7 @@ export async function getBrowser() {
                 height: 1080,
             },
             executablePath: await chromium.executablePath(),
-            headless: chromium.headless as any,
+            headless: true,
         });
     } else {
         // Local development - dynamically import full puppeteer 

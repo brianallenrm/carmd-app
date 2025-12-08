@@ -2,6 +2,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBrowser } from "@/lib/puppeteer";
 
+export const maxDuration = 60; // Allow up to 60s (if plan permits)
+
+
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
@@ -32,7 +35,7 @@ export async function POST(req: NextRequest) {
         await page.setViewport({ width: 850, height: 1200, deviceScaleFactor: 2 });
 
         // 4. Navigate to Preview Page
-        await page.goto(previewUrl, { waitUntil: "networkidle0" });
+        await page.goto(previewUrl, { waitUntil: "domcontentloaded" });
 
         // 5. Take Screenshot
         // Hide print buttons and Next.js dev overlay

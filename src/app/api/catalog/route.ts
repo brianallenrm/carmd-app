@@ -44,16 +44,13 @@ interface Catalog {
     refacciones: CatalogItem[];
 }
 
-let catalogCache: Catalog | null = null;
+// Import directly to ensure Vercel bundles it
+import catalogDataRaw from '../../../../public/catalog/catalogo_final.json';
+
+const catalogCache: Catalog = catalogDataRaw as Catalog;
 
 function loadCatalog(): Catalog {
-    if (catalogCache) return catalogCache;
-
-    const catalogPath = join(process.cwd(), 'public', 'catalog', 'catalogo_final.json');
-    const catalogData = readFileSync(catalogPath, 'utf-8');
-    catalogCache = JSON.parse(catalogData);
-
-    return catalogCache!;
+    return catalogCache;
 }
 
 export async function GET(request: NextRequest) {

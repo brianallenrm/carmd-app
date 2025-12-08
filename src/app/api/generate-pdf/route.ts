@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getBrowser } from "@/lib/puppeteer";
 
+export const maxDuration = 60; // Allow up to 60s (if plan permits)
+
+
 export async function POST(req: Request) {
     try {
         const body = await req.json();
@@ -34,7 +37,7 @@ export async function POST(req: Request) {
         // A4 is 210mm x 297mm. 
         await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 2 });
 
-        await page.goto(url, { waitUntil: "networkidle0" });
+        await page.goto(url, { waitUntil: "domcontentloaded" });
 
         const pdfBuffer = await page.pdf({
             format: "A4",

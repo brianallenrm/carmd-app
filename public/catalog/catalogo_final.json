@@ -1,0 +1,4596 @@
+{
+  "version": "13.0 - Normalización Agresiva y Estandarización",
+  "fecha_generacion": "2025-12-07",
+  "servicios": [
+    {
+      "id": 1,
+      "nombre": "* Mantenimientos Preventivos…Gratuitos",
+      "descripcion": "*2 Mantenimientos Preventivos…GRATUITOS",
+      "costo_sugerido": 2.0,
+      "frecuencia": 1100,
+      "categoria": "Otros"
+    },
+    {
+      "id": 6,
+      "nombre": "Inspección Visual",
+      "descripcion": "Inspección visual / Recorrido de prueba / Estudio de daño / Instalación de monitor en vehículo / Estudio códigos de error almacenados en memoria de ECU / Rutinas de diagnóstico en motor básico / Lecturas de vacío en cilindros / Estudio en lecturas presión de compresión en cilindros / Evaluación de estado de conservación en motor / Remover accesorios diversos (tornillería alterada- tornillería con falla en torque de sujeción) / Desmontar motor / Desamble de motor / Estudio de componentes / Evaluación de estado / Clasificación de daños / Limpieza de componentes de motor / Envío de componentes a rectificación / Ensamble de motor rectificado / Instalación de cojinetes de centro de cigüeñal y bielas / Ensamble de pistones / Instalación de anillos / Instalación de retenes en distribución y cabeza de motor / Instalación de ligas / Instalación bomba de lubricante / Instalación de cabeza de motor /  Instalación bomba de refrigerante / Instalación de cabeza de motor / Instalación de sellos de válvula / Instalación de distribución / Instalación de juego de juntas y empaque de motor / Montar motor /  Instalación de accesorios / Instalación de fluidos aceite lubricante, refrigerante / Inspección en sistema de lubricación / Inspección en sistema de ignición / Inspección en sistema de inyección / Inspección en sistema de enfriamiento / Pruebas de funcionamiento en motor / Limpieza de códigos de error / Reinicio de sistemas / Recorrido de prueba",
+      "costo_sugerido": 17463.02,
+      "frecuencia": 1056,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 3,
+      "nombre": "Sistema De Frenos",
+      "descripcion": "Mantenimiento a sistema de frenos / Inspección visual / Recorrido de prueba / Inspección a frenos delanteros / Inspección de pastas delanteras  /  Remover e instalar pastas delanteras Originales Volvo / Aplicación de Liqui Moly a pastas delanteras / Inspección de discos delanteros / Desmontar discos delanteros /  Instalación de discos delanteros nuevos Originasles Volvo / Inspección de retenes de rueda / Desamble de llantas traseras / Inspección de pastas traseras / Remover e instalar pastas traseras Originales Volvo / Aplicación de Liqui Moly en pastas traseras / Inspección de baleros / Inspección de discos traseros / Ensamble de componentes / Instalación de líquido de frenos / Limpieza, ajuste y calibración de frenos /  Purga a sistema hidráulico / Pruebas de funcionamiento / Recorrido de prueba",
+      "costo_sugerido": 2.0,
+      "frecuencia": 462,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 2,
+      "nombre": "Afinación Fuel Injection",
+      "descripcion": "Afinación Fuel Injectión:  Inspección visual / Recorrido de prueba / Monitoreo electrónico / Lectura de códigos almacenados en memoria de ECU   / Sistema de Ignición: Inspección a sistema de ignición / Inspección, limpieza y calibración a  bujías / Desmontar cuerpo de aceleración / Limpieza y mantenimiento a cuerpo de aceleración / Inspección a sistema de inyección / Inspección de pulsos de inyección / Inspección de regulador de combustible / Sistema de Lubricación: Drenado de aceite de motor / Instalación de aceite lavado interno de motor / Drenado de aceite de lavado / Reemplazo de filtro de aceite / Instalación de aceite lubricante / Remover e instalar filtro de aire /   Sistema de enfriamiento: Inspección a sistema de enfriamiento / Inspección y limpieza a filtro de cabina de aire acondicionado / Inspección de niveles de fluidos / Relleno de niveles / Inspección de terminales de batería / Pruebas de funcionamiento / Reinicio de sistemas",
+      "costo_sugerido": 5244.06,
+      "frecuencia": 384,
+      "categoria": "Afinación"
+    },
+    {
+      "id": 5,
+      "nombre": "Pruebas De Funcionamiento",
+      "descripcion": "PRUEBAS DE FUNCIONAMIENTO / INSPECCIÓN DE LÍNEAS ALIMENTACIÓN DE VOLTAJE REFERENCIA EN BOBINAS DE IGNICIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 134,
+      "categoria": "Otros"
+    },
+    {
+      "id": 4,
+      "nombre": "Sistema De Enfriamiento",
+      "descripcion": "SISTEMA DE ENFRIAMIENTO- FUGA DE REFRIGERANTE: INSPECCIÓN VISUAL / ESTUDIO DE DAÑO / PRUEBAS DE FUNCIONAMIENTO / INSPECCIÓN DE SISTEMA DE ENFRIAMIENTO / LOCALIZAR FUGA DE REFRIGERANTE / DESAMBLE DE PARTE FRONTAL DE VEHICULO /DESMONTAR ACCESORIOS / REMOVER RADIADOR / ENTREGA A PROPIETARIO PARA SU ADQUISICIÓN / INSTALACIÓN DE RADIADOR ADQUIRIDO POR EL PROPIETARIO / ENSAMBLE DE ACCESORIOS / REMOVER E INSTALAR DUCTOS DE REFRIGERANTE / INSTALACIÓN DE REFRIGERANTE / PURGA A SISTEMA DE ENFRIAMIENTO / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 21023.4,
+      "frecuencia": 86,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 7,
+      "nombre": "Sistema De Ignición",
+      "descripcion": "SISTEMA DE IGNICIÓN: INSPECCIÓN VISUAL / ESTUDIO DE DAÑO / PRUEBAS DE FUNCIONAMIENTO /LECTURA DE CÓDIGOS ALMACENADOS EN MEMORIA DE VEHÍCULO / RESTAURACIÓN DE SISTEMA DE IGNICIÓN / REMOVER MÓDULO DE IGNICIÓN (BOBINAS) / ADQUISICIÓN DE COMPONENTE A NOMBRE DEL PROPIETARIO / INSTALACIÓN DE COMPONENTE / REINICIO DE SISTEMAS / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA CON MONITOR A BORDO",
+      "costo_sugerido": 0,
+      "frecuencia": 42,
+      "categoria": "Ignición"
+    },
+    {
+      "id": 13,
+      "nombre": "Reinicio De Sistemas",
+      "descripcion": "REINICIO DE SISTEMAS / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA CON MONITOR A BORDO",
+      "costo_sugerido": 0,
+      "frecuencia": 32,
+      "categoria": "Otros"
+    },
+    {
+      "id": 8,
+      "nombre": "Sistema De Carga",
+      "descripcion": "Sistema de carga:",
+      "costo_sugerido": 0,
+      "frecuencia": 28,
+      "categoria": "Sistema Eléctrico"
+    },
+    {
+      "id": 14,
+      "nombre": "Ensamble De Componentes",
+      "descripcion": "ENSAMBLE DE COMPONENTES / REINICIO DE SISTEMAS / LIMPIEZA DE CODIGOS DE ERROR / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 28,
+      "categoria": "Otros"
+    },
+    {
+      "id": 12,
+      "nombre": "Recorrido De Prueba",
+      "descripcion": "RECORRIDO DE PRUEBA / ESTUDIO DE CÓDIGOS ALMACENADOS EN MEMORIA DE VEHÍCULO",
+      "costo_sugerido": 0,
+      "frecuencia": 24,
+      "categoria": "Otros"
+    },
+    {
+      "id": 9,
+      "nombre": "Sistema De Lubricación",
+      "descripcion": "SISTEMA DE LUBRICACIÓN: INSPECCIÓN VISUAL / INSPECCIÓN DE NIVEL DE LUBRICANTE",
+      "costo_sugerido": 0,
+      "frecuencia": 22,
+      "categoria": "Lubricación"
+    },
+    {
+      "id": 11,
+      "nombre": "Sistema De Embrague",
+      "descripcion": "SISTEMA DE EMBRAGUE: INGRESO DE VEHÍCULO EN GRÚA",
+      "costo_sugerido": 0,
+      "frecuencia": 20,
+      "categoria": "Embrague"
+    },
+    {
+      "id": 35,
+      "nombre": "Nota",
+      "descripcion": "NOTA: Este vehículo deberá reemplazar bases de amortiguadores y amortiguadores delanteros a la brevedad posible. Próximo mantenimiento de afinación Julio-Agosto 2025",
+      "costo_sugerido": 53.25,
+      "frecuencia": 20,
+      "categoria": "Otros"
+    },
+    {
+      "id": 38,
+      "nombre": "Mantenimiento De Afinación Realizado El",
+      "descripcion": "Inspección de mantenimiento de afinación realizado el 16/Nov./2024 a los 68,627 kms. (recorrio 8,925 kms.)",
+      "costo_sugerido": 17744.33,
+      "frecuencia": 18,
+      "categoria": "Afinación"
+    },
+    {
+      "id": 10,
+      "nombre": "Sistema De Combustible",
+      "descripcion": "Sistema de combustible:",
+      "costo_sugerido": 0,
+      "frecuencia": 16,
+      "categoria": "Otros"
+    },
+    {
+      "id": 22,
+      "nombre": "Reinicio De Sistema",
+      "descripcion": "REINICIO DE SISTEMA / ACTUALIZACIÓN EN MODULO ECU / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 14,
+      "categoria": "Otros"
+    },
+    {
+      "id": 32,
+      "nombre": "Suspensión",
+      "descripcion": "Suspensión: Inspección visual / Estudio de daño / Recorrido de prueba / Inspección de suspensión / Inspección de amortiguadores delanteros / Remover e instalar amortiguadores delanteros / Inspección de amortiguadores traseros / Remover e instalar amortiguadores traseros / Remover e instalar bases de amortiguadores delanteros / Inspección de gomas de rebote delanteras / Inspección de bujes de horquillas / Inspección de  gomas de barra estabilizadora / Inspección de  tornillos estabilizadores / Remover e instalar horquillas delanteras /  Inspección de rotulas / Torque general a suspensión / Pruebas de funcionamiento / Recorrido de prueba / Alineación de eje delantero / Balanceo de rines",
+      "costo_sugerido": 0,
+      "frecuencia": 14,
+      "categoria": "Suspensión"
+    },
+    {
+      "id": 19,
+      "nombre": "Adquisición De Componente A Nombre Del Propietario",
+      "descripcion": "ADQUISICIÓN DE COMPONENTE A NOMBRE DEL PROPIETARIO / INSTALACIÓN DE CUBRE POLVO DE FLECHA",
+      "costo_sugerido": 0,
+      "frecuencia": 12,
+      "categoria": "Otros"
+    },
+    {
+      "id": 21,
+      "nombre": "Ensamble De Accesorios",
+      "descripcion": "ENSAMBLE DE ACCESORIOS / INSTALACIÓN DE REFRIGERANTE / PURGA DE SISTEMA DE ENFRIAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 12,
+      "categoria": "Otros"
+    },
+    {
+      "id": 15,
+      "nombre": "Purga A Sistema De Enfriamiento",
+      "descripcion": "PURGA A SISTEMA DE ENFRIAMIENTO / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 10,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 20,
+      "nombre": "Restauración De Sistema De Ignición",
+      "descripcion": "RESTAURACIÓN DE SISTEMA DE IGNICIÓN / LIMPIEZA DE CODIGOS DE ERROR / REINICIO EN PANEL DE INSTRUMENTOS",
+      "costo_sugerido": 0,
+      "frecuencia": 10,
+      "categoria": "Ignición"
+    },
+    {
+      "id": 31,
+      "nombre": "Limpieza De Codigos De Error",
+      "descripcion": "LIMPIEZA DE CODIGOS DE ERROR / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 10,
+      "categoria": "Otros"
+    },
+    {
+      "id": 16,
+      "nombre": "Lectura De Códigos Almacenados En Memoria De Ecu",
+      "descripcion": "LECTURA DE CÓDIGOS ALMACENADOS EN MEMORIA DE ECU / LIMPIEZA DE CÓDIGOS DE ERROR",
+      "costo_sugerido": 0,
+      "frecuencia": 8,
+      "categoria": "Otros"
+    },
+    {
+      "id": 17,
+      "nombre": "Sistema De Injection",
+      "descripcion": "Sistema de inyección:",
+      "costo_sugerido": 0,
+      "frecuencia": 8,
+      "categoria": "Afinación"
+    },
+    {
+      "id": 18,
+      "nombre": "* Mantenimiento Preventivos …Gratuitos",
+      "descripcion": "*2 Mantenimiento Preventivos …GRATUITOS",
+      "costo_sugerido": 2.0,
+      "frecuencia": 8,
+      "categoria": "Otros"
+    },
+    {
+      "id": 23,
+      "nombre": "Terminales De Acumulador",
+      "descripcion": "INSPECCIÓN DE TERMINALES DE ACUMULADOR / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 8,
+      "categoria": "Otros"
+    },
+    {
+      "id": 40,
+      "nombre": "Sistema De Luces",
+      "descripcion": "INSPECCIÓN DE SISTEMA DE LUCES / INSPECCIÓN SISTEMA DE CARGA / INSPECCIÓN CERRADURA Y APERTURA DE PUERTAS, CAJUELA Y COFRE / INSPECCIÓN DE CHISGUETEROS Y LIMPIEZA DE PARABRISAS / REMOVER E INSTALAR PLUMAS LIMPIA PARABRISAS / INSPECCIÓN DE PANEL DE INSTRUMENTOS",
+      "costo_sugerido": 0,
+      "frecuencia": 8,
+      "categoria": "Otros"
+    },
+    {
+      "id": 43,
+      "nombre": "Inspección A Sistema De Ignición",
+      "descripcion": "INSPECCIÓN A SISTEMA DE IGNICIÓN / PRUEBAS DE FUNCIONAMIENTO EN BOBINAS / REMOVER E INSTALAR BUJÍAS DE IGNICIÓN / INSTALACIÓN DE COMPONENTES / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 8,
+      "categoria": "Ignición"
+    },
+    {
+      "id": 82,
+      "nombre": "Accesorios",
+      "descripcion": "INSTALACIÓN DE ACCESORIOS / INSTALACIÓN DE MÚLTIPLE DE ADMISIÓN / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 8,
+      "categoria": "Otros"
+    },
+    {
+      "id": 95,
+      "nombre": "Limpieza De Códigos De Error",
+      "descripcion": "LIMPIEZA DE CÓDIGOS DE ERROR / REINICIO EN PANEL DE INSTRUMENTOS",
+      "costo_sugerido": 0,
+      "frecuencia": 8,
+      "categoria": "Otros"
+    },
+    {
+      "id": 100,
+      "nombre": "Limpieza De Códigos Almacenados",
+      "descripcion": "LIMPIEZA DE CÓDIGOS ALMACENADOS /PROGRAMACIÓN DE CUERPO DE ACELERACIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 8,
+      "categoria": "Otros"
+    },
+    {
+      "id": 25,
+      "nombre": "Remover Accesorios Diversos",
+      "descripcion": "REMOVER ACCESORIOS DIVERSOS / REALIZAR PRUEBAS DE FUNCIONAMIENTO / DESMONTAR TANQUE DE COMBUSTIBLE",
+      "costo_sugerido": 0,
+      "frecuencia": 6,
+      "categoria": "Otros"
+    },
+    {
+      "id": 26,
+      "nombre": "Remover Bomba De Combustible",
+      "descripcion": "REMOVER BOMBA DE COMBUSTIBLE / PRUEBAS DE FUNCIONAMIENTO EN ACCESORIOS",
+      "costo_sugerido": 0,
+      "frecuencia": 6,
+      "categoria": "Otros"
+    },
+    {
+      "id": 42,
+      "nombre": "Mantenimiento De Afinación Relizado El",
+      "descripcion": "Inspección de mantenimiento de afinación relizado el 15/ago/2024 amlo0s 159,226 kms. (recorrio 2,596 kms,)",
+      "costo_sugerido": 32408.6,
+      "frecuencia": 6,
+      "categoria": "Afinación"
+    },
+    {
+      "id": 47,
+      "nombre": "Afinación Diesel",
+      "descripcion": "Mantenimiento de afinación Diesel: Ultimo mantenimiento de afinación realizado el 30-oct-2024 a los 127,819 (recorrio 10,940 kms.)  Inspección visual / Recorrido de prueba / Diagnostico Multi-Check / Lecturas de códigos de falla / Inbspección a bujías incandescentes / Remover e instalar filtro de combustible diesel / Remover e instalar filtro de aire / Inspección a filtro de cabina (polen) / Sistema de lubricación: Drenado de aceite de motor / Instalación de aceite lavado interno de motor / Drenado de aceite de lavado / Reemplazo de filtro de aceite / Instalación de aceite lubricante / Sistema de enfriamiento: Inspección de sistema de enfriamiento / Inspección de refrigerante / Inspección de niveles de fluidos / Relleno de niveles / Inspección de terminales de batería / Pruebas de funcionamiento / Reinicio en panel de instrumentos",
+      "costo_sugerido": 27799.0,
+      "frecuencia": 6,
+      "categoria": "Afinación"
+    },
+    {
+      "id": 49,
+      "nombre": "Adquisición De Componentes En Nombre Del Propietario",
+      "descripcion": "ADQUISICIÓN DE COMPONENTES EN NOMBRE DEL PROPIETARIO / INSTALACIÓN DE MAZAS BALEROS EN RUEDAS DELANTERAS",
+      "costo_sugerido": 0,
+      "frecuencia": 6,
+      "categoria": "Otros"
+    },
+    {
+      "id": 92,
+      "nombre": "Cuerpo De Aceleración",
+      "descripcion": "CUERPO DE ACELERACIÓN: INSPECCIÓN VISUAL / LOCALIZAR LINEAS AVERIADAS / RESTAURACIÓN DE LINEAS / PRUEBAS DE FUNCIOBNAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 6,
+      "categoria": "Otros"
+    },
+    {
+      "id": 101,
+      "nombre": "Sistema De Aire Acondicionado",
+      "descripcion": "INSPECCIÓN DE SISTEMA DE AIRE ACONDICIONADO / MANTENIMIENTO A SISTEMA",
+      "costo_sugerido": 0,
+      "frecuencia": 6,
+      "categoria": "Otros"
+    },
+    {
+      "id": 112,
+      "nombre": "Elevar Vehículo",
+      "descripcion": "Elevar vehículo / Estudio de daño / Retirar accesorios diversos / Remover motor de arranque (marcha) / Restauración de líneas alteradas / Inspección y pruebas de funcionamiento a motor de arranque / Instalación de componente y accesorios / Pruebas de funcionamiento  / Entrega de vehículo a domicilio a solicitud de propietario",
+      "costo_sugerido": 0,
+      "frecuencia": 6,
+      "categoria": "Otros"
+    },
+    {
+      "id": 146,
+      "nombre": "Refrigerante",
+      "descripcion": "INSTALACIÓN DE REFRIGERANTE / PURGA DE SISTEMA DE ENFRIAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 6,
+      "categoria": "Otros"
+    },
+    {
+      "id": 212,
+      "nombre": "Mantenimiento Realizado El",
+      "descripcion": "Inspección de mantenimiento realizado el 23/abr/2024 a los 48,802 kms. (recorrió 6,915 km.)",
+      "costo_sugerido": 8213.13,
+      "frecuencia": 6,
+      "categoria": "Otros"
+    },
+    {
+      "id": 24,
+      "nombre": "Remover Toma Completa De Sistema De Enfriamiento",
+      "descripcion": "REMOVER TOMA COMPLETA DE SISTEMA DE ENFRIAMIENTO / TOMA ADQUIRIDA POR PROPIETARIO",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 27,
+      "nombre": "Tanque De Combustible",
+      "descripcion": "INSTALACIÓN DE TANQUE DE COMBUSTIBLE / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 28,
+      "nombre": "*Este Vehículo Deberá Retornar En Días Habiles Para Su Inspección",
+      "descripcion": "*Este vehículo deberá retornar en 5 días habiles para su inspección.",
+      "costo_sugerido": 5.0,
+      "frecuencia": 4,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 29,
+      "nombre": "Sistema Start",
+      "descripcion": "Sistema START-STOP:",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 30,
+      "nombre": "Inspección Y Estudio A Sistema De Carga",
+      "descripcion": "INSPECCIÓN Y ESTUDIO A SISTEMA DE CARGA / REMOV ER E INSTALAR ACUMULADOR INTELIGENTE",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 33,
+      "nombre": "Kms",
+      "descripcion": "Mantenimiento 100,000 KMS:",
+      "costo_sugerido": 80000.0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 34,
+      "nombre": "Reinicio De Sistemas Previo Limpieza De Códigos De Error",
+      "descripcion": "REINICIO DE SISTEMAS PREVIO LIMPIEZA DE CÓDIGOS DE ERROR",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 36,
+      "nombre": "Mantenimiento",
+      "descripcion": "Mantenimiento:",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 37,
+      "nombre": "Líneas De Alimentación De Voltaje",
+      "descripcion": "INSPECCIÓN DE LÍNEAS DE ALIMENTACIÓN DE VOLTAJE / ESTUDIO DE CICLO DE TRABAJO EN MOTO VENTILADOR",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 39,
+      "nombre": "Inspección",
+      "descripcion": "Inspección general:",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 41,
+      "nombre": "Limpieza, Mantenimiento … En Mano De Obra",
+      "descripcion": "Limpieza, mantenimiento …SIN COSTO en mano de obra.",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 44,
+      "nombre": "Inspección A Sistema De Injection",
+      "descripcion": "INSPECCIÓN A SISTEMA DE INYECCIÓN / INSPECCIÓN A RIEL DE INYECTORES",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Afinación"
+    },
+    {
+      "id": 45,
+      "nombre": "Inspección A Regulador De Presión",
+      "descripcion": "INSPECCIÓN A REGULADOR DE PRESIÓN / INSPECCIÓN EN PULSO DE INYECCIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 46,
+      "nombre": "Monitoreo Electrónico",
+      "descripcion": "Monitoreo electrónico / Lectura de códigos de falla / Limpieza de códigos / Inspección de sensores / Inspección de bujías/ Inspección de bobinas de ignición /  Inspección de a cuerpo de aceleración / Inspección y limpieza a filtro de aire / Inspección de sistema de inyección / Inspección de regulador de combustible / Inspección de sistema de lubricación / Inspección de sistema de enfriamiento / Inspección de estado de acumulador / Pruebas de funcionamiento / Reinicio de sistemas / Instalación de aditivo Liqui Moly a sistema de combustible para elevar octanaje",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 48,
+      "nombre": "Conector Faltante",
+      "descripcion": "INSTALACIÓN DE CONECTOR FALTANTE / INSTALACIÓN DE ACCESORIOS",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 50,
+      "nombre": "Mantenimiento, Limpieza Y Restauración A Motor De Arranque (Marcha)",
+      "descripcion": "MANTENIMIENTO, LIMPIEZA Y RESTAURACIÓN A MOTOR DE ARRANQUE (MARCHA)",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 57,
+      "nombre": "Mantenimiento De Afinación Y Sistema De Frenos Realizados El",
+      "descripcion": "Inspección de mantenimiento de afinación y sistema de frenos delanteros realizados el 12/Ago./2024 a los 84,228 km. (recorrió 7,669 kms.)",
+      "costo_sugerido": 28335.0,
+      "frecuencia": 4,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 142,
+      "nombre": "Transmisión",
+      "descripcion": "Transmisión:  Presenta fugas de lubricante – Inspección de estado / Desamble de transmisión / Limpieza de componentes / Estudio en estado de conservación de componentes / Ensamble de transmisión – instalando juego de retenes y sellador",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Transmisión"
+    },
+    {
+      "id": 158,
+      "nombre": "Mantenimiento De Afinación Realizado",
+      "descripcion": "Inspección de mantenimiento de afinación realizado 01/jul/2025 a los 163,653 km. (recorrió 5,163 kms.)",
+      "costo_sugerido": 20199.9,
+      "frecuencia": 4,
+      "categoria": "Afinación"
+    },
+    {
+      "id": 167,
+      "nombre": "Termostato",
+      "descripcion": "INSPECCIÓN DE TERMOSTATO / INSPECCIÓN DE VENTILADORES",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 169,
+      "nombre": "Purga De Sistema",
+      "descripcion": "PURGA DE SISTEMA / INSPECCIÓN DE CICLO EN FUNCIONAMIENTO DE VENTILADORES /",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 196,
+      "nombre": "Componentes",
+      "descripcion": "INSTALACIÓN DE COMPONENTES / LIMPIEZA DE CÓDIGOS DE ERROR / REINICIO DE SISTEMA",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 198,
+      "nombre": "Diagnostico",
+      "descripcion": "Diagnostico – Fuga Sistema de enfriamiento:",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 214,
+      "nombre": "Visual",
+      "descripcion": "INSPECCIÓN DE VISUAL / ESTUDIO DE DAÑO / PRUEBAS DE FUNCIONAMIENTO / RESTAURACIÓN DE TRANSMISIÓN ESTÁNDAR / ENSAMBLE DE COMPONENTES / ENSAMBLE DE TRANSMISIÓN / INSTALACIÓN DE COMPONENTES / INSTALACIÓN DE LUBRICANTE / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 265,
+      "nombre": "Soportes De Motor",
+      "descripcion": "SOPORTES DE MOTOR: INSPECCIÓN VISUAL / ESTUDIO DE DAÑO / DESAMBLE DE ACCESORIOS / REMOVER SOPORTES DE MOTOR DE MOTOR / SOPORTES PROPORCIONADOS POR EL PROPIETARIO / ENSAMBLE DE ACCESORIOS / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 4,
+      "categoria": "Otros"
+    },
+    {
+      "id": 51,
+      "nombre": "Traslado De Vehículo A Instalación De Cerámica",
+      "descripcion": "Traslado de vehículo a instalación de cerámica  / Recoger vehículo y traslado a Car MD",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 52,
+      "nombre": "Accesorio En Cofre",
+      "descripcion": "INSTALACIÓN DE ACCESORIO EN COFRE",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 53,
+      "nombre": "Estribo Lado Piloto",
+      "descripcion": "INSTALACIÓN DE ESTRIBO LADO PILOTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 54,
+      "nombre": "Llantera Texcoco",
+      "descripcion": "LLANTERA TEXCOCO - INSTALACIÓN DE LLANTAS, MONTAJE, BALANCEOS, INSTALACIÓN DE VALVULAS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 55,
+      "nombre": "Sistema De Motor De Arranque",
+      "descripcion": "Sistema de motor de arranque:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 56,
+      "nombre": "Funcionamiento En Ralentí",
+      "descripcion": "INSPECCIÓN DE FUNCIONAMIENTO EN RALENTÍ / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 58,
+      "nombre": "Sistema De Freno De Estacionamiento",
+      "descripcion": "Sistema de freno de estacionamiento:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 59,
+      "nombre": "Chicote Nuevo",
+      "descripcion": "INSTALACIÓN DE CHICOTE NUEVO / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 60,
+      "nombre": "Lecturas De Presión De Combustible",
+      "descripcion": "LECTURAS DE PRESIÓN DE COMBUSTIBLE / INSPECCIÓN DE REGULADOR DE PRESIÓN DE COMBUSTIBLE",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 61,
+      "nombre": "Estudio De Inyectores En Laboratorio",
+      "descripcion": "ESTUDIO DE INYECTORES EN LABORATORIO / INSTALACIÓN DE RIEL DE INYECTORES",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 62,
+      "nombre": "Palanca Nuevo",
+      "descripcion": "INSTALACIÓN DE PALANCA NUEVO / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 63,
+      "nombre": "Sugerencia",
+      "descripcion": "SUGERENCIA: Mantenimiento de afinación a la brevedad posible.",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 64,
+      "nombre": "Mantenimiento De Afinación Realizada El",
+      "descripcion": "Inspección de mantenimiento de afinación realizada el 02/Oct./2023 a los 77,666 km. (recorrió 18,804 kms.)",
+      "costo_sugerido": 19335.4,
+      "frecuencia": 2,
+      "categoria": "Afinación"
+    },
+    {
+      "id": 65,
+      "nombre": "Adquisición De Soporte De Motor En Nombre La Propietaria",
+      "descripcion": "ADQUISICIÓN DE SOPORTE DE MOTOR EN NOMBRE LA PROPIETARIA / INSTALACIÓN DE SOPORTE DE MOTOR / ENSAMBLE DE ACCESORIOS / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 66,
+      "nombre": "Vibración",
+      "descripcion": "Inspección de vibración:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 67,
+      "nombre": "Restauración Sistema De Enfriamiento",
+      "descripcion": "Restauración sistema de enfriamiento:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 68,
+      "nombre": "Inspección Líneas Alimentación De Voltaje Sistema De Ignición",
+      "descripcion": "INSPECCIÓN LÍNEAS ALIMENTACIÓN DE VOLTAJE SISTEMA DE IGNICIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Ignición"
+    },
+    {
+      "id": 69,
+      "nombre": "Arnés",
+      "descripcion": "INSPECCIÓN DE ARNÉS / REMOVER ACCESORIOS / REMOVER INYECTORES / ESTUDIO DE INYECTORES EN LABORATORIO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 70,
+      "nombre": "Remover E Instalar Inyector",
+      "descripcion": "Remover e instalar 1 inyector / Limpieza y lavado de 3 inyectores / Ensamble de componentes",
+      "costo_sugerido": 2.0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 71,
+      "nombre": "Instalación Eléctrica",
+      "descripcion": "Instalación eléctrica:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 72,
+      "nombre": "Estudio De Daño",
+      "descripcion": "Estudio de daño / Desamble de accesorios diversos / Remover instalación eléctrica en áreas dañadas / Remover líneas afectadas (quemadas) / Reconstrucción de instalación / Elaboración de pruebas de funcionamiento por línea (en promedio 562 líneas afectadas) / Pruebas de continuidad en instalación restaurada / Restauración en instalación (iluminación) caja seca / Remover e instalar conectores afectados / Pruebas de funcionamiento en módulos / Prueba de funcionamiento con vehículo funcionando por espacio de 8 horas continuas",
+      "costo_sugerido": 285.0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 73,
+      "nombre": "Lectura De Códigos Almacenados En Ecu",
+      "descripcion": "LECTURA DE CÓDIGOS ALMACENADOS EN ECU / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 74,
+      "nombre": "Reinicio De Modulo Bcm",
+      "descripcion": "REINICIO DE MODULO BCM / LIMPIEZA DE CÓDIGOS DE ERROR",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 75,
+      "nombre": "*Modulo Bcm Posible Cambio",
+      "descripcion": "*Modulo BCM posible cambio.",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 76,
+      "nombre": "De Diagnóstico",
+      "descripcion": "Costo de diagnóstico",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 77,
+      "nombre": "Inspección A Sistema De Enfriamiento",
+      "descripcion": "INSPECCIÓN A SISTEMA DE ENFRIAMIENTO / INSPECCIÓN A SISTEMA DE CARGA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 78,
+      "nombre": "Cuerpo De Aceleración Y Accesorios",
+      "descripcion": "INSPECCIÓN DE CUERPO DE ACELERACIÓN Y ACCESORIOS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 79,
+      "nombre": "Observaciones",
+      "descripcion": "Observaciones: Sistema de carga requiere restauración y/o reemplazo de alternador, después posiblemente cambio de acumulador. Este vehículo deberá de retornar después de 3 días hábiles para su inspección y estudio.",
+      "costo_sugerido": 3.0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 80,
+      "nombre": "Sistema De Enfriamiento Afectado",
+      "descripcion": "SISTEMA DE ENFRIAMIENTO AFECTADO / VEHÍCULO CARENTE DE MANTENIMIENTO / ACCESORIOS MANIPULADOS / ACCESORIOS ADAPTADOS EN DUCTOS, CONECTORES Y LÍNEAS / SISTEMA DE CARGA AFECTADO / ACUMULADOR NO COMPATIBLE CON VEHÍCULO (INSTALACIÓN DE ACUMULADOR COMPATIBLE CON VEHÍCULO- ADQUIRIDO A NOMBRE DE PROPIETARIO EN AUTOZONE) / INSTALACIÓN DEPÓSITO DE REFRIGERANTE Y TAPÓN (ADQUIRIDO A NOMBRE DE PROPIETARIO)",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 81,
+      "nombre": "Ducto Principal En Sistema De Enfriamiento Restaurado (Requiere Cambio Inmediato, Componente No Hay En Existencia)",
+      "descripcion": "Ducto principal en sistema de enfriamiento restaurado (requiere cambio inmediato, componente no hay en existencia) / Instalación de 3 bobinas de ignición (adquiridas a nombre de propietario en tienda AutoZone)",
+      "costo_sugerido": 3.0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 83,
+      "nombre": "Pruebas De Funcionamiento En Sistema De Combustible",
+      "descripcion": "PRUEBAS DE FUNCIONAMIENTO EN SISTEMA DE COMBUSTIBLE",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 84,
+      "nombre": "Requiere Mantenimiento De Afinación",
+      "descripcion": "REQUIERE MANTENIMIENTO MAYOR DE AFINACIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Afinación"
+    },
+    {
+      "id": 85,
+      "nombre": "Restauración En Sistema De Ingnición",
+      "descripcion": "RESTAURACIÓN EN SISTEMA DE INGNICIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 86,
+      "nombre": "Diagnostico Sistema De Enfriamiento",
+      "descripcion": "Diagnostico sistema de enfriamiento:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 87,
+      "nombre": "• Inspección Visual, Estudio De Estado De Conservación",
+      "descripcion": "•\tInspección visual, estudio de estado de conservación.",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 88,
+      "nombre": "• Pruebas De Funcionamiento Y Recorrido De Prueba",
+      "descripcion": "• PRUEBAS DE FUNCIONAMIENTO Y RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 89,
+      "nombre": "• Limpieza De Códigos De Error Reinicio De Sistemas",
+      "descripcion": "• LIMPIEZA DE CÓDIGOS DE ERROR REINICIO DE SISTEMAS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 90,
+      "nombre": "• Termostato Es Necesario Remover Termostato Contenido Para Su Inspección Que Nos Permita Asegurar Que Este Sea Un Componente Original Y Funcionamiento Correcto",
+      "descripcion": "•\tTermostato es necesario remover termostato contenido para su inspección que nos permita asegurar que este sea un componente original y funcionamiento correcto.",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 91,
+      "nombre": "La Intervención Realizada Al Vehículo Con Anterioridad No Cumplió Con El Objetivo En Restaurar Sistema De Enfriamiento. Se Informa A Su Propietario, El Efectuar Restauración Al Presente Vehículo Implica Una Inversión Elevada En La Adquisición De Componentes Necesarios Para Su Correcto Funcionamiento, A Continuación Una Lista De Componentes Originales Requeridos",
+      "descripcion": "La intervención realizada al vehículo con anterioridad no cumplió con el objetivo en restaurar sistema de enfriamiento. Se informa a su propietario, el efectuar restauración al presente vehículo implica una inversión elevada en la adquisición de componentes necesarios para su correcto funcionamiento, a continuación una lista de componentes originales requeridos.",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 93,
+      "nombre": "Ductos De Vacío",
+      "descripcion": "INSPECCIÓN DE DUCTOS DE VACÍO / INSPECCIÓN DE DUCTOS A CUERPO DE ACELERACIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 94,
+      "nombre": "Birlos De Seguridad",
+      "descripcion": "Birlos de seguridad:  Extracción de birlos de seguridad / Adquisición de birlos nuevos / Instalación de birlos",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 96,
+      "nombre": "De Diagnóstico En Atención A Gamaliel Mendoza",
+      "descripcion": "Costo de diagnóstico en atención a Gamaliel Mendoza",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 97,
+      "nombre": "Inspección Previa Salida A Carretera",
+      "descripcion": "Inspección previa salida a carretera:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 98,
+      "nombre": "Mantenimiento De Afinación, Frenos Y Tracción Realizadas El",
+      "descripcion": "Inspección de mantenimiento de afinación, frenos y tracción realizadas el 5/mar/2025 (recorrió 2,093 kms.)",
+      "costo_sugerido": 576.25,
+      "frecuencia": 2,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 99,
+      "nombre": "Inspección Integral Previa Salida A Carretera",
+      "descripcion": "INSPECCIÓN INTEGRAL PREVIA SALIDA A CARRETERA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 102,
+      "nombre": "Gas R",
+      "descripcion": "Instalación de gas r134  / Recorrido de prueba / Pruebas de funcionamiento",
+      "costo_sugerido": 134.0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 103,
+      "nombre": "Litros De Combustible (Pruebas De Funcionamiento En Los Días De Estancia De Vehículo)",
+      "descripcion": "Instalación de 20 litros de combustible (Pruebas de funcionamiento en los días de estancia de vehículo)",
+      "costo_sugerido": 20.0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 104,
+      "nombre": "Servicios Adicionales",
+      "descripcion": "Servicios adicionales: Ruido emitido por vehículo – Inspección visual / Recorrido de prueba / Localizar fuente de ruido extraño /Remover cubierta en puerta trasera / Localizar objetos extraños / Colocación de tuercas sueltas en lugar correspondiente / Instalación de  tapa en puerta trasera / Recorrido de prueba",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 105,
+      "nombre": "*Modulo Ecu Afectado, Requier Cambio Nuevo Y Original",
+      "descripcion": "*Modulo ECU afectado, requier cambio nuevo y original.",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 106,
+      "nombre": "Ecu",
+      "descripcion": "Instalación de ECU:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 107,
+      "nombre": "Restauración De Componentes",
+      "descripcion": "RESTAURACIÓN DE COMPONENTES / INSTALACIÓN DE COMPONENTES RESTAURADOS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 108,
+      "nombre": "Afinación Convencional",
+      "descripcion": "Afinación Convencional:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Afinación"
+    },
+    {
+      "id": 109,
+      "nombre": "Mantenimiento De Afinación Realizada",
+      "descripcion": "Inspección de mantenimiento de afinación realizada 15/feb/2025 a los 241,811 km. (recorrió 7,804 kms.)",
+      "costo_sugerido": 49967.4,
+      "frecuencia": 2,
+      "categoria": "Afinación"
+    },
+    {
+      "id": 110,
+      "nombre": "Mantenimiento A Sistema De Frenos Realizado El",
+      "descripcion": "Inspección de mantenimiento a sistema de frenos realizado el 15/feb/2025 a los 241,811 km. (recorrió 7,804 kms…..SIN COSTO en mano de obra…OPERA GARANTIA",
+      "costo_sugerido": 49967.4,
+      "frecuencia": 2,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 111,
+      "nombre": "Mantenimiento De Frenos Realizados El",
+      "descripcion": "Inspección de mantenimiento de frenos realizados el 6/mar/2024 a los 154,390 kms. (recorrio 5,807 kms.)",
+      "costo_sugerido": 32081.8,
+      "frecuencia": 2,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 113,
+      "nombre": "Líneas De Alimentación De Voltaje Y Referencias",
+      "descripcion": "INSPECCIÓN DE LÍNEAS DE ALIMENTACIÓN DE VOLTAJE Y REFERENCIAS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 114,
+      "nombre": "Módulo De Dirección",
+      "descripcion": "INSPECCIÓN DE MÓDULO DE DIRECCIÓN / INSPECCIÓN DE MECATRÓNICA DE DIRECCIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Dirección"
+    },
+    {
+      "id": 115,
+      "nombre": "De Diagnóstico Precio Normal  Precio En Atención A Sra. Alma Rosa Sedeño",
+      "descripcion": "Costo de diagnóstico precio normal $ 1,950.00 precio en atención a Sra. Alma Rosa Sedeño",
+      "costo_sugerido": 1950.0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 116,
+      "nombre": "Sistema De Carga Dañado",
+      "descripcion": "SISTEMA DE CARGA DAÑADO / DESAMBLE DE ACCESORIOS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Sistema Eléctrico"
+    },
+    {
+      "id": 117,
+      "nombre": "Alternador",
+      "descripcion": "INSTALACIÓN DE ALTERNADOR / ENSAMBLE DE ACCESORIOS / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 118,
+      "nombre": "Limpieza De Codigos En Ecu",
+      "descripcion": "LIMPIEZA DE CODIGOS EN ECU / REINICIO DE SISTEMAS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 119,
+      "nombre": "Cilindro Maestro Nuevo Original",
+      "descripcion": "INSTALACIÓN DE CILINDRO MAESTRO NUEVO ORIGINAL",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 120,
+      "nombre": "Cilindro Maestro",
+      "descripcion": "INSTALACIÓN DE CILINDRO MAESTRO / ENSAMBLE DE ACCESORIOS / INSTALACIÓN DE LIQUIDO DE FRENOS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 121,
+      "nombre": "Purga A Sistema De Frenos",
+      "descripcion": "PURGA A SISTEMA DE FRENOS / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 122,
+      "nombre": "Bayoneta…",
+      "descripcion": "Instalación de bayoneta…..SIN COSTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 123,
+      "nombre": "Bomba De Combustible",
+      "descripcion": "INSTALACIÓN DE BOMBA DE COMBUSTIBLE – FLOTADOR (MATERIAL DE RECUPERACIÓN) ADQUIRIDA A NOMBRE DEL PROPIETARIO / REMOVER E INSTALAR DUCTO DE COMBUSTIBLE / MONTAR TANQUE DE COMBUSTIBLE / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 124,
+      "nombre": "Restauración De Sistema De Frenos Abs",
+      "descripcion": "Restauración de sistema de frenos ABS:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 125,
+      "nombre": "Líneas En Alimentación De Voltaje A Cuerpo De Aceleración",
+      "descripcion": "INSPECCIÓN DE LÍNEAS EN ALIMENTACIÓN DE VOLTAJE A CUERPO DE ACELERACIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 126,
+      "nombre": "Pruebas De Funcionamiento A Cuerpo De Aceleración",
+      "descripcion": "PRUEBAS DE FUNCIONAMIENTO A CUERPO DE ACELERACIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 127,
+      "nombre": "De Diagnóstico……P A G A D O",
+      "descripcion": "Costo de diagnóstico…$ 1,950.00…P A G A D O",
+      "costo_sugerido": 1950.0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 128,
+      "nombre": "Lubricante En Sistema Hidráulico",
+      "descripcion": "INSTALACIÓN DE LUBRICANTE EN SISTEMA HIDRÁULICO / INSTALACIÓN DE ACCESORIOS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 129,
+      "nombre": "De Diagnóstico En Atención A Eliot Adán Gutiérrez",
+      "descripcion": "Costo de diagnóstico en atención a Eliot Adán Gutiérrez",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 130,
+      "nombre": "Recorrido De Prueba En Circuito Mexiquense Monitor A Bordo Instalado",
+      "descripcion": "RECORRIDO DE PRUEBA EN CIRCUITO MEXIQUENSE MONITOR A BORDO INSTALADO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 131,
+      "nombre": "Lecturas Sistema De Enfriamiento",
+      "descripcion": "LECTURAS SISTEMA DE ENFRIAMIENTO – EN RANGO DE FUNCIONAMIENTO CORRECTAS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 132,
+      "nombre": "Recorrido Y Pruebas De Funcionamiento Concluidas",
+      "descripcion": "RECORRIDO Y PRUEBAS DE FUNCIONAMIENTO CONCLUIDAS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 133,
+      "nombre": "Limpieza De Código De Error Almacenado",
+      "descripcion": "LIMPIEZA DE CÓDIGO DE ERROR ALMACENADO / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 134,
+      "nombre": "De Accesorios, Materiales Y Articulos De Limpieza",
+      "descripcion": "Costo de accesorios, materiales y articulos de limpieza",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 135,
+      "nombre": "Reinicio De Sistemas Para Reconocimiento De Módulos De Encendido",
+      "descripcion": "REINICIO DE SISTEMAS PARA RECONOCIMIENTO DE MÓDULOS DE ENCENDIDO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 136,
+      "nombre": "Accesorios Diveros",
+      "descripcion": "INSTALACIÓN DE ACCESORIOS DIVEROS / INSTALACIÓN DE REFRIGERANTE / PURGA DE SISTEMA DE ENFRIAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 137,
+      "nombre": "Alinear Eje",
+      "descripcion": "ALINEAR EJE DELANTERO / INSPECCIÓN DE FLECHAS HOMOCINÉTICAS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 138,
+      "nombre": "Mantenimiento De Frenos Realizado El",
+      "descripcion": "Inspección de mantenimiento de frenos realizado el 01/mar/2025 a los 79,471 km. (recorrió 6,050 km.)",
+      "costo_sugerido": 17145.8,
+      "frecuencia": 2,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 139,
+      "nombre": "Restauración Sistema De Frenos Anti",
+      "descripcion": "Restauración sistema de frenos anti-bloqueo:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 140,
+      "nombre": "Lectura De Códigos Almacenados",
+      "descripcion": "LECTURA DE CÓDIGOS ALMACENADOS / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 141,
+      "nombre": "Lectura De Presión De Compresión",
+      "descripcion": "LECTURA DE PRESIÓN DE COMPRESIÓN / PRUEBAS DE FUGAS DE CILINDROS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 143,
+      "nombre": "Bomba De Combustible Proporcionada Por El Propietario",
+      "descripcion": "INSTALACIÓN DE BOMBA DE COMBUSTIBLE PROPORCIONADA POR EL PROPIETARIO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 144,
+      "nombre": "Montar Tanque De Combustible",
+      "descripcion": "MONTAR TANQUE DE COMBUSTIBLE / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 145,
+      "nombre": "Sistema De Calefacción",
+      "descripcion": "Sistema de calefacción:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 147,
+      "nombre": "Diagnóstico De Vehículo…",
+      "descripcion": "Diagnóstico de vehículo…SIN COSTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 148,
+      "nombre": "Lubricación",
+      "descripcion": "LUBRICACIÓN: INSPECCIÓN VISUAL EN NIVEL DE LUBRICANTE DE MOTOR / DRENADO DE LUBRICANTE / INSTALACIÓN DE LUBRICANTE NUEVO / INSPECCIÓN DE NIVEL CORRECTO / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Lubricación"
+    },
+    {
+      "id": 149,
+      "nombre": "Tracción Delantera",
+      "descripcion": "Tracción delantera / Sistema de frenos:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 150,
+      "nombre": "Inspección A Sistema De Frenos",
+      "descripcion": "Inspección a sistema de frenos / Inspección visual / Recorrido de prueba / Inspección a frenos delanteros / Inspección de pastas delanteras  /  Restauración de pastas delanteras / Inspección a  discos delanteros /  Remover e instalar maza – balero llanta delantera / Inspección de retenes de rueda / Inspección de llantas traseras / Inspección de balatas traseras / Inspección de baleros / Inspección de tambores traseros / Ensamble de componentes / Inspección de líquido de frenos / Limpieza, ajuste y calibración de frenos /  Purga a sistema hidráulico / Pruebas de funcionamiento / Recorrido de prueba",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 151,
+      "nombre": "Desamble De Accesorios",
+      "descripcion": "DESAMBLE DE ACCESORIOS / REMOVER E INSTALAR TERMOSTATO / PURGA A SISTEMA DE ENFRIAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 152,
+      "nombre": "Montar Caja De Dirección",
+      "descripcion": "MONTAR CAJA DE DIRECCIÓN / ENSAMBLE DE COMPONENTES / INSTALACIÓN DE PUENTE DE SUSPENSIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Dirección"
+    },
+    {
+      "id": 153,
+      "nombre": "Alineación De Eje",
+      "descripcion": "ALINEACIÓN DE EJE DELANTERO / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 154,
+      "nombre": "Estado De Refrigerante",
+      "descripcion": "INSPECCIÓN DE ESTADO DE REFRIGERANTE / DRENADO DE REFRIGERANTE / LIMPIEZA A SISTEMA DE ENFRIAMIENTO / INSTALACIÓN DE REFRIGERANTE NUEVO / PURGA A SISTEMA DE ENFRIAMIENTO / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 155,
+      "nombre": "Ruido Reportado",
+      "descripcion": "INSPECCIÓN DE RUIDO REPORTADO / ELEVAR VEHÍCULO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 156,
+      "nombre": "Suspensión Delantera",
+      "descripcion": "INSPECCIÓN DE SUSPENSIÓN DELANTERA / TORQUE A TORNILLERÍA DE SUSPENSIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Suspensión"
+    },
+    {
+      "id": 157,
+      "nombre": "(Soldar Componentes Dañados)",
+      "descripcion": "(SOLDAR COMPONENTES DAÑADOS) / MONTAR CAJA DE TRANSMISIÓN / INSTALACIÓN DE LUBRICANTE NUEVO / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 159,
+      "nombre": "Restauración Sistema De Luces",
+      "descripcion": "Restauración sistema de luces:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 160,
+      "nombre": "Diferencial",
+      "descripcion": "INSPECCIÓN DE DIFERENCIAL / INSPECCIÓN DE NIVEL DE LUBRICANTE / INSTALACIÓN ACEITE LUBRICANTE EN DIFERENCIAL",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 161,
+      "nombre": "Pluma Limpiaparabrisas Trasera…. En Mano De Obra",
+      "descripcion": "Instalación de pluma limpiaparabrisas trasera….SIN COSTO en mano de obra.",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 162,
+      "nombre": "Restauración De Sistema De Luces …. En Mano De Obra",
+      "descripcion": "Restauración de sistema de luces ….SIN COSTO  en mano de obra.",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 163,
+      "nombre": "Sistema De Aire Acondicionado…",
+      "descripcion": "Mantenimiento a sistema de aire acondicionado…SIN COSTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 164,
+      "nombre": "De Diagnóstico En Atención A Dr. Víctor Bravo Téllez",
+      "descripcion": "Costo de diagnóstico en atención a Dr. Víctor Bravo Téllez",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 165,
+      "nombre": "Pruebas De Funcionamiento En Sistema De Enfriamiento",
+      "descripcion": "PRUEBAS DE FUNCIONAMIENTO EN SISTEMA DE ENFRIAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 166,
+      "nombre": "Inspección En Radiador",
+      "descripcion": "INSPECCIÓN EN RADIADOR / INSPECCIÓN EN BOMBA DE AGUA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 168,
+      "nombre": "Inspección En Funcionamiento En Turbo En Motor",
+      "descripcion": "INSPECCIÓN EN FUNCIONAMIENTO EN TURBO EN MOTOR",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 170,
+      "nombre": "Mecanismo En Palanca De Velocidades",
+      "descripcion": "INSPECCIÓN DE MECANISMO EN PALANCA DE VELOCIDADES",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 171,
+      "nombre": "Cable (Chicote) De Palanca De Velocidades",
+      "descripcion": "INSPECCIÓN DE CABLE (CHICOTE) DE PALANCA DE VELOCIDADES",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 172,
+      "nombre": "Chicote De Velocidades",
+      "descripcion": "INSTALACIÓN DE CHICOTE DE VELOCIDADES / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 173,
+      "nombre": "Remover Focos Led Instalados",
+      "descripcion": "REMOVER FOCOS LED INSTALADOS / REINICIO DE SISTEMA / LIMPIEZA DE CÓDIGOS DE FALLA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 174,
+      "nombre": "Pruebas De Funcionamiento (Letargo De Horas)",
+      "descripcion": "Pruebas de funcionamiento (Letargo de 48 horas)",
+      "costo_sugerido": 48.0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 175,
+      "nombre": "Inspección En Fosa",
+      "descripcion": "INSPECCIÓN EN FOSA / TORQUE A PUENTE / PRUEBAS DE FUNCIONAMIENTO EN TRANSMISIÓN AUTOMÁTICA / ESTUDIO DE DATOS ALMACENADOS EN MEMORIA DE VEHÍCULO CORRESPONDIENTES A TRANSMISIÓN AUTOMÁTICA / INSPECCIÓN A SISTEMA DE LUBRICACIÓN EN TRANSMISIÓN AUTOMÁTICA / INSPECCIÓN EN DIFERENCIAL Y CARDAN DE VEHÍCULO / INSPECCIÓN DE COMPONENTES Y ESTADO / INSPECCIÓN DE LUBRICANTE (ESTE VEHÍCULO REQUIERE CAMBIO DE DIFERENCIAL Y CARDAN)",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 176,
+      "nombre": "De Diagnóstico En Atención A Dr. Gabriel Nájera",
+      "descripcion": "Costo de diagnóstico en atención a Dr. Gabriel Nájera",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 177,
+      "nombre": "Mantenimiento De Afinación Fuel Injection Realizada",
+      "descripcion": "Inspección de mantenimiento de afinación fuel injectión realizada 05/JUN/24 a los 120,799 (recorrió 4,270 kms.)…..SIN COSTO en mano de obra….OPERA GARANTIA.",
+      "costo_sugerido": 31274.5,
+      "frecuencia": 2,
+      "categoria": "Afinación"
+    },
+    {
+      "id": 178,
+      "nombre": "Remover E Instalar Ventilador Eléctrico",
+      "descripcion": "REMOVER E INSTALAR VENTILADOR ELÉCTRICO / INSPECCIÓN EN CICLOS DE ACTIVIDAD EN VENTILADOR ELÉCTRICO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Sistema Eléctrico"
+    },
+    {
+      "id": 179,
+      "nombre": "Diagnóstico De Motor",
+      "descripcion": "DIAGNÓSTICO DE MOTOR",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 180,
+      "nombre": "Restauración Y Limpieza En Componentes",
+      "descripcion": "RESTAURACIÓN Y LIMPIEZA EN COMPONENTES / ENSAMBLE DE ACCESORIOS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 181,
+      "nombre": "Sistema",
+      "descripcion": "Inspección de sistema / Pruebas de funcionamiento  / Carga de gas a máxima capacidad permisible",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 182,
+      "nombre": "Pruebas De Funcionamiento, En Diversos Días Durante Su Estancia",
+      "descripcion": "PRUEBAS DE FUNCIONAMIENTO, EN DIVERSOS DÍAS DURANTE SU ESTANCIA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 183,
+      "nombre": "Soporte (Componente No Localizado Por Dias Feriados)",
+      "descripcion": "INSTALACIÓN DE SOPORTE (COMPONENTE NO LOCALIZADO POR DIAS FERIADOS)",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 184,
+      "nombre": "Soporte De Motor",
+      "descripcion": "INSTALACIÓN DE SOPORTE DE MOTOR / ENSAMBLE DE ACCESORIOS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 185,
+      "nombre": "Sistema Aire Acondicionado",
+      "descripcion": "Sistema aire acondicionado:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 186,
+      "nombre": "Actuadores",
+      "descripcion": "INSPECCIÓN DE ACTUADORES / RESTAURACIÓN DE AIRE ACONDICIONADO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 187,
+      "nombre": "Estudio En Ciclo De Trabajo En Sistema De Carga",
+      "descripcion": "ESTUDIO EN CICLO DE TRABAJO EN SISTEMA DE CARGA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Sistema Eléctrico"
+    },
+    {
+      "id": 188,
+      "nombre": "Inspección En Ciclos De Retención De Carga En Acumulador",
+      "descripcion": "INSPECCIÓN EN CICLOS DE RETENCIÓN DE CARGA EN ACUMULADOR",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 189,
+      "nombre": "Inspección Posibles Fugas De Gas En Sistema De Aire Acondicionado",
+      "descripcion": "INSPECCIÓN POSIBLES FUGAS DE GAS EN SISTEMA DE AIRE ACONDICIONADO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 190,
+      "nombre": "Pruebas De Presión A Sistema",
+      "descripcion": "Pruebas de presión a sistema / Carga de gas r134",
+      "costo_sugerido": 134.0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 191,
+      "nombre": "Desamble De Llantas Traseras",
+      "descripcion": "Desamble de llantas traseras / Inspección de pastas traseras / Remover e instalar pastas traseras / Inspección de baleros / Inspección de discos traseros / Ensamble de componentes / Instalación de líquido de frenos / Limpieza, ajuste y calibración de frenos /  Purga a sistema hidráulico / Pruebas de funcionamiento / Recorrido de prueba",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 192,
+      "nombre": "Sistema De Encendido",
+      "descripcion": "INSPECCIÓN DE SISTEMA DE ENCENDIDO / REMOVER E INSTALAR PILA EN CONTROL DE LLAVE",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 193,
+      "nombre": "De Diagnóstico Precio Normal  En Atención A Sandra Escudero",
+      "descripcion": "Costo de diagnóstico precio normal $ 1,950.00 en atención a Sandra Escudero",
+      "costo_sugerido": 1950.0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 194,
+      "nombre": "Restauración Sistema De Ignición",
+      "descripcion": "Restauración sistema de ignición:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Ignición"
+    },
+    {
+      "id": 195,
+      "nombre": "Bobinas De Ignición",
+      "descripcion": "Inspección de bobinas de ignición / Reemplaza de 4 bobinas de ignición",
+      "costo_sugerido": 4.0,
+      "frecuencia": 2,
+      "categoria": "Ignición"
+    },
+    {
+      "id": 197,
+      "nombre": "Observación",
+      "descripcion": "Observación: Ultimo mantenimiento de afinación 26/ago/2023 a los 90,952 recorrio 10,478 kms.",
+      "costo_sugerido": 20332.2,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 199,
+      "nombre": "Balatas Traseras",
+      "descripcion": "INSPECCIÓN DE BALATAS TRASERAS / INSPECCIÓN DE TAMBORES TRASEROS / CORREGIR INSTALACIÓN DE AJUSTADORES",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 200,
+      "nombre": "Palanca De Freno De Estacionamiento",
+      "descripcion": "INSPECCIÓN DE PALANCA DE FRENO DE ESTACIONAMIENTO / CALIBRACIÓN DE PALANCA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 201,
+      "nombre": "Limpieza, Ajuste Y Calibración De Sistema De Frenos",
+      "descripcion": "LIMPIEZA, AJUSTE Y CALIBRACIÓN DE SISTEMA DE FRENOS / PURGA A SISTEMA DE FRENOS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 202,
+      "nombre": "Radiador Y Condensador",
+      "descripcion": "INSPECCIÓN DE RADIADOR Y CONDENSADOR / INSPECCIÓN A BOMBA DE AGUA (ELÉCTRICA)",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 203,
+      "nombre": "Inspección De Luces",
+      "descripcion": "INSPECCIÓN GENERAL DE LUCES",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 204,
+      "nombre": "Kms.",
+      "descripcion": "Mantenimiento 100,000 kms. - cobertura 12 meses o 10,000 kms **",
+      "costo_sugerido": 36670.67,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 205,
+      "nombre": "Limpieza De Código De Error",
+      "descripcion": "LIMPIEZA DE CÓDIGO DE ERROR / REINICIO DE SISTEMA / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 206,
+      "nombre": "Componente Restaurado",
+      "descripcion": "INSTALACIÓN DE COMPONENTE RESTAURADO / ENSAMBLE DE ACCESORIOS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 207,
+      "nombre": "Nivele De Lubricante Correcto",
+      "descripcion": "INSPECCIÓN DE NIVELE DE LUBRICANTE CORRECTO / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 208,
+      "nombre": "Rines En Llantera",
+      "descripcion": "INSTALACIÓN DE RINES EN LLANTERA / BALANCEO DE RINES / ALINEACIÓN DE EJE DELANTERO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 209,
+      "nombre": "De Mano De Obra Por Instalación En Llantera",
+      "descripcion": "Costo de mano de obra por instalación en Llantera",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 210,
+      "nombre": "Desmontar Carter De Motor",
+      "descripcion": "DESMONTAR CARTER DE MOTOR / INSPECCIÓN DE ESTADO DE CARTER",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 211,
+      "nombre": "Carter",
+      "descripcion": "INSTALACIÓN DE CARTER / ENSAMBLE DE ACCESORIOS / COLOCACIÓN DE LUBRICANTE NUEVO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 213,
+      "nombre": "Lodera….. En Mano De Obra",
+      "descripcion": "Instalación de lodera…..SIN COSTO en mano de obra.",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 215,
+      "nombre": "Desamble De Accesorios Diversos",
+      "descripcion": "DESAMBLE DE ACCESORIOS DIVERSOS / DESAMBLE DE FLECHA / LIMPIEZA Y MANTENIMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 216,
+      "nombre": "Torque",
+      "descripcion": "TORQUE GENERAL / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 217,
+      "nombre": "Remover Componente",
+      "descripcion": "REMOVER COMPONENTE / INSTALACIÓN DE TANQUE DE COMBUSTIBLE / INSTALACIÓN DE ACCESORIOS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 218,
+      "nombre": "Vehículo Candidato A Restauración En Motor, No Incluye Transmisión, Embrague, Palanca De Velocidades, Suspensión, Sistema Eléctrico Y Accesorios Afectados Por Calentamiento Extremo",
+      "descripcion": "VEHÍCULO CANDIDATO A RESTAURACIÓN EN MOTOR, NO INCLUYE TRANSMISIÓN, EMBRAGUE, PALANCA DE VELOCIDADES, SUSPENSIÓN, SISTEMA ELÉCTRICO Y ACCESORIOS AFECTADOS POR CALENTAMIENTO EXTREMO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Suspensión"
+    },
+    {
+      "id": 219,
+      "nombre": "Tiempo Aproximado De Reparación Días Hábiles",
+      "descripcion": "Tiempo aproximado de reparación 20 días hábiles.",
+      "costo_sugerido": 20.0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 220,
+      "nombre": "De Diagnóstico A Domicilio",
+      "descripcion": "Costo de diagnóstico a domicilio",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 221,
+      "nombre": "Remover Cuerpo De Aceleración",
+      "descripcion": "REMOVER CUERPO DE ACELERACIÓN / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 222,
+      "nombre": "Remover Pedal De Aceleración Y Realizar Pruebas De Funcionamiento",
+      "descripcion": "REMOVER PEDAL DE ACELERACIÓN Y REALIZAR PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 223,
+      "nombre": "Pruebas De Funcionamiento En Modulo Ecu",
+      "descripcion": "PRUEBAS DE FUNCIONAMIENTO EN MODULO ECU / RESTAURACIÓN DE SISTEMA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 224,
+      "nombre": "Remover E Instalar Modulo Ecu",
+      "descripcion": "REMOVER E INSTALAR MODULO ECU / PROGRAMACIÓN DE MODULO / REINICIO DE SISTEMAS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 225,
+      "nombre": "De Diagnóstico……",
+      "descripcion": "Costo de diagnóstico…$ 1,950.00…..SIN COSTO",
+      "costo_sugerido": 1950.0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 226,
+      "nombre": "Pago En Llantera Por Instalación",
+      "descripcion": "PAGO EN LLANTERA POR INSTALACIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 227,
+      "nombre": "Sistema De Escape",
+      "descripcion": "Sistema de escape:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 228,
+      "nombre": "Estudio En Ciclo De Trabajo En Ventiladores",
+      "descripcion": "ESTUDIO EN CICLO DE TRABAJO EN VENTILADORES / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 229,
+      "nombre": "Montar Transmisión",
+      "descripcion": "MONTAR TRANSMISIÓN / INSTALACIÓN DE LUBRICANTE A TRANSMISIÓN / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Transmisión"
+    },
+    {
+      "id": 230,
+      "nombre": "Restauración De Motor Y Sistema De Embrague Realizada El",
+      "descripcion": "Inspección de restauración de motor y sistema de embrague realizada el 15/mar/2025 a los 26,706 km. (recorrió 1,971 kms.)",
+      "costo_sugerido": 5779.8,
+      "frecuencia": 2,
+      "categoria": "Embrague"
+    },
+    {
+      "id": 231,
+      "nombre": "Inspección A Dirección Hidráulica",
+      "descripcion": "INSPECCIÓN A DIRECCIÓN HIDRÁULICA / DESAMBLE DE ACCESORIOS / DESMONTAR BOMBA DE DIRECCIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Diagnóstico"
+    },
+    {
+      "id": 232,
+      "nombre": "Restauración De Bomba De Dirección",
+      "descripcion": "RESTAURACIÓN DE BOMBA DE DIRECCIÓN / INSTALACIÓN DE COMPONENTE / ENSAMBLE DE ACCESORIOS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Dirección"
+    },
+    {
+      "id": 233,
+      "nombre": "Lubricante A Dirección Hidráulica",
+      "descripcion": "INSTALACIÓN DE LUBRICANTE A DIRECCIÓN HIDRÁULICA / PURGA DE SISTEMA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Dirección"
+    },
+    {
+      "id": 234,
+      "nombre": "Aplicación De Aditivo En Tanque De Combustible Para Limpieza De Catalizador",
+      "descripcion": "APLICACIÓN DE ADITIVO EN TANQUE DE COMBUSTIBLE PARA LIMPIEZA DE CATALIZADOR",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 235,
+      "nombre": "Limpieza De Códigos De Falla Almacenada",
+      "descripcion": "LIMPIEZA DE CÓDIGOS DE FALLA ALMACENADA / BORRAR LUZ CHECK ENGINE",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 236,
+      "nombre": "Limpieza De Códigos De Falla Correspondientes A Bolsas De Aire",
+      "descripcion": "LIMPIEZA DE CÓDIGOS DE FALLA CORRESPONDIENTES A BOLSAS DE AIRE / ELIMINACIÓN DE ICONOS DE ADVERTENCIA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 237,
+      "nombre": "Limpieza E Instalación De Datos Correspondientes A Cerradura",
+      "descripcion": "LIMPIEZA E INSTALACIÓN DE DATOS CORRESPONDIENTES A CERRADURA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 238,
+      "nombre": "Programación De Sistema",
+      "descripcion": "PROGRAMACIÓN DE SISTEMA / INSPECCIÓN DE CHAPA DE CAJUELA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 239,
+      "nombre": "*Nota",
+      "descripcion": "*NOTA- Este vehiculo requiere cambio de cilindro maestro y flecha de tracción.",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 240,
+      "nombre": "Sistema De Luces Intermitentes",
+      "descripcion": "INSPECCIÓN DE SISTEMA DE LUCES INTERMITENTES / DESMONTAR CONSOLA / RETIRAR BOTÓN DE INTERMITENTES / RESTAURACIÓN DE BOTÓN / ENSAMBLE DE COMPONENTES / MONTAR CONSOLA / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 241,
+      "nombre": "Drenado De Sistema De Enfriamiento",
+      "descripcion": "DRENADO DE SISTEMA DE ENFRIAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 242,
+      "nombre": "Remover Múltiple De Admisión",
+      "descripcion": "REMOVER MÚLTIPLE DE ADMISIÓN / REMOVER DUCTO (TUBO) DE SISTEMA DE ENFRIAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 243,
+      "nombre": "Retirar Termostato",
+      "descripcion": "RETIRAR TERMOSTATO / MANTENIMIENTO A TERMOSTATO / ENSAMBLE DE COMPONENTES",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 244,
+      "nombre": "Sistema Eléctrico",
+      "descripcion": "Sistema eléctrico:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Sistema Eléctrico"
+    },
+    {
+      "id": 245,
+      "nombre": "Pruebas De Funcionamiento A Bobinas De Ignición",
+      "descripcion": "PRUEBAS DE FUNCIONAMIENTO A BOBINAS DE IGNICIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Ignición"
+    },
+    {
+      "id": 246,
+      "nombre": "Bobina De Ignición",
+      "descripcion": "INSTALACIÓN DE BOBINA DE IGNICIÓN / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Ignición"
+    },
+    {
+      "id": 247,
+      "nombre": "Estado De Soportes",
+      "descripcion": "INSPECCIÓN DE ESTADO DE SOPORTES / REMOVER E INSTALAR SOPORTE DE MOTOR / INSTALACIÓN DE VISERAS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 248,
+      "nombre": "Módulo De Encendido",
+      "descripcion": "INSTALACIÓN DE MÓDULO DE ENCENDIDO / REINICIO DE SISTEMAS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 249,
+      "nombre": "Módulo Nuevo Original",
+      "descripcion": "INSTALACIÓN DE MÓDULO NUEVO ORIGINAL / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 250,
+      "nombre": "Soportes",
+      "descripcion": "INSTALACIÓN DE SOPORTES / ENSAMBLE DE COMPONENTES / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 251,
+      "nombre": "Instalación Y Programación",
+      "descripcion": "INSTALACIÓN Y PROGRAMACIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 252,
+      "nombre": "Tracción",
+      "descripcion": "TRACCIÓN: INSPECCIÓN VISUAL / ESTUDIO DE DAÑO / DESAMBLE DE TRACCIÓN DELANTERA / REMOVER E INSTALAR ESPIGAS DELANTERAS / INSPECCIÓN DE FLECHAS / ENSAMBLE DE COMPONENTES / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 253,
+      "nombre": "Instalación Correcta En Ducto De Caudal De Oxigeno A Motor",
+      "descripcion": "INSTALACIÓN CORRECTA EN DUCTO DE CAUDAL DE OXIGENO A MOTOR",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 254,
+      "nombre": "Es Necesario Retirar Unidad De Solendoides",
+      "descripcion": "ES NECESARIO RETIRAR UNIDAD DE SOLENDOIDES- POSIBLE CAMBIO / RESTAURAR TRANSMISIÓN DE VEHÍCULO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 255,
+      "nombre": "Mecatrónica Y Sistema Hidraulico… P A G A D O",
+      "descripcion": "Mecatrónica y sistema hidraulico…$ 49,913.00  P A G A D O",
+      "costo_sugerido": 49913.0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 256,
+      "nombre": "Reemplazo De Oring",
+      "descripcion": "REEMPLAZO DE ORING / LIMPIEZA DE CARTER DE MOTOR / INSTALACIÓN DE CARTER DE MOTOR Y SELLADO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 257,
+      "nombre": "Instalación Demotor De Arranque",
+      "descripcion": "INSTALACIÓN DEMOTOR DE ARRANQUE / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 258,
+      "nombre": "Preventivo De Dirección … Por Garanrtía",
+      "descripcion": "Mantenimiento preventivo de dirección …Sin Costo por garanrtía",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Dirección"
+    },
+    {
+      "id": 259,
+      "nombre": "Mantenimiento De Afinación….. En Mano D Eobra",
+      "descripcion": "Inspección de mantenimiento de afinación…..SIN COSTO en mano d eobra.",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Afinación"
+    },
+    {
+      "id": 260,
+      "nombre": "Siste",
+      "descripcion": "INSPECCIÓN DE SISTE",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 261,
+      "nombre": "Ma De Enfriamiento",
+      "descripcion": "ma de enfriamiento / Localizar fuga de refrigerante / Desamble de accesorios / Desmontar radiador /  Envió de radiador a restauración / Instalación de radiador restaurado / Instalación de accesorios / Instalación de refrigerante / Purga a sistema de enfriamiento / Pruebas de funcionamiento",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 262,
+      "nombre": "Adicional",
+      "descripcion": "ADICIONAL: BANDA DE ACCESORIOS: INSPECCIÓN VISUAL / ESTUDIO DE ESTADO DE BANDA / DESAMBLE DE ACCESORIOS / REMOVER BANDA DE ACCESORIOS / ADQUISICIÓN DE BANDA EN NOMBRE DEL PROPIETARIO / INSTALACIÓN DE COMPONENTE / ENSAMBLE DE ACCESORIOS / PRUEBAS DE FUNCIONAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 263,
+      "nombre": "Polea Tensora Y Banda Accesorios",
+      "descripcion": "Polea tensora y banda accesorios : Inspección visual / Estudio de estado / Recorrido de prueba / Desamble de accesorios / Remover e instalar polea tensora / Remover e instalar banda de accesorios / Ensamble de componentes / Instalación de accesorios / Pruebas de funcionamiento….Costo mano de obra precio normal $ 2,950.00",
+      "costo_sugerido": 2950.0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 264,
+      "nombre": "Ductos De Sistema De Enfriamiento",
+      "descripcion": "DUCTOS DE SISTEMA DE ENFRIAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 266,
+      "nombre": "Distribución",
+      "descripcion": "Distribución: Inspección visual / Recorrido de prueba / Estudio de códigos almacenados en ECU / Pruebas de funcionamiento / Desamble de accesorios diversos / Remover tapa de distribución / Desamble de distribución / Estudio de estado de componentes / Remover e instalar poleas de poleas / Remover e instalar bomba de agua / Remover e instalar banda / Ensamble de componentes / Instalación de accesorios / Instalación de refrigerante /  Pruebas de funcionamiento",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 267,
+      "nombre": "Purga A De Sistema De Enfriamiento",
+      "descripcion": "PURGA A DE SISTEMA DE ENFRIAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 268,
+      "nombre": "Birlos Nuevos",
+      "descripcion": "INSTALACIÓN DE BIRLOS NUEVOS / ALINEAR EJE DELANTERO / BALANCEO DE RINES",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 269,
+      "nombre": "Gas",
+      "descripcion": "Instalación de gas / Instalación de accesorios y  componentes /",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 270,
+      "nombre": "Gas…",
+      "descripcion": "Instalación de gas….SIN COSTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 271,
+      "nombre": "Palanca Nueva",
+      "descripcion": "INSTALACIÓN DE PALANCA NUEVA / PRUEBAS DE FUNCIONAMIENTO / RECORRIDO DE PRUEBA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 272,
+      "nombre": "Restauración A Motor Realizado El",
+      "descripcion": "Inspección de restauración a motor realizado el 16/jul/2025 a los 205,237 km. (recorrió 942 kms.)",
+      "costo_sugerido": 41280.4,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 273,
+      "nombre": "Sistema De Frenos Abs",
+      "descripcion": "Sistema de frenos ABS:",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 274,
+      "nombre": "Adquisición E Instalación De Soporte De Motor Lado Derecho",
+      "descripcion": "ADQUISICIÓN E INSTALACIÓN DE SOPORTE DE MOTOR LADO DERECHO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 275,
+      "nombre": "Toma De Sistema De Enfriamiento",
+      "descripcion": "TOMA DE SISTEMA DE ENFRIAMIENTO",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Enfriamiento"
+    },
+    {
+      "id": 276,
+      "nombre": "Completo A Sistema De Frenos Cobertura Meses**",
+      "descripcion": "Mantenimiento completo a sistema de frenos cobertura 12 meses**",
+      "costo_sugerido": 12.0,
+      "frecuencia": 2,
+      "categoria": "Frenos"
+    },
+    {
+      "id": 277,
+      "nombre": "Materiales Sistema De Luces",
+      "descripcion": "MATERIALES SISTEMA DE LUCES",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 278,
+      "nombre": "Tolva Salpicadera Izquierda",
+      "descripcion": "INSTALACIÓN DE TOLVA SALPICADERA IZQUIERDA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 279,
+      "nombre": "Tolva Salpicadera Derecha",
+      "descripcion": "INSTALACIÓN DE TOLVA SALPICADERA DERECHA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 280,
+      "nombre": "Centro Rin",
+      "descripcion": "INSTALACIÓN DE CENTRO RIN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 281,
+      "nombre": "Cover Quarter Trim",
+      "descripcion": "INSTALACIÓN DE COVER QUARTER TRIM",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 282,
+      "nombre": "Pruebas De Funcionamiento En Sistema De Ignición",
+      "descripcion": "PRUEBAS DE FUNCIONAMIENTO EN SISTEMA DE IGNICIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Ignición"
+    },
+    {
+      "id": 283,
+      "nombre": "Voltaje De Alimentación A Bobinas De Ignición",
+      "descripcion": "INSPECCIÓN DE VOLTAJE DE ALIMENTACIÓN A BOBINAS DE IGNICIÓN",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Ignición"
+    },
+    {
+      "id": 284,
+      "nombre": "Remover E Instalar Bobina De Ignición",
+      "descripcion": "REMOVER E INSTALAR BOBINA DE IGNICIÓN / LIMPIEZA DE CÓDIGOS ALMACENADOS / REINICIO DE SISTEMA",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Ignición"
+    },
+    {
+      "id": 285,
+      "nombre": "Retirar Múltiple De Admisión",
+      "descripcion": "RETIRAR MÚLTIPLE DE ADMISIÓN / LIMPIEZA DE ÁREAS / INSTALACIÓN DE LIGAS NUEVAS",
+      "costo_sugerido": 0,
+      "frecuencia": 2,
+      "categoria": "Otros"
+    },
+    {
+      "id": 286,
+      "nombre": "*Este Vehículo Deberá De Retornar El Segundo Mes Del Para Su Inspección",
+      "descripcion": "*Este vehículo deberá de retornar el segundo mes del 2026 para su inspección.",
+      "costo_sugerido": 104.0,
+      "frecuencia": 1,
+      "categoria": "Diagnóstico"
+    }
+  ],
+  "refacciones": [
+    {
+      "id": 1,
+      "nombre": "Materiales Diversos, Consumibles Y Artículos De Limpieza",
+      "descripcion": "Materiales Diversos, Consumibles Y Artículos De Limpieza",
+      "costo_sugerido": 0,
+      "frecuencia": 978
+    },
+    {
+      "id": 55,
+      "nombre": "Filtro De Aceite",
+      "descripcion": "Filtro De Aceite",
+      "costo_sugerido": 0,
+      "frecuencia": 414
+    },
+    {
+      "id": 56,
+      "nombre": "Líquido Limpieza De Inyectores Liqui Moly",
+      "descripcion": "Líquido Limpieza De Inyectores Liqui Moly",
+      "costo_sugerido": 0,
+      "frecuencia": 380
+    },
+    {
+      "id": 57,
+      "nombre": "Spray Cuerpo De Aceleración Liqui Moly",
+      "descripcion": "Spray Cuerpo De Aceleración Liqui Moly",
+      "costo_sugerido": 0,
+      "frecuencia": 378
+    },
+    {
+      "id": 58,
+      "nombre": "Filtro De Aire",
+      "descripcion": "Filtro De Aire",
+      "costo_sugerido": 0,
+      "frecuencia": 374
+    },
+    {
+      "id": 59,
+      "nombre": "Liqui Moly Frenos……",
+      "descripcion": "Liqui Moly Frenos……",
+      "costo_sugerido": 240.0,
+      "frecuencia": 210
+    },
+    {
+      "id": 60,
+      "nombre": "Líquido De Frenos………",
+      "descripcion": "Líquido De Frenos………",
+      "costo_sugerido": 68.0,
+      "frecuencia": 162
+    },
+    {
+      "id": 61,
+      "nombre": "Espuma Limpia Frenos….…",
+      "descripcion": "Espuma Limpia Frenos….…",
+      "costo_sugerido": 260.0,
+      "frecuencia": 162
+    },
+    {
+      "id": 62,
+      "nombre": "Filtro De Cabina (Aire Acondicionado)",
+      "descripcion": "Filtro De Cabina (Aire Acondicionado)",
+      "costo_sugerido": 0,
+      "frecuencia": 148
+    },
+    {
+      "id": 63,
+      "nombre": "Garrafa De Aceite Lubricante",
+      "descripcion": "Garrafa De Aceite Lubricante",
+      "costo_sugerido": 0,
+      "frecuencia": 134
+    },
+    {
+      "id": 64,
+      "nombre": "Juego De Pastas Delanteras",
+      "descripcion": "Juego De Pastas Delanteras",
+      "costo_sugerido": 0,
+      "frecuencia": 84
+    },
+    {
+      "id": 2,
+      "nombre": "Materiales Diversos, Consumibles Y Artículos De Limpieza…",
+      "descripcion": "Materiales Diversos, Consumibles Y Artículos De Limpieza…",
+      "costo_sugerido": 0,
+      "frecuencia": 80
+    },
+    {
+      "id": 65,
+      "nombre": "Filtro De Cabina (Polen)",
+      "descripcion": "Filtro De Cabina (Polen)",
+      "costo_sugerido": 0,
+      "frecuencia": 78
+    },
+    {
+      "id": 66,
+      "nombre": "Filtro De Combustible",
+      "descripcion": "Filtro De Combustible",
+      "costo_sugerido": 0,
+      "frecuencia": 76
+    },
+    {
+      "id": 67,
+      "nombre": "Garrafa De Refrigerante",
+      "descripcion": "Garrafa De Refrigerante",
+      "costo_sugerido": 0,
+      "frecuencia": 68
+    },
+    {
+      "id": 68,
+      "nombre": "Líquido De Frenos……",
+      "descripcion": "Líquido De Frenos……",
+      "costo_sugerido": 68.0,
+      "frecuencia": 56
+    },
+    {
+      "id": 69,
+      "nombre": "Espuma Limpia Frenos……",
+      "descripcion": "Espuma Limpia Frenos……",
+      "costo_sugerido": 150.0,
+      "frecuencia": 56
+    },
+    {
+      "id": 70,
+      "nombre": "Juego De Pastas Traseras",
+      "descripcion": "Juego De Pastas Traseras",
+      "costo_sugerido": 0,
+      "frecuencia": 54
+    },
+    {
+      "id": 71,
+      "nombre": "Rectificación De Discos Traseros…",
+      "descripcion": "Rectificación De Discos Traseros…",
+      "costo_sugerido": 0,
+      "frecuencia": 48
+    },
+    {
+      "id": 72,
+      "nombre": "Rectificación De Discos Delanteros…",
+      "descripcion": "Rectificación De Discos Delanteros…",
+      "costo_sugerido": 0,
+      "frecuencia": 40
+    },
+    {
+      "id": 73,
+      "nombre": "Filtro De Cabina Aire Acondicionado",
+      "descripcion": "Filtro De Cabina Aire Acondicionado",
+      "costo_sugerido": 0,
+      "frecuencia": 40
+    },
+    {
+      "id": 3,
+      "nombre": "Materiales Diversos, Consumibles Y Artículos De Limpieza……",
+      "descripcion": "Materiales Diversos, Consumibles Y Artículos De Limpieza……",
+      "costo_sugerido": 248.41,
+      "frecuencia": 38
+    },
+    {
+      "id": 74,
+      "nombre": "Filtro De Cabina",
+      "descripcion": "Filtro De Cabina",
+      "costo_sugerido": 0,
+      "frecuencia": 38
+    },
+    {
+      "id": 4,
+      "nombre": "Materiales Diversos, Focos, Consumibles Y Artículos De Limpieza",
+      "descripcion": "Materiales Diversos, Focos, Consumibles Y Artículos De Limpieza",
+      "costo_sugerido": 0,
+      "frecuencia": 36
+    },
+    {
+      "id": 75,
+      "nombre": "Filtro De Aire (Cabina)",
+      "descripcion": "Filtro De Aire (Cabina)",
+      "costo_sugerido": 0,
+      "frecuencia": 36
+    },
+    {
+      "id": 76,
+      "nombre": "Aditivo Liqui Moly",
+      "descripcion": "Aditivo Liqui Moly",
+      "costo_sugerido": 0,
+      "frecuencia": 34
+    },
+    {
+      "id": 77,
+      "nombre": "Garrafa De Aceite Lubricante Para Motor",
+      "descripcion": "Garrafa De Aceite Lubricante Para Motor",
+      "costo_sugerido": 0,
+      "frecuencia": 32
+    },
+    {
+      "id": 78,
+      "nombre": "Banda De Accesorios",
+      "descripcion": "Banda De Accesorios",
+      "costo_sugerido": 0,
+      "frecuencia": 24
+    },
+    {
+      "id": 79,
+      "nombre": "Amortiguadores Delanteros",
+      "descripcion": "Amortiguadores Delanteros",
+      "costo_sugerido": 0,
+      "frecuencia": 22
+    },
+    {
+      "id": 5,
+      "nombre": "Materiales Diversos, Focos, Consumibles Y Artículos De Limpieza……",
+      "descripcion": "Materiales Diversos, Focos, Consumibles Y Artículos De Limpieza……",
+      "costo_sugerido": 280.67,
+      "frecuencia": 20
+    },
+    {
+      "id": 6,
+      "nombre": "Diversos, Consumibles Y Artículos De Limpieza",
+      "descripcion": "Diversos, Consumibles Y Artículos De Limpieza",
+      "costo_sugerido": 0,
+      "frecuencia": 16
+    },
+    {
+      "id": 7,
+      "nombre": "Materiales Diversos, Consumibles Y Artículos De Limpieza….…",
+      "descripcion": "Materiales Diversos, Consumibles Y Artículos De Limpieza….…",
+      "costo_sugerido": 220.32,
+      "frecuencia": 16
+    },
+    {
+      "id": 80,
+      "nombre": "Juego De Cables De Bujías",
+      "descripcion": "Juego De Cables De Bujías",
+      "costo_sugerido": 0,
+      "frecuencia": 14
+    },
+    {
+      "id": 81,
+      "nombre": "Garrafa De Aceite Lavado Interno De Motor",
+      "descripcion": "Garrafa De Aceite Lavado Interno De Motor",
+      "costo_sugerido": 0,
+      "frecuencia": 14
+    },
+    {
+      "id": 82,
+      "nombre": "Bases De Amortiguadores Delanteros",
+      "descripcion": "Bases De Amortiguadores Delanteros",
+      "costo_sugerido": 0,
+      "frecuencia": 14
+    },
+    {
+      "id": 83,
+      "nombre": "Garrafa De Aceite Lubricante Liqui Moly",
+      "descripcion": "Garrafa De Aceite Lubricante Liqui Moly",
+      "costo_sugerido": 0,
+      "frecuencia": 14
+    },
+    {
+      "id": 84,
+      "nombre": "Rectificación De Discos Delanteros……",
+      "descripcion": "Rectificación De Discos Delanteros……",
+      "costo_sugerido": 0,
+      "frecuencia": 12
+    },
+    {
+      "id": 85,
+      "nombre": "*Amortiguadores Delanteros Y Bases De",
+      "descripcion": "*Amortiguadores Delanteros Y Bases De",
+      "costo_sugerido": 0,
+      "frecuencia": 12
+    },
+    {
+      "id": 86,
+      "nombre": "Bujías Filtro De Aire",
+      "descripcion": "Bujías Filtro De Aire",
+      "costo_sugerido": 0,
+      "frecuencia": 10
+    },
+    {
+      "id": 87,
+      "nombre": "Amortiguadores Traseros",
+      "descripcion": "Amortiguadores Traseros",
+      "costo_sugerido": 0,
+      "frecuencia": 10
+    },
+    {
+      "id": 88,
+      "nombre": "Rectificación De Discos Delanteros …",
+      "descripcion": "Rectificación De Discos Delanteros …",
+      "costo_sugerido": 0,
+      "frecuencia": 10
+    },
+    {
+      "id": 89,
+      "nombre": "Juego De Clutch Incluye Plato, Disco Y Collarín",
+      "descripcion": "Juego De Clutch Incluye Plato, Disco Y Collarín",
+      "costo_sugerido": 0,
+      "frecuencia": 10
+    },
+    {
+      "id": 8,
+      "nombre": "Materiales, Diversos Consumibles Y Artículos De Limpieza",
+      "descripcion": "Materiales, Diversos Consumibles Y Artículos De Limpieza",
+      "costo_sugerido": 0,
+      "frecuencia": 8
+    },
+    {
+      "id": 90,
+      "nombre": "Liqui Moly Frenos………",
+      "descripcion": "Liqui Moly Frenos………",
+      "costo_sugerido": 240.0,
+      "frecuencia": 8
+    },
+    {
+      "id": 91,
+      "nombre": "Drenado De Aceite De Lavado / Reemplazo De Filtro De Aceite / Instalación De Aceite Lubricante A Motor",
+      "descripcion": "Drenado De Aceite De Lavado / Reemplazo De Filtro De Aceite / Instalación De Aceite Lubricante A Motor",
+      "costo_sugerido": 0,
+      "frecuencia": 8
+    },
+    {
+      "id": 92,
+      "nombre": "Juego De Amortiguadores Delanteros",
+      "descripcion": "Juego De Amortiguadores Delanteros",
+      "costo_sugerido": 0,
+      "frecuencia": 8
+    },
+    {
+      "id": 93,
+      "nombre": "Sensor De Detonación",
+      "descripcion": "Sensor De Detonación",
+      "costo_sugerido": 0,
+      "frecuencia": 8
+    },
+    {
+      "id": 94,
+      "nombre": "Juego De Plumas Limpiaparabrisas",
+      "descripcion": "Juego De Plumas Limpiaparabrisas",
+      "costo_sugerido": 0,
+      "frecuencia": 8
+    },
+    {
+      "id": 9,
+      "nombre": "Materiales Diversos, Focos, Consumibles Y Artículos De Limpieza…",
+      "descripcion": "Materiales Diversos, Focos, Consumibles Y Artículos De Limpieza…",
+      "costo_sugerido": 0,
+      "frecuencia": 6
+    },
+    {
+      "id": 10,
+      "nombre": "Materiales Diversos, Consumibles Y Artículos De Limpieza…..…",
+      "descripcion": "Materiales Diversos, Consumibles Y Artículos De Limpieza…..…",
+      "costo_sugerido": 183.47,
+      "frecuencia": 6
+    },
+    {
+      "id": 95,
+      "nombre": "Deposito De Refrigerante",
+      "descripcion": "Deposito De Refrigerante",
+      "costo_sugerido": 0,
+      "frecuencia": 6
+    },
+    {
+      "id": 96,
+      "nombre": "Rectificación De Discos Delanteros",
+      "descripcion": "Rectificación De Discos Delanteros",
+      "costo_sugerido": 0,
+      "frecuencia": 6
+    },
+    {
+      "id": 97,
+      "nombre": "Rectificación De Discos Traseros …",
+      "descripcion": "Rectificación De Discos Traseros …",
+      "costo_sugerido": 0,
+      "frecuencia": 6
+    },
+    {
+      "id": 98,
+      "nombre": "Juego De Juntas",
+      "descripcion": "Juego De Juntas",
+      "costo_sugerido": 0,
+      "frecuencia": 6
+    },
+    {
+      "id": 99,
+      "nombre": "Litros De Aceite Lubricante",
+      "descripcion": "Litros De Aceite Lubricante",
+      "costo_sugerido": 0,
+      "frecuencia": 6
+    },
+    {
+      "id": 100,
+      "nombre": "Bases De Amortiguador Delanteros",
+      "descripcion": "Bases De Amortiguador Delanteros",
+      "costo_sugerido": 0,
+      "frecuencia": 6
+    },
+    {
+      "id": 101,
+      "nombre": "Amortiguadores Delanteros…",
+      "descripcion": "Amortiguadores Delanteros…",
+      "costo_sugerido": 3960.11,
+      "frecuencia": 6
+    },
+    {
+      "id": 102,
+      "nombre": "Amortiguadores Traseros …",
+      "descripcion": "Amortiguadores Traseros …",
+      "costo_sugerido": 1989.89,
+      "frecuencia": 6
+    },
+    {
+      "id": 103,
+      "nombre": "Bases De Amortiguador Delanteros…",
+      "descripcion": "Bases De Amortiguador Delanteros…",
+      "costo_sugerido": 801.12,
+      "frecuencia": 6
+    },
+    {
+      "id": 104,
+      "nombre": "Líquido Limpieza De Inyectores Liqui Moly……",
+      "descripcion": "Líquido Limpieza De Inyectores Liqui Moly……",
+      "costo_sugerido": 290.0,
+      "frecuencia": 6
+    },
+    {
+      "id": 105,
+      "nombre": "Juego De Balatas Traseras",
+      "descripcion": "Juego De Balatas Traseras",
+      "costo_sugerido": 0,
+      "frecuencia": 6
+    },
+    {
+      "id": 11,
+      "nombre": "Materiales Diversos, Consumibles Y Árticulos De Limpieza",
+      "descripcion": "Materiales Diversos, Consumibles Y Árticulos De Limpieza",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 12,
+      "nombre": "Instalación Y Reconocimiento De Acumulador Nuevo Original / Programación / Reinicio De Sistemas",
+      "descripcion": "Instalación Y Reconocimiento De Acumulador Nuevo Original / Programación / Reinicio De Sistemas",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 106,
+      "nombre": "Kit De Distribución (Poleas, Banda)",
+      "descripcion": "Kit De Distribución (Poleas, Banda)",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 107,
+      "nombre": "Tapón De Deposito De Refrigerante",
+      "descripcion": "Tapón De Deposito De Refrigerante",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 108,
+      "nombre": "Aditivo Liqui Moly Elevar Octanaje",
+      "descripcion": "Aditivo Liqui Moly Elevar Octanaje",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 109,
+      "nombre": "Toma De Refrigerante",
+      "descripcion": "Toma De Refrigerante",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 110,
+      "nombre": "Sensor De Temperatura",
+      "descripcion": "Sensor De Temperatura",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 111,
+      "nombre": "Terminal Lado Izquierdo",
+      "descripcion": "Terminal Lado Izquierdo",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 112,
+      "nombre": "Juego De Birlos De Seguridad",
+      "descripcion": "Juego De Birlos De Seguridad",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 113,
+      "nombre": "Juego De Herrajes",
+      "descripcion": "Juego De Herrajes",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 114,
+      "nombre": "Líquido De Frenos",
+      "descripcion": "Líquido De Frenos",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 115,
+      "nombre": "Rectificación De Discos Traseros",
+      "descripcion": "Rectificación De Discos Traseros",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 116,
+      "nombre": "Litros De Aceite Lavado Interno De Motor",
+      "descripcion": "Litros De Aceite Lavado Interno De Motor",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 117,
+      "nombre": "Banda De Distribución",
+      "descripcion": "Banda De Distribución",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 118,
+      "nombre": "Garrafa De Aceitew ( Lt.)",
+      "descripcion": "Garrafa De Aceitew ( Lt.)",
+      "costo_sugerido": 9.92,
+      "frecuencia": 4
+    },
+    {
+      "id": 119,
+      "nombre": "Litros De Aceitew",
+      "descripcion": "Litros De Aceitew",
+      "costo_sugerido": 12.5,
+      "frecuencia": 4
+    },
+    {
+      "id": 120,
+      "nombre": "Nota: Remover E Instalar Sensor De Oxigeno Original (Usado) Contenido Dentro De Vehiculo",
+      "descripcion": "Nota: Remover E Instalar Sensor De Oxigeno Original (Usado) Contenido Dentro De Vehiculo",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 121,
+      "nombre": "Discos Delanteros",
+      "descripcion": "Discos Delanteros",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 122,
+      "nombre": "Litros De Aceite Atf",
+      "descripcion": "Litros De Aceite Atf",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 123,
+      "nombre": "Juego Juego De Pastas Delanteras",
+      "descripcion": "Juego Juego De Pastas Delanteras",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 124,
+      "nombre": "Rectificación De Discos Delanteros / Rectificación De Discos Traseros…",
+      "descripcion": "Rectificación De Discos Delanteros / Rectificación De Discos Traseros…",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 125,
+      "nombre": "Líquido De Frenos…… En Atención A Roberto Plata",
+      "descripcion": "Líquido De Frenos…… En Atención A Roberto Plata",
+      "costo_sugerido": 68.0,
+      "frecuencia": 4
+    },
+    {
+      "id": 126,
+      "nombre": "Espuma Limpia Frenos…… En Atención A Roberto Plata",
+      "descripcion": "Espuma Limpia Frenos…… En Atención A Roberto Plata",
+      "costo_sugerido": 150.0,
+      "frecuencia": 4
+    },
+    {
+      "id": 127,
+      "nombre": "Liqui Moly Frenos…… En Atención A Roberto Plata",
+      "descripcion": "Liqui Moly Frenos…… En Atención A Roberto Plata",
+      "costo_sugerido": 240.0,
+      "frecuencia": 4
+    },
+    {
+      "id": 128,
+      "nombre": "Rectificación De Discos Traseros……",
+      "descripcion": "Rectificación De Discos Traseros……",
+      "costo_sugerido": 2.0,
+      "frecuencia": 4
+    },
+    {
+      "id": 129,
+      "nombre": "Gomas De Rebote Amortiguador Delanteros",
+      "descripcion": "Gomas De Rebote Amortiguador Delanteros",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 130,
+      "nombre": "Gomas De Rebote Amortiguador Traseros",
+      "descripcion": "Gomas De Rebote Amortiguador Traseros",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 131,
+      "nombre": "Garrafas De Refrigerante",
+      "descripcion": "Garrafas De Refrigerante",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 132,
+      "nombre": "Kit De Distribución",
+      "descripcion": "Kit De Distribución",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 133,
+      "nombre": "Remover E Instalar Cables De Bujías",
+      "descripcion": "Remover E Instalar Cables De Bujías",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 134,
+      "nombre": "Horquillas Con Rotulas",
+      "descripcion": "Horquillas Con Rotulas",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 135,
+      "nombre": "De Fluidos, Lubricante Y Refrigerante",
+      "descripcion": "De Fluidos, Lubricante Y Refrigerante",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 136,
+      "nombre": "Remover Accesorios Diversos / Restauración De Líneas En Sensores De Detonación",
+      "descripcion": "Remover Accesorios Diversos / Restauración De Líneas En Sensores De Detonación",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 137,
+      "nombre": "Litros De Aceite Lubricantew-",
+      "descripcion": "Litros De Aceite Lubricantew-",
+      "costo_sugerido": 20.0,
+      "frecuencia": 4
+    },
+    {
+      "id": 138,
+      "nombre": "Drenado De Aceite De Lavado / Reemplazo De Filtro De Aceite",
+      "descripcion": "Drenado De Aceite De Lavado / Reemplazo De Filtro De Aceite",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 139,
+      "nombre": "Juego De Anillos",
+      "descripcion": "Juego De Anillos",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 140,
+      "nombre": "Spray Cuerpo De Aceleración Liqui Moly……",
+      "descripcion": "Spray Cuerpo De Aceleración Liqui Moly……",
+      "costo_sugerido": 280.0,
+      "frecuencia": 4
+    },
+    {
+      "id": 141,
+      "nombre": "Fuga De Refrigerante",
+      "descripcion": "Fuga De Refrigerante",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 142,
+      "nombre": "Juego De Metales De Centro",
+      "descripcion": "Juego De Metales De Centro",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 143,
+      "nombre": "Juego De Metales De Biela",
+      "descripcion": "Juego De Metales De Biela",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 144,
+      "nombre": "Bomba De Aceite",
+      "descripcion": "Bomba De Aceite",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 145,
+      "nombre": "Refrigerante…",
+      "descripcion": "Refrigerante…",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 146,
+      "nombre": "Remover E Instalar Banda De Accesorios",
+      "descripcion": "Remover E Instalar Banda De Accesorios",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 147,
+      "nombre": "Banda Accesorios",
+      "descripcion": "Banda Accesorios",
+      "costo_sugerido": 0,
+      "frecuencia": 4
+    },
+    {
+      "id": 13,
+      "nombre": "Adquisición De Termostato – Instalación De Componente / Remover E Instalar Mangueras /",
+      "descripcion": "Adquisición De Termostato – Instalación De Componente / Remover E Instalar Mangueras /",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 14,
+      "nombre": "Lectura De Códigos Almacenados En Ecu / Pruebas A Válvula Vdo",
+      "descripcion": "Lectura De Códigos Almacenados En Ecu / Pruebas A Válvula Vdo",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 15,
+      "nombre": "Calibración A Válvula Vdo / Pruebas De Funcionamiento / Recorrido De Prueba",
+      "descripcion": "Calibración A Válvula Vdo / Pruebas De Funcionamiento / Recorrido De Prueba",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 16,
+      "nombre": "Materiales Diversos, Consumibles, Transportes Y Artículos De Limpieza",
+      "descripcion": "Materiales Diversos, Consumibles, Transportes Y Artículos De Limpieza",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 17,
+      "nombre": "Sistema De Frenos Abs- Requiere Jrestauración A Sistema / Reemplazo De Sensor Vss – Y Pruebas A Modulo Abs Para Conocer Su Funcionamiento",
+      "descripcion": "Sistema De Frenos Abs- Requiere Jrestauración A Sistema / Reemplazo De Sensor Vss – Y Pruebas A Modulo Abs Para Conocer Su Funcionamiento",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 18,
+      "nombre": "• Radiador Pruebas Realizadas A Radiador, Determinan Que Éste Se Encuentra Obstruido, Deberá Realizarse Su Cambio; Siendo Radiador De Reemplazo Estrictamente Original",
+      "descripcion": "• Radiador Pruebas Realizadas A Radiador, Determinan Que Éste Se Encuentra Obstruido, Deberá Realizarse Su Cambio; Siendo Radiador De Reemplazo Estrictamente Original",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 19,
+      "nombre": "Remover Sensor Maf / Inspección Visual Y Limpieza De Componente",
+      "descripcion": "Remover Sensor Maf / Inspección Visual Y Limpieza De Componente",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 20,
+      "nombre": "Instalación De Sensor / Pruebas De Funcionamiento",
+      "descripcion": "Instalación De Sensor / Pruebas De Funcionamiento",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 21,
+      "nombre": "Sellar Fuga De Lubricante En Tren Valvular / Desamble De Componentes / Retirar Tapa De Tren Valvular / Limpieza De Áreas / Instalación De Junta En Tapa De Tren Valvular",
+      "descripcion": "Sellar Fuga De Lubricante En Tren Valvular / Desamble De Componentes / Retirar Tapa De Tren Valvular / Limpieza De Áreas / Instalación De Junta En Tapa De Tren Valvular",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 22,
+      "nombre": "Pruebas De Funcionamiento / Recorrido De Prueba / Inspección A Líneas De Sensor Maf",
+      "descripcion": "Pruebas De Funcionamiento / Recorrido De Prueba / Inspección A Líneas De Sensor Maf",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 23,
+      "nombre": "Nota: Este Vehiculo Deberá De Retornar Despues De Dias Habiles Para Su Inspección En Sistema De Enfriamiento (Posible Reemplazo En Bomba De Agua Y Remover Radiador",
+      "descripcion": "Nota: Este Vehiculo Deberá De Retornar Despues De Dias Habiles Para Su Inspección En Sistema De Enfriamiento (Posible Reemplazo En Bomba De Agua Y Remover Radiador",
+      "costo_sugerido": 10.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 24,
+      "nombre": "Materiales Diversos, Consumibles, Artículos De Limpieza Y Traslados Para Adquisición De Cuerpo De Aceleración",
+      "descripcion": "Materiales Diversos, Consumibles, Artículos De Limpieza Y Traslados Para Adquisición De Cuerpo De Aceleración",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 25,
+      "nombre": "Instalación De Moto Ventilador Nuevo / Ensamble De Accesorios / Pruebas De Funcionamiento",
+      "descripcion": "Instalación De Moto Ventilador Nuevo / Ensamble De Accesorios / Pruebas De Funcionamiento",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 26,
+      "nombre": "Materiales Diversos, Consumibles Y Artículos De Limpieza ……",
+      "descripcion": "Materiales Diversos, Consumibles Y Artículos De Limpieza ……",
+      "costo_sugerido": 289.5,
+      "frecuencia": 2
+    },
+    {
+      "id": 27,
+      "nombre": "Sistema De Lubricación: Drenado De Aceite De Motor / Instalación De Aceite Lavado Interno De Motor",
+      "descripcion": "Sistema De Lubricación: Drenado De Aceite De Motor / Instalación De Aceite Lavado Interno De Motor",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 28,
+      "nombre": "Remover Toma Completa De Sistema De Enfriamiento / Instalación De Toma Completa Con Termostato Y Sensor",
+      "descripcion": "Remover Toma Completa De Sistema De Enfriamiento / Instalación De Toma Completa Con Termostato Y Sensor",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 29,
+      "nombre": "Lectura De Códigos Almacenados En Ecu / Pruebas De Funcionamiento De Sistema De Carga / Remover E Instalar Acumulador / Reinicio De Sistemas / Pruebas De Funcionamiento",
+      "descripcion": "Lectura De Códigos Almacenados En Ecu / Pruebas De Funcionamiento De Sistema De Carga / Remover E Instalar Acumulador / Reinicio De Sistemas / Pruebas De Funcionamiento",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 30,
+      "nombre": "Materiales Diversos, Consumibles Y Artículos De Limpieza / Transportes Adquisición De Bobina",
+      "descripcion": "Materiales Diversos, Consumibles Y Artículos De Limpieza / Transportes Adquisición De Bobina",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 31,
+      "nombre": "Materiales Diversos, Consumibles Y Artículos De Limpieza, Transportes De Uber",
+      "descripcion": "Materiales Diversos, Consumibles Y Artículos De Limpieza, Transportes De Uber",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 32,
+      "nombre": "Desamble De Accesorios / Limpieza De Sistema / Rectificación De Discos Traseros / Ensamble De Accesorios / Pruebas De Funcionamiento",
+      "descripcion": "Desamble De Accesorios / Limpieza De Sistema / Rectificación De Discos Traseros / Ensamble De Accesorios / Pruebas De Funcionamiento",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 33,
+      "nombre": "Instalación De Tornillo De Drenado… En Mano De Obra",
+      "descripcion": "Instalación De Tornillo De Drenado… En Mano De Obra",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 34,
+      "nombre": "Lectura De Códigos De Error Almacenados En Ecu / Pruebas De Funcionamiento En Acumulador Principal",
+      "descripcion": "Lectura De Códigos De Error Almacenados En Ecu / Pruebas De Funcionamiento En Acumulador Principal",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 35,
+      "nombre": "Sistema De Embrague: Estudio De Daño / Remover Conjunto De Embrague / Rectificación De Volante Motriz / Instalación De Conjunto De Embrague Nuevo Incluye Plato, Disco Y Collarín",
+      "descripcion": "Sistema De Embrague: Estudio De Daño / Remover Conjunto De Embrague / Rectificación De Volante Motriz / Instalación De Conjunto De Embrague Nuevo Incluye Plato, Disco Y Collarín",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 36,
+      "nombre": "Materiales Diversos, Casetas, Combustible, Consumibles Y Artículos De Limpieza",
+      "descripcion": "Materiales Diversos, Casetas, Combustible, Consumibles Y Artículos De Limpieza",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 37,
+      "nombre": "Instalación De Tornillo De Alta Resistencia",
+      "descripcion": "Instalación De Tornillo De Alta Resistencia",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 38,
+      "nombre": "Instalación De Poleas Tensoras / Remover Alternador",
+      "descripcion": "Instalación De Poleas Tensoras / Remover Alternador",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 39,
+      "nombre": "Envio De Ductos A Restauración / Instalación De Ductos Metalicos Restaurados / Reemplazo De Mangueras",
+      "descripcion": "Envio De Ductos A Restauración / Instalación De Ductos Metalicos Restaurados / Reemplazo De Mangueras",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 40,
+      "nombre": "Materiales Diversos, Focos, Consumibles Y Artículos De Limpieza….…",
+      "descripcion": "Materiales Diversos, Focos, Consumibles Y Artículos De Limpieza….…",
+      "costo_sugerido": 215.5,
+      "frecuencia": 2
+    },
+    {
+      "id": 41,
+      "nombre": "Materiales Diversos, Consumibles Y Articulos De Limpieza…",
+      "descripcion": "Materiales Diversos, Consumibles Y Articulos De Limpieza…",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 42,
+      "nombre": "Instalación De Junta Nueva",
+      "descripcion": "Instalación De Junta Nueva",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 43,
+      "nombre": "Instalación De Sensor / Reinicio De Sistemas / Pruebas De Funcionamiento",
+      "descripcion": "Instalación De Sensor / Reinicio De Sistemas / Pruebas De Funcionamiento",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 44,
+      "nombre": "Diversos, Consumibles Y Artículos De Limpieza……",
+      "descripcion": "Diversos, Consumibles Y Artículos De Limpieza……",
+      "costo_sugerido": 240.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 45,
+      "nombre": "Materiales Diversos, Consumibles Y Artículos De Limpieza… … En Atención A Luis Flores",
+      "descripcion": "Materiales Diversos, Consumibles Y Artículos De Limpieza… … En Atención A Luis Flores",
+      "costo_sugerido": 328.5,
+      "frecuencia": 2
+    },
+    {
+      "id": 46,
+      "nombre": "Calibración De Bujías / Limpieza E Instalación",
+      "descripcion": "Calibración De Bujías / Limpieza E Instalación",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 47,
+      "nombre": "Sistema De Carga: Inspección En Sistema De Carga / Pruebas De Funcionamiento / Remover E Instalar Acumulador Original Compatible Con El Vehículo",
+      "descripcion": "Sistema De Carga: Inspección En Sistema De Carga / Pruebas De Funcionamiento / Remover E Instalar Acumulador Original Compatible Con El Vehículo",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 48,
+      "nombre": "Pruebas De Funcionamiento / Inspección De Banda De Accesorios",
+      "descripcion": "Pruebas De Funcionamiento / Inspección De Banda De Accesorios",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 49,
+      "nombre": "Instalación De Banda De Accesorios / Ensamble De Accesorios / Pruebas De Funcionamiento",
+      "descripcion": "Instalación De Banda De Accesorios / Ensamble De Accesorios / Pruebas De Funcionamiento",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 50,
+      "nombre": "Instalación De Acumulador Nuevo Original",
+      "descripcion": "Instalación De Acumulador Nuevo Original",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 51,
+      "nombre": "Instalación Aditivo Liqui Moly Para Limpieza De Catalizador",
+      "descripcion": "Instalación Aditivo Liqui Moly Para Limpieza De Catalizador",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 52,
+      "nombre": "Instalación De Neumáticos / Instalación De Válvulas",
+      "descripcion": "Instalación De Neumáticos / Instalación De Válvulas",
+      "costo_sugerido": 4.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 53,
+      "nombre": "Remover Toma Completa De Sistema De Enfriamiento / Remover E Instalar Ducto De Radiador A Toma",
+      "descripcion": "Remover Toma Completa De Sistema De Enfriamiento / Remover E Instalar Ducto De Radiador A Toma",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 54,
+      "nombre": "Instalación Y Reconocimiento De Acumulador Nuevo / Programación / Reinicio De Sistemas",
+      "descripcion": "Instalación Y Reconocimiento De Acumulador Nuevo / Programación / Reinicio De Sistemas",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 148,
+      "nombre": "Adicional: Remover E Instalar Ducto De Filtro De Aire…",
+      "descripcion": "Adicional: Remover E Instalar Ducto De Filtro De Aire…",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 149,
+      "nombre": "Ducto De Filtro De Aire",
+      "descripcion": "Ducto De Filtro De Aire",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 150,
+      "nombre": "Litros De Aceite Lubricante Liqui Moly Sintetico",
+      "descripcion": "Litros De Aceite Lubricante Liqui Moly Sintetico",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 151,
+      "nombre": "Bases De Amortiguadores Traseros",
+      "descripcion": "Bases De Amortiguadores Traseros",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 152,
+      "nombre": "Remover E Instalar Filtro De Combustible / Remover Accesorios Diversos",
+      "descripcion": "Remover E Instalar Filtro De Combustible / Remover Accesorios Diversos",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 153,
+      "nombre": "Filtro De Lubricante",
+      "descripcion": "Filtro De Lubricante",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 154,
+      "nombre": "*Toma De Agua, Sensor De Temperatura Y Refrigerante Proporcionados Por El Propietario",
+      "descripcion": "*Toma De Agua, Sensor De Temperatura Y Refrigerante Proporcionados Por El Propietario",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 155,
+      "nombre": "Amortiguadores Delanteros Kyb",
+      "descripcion": "Amortiguadores Delanteros Kyb",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 156,
+      "nombre": "Deposito Y Tapón De Refrigerante",
+      "descripcion": "Deposito Y Tapón De Refrigerante",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 157,
+      "nombre": "Remover E Instalar Bujías De Ignición (Adquiridas A Nombre De Propietario)",
+      "descripcion": "Remover E Instalar Bujías De Ignición (Adquiridas A Nombre De Propietario)",
+      "costo_sugerido": 4.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 158,
+      "nombre": "Monrtar Llantas / Reprogramación De Sensores De Rueda",
+      "descripcion": "Monrtar Llantas / Reprogramación De Sensores De Rueda",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 159,
+      "nombre": "Discos Delanteros…. C/U",
+      "descripcion": "Discos Delanteros…. C/U",
+      "costo_sugerido": 4394.08,
+      "frecuencia": 2
+    },
+    {
+      "id": 160,
+      "nombre": "Sensor De Pedal De Freno",
+      "descripcion": "Sensor De Pedal De Freno",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 161,
+      "nombre": "Sensor De Frenos",
+      "descripcion": "Sensor De Frenos",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 162,
+      "nombre": "Nota: Si Despues De Días El Ciclo De Funcionamiento En Sensor Maf Es Correcto, No Será Necesario Su Reemplazo",
+      "descripcion": "Nota: Si Despues De Días El Ciclo De Funcionamiento En Sensor Maf Es Correcto, No Será Necesario Su Reemplazo",
+      "costo_sugerido": 10.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 163,
+      "nombre": "Juego De Amortiguadores Delanteros  C/U",
+      "descripcion": "Juego De Amortiguadores Delanteros  C/U",
+      "costo_sugerido": 2647.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 164,
+      "nombre": "Bases De Amortiguadores Delanteros  C/U",
+      "descripcion": "Bases De Amortiguadores Delanteros  C/U",
+      "costo_sugerido": 1450.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 165,
+      "nombre": "Rotulas  C/U",
+      "descripcion": "Rotulas  C/U",
+      "costo_sugerido": 560.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 166,
+      "nombre": "Fluido Liqui Moly Elevar Octanaje De Combustible",
+      "descripcion": "Fluido Liqui Moly Elevar Octanaje De Combustible",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 167,
+      "nombre": "*Sensor Maf Proporcioinado Por El Propietario",
+      "descripcion": "*Sensor Maf Proporcioinado Por El Propietario",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 168,
+      "nombre": "Remover E Instalar Sensor Maf * Proporcionado Por El Propietario",
+      "descripcion": "Remover E Instalar Sensor Maf * Proporcionado Por El Propietario",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 169,
+      "nombre": "Litros De Aceite Lubricante Para Motor",
+      "descripcion": "Litros De Aceite Lubricante Para Motor",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 170,
+      "nombre": "Espuma Limpia Frenos",
+      "descripcion": "Espuma Limpia Frenos",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 171,
+      "nombre": "Liqui Moly Frenos",
+      "descripcion": "Liqui Moly Frenos",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 172,
+      "nombre": "Nota: No Hay En Existencia Pastas De Frenos, Despues De Pago, Entrega De- Dias Habiles",
+      "descripcion": "Nota: No Hay En Existencia Pastas De Frenos, Despues De Pago, Entrega De- Dias Habiles",
+      "costo_sugerido": 6.5,
+      "frecuencia": 2
+    },
+    {
+      "id": 173,
+      "nombre": "Juego De Repuestos De Calipers Delanteros",
+      "descripcion": "Juego De Repuestos De Calipers Delanteros",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 174,
+      "nombre": "Juego De Repuestos De Calipers Traseros",
+      "descripcion": "Juego De Repuestos De Calipers Traseros",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 175,
+      "nombre": "Filtro De Aire, Filtro De Cabina (Aire Acondicionado), Filtro De Aceite - Suzuki",
+      "descripcion": "Filtro De Aire, Filtro De Cabina (Aire Acondicionado), Filtro De Aceite - Suzuki",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 176,
+      "nombre": "*Sensores De Oxigeno Nuevos Y Orginales Proporcionados Por El Propietario",
+      "descripcion": "*Sensores De Oxigeno Nuevos Y Orginales Proporcionados Por El Propietario",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 177,
+      "nombre": "Juego Seguros",
+      "descripcion": "Juego Seguros",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 178,
+      "nombre": "Juego De Repustos Y Orings",
+      "descripcion": "Juego De Repustos Y Orings",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 179,
+      "nombre": "Nota: Este Vehículo Deberá Reemplazar Filtro De Carbon Activado ( Canister)",
+      "descripcion": "Nota: Este Vehículo Deberá Reemplazar Filtro De Carbon Activado ( Canister)",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 180,
+      "nombre": "Spray Descarbonizante Liqui Moly",
+      "descripcion": "Spray Descarbonizante Liqui Moly",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 181,
+      "nombre": "Filltro De Aceite De Motor",
+      "descripcion": "Filltro De Aceite De Motor",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 182,
+      "nombre": "Adicionales: Remover E Instalar Filtro Purificador De Oxígeno En Motor / Lubricación: Drenado De Aceite De Motor / Lavado Interno De Motor / Drenado De Aceite De Lavado / Instalación De Aceite Lubricante De Motor / Remover E Instalar Filtro De Aceite…… En Mano De Obra",
+      "descripcion": "Adicionales: Remover E Instalar Filtro Purificador De Oxígeno En Motor / Lubricación: Drenado De Aceite De Motor / Lavado Interno De Motor / Drenado De Aceite De Lavado / Instalación De Aceite Lubricante De Motor / Remover E Instalar Filtro De Aceite…… En Mano De Obra",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 183,
+      "nombre": "Litros De Aceite Semi Sinteticow-",
+      "descripcion": "Litros De Aceite Semi Sinteticow-",
+      "costo_sugerido": 17.5,
+      "frecuencia": 2
+    },
+    {
+      "id": 184,
+      "nombre": "Sensor De Árbol De Levas",
+      "descripcion": "Sensor De Árbol De Levas",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 185,
+      "nombre": "Sensores Vss (  C/U)",
+      "descripcion": "Sensores Vss (  C/U)",
+      "costo_sugerido": 2349.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 186,
+      "nombre": "Filtro De Cabina (Polen) Aire Acondicionado",
+      "descripcion": "Filtro De Cabina (Polen) Aire Acondicionado",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 187,
+      "nombre": "*Filtro De Cabina (Aire Acondicionado)",
+      "descripcion": "*Filtro De Cabina (Aire Acondicionado)",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 188,
+      "nombre": "Juego De Tornillos De Disco",
+      "descripcion": "Juego De Tornillos De Disco",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 189,
+      "nombre": "Remover E Instalar Tornillos De Disco",
+      "descripcion": "Remover E Instalar Tornillos De Disco",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 190,
+      "nombre": "Banda Distribución",
+      "descripcion": "Banda Distribución",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 191,
+      "nombre": "Código De Error Registrado – Remover E Instalar Bujías De Ignición (Bujía N. Afectada)",
+      "descripcion": "Código De Error Registrado – Remover E Instalar Bujías De Ignición (Bujía N. Afectada)",
+      "costo_sugerido": 1.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 192,
+      "nombre": "Remover E Instalar Bases De Amortiguadores Delanteros",
+      "descripcion": "Remover E Instalar Bases De Amortiguadores Delanteros",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 193,
+      "nombre": "Repuesto De Bomba De Aceite",
+      "descripcion": "Repuesto De Bomba De Aceite",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 194,
+      "nombre": "Juego De Juntas Y Retenes",
+      "descripcion": "Juego De Juntas Y Retenes",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 195,
+      "nombre": "Filtro De Lubricante Transmisión",
+      "descripcion": "Filtro De Lubricante Transmisión",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 196,
+      "nombre": "Litros De Aceite Transmisión Estandar",
+      "descripcion": "Litros De Aceite Transmisión Estandar",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 197,
+      "nombre": "Drenado De Aceite De Lavado / Reemplazo De Filtro De Aceite / Instalación De Aceite Lubricante",
+      "descripcion": "Drenado De Aceite De Lavado / Reemplazo De Filtro De Aceite / Instalación De Aceite Lubricante",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 198,
+      "nombre": "Disco Y Collarin …. – A Cuenta  Resta",
+      "descripcion": "Disco Y Collarin …. – A Cuenta  Resta",
+      "costo_sugerido": 5643.33,
+      "frecuencia": 2
+    },
+    {
+      "id": 199,
+      "nombre": "Garrafa De Aceitew ( Lt.)…",
+      "descripcion": "Garrafa De Aceitew ( Lt.)…",
+      "costo_sugerido": 119.69,
+      "frecuencia": 2
+    },
+    {
+      "id": 200,
+      "nombre": "Litros De Aceitew…",
+      "descripcion": "Litros De Aceitew…",
+      "costo_sugerido": 129.26,
+      "frecuencia": 2
+    },
+    {
+      "id": 201,
+      "nombre": "Juego De Clutch Incluye Plato, Disco Y Collarín….…Pagado",
+      "descripcion": "Juego De Clutch Incluye Plato, Disco Y Collarín….…Pagado",
+      "costo_sugerido": 4200.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 202,
+      "nombre": "Sensores De Oxigeno…….P A G A D O S (-Ene-)",
+      "descripcion": "Sensores De Oxigeno…….P A G A D O S (-Ene-)",
+      "costo_sugerido": 1681.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 203,
+      "nombre": "Sensor Ckp No Original Adquirido A En Tienda Autozone * Devolucion De Sensor, Funcionamiento Erroneo",
+      "descripcion": "Sensor Ckp No Original Adquirido A En Tienda Autozone * Devolucion De Sensor, Funcionamiento Erroneo",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 204,
+      "nombre": "Litro De Aceite Transmisión",
+      "descripcion": "Litro De Aceite Transmisión",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 205,
+      "nombre": "Kit De Distribución Y Refrigerante Proporcionados Por El Propietario",
+      "descripcion": "Kit De Distribución Y Refrigerante Proporcionados Por El Propietario",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 206,
+      "nombre": "Juego De Bujias",
+      "descripcion": "Juego De Bujias",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 207,
+      "nombre": "*Nota: Este Vehículo Deberá Instalar Sensor Ckp Original A La Brevedad Posible",
+      "descripcion": "*Nota: Este Vehículo Deberá Instalar Sensor Ckp Original A La Brevedad Posible",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 208,
+      "nombre": "Sensor Ckp No Original Adquirido A Nombre De Propietario En Tienda Autozone",
+      "descripcion": "Sensor Ckp No Original Adquirido A Nombre De Propietario En Tienda Autozone",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 209,
+      "nombre": "Amortiguadores Delanteros ……P A G A D O",
+      "descripcion": "Amortiguadores Delanteros ……P A G A D O",
+      "costo_sugerido": 15134.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 210,
+      "nombre": "Juegos De Herrajes",
+      "descripcion": "Juegos De Herrajes",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 211,
+      "nombre": "• Sensor De Presión De Aceite (Reemplazo De Sensor Y Arnés)",
+      "descripcion": "• Sensor De Presión De Aceite (Reemplazo De Sensor Y Arnés)",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 212,
+      "nombre": "Filtro Diesel",
+      "descripcion": "Filtro Diesel",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 213,
+      "nombre": "Sensor De Presión ……Pagado",
+      "descripcion": "Sensor De Presión ……Pagado",
+      "costo_sugerido": 2900.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 214,
+      "nombre": "Flecha Lado Derecho Y Terminales….. …P A G A D O-Mayo-",
+      "descripcion": "Flecha Lado Derecho Y Terminales….. …P A G A D O-Mayo-",
+      "costo_sugerido": 1003.75,
+      "frecuencia": 2
+    },
+    {
+      "id": 215,
+      "nombre": "Remover E Instalar Flecha Derecha / Remover E Instalar Terminales",
+      "descripcion": "Remover E Instalar Flecha Derecha / Remover E Instalar Terminales",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 216,
+      "nombre": "Localizar Fuga De Refrigerante / Remover Accesorios Diversos",
+      "descripcion": "Localizar Fuga De Refrigerante / Remover Accesorios Diversos",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 217,
+      "nombre": "Spray Cuerpo De Aceleración Liqui Moly….…",
+      "descripcion": "Spray Cuerpo De Aceleración Liqui Moly….…",
+      "costo_sugerido": 280.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 218,
+      "nombre": "Remover Banda De Accesorios / Adquisición De Banda De Accesorios A Nombre Del Propietario",
+      "descripcion": "Remover Banda De Accesorios / Adquisición De Banda De Accesorios A Nombre Del Propietario",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 219,
+      "nombre": "Remover Banda De Accesorios / Adquisición De Banda De Accesorios Proporcionados Por El Propietario",
+      "descripcion": "Remover Banda De Accesorios / Adquisición De Banda De Accesorios Proporcionados Por El Propietario",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 220,
+      "nombre": "Filtro De Transmisión",
+      "descripcion": "Filtro De Transmisión",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 221,
+      "nombre": "Nota: Este Vehiculo Deberá De Retornar En Dias Habiles Para Leer Datos Almacenados En Memoria De Vehículo (Sensor De Árbol De Levas)",
+      "descripcion": "Nota: Este Vehiculo Deberá De Retornar En Dias Habiles Para Leer Datos Almacenados En Memoria De Vehículo (Sensor De Árbol De Levas)",
+      "costo_sugerido": 5.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 222,
+      "nombre": "Juego De Metales De Biela Y Centro",
+      "descripcion": "Juego De Metales De Biela Y Centro",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 223,
+      "nombre": "Bomba Aceite",
+      "descripcion": "Bomba Aceite",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 224,
+      "nombre": "Lubricante Y Refrigerante",
+      "descripcion": "Lubricante Y Refrigerante",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 225,
+      "nombre": "Rectificación De Discos Delanteros…Cost",
+      "descripcion": "Rectificación De Discos Delanteros…Cost",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 226,
+      "nombre": "Aceite Lubricante",
+      "descripcion": "Aceite Lubricante",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 227,
+      "nombre": "Drenado De Aceite De Motor / Instalación De Aceite Lavado Interno De Motor / Drenado De Aceite De Lavado / Reemplazo De Filtro De Aceite / Instalación De Aceite Lubricante",
+      "descripcion": "Drenado De Aceite De Motor / Instalación De Aceite Lavado Interno De Motor / Drenado De Aceite De Lavado / Reemplazo De Filtro De Aceite / Instalación De Aceite Lubricante",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 228,
+      "nombre": "Filtro De Polen (Aire Acondicionado)",
+      "descripcion": "Filtro De Polen (Aire Acondicionado)",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 229,
+      "nombre": "Adicional: Remover E Instalar Sensor De Oxigeno",
+      "descripcion": "Adicional: Remover E Instalar Sensor De Oxigeno",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 230,
+      "nombre": "Remover E Instalar Sensor De Oxigeno Banco (Proporcionado Por El Propietario)",
+      "descripcion": "Remover E Instalar Sensor De Oxigeno Banco (Proporcionado Por El Propietario)",
+      "costo_sugerido": 1.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 231,
+      "nombre": "Programación De Cuerpo De Aceleración / Reconocimiento De Sensor De Oxigeno",
+      "descripcion": "Programación De Cuerpo De Aceleración / Reconocimiento De Sensor De Oxigeno",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 232,
+      "nombre": "Aditivo Liqui Moly (Elevar Octanaje)",
+      "descripcion": "Aditivo Liqui Moly (Elevar Octanaje)",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 233,
+      "nombre": "Inspección De Pastas Delanteras / Inspección De Discos Delanteros / Inspección De Retenes De Rueda",
+      "descripcion": "Inspección De Pastas Delanteras / Inspección De Discos Delanteros / Inspección De Retenes De Rueda",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 234,
+      "nombre": "Drenado De Aceite De Motor / Instalación De Aceite Lavado Interno De Motor /Drenado De Aceite De Lavado / Reemplazo De Filtro De Aceite / Instalación De Aceite Lubricante",
+      "descripcion": "Drenado De Aceite De Motor / Instalación De Aceite Lavado Interno De Motor /Drenado De Aceite De Lavado / Reemplazo De Filtro De Aceite / Instalación De Aceite Lubricante",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 235,
+      "nombre": "Terminal De Dirección",
+      "descripcion": "Terminal De Dirección",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 236,
+      "nombre": "Litros De Aceite Semi |Sinteticow- Toyota",
+      "descripcion": "Litros De Aceite Semi |Sinteticow- Toyota",
+      "costo_sugerido": 17.5,
+      "frecuencia": 2
+    },
+    {
+      "id": 237,
+      "nombre": "Filtro De Combustible Diesel",
+      "descripcion": "Filtro De Combustible Diesel",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 238,
+      "nombre": "Litros De Aceite Stp Diesel",
+      "descripcion": "Litros De Aceite Stp Diesel",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 239,
+      "nombre": "Juego De Juntas Y Orings / Sensor De Presión De Aceite ….…P A G A D O",
+      "descripcion": "Juego De Juntas Y Orings / Sensor De Presión De Aceite ….…P A G A D O",
+      "costo_sugerido": 3000.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 240,
+      "nombre": "Interpretación De Código / Remover E Instalar Sonda Lambda (Sensor De Oxígeno)",
+      "descripcion": "Interpretación De Código / Remover E Instalar Sonda Lambda (Sensor De Oxígeno)",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 241,
+      "nombre": "Adquisición De Sensor A Nombre De Propietario / Reconocimiento De Sensor",
+      "descripcion": "Adquisición De Sensor A Nombre De Propietario / Reconocimiento De Sensor",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 242,
+      "nombre": "Sensor De Oxigeno ()",
+      "descripcion": "Sensor De Oxigeno ()",
+      "costo_sugerido": 2.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 243,
+      "nombre": "Sensor De Presion De Aceite",
+      "descripcion": "Sensor De Presion De Aceite",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 244,
+      "nombre": "Polea Loca De Banda De Alterador",
+      "descripcion": "Polea Loca De Banda De Alterador",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 245,
+      "nombre": "Remover Banda De Accesorios / Remover Poleas Tensoras Afectadas",
+      "descripcion": "Remover Banda De Accesorios / Remover Poleas Tensoras Afectadas",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 246,
+      "nombre": "Litro Lubricante Liqui Moly Sintetico Para Motor",
+      "descripcion": "Litro Lubricante Liqui Moly Sintetico Para Motor",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 247,
+      "nombre": "*Garrafa De Aceite Liqui Moly Sintetico Proporcionado Por El Propietaroio",
+      "descripcion": "*Garrafa De Aceite Liqui Moly Sintetico Proporcionado Por El Propietaroio",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 248,
+      "nombre": "Localizar Fuga De Refrigerante / Desamble De Accesorios / Remover Ductos Metalicos Dañados",
+      "descripcion": "Localizar Fuga De Refrigerante / Desamble De Accesorios / Remover Ductos Metalicos Dañados",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 249,
+      "nombre": "Termostato De Aceite",
+      "descripcion": "Termostato De Aceite",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 250,
+      "nombre": "Junta Enfriador De Aceite",
+      "descripcion": "Junta Enfriador De Aceite",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 251,
+      "nombre": "Termostato Refrigerante",
+      "descripcion": "Termostato Refrigerante",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 252,
+      "nombre": "Juego De Juntas De Motor",
+      "descripcion": "Juego De Juntas De Motor",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 253,
+      "nombre": "Juego De Medias Lunas",
+      "descripcion": "Juego De Medias Lunas",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 254,
+      "nombre": "Lubricante Lavado, Lubricante Motor Y Filtro De Aceite",
+      "descripcion": "Lubricante Lavado, Lubricante Motor Y Filtro De Aceite",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 255,
+      "nombre": "Kit De Distribución (Cadena Y Engranes, Tenor Y Guias)",
+      "descripcion": "Kit De Distribución (Cadena Y Engranes, Tenor Y Guias)",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 256,
+      "nombre": "Líquido Limpieza De Inyectores Liqui Moly...…",
+      "descripcion": "Líquido Limpieza De Inyectores Liqui Moly...…",
+      "costo_sugerido": 290.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 257,
+      "nombre": "Líquido De Frenos…… En Atención A Santa Meraz",
+      "descripcion": "Líquido De Frenos…… En Atención A Santa Meraz",
+      "costo_sugerido": 68.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 258,
+      "nombre": "Espuma Limpia Frenos…… En Atención A Santa Meraz",
+      "descripcion": "Espuma Limpia Frenos…… En Atención A Santa Meraz",
+      "costo_sugerido": 150.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 259,
+      "nombre": "Liqui Moly Frenos…… En Atención A Santa Meraz",
+      "descripcion": "Liqui Moly Frenos…… En Atención A Santa Meraz",
+      "costo_sugerido": 240.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 260,
+      "nombre": "Tanque Recuperador (Deposito De Refrigerante)",
+      "descripcion": "Tanque Recuperador (Deposito De Refrigerante)",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 261,
+      "nombre": "Sensor De Rueda",
+      "descripcion": "Sensor De Rueda",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 262,
+      "nombre": "Banda De Alternador",
+      "descripcion": "Banda De Alternador",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 263,
+      "nombre": "Poleas Tensoras – Banda",
+      "descripcion": "Poleas Tensoras – Banda",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 264,
+      "nombre": "Localizar Fuga De Refrigerante / Remover E Instalar Abrazadera En Ducto Principal",
+      "descripcion": "Localizar Fuga De Refrigerante / Remover E Instalar Abrazadera En Ducto Principal",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 265,
+      "nombre": "Desamble De Accesorios / Remover Sensor De Pedal",
+      "descripcion": "Desamble De Accesorios / Remover Sensor De Pedal",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 266,
+      "nombre": "Adquicisión De Sensor A Nombre De Propietario",
+      "descripcion": "Adquicisión De Sensor A Nombre De Propietario",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 267,
+      "nombre": "Filtro De Aceite / Lubricantew Gf Honda",
+      "descripcion": "Filtro De Aceite / Lubricantew Gf Honda",
+      "costo_sugerido": 13.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 268,
+      "nombre": "Discos Traseros ( C/U)",
+      "descripcion": "Discos Traseros ( C/U)",
+      "costo_sugerido": 5080.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 269,
+      "nombre": "Filtro De Cabina Piezas (Aire Acondicionado)",
+      "descripcion": "Filtro De Cabina Piezas (Aire Acondicionado)",
+      "costo_sugerido": 2.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 270,
+      "nombre": "Nota: Este Vehiculo Deberá De Reemplazar Sensores De Oxigeno A La Brevedad Posible",
+      "descripcion": "Nota: Este Vehiculo Deberá De Reemplazar Sensores De Oxigeno A La Brevedad Posible",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 271,
+      "nombre": "Restauración De Líneas En Sensores De Oxigeno",
+      "descripcion": "Restauración De Líneas En Sensores De Oxigeno",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 272,
+      "nombre": "Desamble De Accesorios / Remover E Instalar Bomba De Refrigerante *Proporcionada Por El Propietario",
+      "descripcion": "Desamble De Accesorios / Remover E Instalar Bomba De Refrigerante *Proporcionada Por El Propietario",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 273,
+      "nombre": "*Bomba De Agua, Banda Y Junta Proporcionadas Por El Propietario",
+      "descripcion": "*Bomba De Agua, Banda Y Junta Proporcionadas Por El Propietario",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 274,
+      "nombre": "Litros De Aceite Lubricante Liqui Molyw-",
+      "descripcion": "Litros De Aceite Lubricante Liqui Molyw-",
+      "costo_sugerido": 30.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 275,
+      "nombre": "Terminales De Dirección",
+      "descripcion": "Terminales De Dirección",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 276,
+      "nombre": "Cables De Bujías",
+      "descripcion": "Cables De Bujías",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 277,
+      "nombre": "Embrague Completo (Plato, Disco Y Collarín)….… P A G A D O",
+      "descripcion": "Embrague Completo (Plato, Disco Y Collarín)….… P A G A D O",
+      "costo_sugerido": 11200.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 278,
+      "nombre": "Restauración Masas Y Discos Traseros",
+      "descripcion": "Restauración Masas Y Discos Traseros",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 279,
+      "nombre": "Amortiguadores Delanteros ( C/U)",
+      "descripcion": "Amortiguadores Delanteros ( C/U)",
+      "costo_sugerido": 3100.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 280,
+      "nombre": "Tornillos Estabilizadores, Viseras, Soporte De Motor, Bases De Amortiguador Delanteros",
+      "descripcion": "Tornillos Estabilizadores, Viseras, Soporte De Motor, Bases De Amortiguador Delanteros",
+      "costo_sugerido": 1.67,
+      "frecuencia": 2
+    },
+    {
+      "id": 281,
+      "nombre": "Porta Filtro De Aire",
+      "descripcion": "Porta Filtro De Aire",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 282,
+      "nombre": "Garrafa De Aceite Lubricante Liqui Moly Sintetico",
+      "descripcion": "Garrafa De Aceite Lubricante Liqui Moly Sintetico",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 283,
+      "nombre": "Juego De Pastas Delanteras Originales Vw",
+      "descripcion": "Juego De Pastas Delanteras Originales Vw",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 284,
+      "nombre": "Garrafa De Refrigerante …… En Atención A Noe Alfonso Lara",
+      "descripcion": "Garrafa De Refrigerante …… En Atención A Noe Alfonso Lara",
+      "costo_sugerido": 275.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 285,
+      "nombre": "Juego De Juntas Motor",
+      "descripcion": "Juego De Juntas Motor",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 286,
+      "nombre": "Junta Toma Refrigerante",
+      "descripcion": "Junta Toma Refrigerante",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 287,
+      "nombre": "Líquido De Frenos…… En Atención A Oscar Martínez",
+      "descripcion": "Líquido De Frenos…… En Atención A Oscar Martínez",
+      "costo_sugerido": 68.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 288,
+      "nombre": "Espuma Limpia Frenos…… En Atención A Oscar Martínez",
+      "descripcion": "Espuma Limpia Frenos…… En Atención A Oscar Martínez",
+      "costo_sugerido": 150.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 289,
+      "nombre": "Liqui Moly Frenos…… En Atención A Oscar Martínez",
+      "descripcion": "Liqui Moly Frenos…… En Atención A Oscar Martínez",
+      "costo_sugerido": 240.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 290,
+      "nombre": "Realizar Rutina De Funcionamiento De Transmisión En Vehículo - Resultado Sensores Vss Entrada Y Salida Afectados",
+      "descripcion": "Realizar Rutina De Funcionamiento De Transmisión En Vehículo - Resultado Sensores Vss Entrada Y Salida Afectados",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 291,
+      "nombre": "Remover Sensor De Nivel De Lubricante / Reemplazo De Junta En Sensor De Nivel",
+      "descripcion": "Remover Sensor De Nivel De Lubricante / Reemplazo De Junta En Sensor De Nivel",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 292,
+      "nombre": "Instalación De Accesorios / Instalación De Lubricante / Reemplazo De Filtro De Aceite",
+      "descripcion": "Instalación De Accesorios / Instalación De Lubricante / Reemplazo De Filtro De Aceite",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 293,
+      "nombre": "Filtro De Aire (Aire Acondicionado)",
+      "descripcion": "Filtro De Aire (Aire Acondicionado)",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 294,
+      "nombre": "Banda Adquirida A Nombre De Propietaria",
+      "descripcion": "Banda Adquirida A Nombre De Propietaria",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 295,
+      "nombre": "Spray Cuerpo De Aceleración Liqui Molyl",
+      "descripcion": "Spray Cuerpo De Aceleración Liqui Molyl",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 296,
+      "nombre": "Litros Aceite Stp Sintetico Lavado Interno De Motor",
+      "descripcion": "Litros Aceite Stp Sintetico Lavado Interno De Motor",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 297,
+      "nombre": "Nota: Este Vehículo Debera De Reemplazar Pastas De Frenos De Mejor Calidad; Asi Como Rectificar Discos",
+      "descripcion": "Nota: Este Vehículo Debera De Reemplazar Pastas De Frenos De Mejor Calidad; Asi Como Rectificar Discos",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 298,
+      "nombre": "Juego De Seguros De Llantas",
+      "descripcion": "Juego De Seguros De Llantas",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 299,
+      "nombre": "Remover Accesorios Diversos / Remover Banda De Accesorios",
+      "descripcion": "Remover Accesorios Diversos / Remover Banda De Accesorios",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 300,
+      "nombre": "Banda De Accesorios Gates",
+      "descripcion": "Banda De Accesorios Gates",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 301,
+      "nombre": "Filtro De Aire Gm Original",
+      "descripcion": "Filtro De Aire Gm Original",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 302,
+      "nombre": "Filtro De Cabina (Aire Acondicionado) Gm",
+      "descripcion": "Filtro De Cabina (Aire Acondicionado) Gm",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 303,
+      "nombre": "Filtro De Aceite Gm",
+      "descripcion": "Filtro De Aceite Gm",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 304,
+      "nombre": "Bomba De Agua Y Banda",
+      "descripcion": "Bomba De Agua Y Banda",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 305,
+      "nombre": "Sensor De Presión De Aceite",
+      "descripcion": "Sensor De Presión De Aceite",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 306,
+      "nombre": "Remover E Instalar Sensor De Oxigeno Primario (Proporcionado Por Propietario)",
+      "descripcion": "Remover E Instalar Sensor De Oxigeno Primario (Proporcionado Por Propietario)",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 307,
+      "nombre": "Filtro De Cabina ( Elementos)",
+      "descripcion": "Filtro De Cabina ( Elementos)",
+      "costo_sugerido": 2.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 308,
+      "nombre": "Gallones De Refrigerantes",
+      "descripcion": "Gallones De Refrigerantes",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 309,
+      "nombre": "Deposito Refrigerante….….Pagado",
+      "descripcion": "Deposito Refrigerante….….Pagado",
+      "costo_sugerido": 1200.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 310,
+      "nombre": "Remover E Instalar Sensor De Árbol De Levas (Adquirido A Nombre De C.P. Juan Jiménez)",
+      "descripcion": "Remover E Instalar Sensor De Árbol De Levas (Adquirido A Nombre De C.P. Juan Jiménez)",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 311,
+      "nombre": "Sensor De Árbol De Levas….…P A G A D O",
+      "descripcion": "Sensor De Árbol De Levas….…P A G A D O",
+      "costo_sugerido": 2500.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 312,
+      "nombre": "Bujías….Pagado",
+      "descripcion": "Bujías….Pagado",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 313,
+      "nombre": "Juego De Amortiguadores Traseros",
+      "descripcion": "Juego De Amortiguadores Traseros",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 314,
+      "nombre": "Restauración En Líneas De Sensor Ect",
+      "descripcion": "Restauración En Líneas De Sensor Ect",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 315,
+      "nombre": "*Nota: Se Recomienda Reemplazo De Sensor Ect Y Arnés Originales",
+      "descripcion": "*Nota: Se Recomienda Reemplazo De Sensor Ect Y Arnés Originales",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 316,
+      "nombre": "Juego De Birlos",
+      "descripcion": "Juego De Birlos",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 317,
+      "nombre": "Remover E Instalar Filtro De Aceite / Instalación De Aceite Lubricante",
+      "descripcion": "Remover E Instalar Filtro De Aceite / Instalación De Aceite Lubricante",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 318,
+      "nombre": "Líquido De Frenos…… Por Introducción",
+      "descripcion": "Líquido De Frenos…… Por Introducción",
+      "costo_sugerido": 68.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 319,
+      "nombre": "Espuma Limpia Frenos…… Por Introducción",
+      "descripcion": "Espuma Limpia Frenos…… Por Introducción",
+      "costo_sugerido": 150.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 320,
+      "nombre": "Liqui Moly Frenos………Por Introducción",
+      "descripcion": "Liqui Moly Frenos………Por Introducción",
+      "costo_sugerido": 240.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 321,
+      "nombre": "Sensores De Pastas ….…P A G A D O",
+      "descripcion": "Sensores De Pastas ….…P A G A D O",
+      "costo_sugerido": 2204.0,
+      "frecuencia": 2
+    },
+    {
+      "id": 322,
+      "nombre": "Arnes Sensor Vss",
+      "descripcion": "Arnes Sensor Vss",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 323,
+      "nombre": "Liqui Moly (Elevar Octanaje De Combustible)",
+      "descripcion": "Liqui Moly (Elevar Octanaje De Combustible)",
+      "costo_sugerido": 0,
+      "frecuencia": 2
+    },
+    {
+      "id": 324,
+      "nombre": "*Pastas Delanteras Y Traseras Proporcionadas Por El Propietario",
+      "descripcion": "*Pastas Delanteras Y Traseras Proporcionadas Por El Propietario",
+      "costo_sugerido": 0,
+      "frecuencia": 1
+    },
+    {
+      "id": 325,
+      "nombre": "Sensor De Oxigeno",
+      "descripcion": "Sensor De Oxigeno",
+      "costo_sugerido": 0,
+      "frecuencia": 1
+    },
+    {
+      "id": 326,
+      "nombre": "Sensor Maf",
+      "descripcion": "Sensor Maf",
+      "costo_sugerido": 0,
+      "frecuencia": 1
+    }
+  ],
+  "categorias": [
+    "Enfriamiento",
+    "Embrague",
+    "Ignición",
+    "Transmisión",
+    "Suspensión",
+    "Dirección",
+    "Otros",
+    "Sistema Eléctrico",
+    "Afinación",
+    "Lubricación",
+    "Diagnóstico",
+    "Frenos"
+  ],
+  "estadisticas": {
+    "servicios": 286,
+    "refacciones": 326
+  }
+}

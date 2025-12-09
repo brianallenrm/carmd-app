@@ -38,6 +38,9 @@ export async function POST(req: NextRequest) {
         // 4. Navigate to Preview Page
         await page.goto(previewUrl, { waitUntil: "domcontentloaded" });
 
+        // Wait for the main note card to appear (replaces the "Loading..." fallback)
+        await page.waitForSelector(".shadow-2xl", { timeout: 15000 });
+
         // 5. Take Screenshot
         // Hide print buttons and Next.js dev overlay
         await page.addStyleTag({

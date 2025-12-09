@@ -35,10 +35,11 @@ export async function POST(req: Request) {
 
         // Set viewport to A4 size (approximate pixels at 96 DPI)
         // A4 is 210mm x 297mm. 
-        // Set viewport to A4 size. Scale 1 is faster and safer for serverless.
         await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 1 });
-
         await page.goto(url, { waitUntil: "domcontentloaded" });
+
+        // Wait for the main note card to appear (replaces the "Loading..." fallback)
+        await page.waitForSelector(".shadow-2xl", { timeout: 15000 });
 
         const pdfBuffer = await page.pdf({
             format: "A4",

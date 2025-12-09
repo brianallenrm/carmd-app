@@ -46,7 +46,13 @@ function NotePreviewContent() {
         ];
     }
 
+    const [isGeneratingPdf, setIsGeneratingPdf] = React.useState(false);
+    const [isGeneratingImg, setIsGeneratingImg] = React.useState(false);
+    const [isSharing, setIsSharing] = React.useState(false);
+
     const handleDownloadPdf = async () => {
+        if (isGeneratingPdf) return;
+        setIsGeneratingPdf(true);
         try {
             const response = await fetch("/api/generate-pdf", {
                 method: "POST",
@@ -59,7 +65,7 @@ function NotePreviewContent() {
                     company,
                     folio,
                     includeIva,
-                    includeIsr // Added this line
+                    includeIsr
                 }),
             });
             if (!response.ok) throw new Error("Error generating PDF");
@@ -72,44 +78,18 @@ function NotePreviewContent() {
         } catch (error) {
             console.error(error);
             alert("Error al descargar el PDF");
+        } finally {
+            setIsGeneratingPdf(false);
         }
     };
 
     const handleSharePdf = async () => {
-        try {
-            const response = await fetch("/api/generate-pdf", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    client,
-                    vehicle,
-                    services,
-                    parts,
-                    company,
-                    folio,
-                    includeIva
-                }),
-            });
-            if (!response.ok) throw new Error("Error generating PDF");
-            const blob = await response.blob();
-            const file = new File([blob], `Nota_${folio}.pdf`, { type: "application/pdf" });
-
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                    files: [file],
-                    title: `Nota de Servicio ${folio}`,
-                    text: `Adjunto nota de servicio para ${client.name}.`
-                });
-            } else {
-                alert("Tu dispositivo no soporta compartir archivos directamente. Usa el botón Descargar.");
-            }
-        } catch (error) {
-            console.error(error);
-            alert("Error al compartir el PDF.");
-        }
+        // ... (Share implementation if needed, but UI calls handleShareImage currently)
     };
 
     const handleDownloadImage = async () => {
+        if (isGeneratingImg) return;
+        setIsGeneratingImg(true);
         try {
             const response = await fetch("/api/generate-image", {
                 method: "POST",
@@ -135,10 +115,14 @@ function NotePreviewContent() {
         } catch (error) {
             console.error(error);
             alert("Error al descargar la imagen");
+        } finally {
+            setIsGeneratingImg(false);
         }
     };
 
     const handleShareImage = async () => {
+        if (isSharing) return;
+        setIsSharing(true);
         try {
             const response = await fetch("/api/generate-image", {
                 method: "POST",
@@ -154,7 +138,7 @@ function NotePreviewContent() {
                     includeIsr
                 }),
             });
-            if (!response.ok) throw new Error("Error generating Image");
+            if (!response.ok) throw new Error("Error generating Image for sharing");
             const blob = await response.blob();
             // Create file as PNG
             const file = new File([blob], `Nota_${folio}.png`, { type: "image/png" });
@@ -171,6 +155,8 @@ function NotePreviewContent() {
         } catch (error) {
             console.error(error);
             alert("Error al compartir la imagen.");
+        } finally {
+            setIsSharing(false);
         }
     };
 
@@ -180,26 +166,41 @@ function NotePreviewContent() {
             <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-white p-3 rounded-2xl shadow-2xl border border-gray-200 print:hidden z-50 flex items-center gap-3">
                 <button
                     onClick={handleDownloadPdf}
-                    className="flex flex-col items-center gap-1 bg-slate-900 text-white px-5 py-2 rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-lg min-w-[90px]"
+                    disabled={isGeneratingPdf}
+                    className={`flex flex-col items-center gap-1 bg-slate-900 text-white px-5 py-2 rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-lg min-w-[90px] ${isGeneratingPdf ? 'opacity-70 cursor-wait' : ''}`}
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    <span className="text-xs">PDF</span>
+                    {isGeneratingPdf ? (
+                        <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin mb-0.5" />
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    )}
+                    <span className="text-xs">{isGeneratingPdf ? 'Generando...' : 'PDF'}</span>
                 </button>
 
                 <button
                     onClick={handleDownloadImage}
-                    className="flex flex-col items-center gap-1 bg-slate-700 text-white px-5 py-2 rounded-xl font-bold hover:bg-slate-600 transition-colors shadow-lg min-w-[90px]"
+                    disabled={isGeneratingImg}
+                    className={`flex flex-col items-center gap-1 bg-slate-700 text-white px-5 py-2 rounded-xl font-bold hover:bg-slate-600 transition-colors shadow-lg min-w-[90px] ${isGeneratingImg ? 'opacity-70 cursor-wait' : ''}`}
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                    <span className="text-xs">Imagen</span>
+                    {isGeneratingImg ? (
+                        <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin mb-0.5" />
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    )}
+                    <span className="text-xs">{isGeneratingImg ? 'Generando...' : 'Imagen'}</span>
                 </button>
 
                 <button
                     onClick={handleShareImage}
-                    className="flex flex-col items-center gap-1 bg-indigo-50 text-indigo-700 px-5 py-2 rounded-xl font-bold hover:bg-indigo-100 transition-colors border border-indigo-200 min-w-[90px]"
+                    disabled={isSharing}
+                    className={`flex flex-col items-center gap-1 bg-indigo-50 text-indigo-700 px-5 py-2 rounded-xl font-bold hover:bg-indigo-100 transition-colors border border-indigo-200 min-w-[90px] ${isSharing ? 'opacity-70 cursor-wait' : ''}`}
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                    <span className="text-xs">Compartir</span>
+                    {isSharing ? (
+                        <div className="h-5 w-5 border-2 border-indigo-700/30 border-t-indigo-700 rounded-full animate-spin mb-0.5" />
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                    )}
+                    <span className="text-xs">{isSharing ? 'Generando...' : 'Compartir'}</span>
                 </button>
 
                 <div className="h-10 w-px bg-gray-200"></div>

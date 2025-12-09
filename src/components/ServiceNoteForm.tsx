@@ -126,6 +126,8 @@ export default function ServiceNoteForm() {
             return;
         }
 
+        const newWindow = window.open('', '_blank');
+
         setIsSaving(true);
         const currentDate = new Date().toLocaleDateString("es-MX");
 
@@ -164,7 +166,12 @@ export default function ServiceNoteForm() {
             params.set("date", currentDate);
 
             const url = `/note-preview?${params.toString()}`;
-            window.open(url, "_blank");
+
+            if (newWindow) {
+                newWindow.location.href = url;
+            } else {
+                window.location.href = url; // Fallback
+            }
 
         } catch (error) {
             console.error(error);

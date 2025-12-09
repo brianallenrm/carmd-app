@@ -65,7 +65,11 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (error) {
-        console.error("Error generating Image:", error);
-        return NextResponse.json({ error: "Failed to generate Image" }, { status: 500 });
+        console.error("Image Generation Error:", error);
+        return NextResponse.json(
+            { error: error instanceof Error ? error.message : String(error) },
+            { status: 500 }
+        );
     }
 }
+```

@@ -68,7 +68,10 @@ function NotePreviewContent() {
                     includeIsr
                 }),
             });
-            if (!response.ok) throw new Error("Error generating PDF");
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || "Error generating PDF");
+            }
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -77,7 +80,7 @@ function NotePreviewContent() {
             link.click();
         } catch (error) {
             console.error(error);
-            alert("Error al descargar el PDF");
+            alert(`Error: ${error instanceof Error ? error.message : "Error al descargar el PDF"}`);
         } finally {
             setIsGeneratingPdf(false);
         }
@@ -105,7 +108,10 @@ function NotePreviewContent() {
                     includeIsr
                 }),
             });
-            if (!response.ok) throw new Error("Error generating Image");
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || "Error generating Image");
+            }
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -114,7 +120,7 @@ function NotePreviewContent() {
             link.click();
         } catch (error) {
             console.error(error);
-            alert("Error al descargar la imagen");
+            alert(`Error: ${error instanceof Error ? error.message : "Error al descargar la imagen"}`);
         } finally {
             setIsGeneratingImg(false);
         }

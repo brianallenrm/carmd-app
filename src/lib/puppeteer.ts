@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer-core';
 // @ts-ignore
-import chromium from '@sparticuz/chromium';
+import chromium from '@sparticuz/chromium-min';
 
 // Interface for the browser instance doesn't change much between core and full
 export async function getBrowser() {
@@ -17,7 +17,9 @@ export async function getBrowser() {
                 width: 1920,
                 height: 1080,
             },
-            executablePath: await chromium.executablePath(),
+            executablePath: await chromium.executablePath(
+                "https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar"
+            ),
             headless: true,
         });
     } else {

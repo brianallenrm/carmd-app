@@ -35,8 +35,8 @@ export async function POST(req: Request) {
 
         // Set viewport to A4 size (approximate pixels at 96 DPI)
         // A4 is 210mm x 297mm. 
-        // Restore Retina quality (Scale 2) now that logic is stable
-        await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 2 });
+        // Max Quality: Scale 3 (Ultra HD). High limit for serverless.
+        await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 3 });
         await page.goto(url, { waitUntil: "domcontentloaded" });
 
         // Wait for the main note card to appear (replaces the "Loading..." fallback)

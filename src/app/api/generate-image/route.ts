@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
         const page = await browser.newPage();
 
         // 3. Set Viewport to match A4 content size more closely
-        // Restore Retina quality (Scale 2) now that logic is stable
-        await page.setViewport({ width: 850, height: 1200, deviceScaleFactor: 2 });
+        // Max Quality: Scale 3 (Ultra HD)
+        await page.setViewport({ width: 850, height: 1200, deviceScaleFactor: 3 });
 
         // 4. Navigate to Preview Page
         await page.goto(previewUrl, { waitUntil: "domcontentloaded" });

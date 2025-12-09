@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
         const page = await browser.newPage();
 
         // 3. Set Viewport to match A4 content size more closely
-        await page.setViewport({ width: 850, height: 1200, deviceScaleFactor: 2 });
+        // Scale 1 for speed on Serverless
+        await page.setViewport({ width: 850, height: 1200, deviceScaleFactor: 1 });
 
         // 4. Navigate to Preview Page
         await page.goto(previewUrl, { waitUntil: "domcontentloaded" });

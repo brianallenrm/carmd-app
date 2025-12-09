@@ -35,7 +35,8 @@ export async function POST(req: Request) {
 
         // Set viewport to A4 size (approximate pixels at 96 DPI)
         // A4 is 210mm x 297mm. 
-        await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 2 });
+        // Set viewport to A4 size. Scale 1 is faster and safer for serverless.
+        await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 1 });
 
         await page.goto(url, { waitUntil: "domcontentloaded" });
 
@@ -43,6 +44,7 @@ export async function POST(req: Request) {
             format: "A4",
             printBackground: true,
             margin: { top: "0px", right: "0px", bottom: "0px", left: "0px" },
+            timeout: 30000, // Explicit timeout for PDF generation action
         });
 
         await browser.close();

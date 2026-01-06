@@ -15,25 +15,33 @@ export async function POST(req: Request) {
         const protocol = host.includes("localhost") ? "http" : "https";
         const baseUrl = `${protocol}://${host}`;
 
-        // Construct URL with query params
-        const params = new URLSearchParams({
-            client: JSON.stringify(client || {}),
-            vehicle: JSON.stringify(vehicle || {}),
-            company: JSON.stringify(company || {}),
-            services: JSON.stringify(services || []),
-            parts: JSON.stringify(parts || []),
+        // 1. Prepare Data Object
+        const pdfData = {
+            client: client || {},
+            vehicle: vehicle || {},
+            company: company || {},
+            services: services || [],
+            parts: parts || [],
             folio: folio || "00001",
             date: date || new Date().toLocaleDateString("es-MX"),
-        });
-        if (notes) params.set("notes", notes);
-        if (body.includeIva !== undefined) params.set("includeIva", body.includeIva.toString());
-        if (body.includeIsr !== undefined) params.set("includeIsr", body.includeIsr.toString());
+            includeIva: body.includeIva,
+            includeIsr: body.includeIsr,
+            notes: notes
+        };
 
-        const url = `${baseUrl}/note-preview?${params.toString()}`;
-
-        // Launch Puppeteer
+        // 2. Launch Puppeteer
         const browser = await getBrowser();
         const page = await browser.newPage();
+
+        // 3. Inject Data BEFORE navigation
+        // This bypasses URL length limits and ensures data consistency
+        await page.evaluateOnNewDocument((data: any) => {
+            (window as any).__PDF_DATA__ = data;
+        }, pdfData);
+
+        // 4. Navigate to minimal URL
+        // We only pass folio/date purely for fallback or logging, but the real data is in window
+        const url = `${baseUrl}/note-preview`; // No query params needed for data
 
         // Set viewport to A4 size (approximate pixels at 96 DPI)
         // A4 is 210mm x 297mm. 

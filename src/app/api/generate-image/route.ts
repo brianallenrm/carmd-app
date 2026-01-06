@@ -10,27 +10,32 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
 
         // 1. Construct the Preview URL with all data as query params
-        // We reuse the same logic as the PDF generator
+        // 1. Prepare Data Object
+        const imgData = {
+            client: body.client,
+            vehicle: body.vehicle,
+            company: body.company,
+            services: body.services,
+            parts: body.parts,
+            folio: body.folio,
+            date: body.date,
+            includeIva: body.includeIva,
+            includeIsr: body.includeIsr,
+            notes: body.notes
+        };
+
         const baseUrl = req.nextUrl.origin;
-        const params = new URLSearchParams();
+        // Clean URL without data params
+        const previewUrl = `${baseUrl}/note-preview`;
 
-        if (body.client) params.set("client", JSON.stringify(body.client));
-        if (body.vehicle) params.set("vehicle", JSON.stringify(body.vehicle));
-        if (body.company) params.set("company", JSON.stringify(body.company));
-        if (body.services) params.set("services", JSON.stringify(body.services));
-        if (body.parts) params.set("parts", JSON.stringify(body.parts));
-        if (body.folio) params.set("folio", body.folio);
-        if (body.date) params.set("date", body.date);
-        if (body.notes) params.set("notes", body.notes);
-        if (body.includeIva !== undefined) params.set("includeIva", body.includeIva.toString());
-        if (body.includeIsr !== undefined) params.set("includeIsr", body.includeIsr.toString());
-
-        const previewUrl = `${baseUrl}/note-preview?${params.toString()}`;
-
-        // 2. Launch Puppeteer
         // 2. Launch Puppeteer
         const browser = await getBrowser();
         const page = await browser.newPage();
+
+        // 3. Inject Data
+        await page.evaluateOnNewDocument((data: any) => {
+            (window as any).__PDF_DATA__ = data;
+        }, imgData);
 
         // 3. Set Viewport to match A4 content size more closely
         // Max Quality: Scale 3 (Ultra HD)

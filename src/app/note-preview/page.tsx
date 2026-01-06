@@ -8,11 +8,19 @@ import { COMPANY_DEFAULTS } from "@/lib/constants";
 function NotePreviewContent() {
     const searchParams = useSearchParams();
 
-    const folio = searchParams.get("folio") || "00001";
-    const date = searchParams.get("date") || new Date().toLocaleDateString();
-    const includeIva = searchParams.get("includeIva") === 'true';
-    const includeIsr = searchParams.get("includeIsr") === 'true';
-    const notes = searchParams.get("notes") || ""; // Fix: Retrieve notes param
+    const searchParams = useSearchParams();
+
+    // Check for injected data (from Puppeteer) or fallback to searchParams
+    let sourceData: any = {};
+    if (typeof window !== 'undefined' && (window as any).__PDF_DATA__) {
+        sourceData = (window as any).__PDF_DATA__;
+    }
+
+    const folio = sourceData.folio || searchParams.get("folio") || "00001";
+    const date = sourceData.date || searchParams.get("date") || new Date().toLocaleDateString();
+    const includeIva = sourceData.includeIva !== undefined ? sourceData.includeIva : (searchParams.get("includeIva") === 'true');
+    const includeIsr = sourceData.includeIsr !== undefined ? sourceData.includeIsr : (searchParams.get("includeIsr") === 'true');
+    const notes = sourceData.notes || searchParams.get("notes") || "";
 
     // Parse complex objects from JSON strings
     let client = { name: "Cliente Ejemplo", address: "", phone: "", email: "" };
@@ -21,23 +29,49 @@ function NotePreviewContent() {
     let services = [];
     let parts = [];
 
-    try {
-        const clientParam = searchParams.get("client");
-        if (clientParam) client = JSON.parse(clientParam);
+    if (sourceData.client) {
+        client = sourceData.client;
+    } else {
+        try {
+            const clientParam = searchParams.get("client");
+            if (clientParam) client = JSON.parse(clientParam);
+        } catch (e) { console.error("Parse client", e); }
+    }
 
-        const vehicleParam = searchParams.get("vehicle");
-        if (vehicleParam) vehicle = JSON.parse(vehicleParam);
+    if (sourceData.vehicle) {
+        vehicle = sourceData.vehicle;
+    } else {
+        try {
+            const vehicleParam = searchParams.get("vehicle");
+            if (vehicleParam) vehicle = JSON.parse(vehicleParam);
+        } catch (e) { console.error("Parse vehicle", e); }
+    }
 
-        const companyParam = searchParams.get("company");
-        if (companyParam) company = JSON.parse(companyParam);
+    if (sourceData.company) {
+        company = sourceData.company;
+    } else {
+        try {
+            const companyParam = searchParams.get("company");
+            if (companyParam) company = JSON.parse(companyParam);
+        } catch (e) { console.error("Parse company", e); }
+    }
 
-        const servicesParam = searchParams.get("services");
-        if (servicesParam) services = JSON.parse(servicesParam);
+    if (sourceData.services) {
+        services = sourceData.services;
+    } else {
+        try {
+            const servicesParam = searchParams.get("services");
+            if (servicesParam) services = JSON.parse(servicesParam);
+        } catch (e) { console.error("Parse services", e); }
+    }
 
-        const partsParam = searchParams.get("parts");
-        if (partsParam) parts = JSON.parse(partsParam);
-    } catch (e) {
-        console.error("Failed to parse parameters", e);
+    if (sourceData.parts) {
+        parts = sourceData.parts;
+    } else {
+        try {
+            const partsParam = searchParams.get("parts");
+            if (partsParam) parts = JSON.parse(partsParam);
+        } catch (e) { console.error("Parse parts", e); }
     }
 
     // Default services if empty

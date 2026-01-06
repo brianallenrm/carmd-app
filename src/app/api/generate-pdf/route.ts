@@ -62,7 +62,7 @@ export async function POST(req: Request) {
         }
 
         // Wait for the main note card to appear (replaces the "Loading..." fallback)
-        await page.waitForSelector("#note-preview-container", { timeout: 15000 });
+        await page.waitForSelector("#note-preview-container", { timeout: 30000 });
 
         const pdfBuffer = await page.pdf({
             format: "A4",

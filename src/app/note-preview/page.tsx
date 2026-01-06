@@ -8,74 +8,54 @@ import { COMPANY_DEFAULTS } from "@/lib/constants";
 function NotePreviewContent() {
     const searchParams = useSearchParams();
 
+    // State to hold the final data source
+    const [sourceData, setSourceData] = React.useState<any>({});
+    const [isLoaded, setIsLoaded] = React.useState(false);
 
+    React.useEffect(() => {
+        // Check for injected data from Puppeteer
+        if (typeof window !== 'undefined' && (window as any).__PDF_DATA__) {
+            console.log("Loaded data from injection");
+            setSourceData((window as any).__PDF_DATA__);
+        } else {
+            // Fallback: Construct data from URL Search Params
+            // This runs if opened directly in browser or if injection fails
+            const data: any = {};
 
-    // Check for injected data (from Puppeteer) or fallback to searchParams
-    let sourceData: any = {};
-    if (typeof window !== 'undefined' && (window as any).__PDF_DATA__) {
-        sourceData = (window as any).__PDF_DATA__;
-    }
+            try {
+                if (searchParams.get("client")) data.client = JSON.parse(searchParams.get("client") || "{}");
+                if (searchParams.get("vehicle")) data.vehicle = JSON.parse(searchParams.get("vehicle") || "{}");
+                if (searchParams.get("company")) data.company = JSON.parse(searchParams.get("company") || "{}");
+                if (searchParams.get("services")) data.services = JSON.parse(searchParams.get("services") || "[]");
+                if (searchParams.get("parts")) data.parts = JSON.parse(searchParams.get("parts") || "[]");
+                data.folio = searchParams.get("folio");
+                data.date = searchParams.get("date");
+                if (searchParams.get("notes")) data.notes = searchParams.get("notes");
+                if (searchParams.get("includeIva")) data.includeIva = searchParams.get("includeIva") === 'true';
+                if (searchParams.get("includeIsr")) data.includeIsr = searchParams.get("includeIsr") === 'true';
+            } catch (err) {
+                console.error("Error parsing URL params", err);
+            }
+            setSourceData(data);
+        }
+        setIsLoaded(true);
+    }, [searchParams]);
 
-    const folio = sourceData.folio || searchParams.get("folio") || "00001";
-    const date = sourceData.date || searchParams.get("date") || new Date().toLocaleDateString();
-    const includeIva = sourceData.includeIva !== undefined ? sourceData.includeIva : (searchParams.get("includeIva") === 'true');
-    const includeIsr = sourceData.includeIsr !== undefined ? sourceData.includeIsr : (searchParams.get("includeIsr") === 'true');
-    const notes = sourceData.notes || searchParams.get("notes") || "";
+    // Derived values
+    const folio = sourceData.folio || "00001";
+    const date = sourceData.date || new Date().toLocaleDateString();
+    const includeIva = sourceData.includeIva === true;
+    const includeIsr = sourceData.includeIsr === true;
+    const notes = sourceData.notes || "";
 
-    // Parse complex objects from JSON strings
-    let client = { name: "Cliente Ejemplo", address: "", phone: "", email: "" };
-    let vehicle = { brand: "", model: "", year: "", plates: "", vin: "", engine: "", odometer: 0 };
-    let company = COMPANY_DEFAULTS;
-    let services = [];
-    let parts = [];
+    let client = sourceData.client || { name: "Cliente Ejemplo", address: "", phone: "", email: "" };
+    let vehicle = sourceData.vehicle || { brand: "", model: "", year: "", plates: "", vin: "", engine: "", odometer: 0 };
+    let company = sourceData.company || COMPANY_DEFAULTS;
+    let services = sourceData.services || [];
+    let parts = sourceData.parts || [];
 
-    if (sourceData.client) {
-        client = sourceData.client;
-    } else {
-        try {
-            const clientParam = searchParams.get("client");
-            if (clientParam) client = JSON.parse(clientParam);
-        } catch (e) { console.error("Parse client", e); }
-    }
-
-    if (sourceData.vehicle) {
-        vehicle = sourceData.vehicle;
-    } else {
-        try {
-            const vehicleParam = searchParams.get("vehicle");
-            if (vehicleParam) vehicle = JSON.parse(vehicleParam);
-        } catch (e) { console.error("Parse vehicle", e); }
-    }
-
-    if (sourceData.company) {
-        company = sourceData.company;
-    } else {
-        try {
-            const companyParam = searchParams.get("company");
-            if (companyParam) company = JSON.parse(companyParam);
-        } catch (e) { console.error("Parse company", e); }
-    }
-
-    if (sourceData.services) {
-        services = sourceData.services;
-    } else {
-        try {
-            const servicesParam = searchParams.get("services");
-            if (servicesParam) services = JSON.parse(servicesParam);
-        } catch (e) { console.error("Parse services", e); }
-    }
-
-    if (sourceData.parts) {
-        parts = sourceData.parts;
-    } else {
-        try {
-            const partsParam = searchParams.get("parts");
-            if (partsParam) parts = JSON.parse(partsParam);
-        } catch (e) { console.error("Parse parts", e); }
-    }
-
-    // Default services if empty
-    if (services.length === 0 && parts.length === 0) {
+    // Default services if empty (and not loading)
+    if (isLoaded && services.length === 0 && parts.length === 0) {
         services = [
             { id: "1", description: "Diagnóstico General Computarizado", laborCost: 850 },
         ];

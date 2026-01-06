@@ -33,6 +33,7 @@ export default function ServiceNoteForm() {
         { id: "1", description: "", laborCost: 0, partsCost: 0, quantity: 1 },
     ]);
     const [notes, setNotes] = useState("");
+    const [isDraftLoaded, setIsDraftLoaded] = useState(false);
 
     const [suggestions, setSuggestions] = useState<string[]>([]);
 
@@ -44,7 +45,56 @@ export default function ServiceNoteForm() {
                 if (data.services) setSuggestions(data.services);
             })
             .catch(err => console.error("Failed to load suggestions", err));
+
+        // Load Draft from LocalStorage
+        const savedDraft = localStorage.getItem("service-note-draft");
+        if (savedDraft) {
+            try {
+                const parsed = JSON.parse(savedDraft);
+                setClient(parsed.client || client);
+                setVehicle(parsed.vehicle || vehicle);
+                setServices(parsed.services || services);
+                setParts(parsed.parts || parts);
+                setNotes(parsed.notes || "");
+                setIncludeIva(parsed.includeIva || false);
+                setIncludeIsr(parsed.includeIsr || false);
+            } catch (e) {
+                console.error("Error loading draft", e);
+            }
+        }
+        setIsDraftLoaded(true);
     }, []);
+
+    // Auto-Save Effect
+    useEffect(() => {
+        if (!isDraftLoaded) return;
+        const draft = {
+            client,
+            vehicle,
+            services,
+            parts,
+            notes,
+            includeIva,
+            includeIsr
+        };
+        localStorage.setItem("service-note-draft", JSON.stringify(draft));
+    }, [client, vehicle, services, parts, notes, includeIva, includeIsr, isDraftLoaded]);
+
+    const handleClearForm = () => {
+        if (!confirm("¿Estás seguro de borrar toda la información y empezar de cero?")) return;
+
+        // Reset States
+        setClient({ name: "", address: "", phone: "", email: "" });
+        setVehicle({ brand: "", model: "", year: "", plates: "", vin: "", engine: "", odometer: 0 });
+        setServices([{ id: Date.now().toString(), description: "", laborCost: 0, partsCost: 0 }]);
+        setParts([{ id: Date.now().toString(), description: "", laborCost: 0, partsCost: 0, quantity: 1 }]);
+        setNotes("");
+        setIncludeIva(false);
+        setIncludeIsr(false);
+
+        // Clear Storage
+        localStorage.removeItem("service-note-draft");
+    };
 
     const addService = () => {
         setServices([
@@ -612,16 +662,19 @@ export default function ServiceNoteForm() {
                     >
                         <Save size={20} />
                         {isSaving ? "Guardando..." : "Generar Nota PDF"}
+                        <Save size={20} />
+                        {isSaving ? "Guardando..." : "Generar Nota PDF"}
                     </button>
                 </div>
-            </form>
-
-
-            <datalist id="service-suggestions">
-                {suggestions.map((suggestion, index) => (
-                    <option key={index} value={suggestion} />
-                ))}
-            </datalist>
         </div>
+            </form >
+
+
+        <datalist id="service-suggestions">
+            {suggestions.map((suggestion, index) => (
+                <option key={index} value={suggestion} />
+            ))}
+        </datalist>
+        </div >
     );
 }

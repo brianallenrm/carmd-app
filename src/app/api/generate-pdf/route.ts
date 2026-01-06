@@ -7,7 +7,7 @@ export const maxDuration = 60; // Allow up to 60s (if plan permits)
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const body = await req.json();
+
         const { client, vehicle, services, parts, company, folio, notes, date } = body;
 
         // Determine base URL

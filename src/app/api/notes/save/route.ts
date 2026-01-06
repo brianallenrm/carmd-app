@@ -67,6 +67,13 @@ export async function POST(req: Request) {
         // Ideally we use header keys if the sheet has headers in row 1.
         // Let's assume headers are: "Folio", "Fecha", "Cliente", "Correo", "Telefono", "Vehiculo", "Anio", "Placa", "KM", "Servicio", "MO", "Refacciones", "Total", "Factura"
 
+        // Check if "Metadatos" header exists, if not, add it
+        await sheet.loadHeaderRow();
+        const headers = sheet.headerValues;
+        if (!headers.includes("Metadatos")) {
+            await sheet.setHeaderRow([...headers, "Metadatos"]);
+        }
+
         const rowData = {
             "Folio": newFolio,
             "Fecha": date, // e.g. "4/1/23"
@@ -81,7 +88,8 @@ export async function POST(req: Request) {
             "MO": laborTotal,
             "Refacciones": partsTotal,
             "Total": total,
-            "Factura": facturaStatus
+            "Factura": facturaStatus,
+            "Metadatos": JSON.stringify(body) // Store full payload for templates
         };
 
         // 4. Append Row

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEvent } from "react";
-import { Plus, Trash2, FileText, Save, Car, User, Search, Eye } from "lucide-react";
+import { Plus, Trash2, FileText, Save, Car, User, Search, Eye, History, X, Clock } from "lucide-react";
 import CatalogSearch from './CatalogSearch';
 import { ServiceItem, ClientInfo, VehicleInfo } from "@/types/service-note";
 import { COMPANY_DEFAULTS } from "@/lib/constants";
@@ -36,6 +36,48 @@ export default function ServiceNoteForm() {
     const [isDraftLoaded, setIsDraftLoaded] = useState(false);
 
     const [suggestions, setSuggestions] = useState<string[]>([]);
+
+    // History / Template State
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+    const [recentNotes, setRecentNotes] = useState<any[]>([]);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
+    const loadRecentNotes = async () => {
+        setIsLoadingHistory(true);
+        try {
+            const res = await fetch("/api/notes/recent");
+            const data = await res.json();
+            if (data.templates) {
+                setRecentNotes(data.templates);
+            }
+        } catch (error) {
+            console.error("Error loading history:", error);
+        } finally {
+            setIsLoadingHistory(false);
+        }
+    };
+
+    const applyTemplate = (note: any) => {
+        if (!confirm(`¿Usar la nota ${note.folio} como plantilla? Esto reemplazará los datos actuales.`)) return;
+
+        const data = note.data;
+        // Keep current client if they have typed one? Or overwrite? 
+        // User scenario: "use as template". Usually implies copying the service data, but maybe not the client?
+        // User said: "pueda abrir esa reciente y usarla como template y ya no llenar todo desde 0"
+        // Let's load everything BUT maybe reset the Date/Folio (Folio is generated on save).
+        // I'll overwrite client/vehicle too as that's often what they want (same car, same client).
+        // They can edit client name after.
+
+        if (data.client) setClient(data.client);
+        if (data.vehicle) setVehicle(data.vehicle);
+        if (data.services) setServices(data.services);
+        if (data.parts) setParts(data.parts);
+        if (data.notes) setNotes(data.notes);
+        if (data.includeIva !== undefined) setIncludeIva(data.includeIva);
+        if (data.includeIsr !== undefined) setIncludeIsr(data.includeIsr);
+
+        setIsHistoryOpen(false);
+    };
 
     useEffect(() => {
         // Load suggestions from history
@@ -463,7 +505,7 @@ export default function ServiceNoteForm() {
                                         <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Descripción</span>
                                         <textarea
                                             placeholder="Descripción detallada del servicio..."
-                                            className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-sm text-gray-900 uppercase min-h-[50px]"
+                                            className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-sm text-gray-900 min-h-[50px]"
                                             value={service.description}
                                             onChange={(e) => updateService(service.id, "description", e.target.value)}
                                             spellCheck={true}
@@ -542,7 +584,7 @@ export default function ServiceNoteForm() {
                                         <input
                                             type="text"
                                             placeholder="Nombre de la refacción..."
-                                            className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 text-sm uppercase"
+                                            className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 text-sm"
                                             value={part.description}
                                             onChange={(e) => updatePart(part.id, "description", e.target.value)}
                                             spellCheck={true}
@@ -677,6 +719,65 @@ export default function ServiceNoteForm() {
                     </div>
                 </div>
             </form>
+
+            {/* History Modal */}
+            {isHistoryOpen && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+                        <div className="flex justify-between items-center p-4 border-b">
+                            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                <History className="text-[#F37014]" />
+                                Notas Recientes
+                            </h2>
+                            <button onClick={() => setIsHistoryOpen(false)} className="text-gray-400 hover:text-gray-600">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+                            {isLoadingHistory ? (
+                                <div className="text-center py-8 text-gray-500">Cargando historial...</div>
+                            ) : recentNotes.length === 0 ? (
+                                <div className="text-center py-8 text-gray-500">
+                                    No se encontraron notas recientes con datos de plantilla.
+                                    <br />
+                                    <span className="text-xs text-gray-400">(Solo las notas nuevas se pueden usar como plantilla)</span>
+                                </div>
+                            ) : (
+                                recentNotes.map((note) => (
+                                    <div key={note.folio} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex justify-between items-center">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="font-mono font-bold text-[#F37014]">{note.folio}</span>
+                                                <span className="text-gray-300">|</span>
+                                                <span className="text-sm text-gray-500 flex items-center gap-1">
+                                                    <Clock size={12} />
+                                                    {note.date}
+                                                </span>
+                                            </div>
+                                            <h3 className="font-bold text-gray-800">{note.client}</h3>
+                                            <p className="text-sm text-gray-600 truncate max-w-md">{note.vehicle}</p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => applyTemplate(note)}
+                                            className="ml-4 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 font-medium text-sm border border-indigo-200 transition-colors"
+                                        >
+                                            Usar Plantilla
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        <div className="p-4 border-t bg-gray-50 rounded-b-xl">
+                            <p className="text-xs text-gray-500 text-center">
+                                Se cargarán todos los servicios, refacciones y datos del vehículo.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <datalist id="service-suggestions">
                 {suggestions.map((suggestion, index) => (

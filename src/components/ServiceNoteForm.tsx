@@ -645,30 +645,8 @@ export default function ServiceNoteForm() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex justify-end gap-4 pt-8 border-t text-gray-900">
-                    <button
-                        type="button"
-                        onClick={handlePreview}
-                        className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm"
-                        title="Ver cómo quedará sin guardar"
-                    >
-                        <Eye size={20} />
-                        Previsualizar
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={isSaving}
-                        className={`flex items-center gap-2 px-6 py-3 bg-[#F37014] hover:bg-orange-600 text-white font-bold rounded-lg transition-colors shadow-lg shadow-orange-500/20 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                        <Save size={20} />
-                        {isSaving ? "Guardando..." : "Generar Nota PDF"}
-                        <Save size={20} />
-                        {isSaving ? "Guardando..." : "Generar Nota PDF"}
-                    </button>
-                </div>
         </div>
             </form >
-
 
         <datalist id="service-suggestions">
             {suggestions.map((suggestion, index) => (

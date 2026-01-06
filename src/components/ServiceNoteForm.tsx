@@ -93,9 +93,12 @@ export default function ServiceNoteForm() {
 
     const [isSearching, setIsSearching] = useState(false);
 
+    const [searchError, setSearchError] = useState<string | null>(null);
+
     // Function to search vehicle by plate
     const searchPlate = async (plate: string) => {
         if (plate.length < 5) return; // Basic validation
+        setSearchError(null); // Clear previous errors
         setIsSearching(true);
         try {
             const res = await fetch(`/api/vehicle/lookup?plate=${encodeURIComponent(plate)}`);
@@ -103,11 +106,14 @@ export default function ServiceNoteForm() {
                 const data = await res.json();
                 setClient(prev => ({ ...prev, ...data.client }));
                 setVehicle(prev => ({ ...prev, ...data.vehicle }));
+                setSearchError(null);
             } else {
-                alert("Vehículo no encontrado en el inventario.");
+                setSearchError("Vehículo no encontrado.");
+                // Removed alert logic to prevent infinite loop onBlur
             }
         } catch (error) {
             console.error("Error searching plate:", error);
+            setSearchError("Error de conexión.");
         } finally {
             setIsSearching(false);
         }
@@ -305,10 +311,12 @@ export default function ServiceNoteForm() {
                                     {isSearching ? (
                                         <div className="animate-spin h-5 w-5 border-2 border-[#F37014] border-t-transparent rounded-full text-gray-900"></div>
                                     ) : (
-                                        <Search size={20} className="cursor-pointer hover:text-[#F37014]" onClick={() => searchPlate(vehicle.plates)} />
                                     )}
                                 </div>
                             </div>
+                            {searchError && (
+                                <p className="text-xs text-red-500 mt-1 pl-1">{searchError}</p>
+                            )}
                         </div>
                     </div>
                     <div className="space-y-2 md:col-span-2">

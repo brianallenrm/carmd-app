@@ -67,7 +67,9 @@ export default function ServiceNoteTemplate({
     const totalIva = includeIva ? subtotal * 0.16 : 0;
     const totalIsr = includeIsr ? subtotal * 0.0125 : 0;
     const grandTotal = subtotal + totalIva - totalIsr;
-    const nextMaintenance = calculateNextMaintenance(vehicle.odometer);
+
+    const safeOdometer = (vehicle && vehicle.odometer) ? vehicle.odometer : 0;
+    const nextMaintenance = calculateNextMaintenance(safeOdometer);
 
     return (
         <div className="w-[21cm] min-h-[29.7cm] bg-white p-8 mx-auto relative text-slate-800 flex flex-col" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -173,7 +175,7 @@ export default function ServiceNoteTemplate({
                         </div>
                         <div className="col-span-2">
                             <span className="text-slate-400 block text-[9px] uppercase">Kilometraje</span>
-                            <span className="font-mono font-bold text-slate-900">{vehicle.odometer.toLocaleString()} km</span>
+                            <span className="font-mono font-bold text-slate-900">{safeOdometer.toLocaleString()} km</span>
                         </div>
                     </div>
                 </div>

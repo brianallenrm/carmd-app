@@ -30,8 +30,9 @@ export default function ServiceNoteForm() {
         { id: "1", description: "", laborCost: 0, partsCost: 0 },
     ]);
     const [parts, setParts] = useState<ServiceItem[]>([
-        { id: "1", description: "", laborCost: 0, partsCost: 0 },
+        { id: "1", description: "", laborCost: 0, partsCost: 0, quantity: 1 },
     ]);
+    const [notes, setNotes] = useState("");
 
     const [suggestions, setSuggestions] = useState<string[]>([]);
 
@@ -67,7 +68,7 @@ export default function ServiceNoteForm() {
     const addPart = () => {
         setParts([
             ...parts,
-            { id: Date.now().toString(), description: "", laborCost: 0, partsCost: 0 },
+            { id: Date.now().toString(), description: "", laborCost: 0, partsCost: 0, quantity: 1 },
         ]);
     };
 
@@ -84,7 +85,7 @@ export default function ServiceNoteForm() {
     };
 
     const servicesTotal = services.reduce((sum, s) => sum + (s.laborCost || 0), 0);
-    const partsTotal = parts.reduce((sum, p) => sum + (p.partsCost || 0), 0);
+    const partsTotal = parts.reduce((sum, p) => sum + ((p.partsCost || 0) * (p.quantity || 1)), 0);
     const subtotal = servicesTotal + partsTotal;
     const totalIva = includeIva ? subtotal * 0.16 : 0;
     const totalIsr = includeIsr ? subtotal * 0.0125 : 0;
@@ -129,7 +130,12 @@ export default function ServiceNoteForm() {
         const newWindow = window.open('', '_blank');
 
         setIsSaving(true);
-        const currentDate = new Date().toLocaleDateString("es-MX");
+        // Use YYYY-MM-DD format based on local time to avoid ambiguity
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const currentDate = `${year}-${month}-${day}`;
 
         try {
             // 1. Save to Google Sheets (Master)
@@ -141,6 +147,7 @@ export default function ServiceNoteForm() {
                     vehicle,
                     services,
                     parts,
+                    notes, // Add notes
                     company: COMPANY_DEFAULTS,
                     includeIva,
                     includeIsr,
@@ -159,6 +166,7 @@ export default function ServiceNoteForm() {
             params.set("vehicle", JSON.stringify(vehicle));
             params.set("services", JSON.stringify(services));
             params.set("parts", JSON.stringify(parts));
+            if (notes) params.set("notes", notes); // Pass notes
             params.set("company", JSON.stringify(COMPANY_DEFAULTS));
             params.set("folio", newFolio); // Use Real Folio
             params.set("includeIva", includeIva.toString());
@@ -424,29 +432,42 @@ export default function ServiceNoteForm() {
                     <div className="space-y-4">
                         {parts.map((part) => (
                             <div key={part.id} className="flex gap-4 items-start group bg-white p-4 border border-gray-200 rounded-lg hover:border-[#F37014]/50 transition-colors shadow-sm text-gray-900">
-                                <div className="flex-1 space-y-1">
-                                    <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Refacción</span>
-                                    <CatalogSearch
-                                        type="refacciones"
-                                        placeholder="Buscar refacción..."
-                                        onSelect={(item) => {
-                                            updatePart(part.id, "description", item.nombre);
-                                            if (item.costo_sugerido > 0) {
-                                                updatePart(part.id, "partsCost", item.costo_sugerido);
-                                            }
-                                        }}
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Nombre de la refacción..."
-                                        className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 text-sm uppercase"
-                                        value={part.description}
-                                        onChange={(e) => updatePart(part.id, "description", e.target.value)}
-                                    />
+                                <div className="flex gap-2 w-full">
+                                    <div className="w-16 space-y-1">
+                                        <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Cant.</span>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            placeholder="1"
+                                            className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 text-sm font-mono text-center"
+                                            value={part.quantity || 1}
+                                            onChange={(e) => updatePart(part.id, "quantity", parseInt(e.target.value) || 1)}
+                                        />
+                                    </div>
+                                    <div className="flex-1 space-y-1">
+                                        <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Refacción</span>
+                                        <CatalogSearch
+                                            type="refacciones"
+                                            placeholder="Buscar refacción..."
+                                            onSelect={(item) => {
+                                                updatePart(part.id, "description", item.nombre);
+                                                if (item.costo_sugerido > 0) {
+                                                    updatePart(part.id, "partsCost", item.costo_sugerido);
+                                                }
+                                            }}
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Nombre de la refacción..."
+                                            className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 text-sm uppercase"
+                                            value={part.description}
+                                            onChange={(e) => updatePart(part.id, "description", e.target.value)}
+                                        />
+                                    </div>
                                 </div>
                                 <div className="w-40 space-y-2">
                                     <div className="space-y-1">
-                                        <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Costo</span>
+                                        <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Costo Unit.</span>
                                         <div className="relative">
                                             <span className="absolute left-2 top-2.5 text-slate-400 text-xs">$</span>
                                             <input
@@ -470,6 +491,20 @@ export default function ServiceNoteForm() {
                             </div>
                         ))}
                     </div>
+                </div>
+
+                {/* Notes Section */}
+                <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 text-gray-900">
+                    <div className="flex items-center gap-2 mb-4 text-gray-800 font-semibold text-lg">
+                        <FileText className="text-[#F37014]" size={20} />
+                        <h3>Observaciones Generales (Opcional)</h3>
+                    </div>
+                    <textarea
+                        placeholder="Escribe notas adicionales aquí... (Usa **negritas** para resaltar texto)"
+                        className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 h-24"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                    />
                 </div>
 
                 {/* Totals Section */}

@@ -3,6 +3,7 @@ export interface ServiceItem {
     description: string;
     laborCost: number;
     partsCost: number;
+    quantity?: number; // New field for parts
 }
 
 export interface ClientInfo {
@@ -38,7 +39,9 @@ export interface ServiceNoteData {
     client: ClientInfo;
     vehicle: VehicleInfo;
     maintenanceInterval?: number;
+    services: ServiceItem[];
     parts: ServiceItem[];
+    notes?: string; // New field for general notes
     company: CompanyInfo;
     includeIva: boolean; // 16%
     includeIsr: boolean; // 1.25% Retention

@@ -10,6 +10,7 @@ interface ServiceNoteTemplateProps {
     vehicle: VehicleInfo;
     services: ServiceItem[];
     parts: ServiceItem[];
+    notes?: string;
     company: CompanyInfo;
     includeIva: boolean;
     includeIsr: boolean;
@@ -17,11 +18,12 @@ interface ServiceNoteTemplateProps {
 
 export default function ServiceNoteTemplate({
     folio,
-    date,
+    date, // Expected format: "YYYY-MM-DD"
     client,
     vehicle,
     services,
     parts,
+    notes,
     company,
     includeIva,
     includeIsr,
@@ -32,13 +34,24 @@ export default function ServiceNoteTemplate({
         return `$${cost.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
     };
 
+    // Helper to render "WhatsApp style" rich text (**bold**)
+    const renderRichText = (text: string) => {
+        if (!text) return null;
+        const parts = text.split(/(\*\*.*?\*\*)/g); // Split by **...**
+        return parts.map((part, index) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+                // Remove asterisks and render bold
+                return <b key={index} className="font-bold">{part.slice(2, -2)}</b>;
+            }
+            return <span key={index}>{part}</span>;
+        });
+    };
+
     // Calculcate totals based on split arrays
-    // Services -> laborCost
-    // Parts -> partsCost
     const servicesTotal = services.reduce((sum, s) => sum + (s.laborCost || 0), 0);
-    // Handle optional parts array for backward compatibility or safety
     const safeParts = parts || [];
-    const partsTotal = safeParts.reduce((sum, p) => sum + (p.partsCost || 0), 0);
+    // Parts Total = (Unit Cost * Quantity)
+    const partsTotal = safeParts.reduce((sum, p) => sum + ((p.partsCost || 0) * (p.quantity || 1)), 0);
 
     const subtotal = servicesTotal + partsTotal;
     const totalIva = includeIva ? subtotal * 0.16 : 0;
@@ -82,14 +95,24 @@ export default function ServiceNoteTemplate({
 
                     <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mt-1 mb-2">* SIN VALOR FISCAL *</p>
 
-                    {/* Date Moved Here */}
+                    {/* Date Fixed: Parse ISO string YYYY-MM-DD manually to avoid timezone issues */}
                     <div className="text-xs text-slate-800 font-semibold bg-slate-100 px-2 py-0.5 rounded inline-block capitalize">
                         {(() => {
-                            const d = new Date(date);
-                            const day = d.getDate().toString().padStart(2, '0');
-                            const month = d.toLocaleDateString('es-MX', { month: 'long' });
-                            const year = d.getFullYear();
-                            return `${day} / ${month.charAt(0).toUpperCase() + month.slice(1)} / ${year}`;
+                            if (!date) return "";
+                            // Expects "YYYY-MM-DD" or similar. Robust split.
+                            // If user passes existing full date string, handle that too?
+                            // But we standardized on YYYY-MM-DD in Form.
+                            if (date.includes('-')) {
+                                const [y, m, d] = date.split('-');
+                                const dateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+                                const day = d;
+                                const month = dateObj.toLocaleDateString('es-MX', { month: 'long' });
+                                const year = y;
+                                return `${day} / ${month.charAt(0).toUpperCase() + month.slice(1)} / ${year}`;
+                            } else {
+                                // Fallback for old links with "5/10/2025" or similar
+                                return date;
+                            }
                         })()}
                     </div>
                 </div>
@@ -156,8 +179,8 @@ export default function ServiceNoteTemplate({
                     <tbody className="divide-y divide-slate-100">
                         {services.map((service) => (
                             <tr key={service.id} className="group">
-                                <td className="py-1 pl-2 text-[10px] text-slate-700 whitespace-pre-wrap leading-snug group-hover:bg-slate-50 transition-colors w-[85%] text-justify pr-2">
-                                    {service.description}
+                                <td className="py-1 pl-2 text-[10px] text-slate-700 whitespace-pre-wrap leading-snug group-hover:bg-slate-50 transition-colors w-[85%] text-justify pr-2 font-inter">
+                                    {renderRichText(service.description)}
                                 </td>
                                 <td className="py-1 pr-2 text-xs font-mono text-right text-slate-900 font-medium group-hover:bg-slate-50 transition-colors w-[15%] align-top">
                                     {formatCost(service.laborCost)}
@@ -170,29 +193,41 @@ export default function ServiceNoteTemplate({
 
             {/* Parts Table */}
             <div className="flex-grow mb-4">
-                <div className="flex justify-between items-end border-b border-slate-200 pb-1 mb-1">
-                    <h4 className="text-[10px] font-bold text-slate-900 uppercase">Refacciones</h4>
+                <div className="flex items-end border-b border-slate-200 pb-1 mb-1">
+                    <h4 className="text-[10px] font-bold text-slate-900 uppercase w-[10%] text-center">CANT.</h4>
+                    <h4 className="text-[10px] font-bold text-slate-900 uppercase w-[75%] pl-2">Refacciones</h4>
                     <h4 className="text-[10px] font-bold text-slate-900 uppercase w-[15%] text-right pr-2">IMPORTE</h4>
                 </div>
                 <table className="w-full">
                     <tbody className="divide-y divide-slate-100">
                         {safeParts.length > 0 ? safeParts.map((part) => (
                             <tr key={part.id} className="group">
-                                <td className="py-1 pl-2 text-[10px] text-slate-700 whitespace-pre-wrap leading-snug group-hover:bg-slate-50 transition-colors w-[85%] text-justify pr-2">
-                                    {part.description}
+                                <td className="py-1 text-[10px] font-mono font-bold text-slate-500 text-center w-[10%] align-top pt-1.5">
+                                    {part.quantity || 1}
+                                </td>
+                                <td className="py-1 pl-2 text-[10px] text-slate-700 whitespace-pre-wrap leading-snug group-hover:bg-slate-50 transition-colors w-[75%] text-justify pr-2 align-top">
+                                    {renderRichText(part.description)}
                                 </td>
                                 <td className="py-1 pr-2 text-xs font-mono text-right text-slate-900 font-medium group-hover:bg-slate-50 transition-colors w-[15%] align-top">
-                                    {formatCost(part.partsCost)}
+                                    {formatCost((part.partsCost || 0) * (part.quantity || 1))}
                                 </td>
                             </tr>
                         )) : (
                             <tr>
-                                <td colSpan={2} className="py-1 pl-2 text-[10px] text-slate-400 italic">No se agregaron refacciones.</td>
+                                <td colSpan={3} className="py-1 pl-2 text-[10px] text-slate-400 italic">No se agregaron refacciones.</td>
                             </tr>
                         )}
                     </tbody>
                 </table>
             </div>
+
+            {/* New: Optional Notes Section */}
+            {notes && notes.trim().length > 0 && (
+                <div className="mb-4 bg-yellow-50/50 p-3 rounded-lg border border-yellow-100 text-slate-800 text-[10px] leading-snug whitespace-pre-wrap">
+                    <span className="font-bold text-[#F37014] uppercase text-[9px] block mb-1">Observaciones Generales:</span>
+                    {renderRichText(notes)}
+                </div>
+            )}
 
             {/* Totals & Notes */}
             <div className="flex justify-between items-start mb-4 border-t-2 border-slate-900 pt-4">

@@ -34,9 +34,10 @@ export async function POST(req: Request) {
         const page = await browser.newPage();
 
         // 3. Inject Data BEFORE navigation
-        // This bypasses URL length limits and ensures data consistency
+        // We inject into BOTH window global and localStorage for redundancy
         await page.evaluateOnNewDocument((data: any) => {
             (window as any).__PDF_DATA__ = data;
+            window.localStorage.setItem('PDF_DATA', JSON.stringify(data));
         }, pdfData);
 
         // 4. Navigate to minimal URL

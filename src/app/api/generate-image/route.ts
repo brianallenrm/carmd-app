@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
         // 3. Inject Data
         await page.evaluateOnNewDocument((data: any) => {
             (window as any).__PDF_DATA__ = data;
+            window.localStorage.setItem('PDF_DATA', JSON.stringify(data));
         }, imgData);
 
         // 3. Set Viewport to match A4 content size more closely

@@ -13,12 +13,25 @@ function NotePreviewContent() {
     const [isLoaded, setIsLoaded] = React.useState(false);
 
     React.useEffect(() => {
-        // Check for injected data from Puppeteer
+        // 1. Check for simple window injection
         if (typeof window !== 'undefined' && (window as any).__PDF_DATA__) {
-            console.log("Loaded data from injection");
+            console.log("Loaded data from window injection");
             setSourceData((window as any).__PDF_DATA__);
-        } else {
-            // Fallback: Construct data from URL Search Params
+        }
+        // 2. Check for localStorage injection (more persistent)
+        else if (typeof window !== 'undefined' && window.localStorage.getItem('PDF_DATA')) {
+            console.log("Loaded data from localStorage");
+            try {
+                const lsData = JSON.parse(window.localStorage.getItem('PDF_DATA') || "{}");
+                setSourceData(lsData);
+                // Clear after use to prevent pollution
+                // window.localStorage.removeItem('PDF_DATA'); // Optional: keep for debugging
+            } catch (e) {
+                console.error("Error parsing localStorage data", e);
+            }
+        }
+        else {
+            // 3. Fallback: Construct data from URL Search Params
             // This runs if opened directly in browser or if injection fails
             const data: any = {};
 

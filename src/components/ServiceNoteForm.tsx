@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEvent } from "react";
-import { Plus, Trash2, FileText, Save, Car, User, Search } from "lucide-react";
+import { Plus, Trash2, FileText, Save, Car, User, Search, Eye } from "lucide-react";
 import CatalogSearch from './CatalogSearch';
 import { ServiceItem, ClientInfo, VehicleInfo } from "@/types/service-note";
 import { COMPANY_DEFAULTS } from "@/lib/constants";
@@ -126,6 +126,41 @@ export default function ServiceNoteForm() {
 
     const [isSaving, setIsSaving] = useState(false);
 
+    // Helper to build the preview URL
+    const buildPreviewUrl = (customFolio: string, customDate: string) => {
+        const params = new URLSearchParams();
+        params.set("client", JSON.stringify(client));
+        params.set("vehicle", JSON.stringify(vehicle));
+        params.set("services", JSON.stringify(services));
+        params.set("parts", JSON.stringify(parts));
+        if (notes) params.set("notes", notes);
+        params.set("company", JSON.stringify(COMPANY_DEFAULTS));
+        params.set("folio", customFolio);
+        params.set("includeIva", includeIva.toString());
+        params.set("includeIsr", includeIsr.toString());
+        params.set("date", customDate);
+        return `/note-preview?${params.toString()}`;
+    };
+
+    const handlePreview = () => {
+        if (!client.name || !vehicle.plates) {
+            setSearchError("Por favor complete Cliente y Placas para previsualizar."); // Reuse search error location or just fallback to reusing alert? 
+            // Better UX: just alert for now as validation failsafe
+            alert("Por favor complete los campos obligatorios (Cliente, Placas) para previsualizar.");
+            return;
+        }
+
+        // Generate current date
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const currentDate = `${year}-${month}-${day}`;
+
+        const url = buildPreviewUrl("BORRADOR", currentDate);
+        window.open(url, '_blank');
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!client.name || !vehicle.plates) {
@@ -167,19 +202,7 @@ export default function ServiceNoteForm() {
             const newFolio = saveData.folio;
 
             // 2. Redirect to Preview with new Folio
-            const params = new URLSearchParams();
-            params.set("client", JSON.stringify(client));
-            params.set("vehicle", JSON.stringify(vehicle));
-            params.set("services", JSON.stringify(services));
-            params.set("parts", JSON.stringify(parts));
-            if (notes) params.set("notes", notes); // Pass notes
-            params.set("company", JSON.stringify(COMPANY_DEFAULTS));
-            params.set("folio", newFolio); // Use Real Folio
-            params.set("includeIva", includeIva.toString());
-            params.set("includeIsr", includeIsr.toString());
-            params.set("date", currentDate);
-
-            const url = `/note-preview?${params.toString()}`;
+            const url = buildPreviewUrl(newFolio, currentDate);
 
             if (newWindow) {
                 newWindow.location.href = url;
@@ -311,6 +334,7 @@ export default function ServiceNoteForm() {
                                     {isSearching ? (
                                         <div className="animate-spin h-5 w-5 border-2 border-[#F37014] border-t-transparent rounded-full text-gray-900"></div>
                                     ) : (
+                                        <Search size={20} className="cursor-pointer hover:text-[#F37014]" onClick={() => searchPlate(vehicle.plates)} />
                                     )}
                                 </div>
                             </div>
@@ -571,9 +595,12 @@ export default function ServiceNoteForm() {
                 <div className="flex justify-end gap-4 pt-8 border-t text-gray-900">
                     <button
                         type="button"
-                        className="px-6 py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+                        onClick={handlePreview}
+                        className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm"
+                        title="Ver cómo quedará sin guardar"
                     >
-                        Cancelar
+                        <Eye size={20} />
+                        Previsualizar
                     </button>
                     <button
                         type="submit"
@@ -585,6 +612,7 @@ export default function ServiceNoteForm() {
                     </button>
                 </div>
             </form>
+
 
             <datalist id="service-suggestions">
                 {suggestions.map((suggestion, index) => (

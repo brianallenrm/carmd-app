@@ -32,35 +32,31 @@ export const getMasterDoc = async () => {
     return doc;
 };
 
-// Helper to find a row index by column letter and value
-export const findRowIndexByColumn = async (doc: GoogleSpreadsheet, sheetIndex: number, columnLetter: string, value: string): Promise<number | null> => {
+// Helper to find ALL row indices by column letter and value
+export const findRowIndicesByColumn = async (doc: GoogleSpreadsheet, sheetIndex: number, columnLetter: string, value: string): Promise<number[]> => {
     const sheet = doc.sheetsByIndex[sheetIndex];
-    // Load the column.
-    // Use the actual row count from the sheet metadata
+    if (!sheet) return [];
+
     const rowCount = sheet.rowCount;
-    // Load all rows in this column to ensure we find the very last entry
+    // Load the search column
     await sheet.loadCells(`${columnLetter}2:${columnLetter}${rowCount}`);
 
-    // Search from newest (bottom) to oldest (top) implies finding the LAST occurrence or iterating reverse?
-    // Inventory usually adds to bottom.
-    // Google Sheets API loads cells. We can iterate rows.
+    const normalize = (str: string) => String(str).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const normalizedSearch = normalize(value);
+    const matches: number[] = [];
 
-    // Normalize search
-    // Normalize search
-    const normalizedSearch = String(value).toUpperCase().replace(/\s/g, '');
-
-    // Search backwards from the last row
-    for (let i = rowCount - 1; i >= 1; i--) { // i=1 because row 0 is header
-        const cell = sheet.getCellByA1(`${columnLetter}${i + 1}`); // 0-indexed row, but A1 uses 1-based
+    // Search matches
+    for (let i = 1; i < rowCount; i++) { // Start at 1 (Row 2)
+        const cell = sheet.getCellByA1(`${columnLetter}${i + 1}`);
         const cellValue = cell.value;
         if (!cellValue) continue;
 
-        const normalizedCell = String(cellValue).toUpperCase().replace(/\s/g, '');
-        if (normalizedCell === normalizedSearch || normalizedCell.includes(normalizedSearch)) { // Allowing include for robustness
-            return i; // Return 0-indexed row number
+        const normalizedCell = normalize(String(cellValue));
+        if (normalizedCell === normalizedSearch || normalizedCell.includes(normalizedSearch)) {
+            matches.push(i);
         }
     }
-    return null;
+    return matches; // Returns 0-based row indices
 };
 
 export const lookupVehicleByPlate = async (plate: string) => {
@@ -71,39 +67,51 @@ export const lookupVehicleByPlate = async (plate: string) => {
 
     const sheet = doc.sheetsByIndex[sheetIndex];
 
-    // 1. Find the Row Index searching in Column N (Placas)
-    // N is the 14th letter.
-    const rowIndex = await findRowIndexByColumn(doc, sheetIndex, 'N', plate);
+    // 1. Find ALL Row Indices searching in Column N (Placas)
+    const rowIndices = await findRowIndicesByColumn(doc, sheetIndex, 'N', plate);
 
-    if (rowIndex === null) return null;
+    if (rowIndices.length === 0) return null;
 
-    // 2. Load the specific row data (Cols A to Q is enough)
-    // A=0, Q=16.
+    let bestRowIndex = rowIndices[rowIndices.length - 1]; // Default to last found (bottom-most)
+
+    // 2. If multiple matches, find the one with the most recent date (Column A)
+    if (rowIndices.length > 1) {
+        // Load Column A (Date) for the matching rows
+        // Optimization: Just load the specific cells we need? 
+        // google-spreadsheet loadCells limits are loose, loading specific ranges is better.
+        // We'll construct a range list or just load the whole column A if matches are scattered?
+        // Loading whole column A is safest/easiest given 1000 rows.
+        await sheet.loadCells(`A2:A${sheet.rowCount}`);
+
+        // Sort indices by Date descending
+        rowIndices.sort((a, b) => {
+            const getJsDate = (rowIndex: number) => {
+                const val = sheet.getCell(rowIndex, 0).value; // Col A is 0
+                if (!val) return 0;
+                // Handle Serial Number (Excel date)
+                if (typeof val === 'number') {
+                    return (val - 25569) * 86400 * 1000;
+                }
+                // Handle String
+                const d = new Date(String(val));
+                return isNaN(d.getTime()) ? 0 : d.getTime();
+            };
+
+            return getJsDate(b) - getJsDate(a); // Descending (Newest first)
+        });
+
+        bestRowIndex = rowIndices[0];
+    }
+
+    const rowIndex = bestRowIndex;
+
+    // 3. Load the specific row data (Cols A to Q is enough)
     await sheet.loadCells(`A${rowIndex + 1}:Q${rowIndex + 1}`);
 
     const getVal = (colIndex: number) => {
         const val = sheet.getCell(rowIndex, colIndex).value;
         return val ? String(val) : '';
     };
-
-    // 3. Map by Column Index (0-based) based on Debug Analysis
-    // Col 0 (A): "Fecha de Ingreso:"
-    // Col 1 (B): "Hora de ingreso:"
-    // Col 2 (C): "Nombre COMPLETO o Empresa:"
-    // Col 3 (D): "Teléfono casa / oficina: "
-    // Col 4 (E): "Teléfono (whatsapp):"
-    // Col 5 (F): "Dirección de correo electrónico"
-    // Col 6 (G): "Domicilio Calle y NUMERO:"
-    // Col 7 (H): "Colonia:"
-    // Col 8 (I): "Deleg. o Municipio:"
-    // Col 9 (J): "Estado:"
-    // Col 10 (K): "Marca: "
-    // Col 11 (L): "Sub marca:"
-    // Col 12 (M): "Modelo (año):"
-    // Col 13 (N): "Placas:"
-    // Col 14 (O): "Número de serie:"
-    // Col 15 (P): "Tipo de Motor:"
-    // Col 16 (Q): "Kilometraje:"
 
     const client = {
         name: getVal(2), // C

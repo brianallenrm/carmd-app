@@ -12,6 +12,7 @@ function NotePreviewContent() {
     const date = searchParams.get("date") || new Date().toLocaleDateString();
     const includeIva = searchParams.get("includeIva") === 'true';
     const includeIsr = searchParams.get("includeIsr") === 'true';
+    const notes = searchParams.get("notes") || ""; // Fix: Retrieve notes param
 
     // Parse complex objects from JSON strings
     let client = { name: "Cliente Ejemplo", address: "", phone: "", email: "" };
@@ -253,6 +254,7 @@ function NotePreviewContent() {
                     date={date}
                     includeIva={includeIva}
                     includeIsr={includeIsr}
+                    notes={notes}
                 />
             </div>
         </div>

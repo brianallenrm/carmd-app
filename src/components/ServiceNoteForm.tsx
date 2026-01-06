@@ -416,6 +416,7 @@ export default function ServiceNoteForm() {
                                             className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-sm text-gray-900 uppercase min-h-[50px]"
                                             value={service.description}
                                             onChange={(e) => updateService(service.id, "description", e.target.value)}
+                                            spellCheck={true}
                                         />
                                     </div>
                                 </div>
@@ -469,11 +470,11 @@ export default function ServiceNoteForm() {
                                         <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Cant.</span>
                                         <input
                                             type="number"
-                                            min="1"
+                                            min="0"
                                             placeholder="1"
                                             className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 text-sm font-mono text-center"
-                                            value={part.quantity || 1}
-                                            onChange={(e) => updatePart(part.id, "quantity", parseInt(e.target.value) || 1)}
+                                            value={part.quantity !== undefined ? part.quantity : ""}
+                                            onChange={(e) => updatePart(part.id, "quantity", e.target.value === "" ? 0 : parseInt(e.target.value))}
                                         />
                                     </div>
                                     <div className="flex-1 space-y-1">
@@ -494,6 +495,7 @@ export default function ServiceNoteForm() {
                                             className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 text-sm uppercase"
                                             value={part.description}
                                             onChange={(e) => updatePart(part.id, "description", e.target.value)}
+                                            spellCheck={true}
                                         />
                                     </div>
                                 </div>
@@ -536,6 +538,7 @@ export default function ServiceNoteForm() {
                         className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 h-24"
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
+                        spellCheck={true}
                     />
                 </div>
 

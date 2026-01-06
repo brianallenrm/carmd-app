@@ -203,7 +203,8 @@ export default function ServiceNoteTemplate({
                         {safeParts.length > 0 ? safeParts.map((part) => (
                             <tr key={part.id} className="group">
                                 <td className="py-1 text-[10px] font-mono font-bold text-slate-500 text-center w-[10%] align-top pt-1.5">
-                                    {part.quantity || 1}
+                                    {/* Logic: Only show quantity if > 0. If 0 or null, show empty string. user request. */}
+                                    {(!part.quantity || part.quantity <= 0) ? "" : part.quantity}
                                 </td>
                                 <td className="py-1 pl-2 text-[10px] text-slate-700 whitespace-pre-wrap leading-snug group-hover:bg-slate-50 transition-colors w-[75%] text-justify pr-2 align-top">
                                     {renderRichText(part.description)}

@@ -247,7 +247,7 @@ export default function ServiceNoteForm() {
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
-        const currentDate = `${year}-${month}-${day}`;
+        const currentDate = `${year}-${month}-${day}`; // ISO format for template consistent parsing
 
         const url = buildPreviewUrl("BORRADOR", currentDate);
         window.open(url, '_blank');
@@ -268,7 +268,7 @@ export default function ServiceNoteForm() {
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
-        const currentDate = `${year}-${month}-${day}`;
+        const currentDate = `${year}-${month}-${day}`; // ISO Format
 
         try {
             // 1. Save to Google Sheets (Master)

@@ -105,7 +105,9 @@ function NotePreviewContent() {
                     company,
                     folio,
                     includeIva,
-                    includeIsr
+                    includeIsr,
+                    notes,
+                    date
                 }),
             });
             if (!response.ok) {

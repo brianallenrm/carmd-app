@@ -1,12 +1,12 @@
 {
-  "version": "13.0 - Normalización Agresiva y Estandarización",
-  "fecha_generacion": "2025-12-07",
+  "version": "14.0 - Unificación de Duplicados",
+  "fecha_generacion": "2026-01-06",
   "servicios": [
     {
       "id": 1,
       "nombre": "* Mantenimientos Preventivos…Gratuitos",
       "descripcion": "*2 Mantenimientos Preventivos…GRATUITOS",
-      "costo_sugerido": 2.0,
+      "costo_sugerido": 2,
       "frecuencia": 1100,
       "categoria": "Otros"
     },
@@ -22,7 +22,7 @@
       "id": 3,
       "nombre": "Sistema De Frenos",
       "descripcion": "Mantenimiento a sistema de frenos / Inspección visual / Recorrido de prueba / Inspección a frenos delanteros / Inspección de pastas delanteras  /  Remover e instalar pastas delanteras Originales Volvo / Aplicación de Liqui Moly a pastas delanteras / Inspección de discos delanteros / Desmontar discos delanteros /  Instalación de discos delanteros nuevos Originasles Volvo / Inspección de retenes de rueda / Desamble de llantas traseras / Inspección de pastas traseras / Remover e instalar pastas traseras Originales Volvo / Aplicación de Liqui Moly en pastas traseras / Inspección de baleros / Inspección de discos traseros / Ensamble de componentes / Instalación de líquido de frenos / Limpieza, ajuste y calibración de frenos /  Purga a sistema hidráulico / Pruebas de funcionamiento / Recorrido de prueba",
-      "costo_sugerido": 2.0,
+      "costo_sugerido": 2,
       "frecuencia": 462,
       "categoria": "Frenos"
     },
@@ -206,7 +206,7 @@
       "id": 18,
       "nombre": "* Mantenimiento Preventivos …Gratuitos",
       "descripcion": "*2 Mantenimiento Preventivos …GRATUITOS",
-      "costo_sugerido": 2.0,
+      "costo_sugerido": 2,
       "frecuencia": 8,
       "categoria": "Otros"
     },
@@ -286,7 +286,7 @@
       "id": 47,
       "nombre": "Afinación Diesel",
       "descripcion": "Mantenimiento de afinación Diesel: Ultimo mantenimiento de afinación realizado el 30-oct-2024 a los 127,819 (recorrio 10,940 kms.)  Inspección visual / Recorrido de prueba / Diagnostico Multi-Check / Lecturas de códigos de falla / Inbspección a bujías incandescentes / Remover e instalar filtro de combustible diesel / Remover e instalar filtro de aire / Inspección a filtro de cabina (polen) / Sistema de lubricación: Drenado de aceite de motor / Instalación de aceite lavado interno de motor / Drenado de aceite de lavado / Reemplazo de filtro de aceite / Instalación de aceite lubricante / Sistema de enfriamiento: Inspección de sistema de enfriamiento / Inspección de refrigerante / Inspección de niveles de fluidos / Relleno de niveles / Inspección de terminales de batería / Pruebas de funcionamiento / Reinicio en panel de instrumentos",
-      "costo_sugerido": 27799.0,
+      "costo_sugerido": 27799,
       "frecuencia": 6,
       "categoria": "Afinación"
     },
@@ -339,6 +339,14 @@
       "categoria": "Otros"
     },
     {
+      "id": 33,
+      "nombre": "Kms",
+      "descripcion": "Mantenimiento 100,000 kms. - cobertura 12 meses o 10,000 kms **",
+      "costo_sugerido": 80000,
+      "frecuencia": 6,
+      "categoria": "Otros"
+    },
+    {
       "id": 24,
       "nombre": "Remover Toma Completa De Sistema De Enfriamiento",
       "descripcion": "REMOVER TOMA COMPLETA DE SISTEMA DE ENFRIAMIENTO / TOMA ADQUIRIDA POR PROPIETARIO",
@@ -358,7 +366,7 @@
       "id": 28,
       "nombre": "*Este Vehículo Deberá Retornar En Días Habiles Para Su Inspección",
       "descripcion": "*Este vehículo deberá retornar en 5 días habiles para su inspección.",
-      "costo_sugerido": 5.0,
+      "costo_sugerido": 5,
       "frecuencia": 4,
       "categoria": "Diagnóstico"
     },
@@ -377,14 +385,6 @@
       "costo_sugerido": 0,
       "frecuencia": 4,
       "categoria": "Diagnóstico"
-    },
-    {
-      "id": 33,
-      "nombre": "Kms",
-      "descripcion": "Mantenimiento 100,000 KMS:",
-      "costo_sugerido": 80000.0,
-      "frecuencia": 4,
-      "categoria": "Otros"
     },
     {
       "id": 34,
@@ -470,7 +470,7 @@
       "id": 57,
       "nombre": "Mantenimiento De Afinación Y Sistema De Frenos Realizados El",
       "descripcion": "Inspección de mantenimiento de afinación y sistema de frenos delanteros realizados el 12/Ago./2024 a los 84,228 km. (recorrió 7,669 kms.)",
-      "costo_sugerido": 28335.0,
+      "costo_sugerido": 28335,
       "frecuencia": 4,
       "categoria": "Frenos"
     },
@@ -686,7 +686,7 @@
       "id": 70,
       "nombre": "Remover E Instalar Inyector",
       "descripcion": "Remover e instalar 1 inyector / Limpieza y lavado de 3 inyectores / Ensamble de componentes",
-      "costo_sugerido": 2.0,
+      "costo_sugerido": 2,
       "frecuencia": 2,
       "categoria": "Otros"
     },
@@ -702,7 +702,7 @@
       "id": 72,
       "nombre": "Estudio De Daño",
       "descripcion": "Estudio de daño / Desamble de accesorios diversos / Remover instalación eléctrica en áreas dañadas / Remover líneas afectadas (quemadas) / Reconstrucción de instalación / Elaboración de pruebas de funcionamiento por línea (en promedio 562 líneas afectadas) / Pruebas de continuidad en instalación restaurada / Restauración en instalación (iluminación) caja seca / Remover e instalar conectores afectados / Pruebas de funcionamiento en módulos / Prueba de funcionamiento con vehículo funcionando por espacio de 8 horas continuas",
-      "costo_sugerido": 285.0,
+      "costo_sugerido": 285,
       "frecuencia": 2,
       "categoria": "Otros"
     },
@@ -758,7 +758,7 @@
       "id": 79,
       "nombre": "Observaciones",
       "descripcion": "Observaciones: Sistema de carga requiere restauración y/o reemplazo de alternador, después posiblemente cambio de acumulador. Este vehículo deberá de retornar después de 3 días hábiles para su inspección y estudio.",
-      "costo_sugerido": 3.0,
+      "costo_sugerido": 3,
       "frecuencia": 2,
       "categoria": "Otros"
     },
@@ -774,7 +774,7 @@
       "id": 81,
       "nombre": "Ducto Principal En Sistema De Enfriamiento Restaurado (Requiere Cambio Inmediato, Componente No Hay En Existencia)",
       "descripcion": "Ducto principal en sistema de enfriamiento restaurado (requiere cambio inmediato, componente no hay en existencia) / Instalación de 3 bobinas de ignición (adquiridas a nombre de propietario en tienda AutoZone)",
-      "costo_sugerido": 3.0,
+      "costo_sugerido": 3,
       "frecuencia": 2,
       "categoria": "Enfriamiento"
     },
@@ -902,7 +902,7 @@
       "id": 102,
       "nombre": "Gas R",
       "descripcion": "Instalación de gas r134  / Recorrido de prueba / Pruebas de funcionamiento",
-      "costo_sugerido": 134.0,
+      "costo_sugerido": 134,
       "frecuencia": 2,
       "categoria": "Otros"
     },
@@ -910,7 +910,7 @@
       "id": 103,
       "nombre": "Litros De Combustible (Pruebas De Funcionamiento En Los Días De Estancia De Vehículo)",
       "descripcion": "Instalación de 20 litros de combustible (Pruebas de funcionamiento en los días de estancia de vehículo)",
-      "costo_sugerido": 20.0,
+      "costo_sugerido": 20,
       "frecuencia": 2,
       "categoria": "Otros"
     },
@@ -998,7 +998,7 @@
       "id": 115,
       "nombre": "De Diagnóstico Precio Normal  Precio En Atención A Sra. Alma Rosa Sedeño",
       "descripcion": "Costo de diagnóstico precio normal $ 1,950.00 precio en atención a Sra. Alma Rosa Sedeño",
-      "costo_sugerido": 1950.0,
+      "costo_sugerido": 1950,
       "frecuencia": 2,
       "categoria": "Diagnóstico"
     },
@@ -1094,7 +1094,7 @@
       "id": 127,
       "nombre": "De Diagnóstico……P A G A D O",
       "descripcion": "Costo de diagnóstico…$ 1,950.00…P A G A D O",
-      "costo_sugerido": 1950.0,
+      "costo_sugerido": 1950,
       "frecuencia": 2,
       "categoria": "Diagnóstico"
     },
@@ -1430,7 +1430,7 @@
       "id": 174,
       "nombre": "Pruebas De Funcionamiento (Letargo De Horas)",
       "descripcion": "Pruebas de funcionamiento (Letargo de 48 horas)",
-      "costo_sugerido": 48.0,
+      "costo_sugerido": 48,
       "frecuencia": 2,
       "categoria": "Otros"
     },
@@ -1558,7 +1558,7 @@
       "id": 190,
       "nombre": "Pruebas De Presión A Sistema",
       "descripcion": "Pruebas de presión a sistema / Carga de gas r134",
-      "costo_sugerido": 134.0,
+      "costo_sugerido": 134,
       "frecuencia": 2,
       "categoria": "Otros"
     },
@@ -1582,7 +1582,7 @@
       "id": 193,
       "nombre": "De Diagnóstico Precio Normal  En Atención A Sandra Escudero",
       "descripcion": "Costo de diagnóstico precio normal $ 1,950.00 en atención a Sandra Escudero",
-      "costo_sugerido": 1950.0,
+      "costo_sugerido": 1950,
       "frecuencia": 2,
       "categoria": "Diagnóstico"
     },
@@ -1598,7 +1598,7 @@
       "id": 195,
       "nombre": "Bobinas De Ignición",
       "descripcion": "Inspección de bobinas de ignición / Reemplaza de 4 bobinas de ignición",
-      "costo_sugerido": 4.0,
+      "costo_sugerido": 4,
       "frecuencia": 2,
       "categoria": "Ignición"
     },
@@ -1649,14 +1649,6 @@
       "costo_sugerido": 0,
       "frecuencia": 2,
       "categoria": "Diagnóstico"
-    },
-    {
-      "id": 204,
-      "nombre": "Kms.",
-      "descripcion": "Mantenimiento 100,000 kms. - cobertura 12 meses o 10,000 kms **",
-      "costo_sugerido": 36670.67,
-      "frecuencia": 2,
-      "categoria": "Otros"
     },
     {
       "id": 205,
@@ -1758,7 +1750,7 @@
       "id": 219,
       "nombre": "Tiempo Aproximado De Reparación Días Hábiles",
       "descripcion": "Tiempo aproximado de reparación 20 días hábiles.",
-      "costo_sugerido": 20.0,
+      "costo_sugerido": 20,
       "frecuencia": 2,
       "categoria": "Otros"
     },
@@ -1806,7 +1798,7 @@
       "id": 225,
       "nombre": "De Diagnóstico……",
       "descripcion": "Costo de diagnóstico…$ 1,950.00…..SIN COSTO",
-      "costo_sugerido": 1950.0,
+      "costo_sugerido": 1950,
       "frecuencia": 2,
       "categoria": "Diagnóstico"
     },
@@ -2046,7 +2038,7 @@
       "id": 255,
       "nombre": "Mecatrónica Y Sistema Hidraulico… P A G A D O",
       "descripcion": "Mecatrónica y sistema hidraulico…$ 49,913.00  P A G A D O",
-      "costo_sugerido": 49913.0,
+      "costo_sugerido": 49913,
       "frecuencia": 2,
       "categoria": "Otros"
     },
@@ -2110,7 +2102,7 @@
       "id": 263,
       "nombre": "Polea Tensora Y Banda Accesorios",
       "descripcion": "Polea tensora y banda accesorios : Inspección visual / Estudio de estado / Recorrido de prueba / Desamble de accesorios / Remover e instalar polea tensora / Remover e instalar banda de accesorios / Ensamble de componentes / Instalación de accesorios / Pruebas de funcionamiento….Costo mano de obra precio normal $ 2,950.00",
-      "costo_sugerido": 2950.0,
+      "costo_sugerido": 2950,
       "frecuencia": 2,
       "categoria": "Otros"
     },
@@ -2206,7 +2198,7 @@
       "id": 276,
       "nombre": "Completo A Sistema De Frenos Cobertura Meses**",
       "descripcion": "Mantenimiento completo a sistema de frenos cobertura 12 meses**",
-      "costo_sugerido": 12.0,
+      "costo_sugerido": 12,
       "frecuencia": 2,
       "categoria": "Frenos"
     },
@@ -2286,7 +2278,7 @@
       "id": 286,
       "nombre": "*Este Vehículo Deberá De Retornar El Segundo Mes Del Para Su Inspección",
       "descripcion": "*Este vehículo deberá de retornar el segundo mes del 2026 para su inspección.",
-      "costo_sugerido": 104.0,
+      "costo_sugerido": 104,
       "frecuencia": 1,
       "categoria": "Diagnóstico"
     }
@@ -2331,21 +2323,21 @@
       "id": 59,
       "nombre": "Liqui Moly Frenos……",
       "descripcion": "Liqui Moly Frenos……",
-      "costo_sugerido": 240.0,
+      "costo_sugerido": 240,
       "frecuencia": 210
     },
     {
       "id": 60,
       "nombre": "Líquido De Frenos………",
       "descripcion": "Líquido De Frenos………",
-      "costo_sugerido": 68.0,
+      "costo_sugerido": 68,
       "frecuencia": 162
     },
     {
       "id": 61,
       "nombre": "Espuma Limpia Frenos….…",
       "descripcion": "Espuma Limpia Frenos….…",
-      "costo_sugerido": 260.0,
+      "costo_sugerido": 260,
       "frecuencia": 162
     },
     {
@@ -2401,14 +2393,14 @@
       "id": 68,
       "nombre": "Líquido De Frenos……",
       "descripcion": "Líquido De Frenos……",
-      "costo_sugerido": 68.0,
+      "costo_sugerido": 68,
       "frecuencia": 56
     },
     {
       "id": 69,
       "nombre": "Espuma Limpia Frenos……",
       "descripcion": "Espuma Limpia Frenos……",
-      "costo_sugerido": 150.0,
+      "costo_sugerido": 150,
       "frecuencia": 56
     },
     {
@@ -2597,7 +2589,7 @@
       "id": 90,
       "nombre": "Liqui Moly Frenos………",
       "descripcion": "Liqui Moly Frenos………",
-      "costo_sugerido": 240.0,
+      "costo_sugerido": 240,
       "frecuencia": 8
     },
     {
@@ -2709,7 +2701,7 @@
       "id": 104,
       "nombre": "Líquido Limpieza De Inyectores Liqui Moly……",
       "descripcion": "Líquido Limpieza De Inyectores Liqui Moly……",
-      "costo_sugerido": 290.0,
+      "costo_sugerido": 290,
       "frecuencia": 6
     },
     {
@@ -2870,28 +2862,28 @@
       "id": 125,
       "nombre": "Líquido De Frenos…… En Atención A Roberto Plata",
       "descripcion": "Líquido De Frenos…… En Atención A Roberto Plata",
-      "costo_sugerido": 68.0,
+      "costo_sugerido": 68,
       "frecuencia": 4
     },
     {
       "id": 126,
       "nombre": "Espuma Limpia Frenos…… En Atención A Roberto Plata",
       "descripcion": "Espuma Limpia Frenos…… En Atención A Roberto Plata",
-      "costo_sugerido": 150.0,
+      "costo_sugerido": 150,
       "frecuencia": 4
     },
     {
       "id": 127,
       "nombre": "Liqui Moly Frenos…… En Atención A Roberto Plata",
       "descripcion": "Liqui Moly Frenos…… En Atención A Roberto Plata",
-      "costo_sugerido": 240.0,
+      "costo_sugerido": 240,
       "frecuencia": 4
     },
     {
       "id": 128,
       "nombre": "Rectificación De Discos Traseros……",
       "descripcion": "Rectificación De Discos Traseros……",
-      "costo_sugerido": 2.0,
+      "costo_sugerido": 2,
       "frecuencia": 4
     },
     {
@@ -2954,7 +2946,7 @@
       "id": 137,
       "nombre": "Litros De Aceite Lubricantew-",
       "descripcion": "Litros De Aceite Lubricantew-",
-      "costo_sugerido": 20.0,
+      "costo_sugerido": 20,
       "frecuencia": 4
     },
     {
@@ -2975,7 +2967,7 @@
       "id": 140,
       "nombre": "Spray Cuerpo De Aceleración Liqui Moly……",
       "descripcion": "Spray Cuerpo De Aceleración Liqui Moly……",
-      "costo_sugerido": 280.0,
+      "costo_sugerido": 280,
       "frecuencia": 4
     },
     {
@@ -3101,7 +3093,7 @@
       "id": 23,
       "nombre": "Nota: Este Vehiculo Deberá De Retornar Despues De Dias Habiles Para Su Inspección En Sistema De Enfriamiento (Posible Reemplazo En Bomba De Agua Y Remover Radiador",
       "descripcion": "Nota: Este Vehiculo Deberá De Retornar Despues De Dias Habiles Para Su Inspección En Sistema De Enfriamiento (Posible Reemplazo En Bomba De Agua Y Remover Radiador",
-      "costo_sugerido": 10.0,
+      "costo_sugerido": 10,
       "frecuencia": 2
     },
     {
@@ -3248,7 +3240,7 @@
       "id": 44,
       "nombre": "Diversos, Consumibles Y Artículos De Limpieza……",
       "descripcion": "Diversos, Consumibles Y Artículos De Limpieza……",
-      "costo_sugerido": 240.0,
+      "costo_sugerido": 240,
       "frecuencia": 2
     },
     {
@@ -3304,7 +3296,7 @@
       "id": 52,
       "nombre": "Instalación De Neumáticos / Instalación De Válvulas",
       "descripcion": "Instalación De Neumáticos / Instalación De Válvulas",
-      "costo_sugerido": 4.0,
+      "costo_sugerido": 4,
       "frecuencia": 2
     },
     {
@@ -3388,7 +3380,7 @@
       "id": 157,
       "nombre": "Remover E Instalar Bujías De Ignición (Adquiridas A Nombre De Propietario)",
       "descripcion": "Remover E Instalar Bujías De Ignición (Adquiridas A Nombre De Propietario)",
-      "costo_sugerido": 4.0,
+      "costo_sugerido": 4,
       "frecuencia": 2
     },
     {
@@ -3423,28 +3415,28 @@
       "id": 162,
       "nombre": "Nota: Si Despues De Días El Ciclo De Funcionamiento En Sensor Maf Es Correcto, No Será Necesario Su Reemplazo",
       "descripcion": "Nota: Si Despues De Días El Ciclo De Funcionamiento En Sensor Maf Es Correcto, No Será Necesario Su Reemplazo",
-      "costo_sugerido": 10.0,
+      "costo_sugerido": 10,
       "frecuencia": 2
     },
     {
       "id": 163,
       "nombre": "Juego De Amortiguadores Delanteros  C/U",
       "descripcion": "Juego De Amortiguadores Delanteros  C/U",
-      "costo_sugerido": 2647.0,
+      "costo_sugerido": 2647,
       "frecuencia": 2
     },
     {
       "id": 164,
       "nombre": "Bases De Amortiguadores Delanteros  C/U",
       "descripcion": "Bases De Amortiguadores Delanteros  C/U",
-      "costo_sugerido": 1450.0,
+      "costo_sugerido": 1450,
       "frecuencia": 2
     },
     {
       "id": 165,
       "nombre": "Rotulas  C/U",
       "descripcion": "Rotulas  C/U",
-      "costo_sugerido": 560.0,
+      "costo_sugerido": 560,
       "frecuencia": 2
     },
     {
@@ -3584,7 +3576,7 @@
       "id": 185,
       "nombre": "Sensores Vss (  C/U)",
       "descripcion": "Sensores Vss (  C/U)",
-      "costo_sugerido": 2349.0,
+      "costo_sugerido": 2349,
       "frecuencia": 2
     },
     {
@@ -3626,7 +3618,7 @@
       "id": 191,
       "nombre": "Código De Error Registrado – Remover E Instalar Bujías De Ignición (Bujía N. Afectada)",
       "descripcion": "Código De Error Registrado – Remover E Instalar Bujías De Ignición (Bujía N. Afectada)",
-      "costo_sugerido": 1.0,
+      "costo_sugerido": 1,
       "frecuencia": 2
     },
     {
@@ -3696,14 +3688,14 @@
       "id": 201,
       "nombre": "Juego De Clutch Incluye Plato, Disco Y Collarín….…Pagado",
       "descripcion": "Juego De Clutch Incluye Plato, Disco Y Collarín….…Pagado",
-      "costo_sugerido": 4200.0,
+      "costo_sugerido": 4200,
       "frecuencia": 2
     },
     {
       "id": 202,
       "nombre": "Sensores De Oxigeno…….P A G A D O S (-Ene-)",
       "descripcion": "Sensores De Oxigeno…….P A G A D O S (-Ene-)",
-      "costo_sugerido": 1681.0,
+      "costo_sugerido": 1681,
       "frecuencia": 2
     },
     {
@@ -3752,7 +3744,7 @@
       "id": 209,
       "nombre": "Amortiguadores Delanteros ……P A G A D O",
       "descripcion": "Amortiguadores Delanteros ……P A G A D O",
-      "costo_sugerido": 15134.0,
+      "costo_sugerido": 15134,
       "frecuencia": 2
     },
     {
@@ -3780,7 +3772,7 @@
       "id": 213,
       "nombre": "Sensor De Presión ……Pagado",
       "descripcion": "Sensor De Presión ……Pagado",
-      "costo_sugerido": 2900.0,
+      "costo_sugerido": 2900,
       "frecuencia": 2
     },
     {
@@ -3808,7 +3800,7 @@
       "id": 217,
       "nombre": "Spray Cuerpo De Aceleración Liqui Moly….…",
       "descripcion": "Spray Cuerpo De Aceleración Liqui Moly….…",
-      "costo_sugerido": 280.0,
+      "costo_sugerido": 280,
       "frecuencia": 2
     },
     {
@@ -3836,7 +3828,7 @@
       "id": 221,
       "nombre": "Nota: Este Vehiculo Deberá De Retornar En Dias Habiles Para Leer Datos Almacenados En Memoria De Vehículo (Sensor De Árbol De Levas)",
       "descripcion": "Nota: Este Vehiculo Deberá De Retornar En Dias Habiles Para Leer Datos Almacenados En Memoria De Vehículo (Sensor De Árbol De Levas)",
-      "costo_sugerido": 5.0,
+      "costo_sugerido": 5,
       "frecuencia": 2
     },
     {
@@ -3899,7 +3891,7 @@
       "id": 230,
       "nombre": "Remover E Instalar Sensor De Oxigeno Banco (Proporcionado Por El Propietario)",
       "descripcion": "Remover E Instalar Sensor De Oxigeno Banco (Proporcionado Por El Propietario)",
-      "costo_sugerido": 1.0,
+      "costo_sugerido": 1,
       "frecuencia": 2
     },
     {
@@ -3962,7 +3954,7 @@
       "id": 239,
       "nombre": "Juego De Juntas Y Orings / Sensor De Presión De Aceite ….…P A G A D O",
       "descripcion": "Juego De Juntas Y Orings / Sensor De Presión De Aceite ….…P A G A D O",
-      "costo_sugerido": 3000.0,
+      "costo_sugerido": 3000,
       "frecuencia": 2
     },
     {
@@ -3983,7 +3975,7 @@
       "id": 242,
       "nombre": "Sensor De Oxigeno ()",
       "descripcion": "Sensor De Oxigeno ()",
-      "costo_sugerido": 2.0,
+      "costo_sugerido": 2,
       "frecuencia": 2
     },
     {
@@ -4081,28 +4073,28 @@
       "id": 256,
       "nombre": "Líquido Limpieza De Inyectores Liqui Moly...…",
       "descripcion": "Líquido Limpieza De Inyectores Liqui Moly...…",
-      "costo_sugerido": 290.0,
+      "costo_sugerido": 290,
       "frecuencia": 2
     },
     {
       "id": 257,
       "nombre": "Líquido De Frenos…… En Atención A Santa Meraz",
       "descripcion": "Líquido De Frenos…… En Atención A Santa Meraz",
-      "costo_sugerido": 68.0,
+      "costo_sugerido": 68,
       "frecuencia": 2
     },
     {
       "id": 258,
       "nombre": "Espuma Limpia Frenos…… En Atención A Santa Meraz",
       "descripcion": "Espuma Limpia Frenos…… En Atención A Santa Meraz",
-      "costo_sugerido": 150.0,
+      "costo_sugerido": 150,
       "frecuencia": 2
     },
     {
       "id": 259,
       "nombre": "Liqui Moly Frenos…… En Atención A Santa Meraz",
       "descripcion": "Liqui Moly Frenos…… En Atención A Santa Meraz",
-      "costo_sugerido": 240.0,
+      "costo_sugerido": 240,
       "frecuencia": 2
     },
     {
@@ -4158,21 +4150,21 @@
       "id": 267,
       "nombre": "Filtro De Aceite / Lubricantew Gf Honda",
       "descripcion": "Filtro De Aceite / Lubricantew Gf Honda",
-      "costo_sugerido": 13.0,
+      "costo_sugerido": 13,
       "frecuencia": 2
     },
     {
       "id": 268,
       "nombre": "Discos Traseros ( C/U)",
       "descripcion": "Discos Traseros ( C/U)",
-      "costo_sugerido": 5080.0,
+      "costo_sugerido": 5080,
       "frecuencia": 2
     },
     {
       "id": 269,
       "nombre": "Filtro De Cabina Piezas (Aire Acondicionado)",
       "descripcion": "Filtro De Cabina Piezas (Aire Acondicionado)",
-      "costo_sugerido": 2.0,
+      "costo_sugerido": 2,
       "frecuencia": 2
     },
     {
@@ -4207,7 +4199,7 @@
       "id": 274,
       "nombre": "Litros De Aceite Lubricante Liqui Molyw-",
       "descripcion": "Litros De Aceite Lubricante Liqui Molyw-",
-      "costo_sugerido": 30.0,
+      "costo_sugerido": 30,
       "frecuencia": 2
     },
     {
@@ -4228,7 +4220,7 @@
       "id": 277,
       "nombre": "Embrague Completo (Plato, Disco Y Collarín)….… P A G A D O",
       "descripcion": "Embrague Completo (Plato, Disco Y Collarín)….… P A G A D O",
-      "costo_sugerido": 11200.0,
+      "costo_sugerido": 11200,
       "frecuencia": 2
     },
     {
@@ -4242,7 +4234,7 @@
       "id": 279,
       "nombre": "Amortiguadores Delanteros ( C/U)",
       "descripcion": "Amortiguadores Delanteros ( C/U)",
-      "costo_sugerido": 3100.0,
+      "costo_sugerido": 3100,
       "frecuencia": 2
     },
     {
@@ -4277,7 +4269,7 @@
       "id": 284,
       "nombre": "Garrafa De Refrigerante …… En Atención A Noe Alfonso Lara",
       "descripcion": "Garrafa De Refrigerante …… En Atención A Noe Alfonso Lara",
-      "costo_sugerido": 275.0,
+      "costo_sugerido": 275,
       "frecuencia": 2
     },
     {
@@ -4298,21 +4290,21 @@
       "id": 287,
       "nombre": "Líquido De Frenos…… En Atención A Oscar Martínez",
       "descripcion": "Líquido De Frenos…… En Atención A Oscar Martínez",
-      "costo_sugerido": 68.0,
+      "costo_sugerido": 68,
       "frecuencia": 2
     },
     {
       "id": 288,
       "nombre": "Espuma Limpia Frenos…… En Atención A Oscar Martínez",
       "descripcion": "Espuma Limpia Frenos…… En Atención A Oscar Martínez",
-      "costo_sugerido": 150.0,
+      "costo_sugerido": 150,
       "frecuencia": 2
     },
     {
       "id": 289,
       "nombre": "Liqui Moly Frenos…… En Atención A Oscar Martínez",
       "descripcion": "Liqui Moly Frenos…… En Atención A Oscar Martínez",
-      "costo_sugerido": 240.0,
+      "costo_sugerido": 240,
       "frecuencia": 2
     },
     {
@@ -4438,7 +4430,7 @@
       "id": 307,
       "nombre": "Filtro De Cabina ( Elementos)",
       "descripcion": "Filtro De Cabina ( Elementos)",
-      "costo_sugerido": 2.0,
+      "costo_sugerido": 2,
       "frecuencia": 2
     },
     {
@@ -4452,7 +4444,7 @@
       "id": 309,
       "nombre": "Deposito Refrigerante….….Pagado",
       "descripcion": "Deposito Refrigerante….….Pagado",
-      "costo_sugerido": 1200.0,
+      "costo_sugerido": 1200,
       "frecuencia": 2
     },
     {
@@ -4466,7 +4458,7 @@
       "id": 311,
       "nombre": "Sensor De Árbol De Levas….…P A G A D O",
       "descripcion": "Sensor De Árbol De Levas….…P A G A D O",
-      "costo_sugerido": 2500.0,
+      "costo_sugerido": 2500,
       "frecuencia": 2
     },
     {
@@ -4515,28 +4507,28 @@
       "id": 318,
       "nombre": "Líquido De Frenos…… Por Introducción",
       "descripcion": "Líquido De Frenos…… Por Introducción",
-      "costo_sugerido": 68.0,
+      "costo_sugerido": 68,
       "frecuencia": 2
     },
     {
       "id": 319,
       "nombre": "Espuma Limpia Frenos…… Por Introducción",
       "descripcion": "Espuma Limpia Frenos…… Por Introducción",
-      "costo_sugerido": 150.0,
+      "costo_sugerido": 150,
       "frecuencia": 2
     },
     {
       "id": 320,
       "nombre": "Liqui Moly Frenos………Por Introducción",
       "descripcion": "Liqui Moly Frenos………Por Introducción",
-      "costo_sugerido": 240.0,
+      "costo_sugerido": 240,
       "frecuencia": 2
     },
     {
       "id": 321,
       "nombre": "Sensores De Pastas ….…P A G A D O",
       "descripcion": "Sensores De Pastas ….…P A G A D O",
-      "costo_sugerido": 2204.0,
+      "costo_sugerido": 2204,
       "frecuencia": 2
     },
     {

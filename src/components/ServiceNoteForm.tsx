@@ -312,14 +312,24 @@ export default function ServiceNoteForm() {
 
     return (
         <div className="max-w-5xl mx-auto p-8 bg-white rounded-xl shadow-xl border border-gray-100 text-gray-900">
-            <div className="flex items-center gap-4 mb-10 border-b pb-6 text-gray-900">
-                <div className="p-4 bg-[#F37014] rounded-xl text-white shadow-lg shadow-[#F37014]/20">
-                    <FileText size={32} />
+            <div className="flex justify-between items-center mb-10 border-b pb-6 text-gray-900">
+                <div className="flex items-center gap-4">
+                    <div className="p-4 bg-[#F37014] rounded-xl text-white shadow-lg shadow-[#F37014]/20">
+                        <FileText size={32} />
+                    </div>
+                    <div>
+                        <h2 className="text-3xl font-bold text-gray-900">Nueva Nota de Servicio</h2>
+                        <p className="text-gray-500">CarMD Premium Service</p>
+                    </div>
                 </div>
-                <div>
-                    <h2 className="text-3xl font-bold text-gray-900">Nueva Nota de Servicio</h2>
-                    <p className="text-gray-500">CarMD Premium Service</p>
-                </div>
+                <button
+                    type="button"
+                    onClick={() => { setIsHistoryOpen(true); loadRecentNotes(); }}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200"
+                >
+                    <History size={18} />
+                    <span>Historial / Plantillas</span>
+                </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-10">

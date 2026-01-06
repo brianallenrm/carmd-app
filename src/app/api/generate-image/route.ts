@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
         if (body.parts) params.set("parts", JSON.stringify(body.parts));
         if (body.folio) params.set("folio", body.folio);
         if (body.date) params.set("date", body.date);
+        if (body.notes) params.set("notes", body.notes);
         if (body.includeIva !== undefined) params.set("includeIva", body.includeIva.toString());
         if (body.includeIsr !== undefined) params.set("includeIsr", body.includeIsr.toString());
 

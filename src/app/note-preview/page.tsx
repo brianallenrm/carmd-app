@@ -60,13 +60,12 @@ function NotePreviewContent() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     client,
-                    vehicle,
-                    services,
-                    parts,
                     company,
                     folio,
                     includeIva,
-                    includeIsr
+                    includeIsr,
+                    notes,
+                    date
                 }),
             });
             if (!response.ok) {
@@ -142,7 +141,9 @@ function NotePreviewContent() {
                     company,
                     folio,
                     includeIva,
-                    includeIsr
+                    includeIsr,
+                    notes,
+                    date
                 }),
             });
             if (!response.ok) throw new Error("Error generating Image for sharing");

@@ -7,7 +7,8 @@ export const maxDuration = 60; // Allow up to 60s (if plan permits)
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { client, vehicle, services, parts, company, folio } = body;
+        const body = await req.json();
+        const { client, vehicle, services, parts, company, folio, notes, date } = body;
 
         // Determine base URL
         const host = req.headers.get("host") || "localhost:3000";
@@ -22,8 +23,9 @@ export async function POST(req: Request) {
             services: JSON.stringify(services || []),
             parts: JSON.stringify(parts || []),
             folio: folio || "00001",
-            date: new Date().toLocaleDateString("es-MX"),
+            date: date || new Date().toLocaleDateString("es-MX"),
         });
+        if (notes) params.set("notes", notes);
         if (body.includeIva !== undefined) params.set("includeIva", body.includeIva.toString());
         if (body.includeIsr !== undefined) params.set("includeIsr", body.includeIsr.toString());
 

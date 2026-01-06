@@ -8,7 +8,7 @@ import { COMPANY_DEFAULTS } from "@/lib/constants";
 function NotePreviewContent() {
     const searchParams = useSearchParams();
 
-    const searchParams = useSearchParams();
+
 
     // Check for injected data (from Puppeteer) or fallback to searchParams
     let sourceData: any = {};

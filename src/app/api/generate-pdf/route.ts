@@ -38,11 +38,23 @@ export async function POST(req: Request) {
         // Set viewport to A4 size (approximate pixels at 96 DPI)
         // A4 is 210mm x 297mm. 
         // Max Quality: Scale 3 (Ultra HD). High limit for serverless.
+        // Max Quality: Scale 3 (Ultra HD). High limit for serverless.
         await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 3 });
-        await page.goto(url, { waitUntil: "domcontentloaded" });
+
+        // Debugging: Capture browser logs
+        page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+        page.on('pageerror', err => console.log('PAGE ERROR:', err.toString()));
+        page.on('requestfailed', request => console.log('PAGE REQUEST FAILED:', request.failure()?.errorText, request.url()));
+
+        try {
+            await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 });
+        } catch (e) {
+            console.error("Page Navigation Error:", e);
+            throw new Error(`Failed to navigate to preview URL: ${e instanceof Error ? e.message : String(e)}`);
+        }
 
         // Wait for the main note card to appear (replaces the "Loading..." fallback)
-        await page.waitForSelector("#note-preview-container", { timeout: 30000 });
+        await page.waitForSelector("#note-preview-container", { timeout: 15000 });
 
         const pdfBuffer = await page.pdf({
             format: "A4",

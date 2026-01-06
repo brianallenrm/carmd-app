@@ -246,7 +246,7 @@ function NotePreviewContent() {
                 </a>
             </div>
 
-            <div className="shadow-2xl print:shadow-none">
+            <div id="note-preview-container" className="shadow-2xl print:shadow-none">
                 <ServiceNoteTemplate
                     client={client}
                     vehicle={vehicle}

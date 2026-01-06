@@ -34,7 +34,7 @@ export default function ServiceNoteTemplate({
         return `$${cost.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
     };
 
-    // Helper to render "WhatsApp style" rich text (**bold**)
+    // Helper to render "WhatsApp style" rich text (**bold**) and newlines
     const renderRichText = (text: string) => {
         if (!text) return null;
         const parts = text.split(/(\*\*.*?\*\*)/g); // Split by **...**
@@ -43,7 +43,17 @@ export default function ServiceNoteTemplate({
                 // Remove asterisks and render bold
                 return <b key={index} className="font-bold">{part.slice(2, -2)}</b>;
             }
-            return <span key={index}>{part}</span>;
+            // Handle newlines explicitly
+            return (
+                <span key={index}>
+                    {part.split('\n').map((line, i, arr) => (
+                        <React.Fragment key={i}>
+                            {line}
+                            {i < arr.length - 1 && <br />}
+                        </React.Fragment>
+                    ))}
+                </span>
+            );
         });
     };
 

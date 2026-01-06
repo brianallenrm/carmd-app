@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
         // Debugging: Capture browser logs
         page.on('console', msg => console.log('PAGE LOG:', msg.text()));
-        page.on('pageerror', err => console.log('PAGE ERROR:', err.toString()));
+        page.on('pageerror', (err: any) => console.log('PAGE ERROR:', err.toString()));
         page.on('requestfailed', request => console.log('PAGE REQUEST FAILED:', request.failure()?.errorText, request.url()));
 
         try {

@@ -64,14 +64,33 @@ export async function GET(req: Request) {
         }
 
         // Add in chunks to avoid timeout
-        const chunkSize = 500;
+        // Reduced chunk size for Serverless stability
+        const chunkSize = 100;
+        let uploadedCount = 0;
+
+        // Log start
+        console.log(`Starting migration of ${allRows.length} items...`);
+
         for (let i = 0; i < allRows.length; i += chunkSize) {
             const chunk = allRows.slice(i, i + chunkSize);
-            await sheet.addRows(chunk);
-            console.log(`Uploaded chunk ${i} to ${i + chunkSize}`);
+            try {
+                await sheet.addRows(chunk);
+                uploadedCount += chunk.length;
+                console.log(`Uploaded chunk ${i} to ${i + chunk.length}`);
+            } catch (err) {
+                console.error(`Failed at chunk ${i}:`, err);
+                // Don't throw, try to continue or return partial
+                return NextResponse.json({
+                    success: false,
+                    created: true,
+                    uploaded: uploadedCount,
+                    error: "Timeout/Error during upload",
+                    details: String(err)
+                }, { status: 206 }); // 206 Partial Content
+            }
         }
 
-        return NextResponse.json({ success: true, count: allRows.length });
+        return NextResponse.json({ success: true, count: uploadedCount });
 
     } catch (error) {
         console.error("Migration Error:", error);

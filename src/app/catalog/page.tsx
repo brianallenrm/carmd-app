@@ -148,11 +148,11 @@ export default function CatalogManager() {
 
                 {/* Search */}
                 <div className="relative mb-6">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
                     <input
                         type="text"
                         placeholder="Buscar servicios o refacciones..."
-                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#F37014] focus:outline-none"
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#F37014] focus:outline-none text-black placeholder-gray-500 font-medium"
                         value={search}
                         onChange={(e) => handleSearch(e.target.value)}
                     />
@@ -163,25 +163,25 @@ export default function CatalogManager() {
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                         <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
                             <div className="bg-gray-100 px-6 py-4 border-b flex justify-between items-center">
-                                <h3 className="font-bold text-lg">{isCreating ? 'Crear Nuevo' : 'Editar Elemento'}</h3>
-                                <button onClick={() => { setEditingItem(null); setIsCreating(false); }} className="text-gray-500 hover:text-red-500">
+                                <h3 className="font-bold text-lg text-gray-900">{isCreating ? 'Crear Nuevo' : 'Editar Elemento'}</h3>
+                                <button onClick={() => { setEditingItem(null); setIsCreating(false); }} className="text-gray-500 hover:text-red-600 font-bold bg-white rounded-full p-1">
                                     <X size={20} />
                                 </button>
                             </div>
                             <div className="p-6 space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1">Nombre</label>
                                     <input
-                                        className="w-full border rounded-lg p-2"
+                                        className="w-full border border-gray-300 rounded-lg p-2 text-black font-medium focus:outline-none focus:ring-2 focus:ring-[#F37014]"
                                         value={editingItem?.nombre}
                                         onChange={e => setEditingItem(prev => ({ ...prev!, nombre: e.target.value }))}
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-1">Tipo</label>
                                         <select
-                                            className="w-full border rounded-lg p-2"
+                                            className="w-full border border-gray-300 rounded-lg p-2 text-black font-medium focus:outline-none focus:ring-2 focus:ring-[#F37014]"
                                             value={editingItem?.tipo}
                                             onChange={e => setEditingItem(prev => ({ ...prev!, tipo: e.target.value as any }))}
                                             disabled={!isCreating}
@@ -191,19 +191,19 @@ export default function CatalogManager() {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Costo ($)</label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-1">Costo ($)</label>
                                         <input
                                             type="number"
-                                            className="w-full border rounded-lg p-2"
+                                            className="w-full border border-gray-300 rounded-lg p-2 text-black font-medium focus:outline-none focus:ring-2 focus:ring-[#F37014]"
                                             value={editingItem?.costo_sugerido}
                                             onChange={e => setEditingItem(prev => ({ ...prev!, costo_sugerido: parseFloat(e.target.value) }))}
                                         />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1">Descripción</label>
                                     <textarea
-                                        className="w-full border rounded-lg p-2 h-24"
+                                        className="w-full border border-gray-300 rounded-lg p-2 h-24 text-black font-medium focus:outline-none focus:ring-2 focus:ring-[#F37014]"
                                         value={editingItem?.descripcion || ''}
                                         onChange={e => setEditingItem(prev => ({ ...prev!, descripcion: e.target.value }))}
                                     />

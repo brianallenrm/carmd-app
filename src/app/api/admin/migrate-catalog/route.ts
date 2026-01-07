@@ -31,10 +31,16 @@ export async function GET(req: Request) {
             sheet = await doc.addSheet({ title: "CATALOGO" });
         }
 
-        // Check headers
-        await sheet.loadHeaderRow();
+        // Check headers (Handle empty sheet case)
         const headers = ["ID", "Tipo", "Nombre", "Descripcion", "Costo", "Frecuencia", "Categoria"];
-        if (sheet.headerValues.length === 0) {
+        try {
+            await sheet.loadHeaderRow();
+            if (sheet.headerValues.length === 0) {
+                // Empty but no error? Set them.
+                throw new Error("Empty headers");
+            }
+        } catch (e) {
+            console.log("Initializing headers for empty sheet...");
             await sheet.setHeaderRow(headers);
         }
 

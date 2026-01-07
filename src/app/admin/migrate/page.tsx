@@ -27,7 +27,11 @@ export default function MigrationPage() {
                 addLog(`Procesando lote ${page + 1}...`);
                 const res = await fetch(`/api/admin/migrate-catalog?page=${page}&limit=${LIMIT}`);
 
-                if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+                if (!res.ok) {
+                    // Try to parse error details
+                    const errData = await res.json().catch(() => ({ error: res.statusText }));
+                    throw new Error(errData.error || errData.details || `HTTP ${res.status}`);
+                }
 
                 const data = await res.json();
 

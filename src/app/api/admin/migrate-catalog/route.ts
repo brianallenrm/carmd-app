@@ -7,7 +7,11 @@ import catalogDataRaw from '../../../../../public/catalog/catalogo_final.json';
 
 export async function GET(req: Request) {
     try {
-        // 1. Auth
+        const { searchParams } = new URL(req.url);
+        const page = parseInt(searchParams.get('page') || '0');
+        const limit = parseInt(searchParams.get('limit') || '50');
+
+        // 1. Auth with Google Sheets
         if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY) {
             throw new Error("Missing Google Sheets Credentials");
         }
@@ -27,9 +31,9 @@ export async function GET(req: Request) {
             sheet = await doc.addSheet({ title: "CATALOGO" });
         }
 
+        // Check headers
         await sheet.loadHeaderRow();
         const headers = ["ID", "Tipo", "Nombre", "Descripcion", "Costo", "Frecuencia", "Categoria"];
-        // Only set header if empty
         if (sheet.headerValues.length === 0) {
             await sheet.setHeaderRow(headers);
         }
@@ -57,43 +61,37 @@ export async function GET(req: Request) {
 
         const allRows = [...services, ...parts];
 
-        // 4. Batch Upload (Check if already populated to avoid dupes)
-        const rows = await sheet.getRows({ limit: 5 });
-        if (rows.length > 0) {
-            return NextResponse.json({ message: "Catalog sheet already has data. Aborting to avoid duplicates." });
+        // Slice for pagination
+        const start = page * limit;
+        const end = start + limit;
+        const chunk = allRows.slice(start, end);
+
+        if (chunk.length === 0) {
+            return NextResponse.json({ success: true, count: 0, completed: true });
         }
 
-        // Add in chunks to avoid timeout
-        // Reduced chunk size for Serverless stability
-        const chunkSize = 100;
-        let uploadedCount = 0;
+        // 4. Batch Upload
+        // Add safeguard: if this is page 0, maybe clear sheet? No, too dangerous.
+        // Just append.
 
-        // Log start
-        console.log(`Starting migration of ${allRows.length} items...`);
+        await sheet.addRows(chunk);
+        console.log(`Uploaded page ${page} (items ${start} to ${end})`);
 
-        for (let i = 0; i < allRows.length; i += chunkSize) {
-            const chunk = allRows.slice(i, i + chunkSize);
-            try {
-                await sheet.addRows(chunk);
-                uploadedCount += chunk.length;
-                console.log(`Uploaded chunk ${i} to ${i + chunk.length}`);
-            } catch (err) {
-                console.error(`Failed at chunk ${i}:`, err);
-                // Don't throw, try to continue or return partial
-                return NextResponse.json({
-                    success: false,
-                    created: true,
-                    uploaded: uploadedCount,
-                    error: "Timeout/Error during upload",
-                    details: String(err)
-                }, { status: 206 }); // 206 Partial Content
-            }
-        }
+        return NextResponse.json({
+            success: true,
+            count: chunk.length,
+            page,
+            totalItems: allRows.length,
+            totalPages: Math.ceil(allRows.length / limit)
+        });
 
-        return NextResponse.json({ success: true, count: uploadedCount });
-
-    } catch (error) {
+    } catch (error: any) {
         console.error("Migration Error:", error);
-        return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
+        // Important: Return JSON error so client can display it
+        return NextResponse.json({
+            success: false,
+            error: error.message || String(error),
+            stack: error.stack
+        }, { status: 500 });
     }
 }

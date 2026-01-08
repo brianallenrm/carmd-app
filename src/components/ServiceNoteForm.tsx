@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEvent } from "react";
-import { Plus, Trash2, FileText, Save, Car, User, Search, Eye, History, X, Clock } from "lucide-react";
+import { Plus, Trash2, FileText, Save, Car, User, Search, Eye, History, X, Clock, ArrowUp, ArrowDown } from "lucide-react";
+
 import CatalogSearch from './CatalogSearch';
 import { ServiceItem, ClientInfo, VehicleInfo } from "@/types/service-note";
 import { COMPANY_DEFAULTS } from "@/lib/constants";
@@ -41,6 +42,27 @@ export default function ServiceNoteForm() {
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [recentNotes, setRecentNotes] = useState<any[]>([]);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
+    // Reordering Helpers
+    const moveService = (index: number, direction: 'up' | 'down') => {
+        const newServices = [...services];
+        if (direction === 'up' && index > 0) {
+            [newServices[index], newServices[index - 1]] = [newServices[index - 1], newServices[index]];
+        } else if (direction === 'down' && index < newServices.length - 1) {
+            [newServices[index], newServices[index + 1]] = [newServices[index + 1], newServices[index]];
+        }
+        setServices(newServices);
+    };
+
+    const movePart = (index: number, direction: 'up' | 'down') => {
+        const newParts = [...parts];
+        if (direction === 'up' && index > 0) {
+            [newParts[index], newParts[index - 1]] = [newParts[index - 1], newParts[index]];
+        } else if (direction === 'down' && index < newParts.length - 1) {
+            [newParts[index], newParts[index + 1]] = [newParts[index + 1], newParts[index]];
+        }
+        setParts(newParts);
+    };
 
     const loadRecentNotes = async () => {
         setIsLoadingHistory(true);
@@ -492,7 +514,7 @@ export default function ServiceNoteForm() {
                     </div>
 
                     <div className="space-y-4">
-                        {services.map((service) => (
+                        {services.map((service, index) => (
                             <div key={service.id} className="flex gap-4 items-start group bg-white p-4 border border-gray-200 rounded-lg hover:border-[#F37014]/50 transition-colors shadow-sm text-gray-900">
                                 <div className="flex-1 space-y-3">
                                     {/* Service Search & Description */}
@@ -541,14 +563,34 @@ export default function ServiceNoteForm() {
                                             />
                                         </div>
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeService(service.id)}
-                                        className="mt-1 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors w-full flex justify-center"
-                                        title="Eliminar servicio"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
+                                    <div className="flex gap-1 mt-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => moveService(index, 'up')}
+                                            disabled={index === 0}
+                                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors flex-1 flex justify-center disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400"
+                                            title="Mover arriba"
+                                        >
+                                            <ArrowUp size={16} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => moveService(index, 'down')}
+                                            disabled={index === services.length - 1}
+                                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors flex-1 flex justify-center disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400"
+                                            title="Mover abajo"
+                                        >
+                                            <ArrowDown size={16} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeService(service.id)}
+                                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors flex-1 flex justify-center"
+                                            title="Eliminar servicio"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -570,7 +612,7 @@ export default function ServiceNoteForm() {
                     </div>
 
                     <div className="space-y-4">
-                        {parts.map((part) => (
+                        {parts.map((part, index) => (
                             <div key={part.id} className="flex gap-4 items-start group bg-white p-4 border border-gray-200 rounded-lg hover:border-[#F37014]/50 transition-colors shadow-sm text-gray-900">
                                 <div className="flex gap-2 w-full">
                                     <div className="w-16 space-y-1">
@@ -620,14 +662,34 @@ export default function ServiceNoteForm() {
                                             />
                                         </div>
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => removePart(part.id)}
-                                        className="mt-1 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors w-full flex justify-center"
-                                        title="Eliminar refacción"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
+                                    <div className="flex gap-1 mt-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => movePart(index, 'up')}
+                                            disabled={index === 0}
+                                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors flex-1 flex justify-center disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400"
+                                            title="Mover arriba"
+                                        >
+                                            <ArrowUp size={16} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => movePart(index, 'down')}
+                                            disabled={index === parts.length - 1}
+                                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors flex-1 flex justify-center disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400"
+                                            title="Mover abajo"
+                                        >
+                                            <ArrowDown size={16} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => removePart(part.id)}
+                                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors flex-1 flex justify-center"
+                                            title="Eliminar refacción"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}

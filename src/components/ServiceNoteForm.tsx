@@ -275,12 +275,28 @@ export default function ServiceNoteForm() {
 
     // Helper to build the preview URL
     const buildPreviewUrl = (customFolio: string, customDate: string) => {
+        // Resolve variables for preview
+        const resolveText = (text: string) => {
+            if (!text) return "";
+            let resolved = text;
+            resolved = resolved.replace(/{cliente}/gi, client.name || "");
+            resolved = resolved.replace(/{vehiculo}/gi, `${vehicle.brand} ${vehicle.model}`.trim() || "");
+            resolved = resolved.replace(/{placas}/gi, vehicle.plates || "");
+            resolved = resolved.replace(/{km}/gi, vehicle.odometer?.toString() || "");
+            resolved = resolved.replace(/{fecha}/gi, customDate);
+            return resolved;
+        };
+
+        const resolvedServices = services.map(s => ({ ...s, description: resolveText(s.description) }));
+        const resolvedParts = parts.map(p => ({ ...p, description: resolveText(p.description) }));
+        const resolvedNotes = resolveText(notes);
+
         const params = new URLSearchParams();
         params.set("client", JSON.stringify(client));
         params.set("vehicle", JSON.stringify(vehicle));
-        params.set("services", JSON.stringify(services));
-        params.set("parts", JSON.stringify(parts));
-        if (notes) params.set("notes", notes);
+        params.set("services", JSON.stringify(resolvedServices));
+        params.set("parts", JSON.stringify(resolvedParts));
+        if (resolvedNotes) params.set("notes", resolvedNotes);
         params.set("company", JSON.stringify(COMPANY_DEFAULTS));
         params.set("folio", customFolio);
         params.set("includeIva", includeIva.toString());
@@ -326,21 +342,52 @@ export default function ServiceNoteForm() {
         const currentDate = `${year}-${month}-${day}`; // ISO Format
 
         try {
+            // Helper to resolve variables
+            const resolveText = (text: string) => {
+                if (!text) return "";
+                let resolved = text;
+                resolved = resolved.replace(/{cliente}/gi, client.name || "");
+                resolved = resolved.replace(/{vehiculo}/gi, `${vehicle.brand} ${vehicle.model}`.trim() || "");
+                resolved = resolved.replace(/{placas}/gi, vehicle.plates || "");
+                resolved = resolved.replace(/{km}/gi, vehicle.odometer?.toString() || "");
+                resolved = resolved.replace(/{fecha}/gi, currentDate);
+                return resolved;
+            };
+
+            const resolvedServices = services.map(s => ({
+                ...s,
+                description: resolveText(s.description)
+            }));
+
+            const resolvedParts = parts.map(p => ({
+                ...p,
+                description: resolveText(p.description)
+            }));
+
+            const resolvedNotes = resolveText(notes);
+
             // 1. Save to Google Sheets (Master)
+            // We send 'resolved' data for the columns/PDF, but 'raw' data for the Metadata (Templates)
             const saveRes = await fetch("/api/notes/save", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    folio: folio === "" ? undefined : folio, // Send manual folio
+                    folio: folio === "" ? undefined : folio,
                     client,
                     vehicle,
-                    services,
-                    parts,
-                    notes, // Add notes
+                    services: resolvedServices, // Resolved for columns/PDF
+                    parts: resolvedParts,     // Resolved for columns/PDF
+                    notes: resolvedNotes,     // Resolved for columns/PDF
                     company: COMPANY_DEFAULTS,
                     includeIva,
                     includeIsr,
-                    date: currentDate
+                    date: currentDate,
+                    // Preserve raw data for templates (so {cliente} persists in history)
+                    rawData: {
+                        services,
+                        parts,
+                        notes
+                    }
                 })
             });
 

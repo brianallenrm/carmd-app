@@ -1,6 +1,7 @@
 export interface ServiceItem {
     id: string;
     description: string;
+    serviceName?: string; // Original catalog name
     laborCost: number;
     partsCost: number;
     quantity?: number; // New field for parts

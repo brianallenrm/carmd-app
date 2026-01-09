@@ -27,18 +27,20 @@ export async function POST(req: Request) {
 
         // 2. Calculate New Folio
         const rows = await sheet.getRows();
-        let lastFolio = 0;
 
-        if (rows.length > 0) {
+        let folio = body.folio;
+        let existingRowIndex = -1;
+
+        if (folio && folio !== "BORRADOR") {
+            // Check if folio exists to UPDATE (skip check if it's a draft/placeholder)
+            existingRowIndex = rows.findIndex(r => r.get("Folio") === folio);
+        } else {
+            // Auto-generate if not provided or placeholder
             const lastRow = rows[rows.length - 1];
-            // Accessing column "Folio" (Header row 1)
-            const lastFolioVal = parseInt(lastRow.get("Folio"));
-            if (!isNaN(lastFolioVal)) {
-                lastFolio = lastFolioVal;
-            }
+            const lastFolio = lastRow ? parseInt(lastRow.get("Folio")) : 0;
+            const nextFolio = lastFolio + 1;
+            folio = nextFolio.toString().padStart(5, '0');
         }
-
-        const newFolio = (lastFolio + 1).toString().padStart(5, '0'); // e.g., 04674
 
         // 3. Prepare Data
         // Sum costs: Handled separately now
@@ -68,14 +70,9 @@ export async function POST(req: Request) {
         // Let's assume headers are: "Folio", "Fecha", "Cliente", "Correo", "Telefono", "Vehiculo", "Anio", "Placa", "KM", "Servicio", "MO", "Refacciones", "Total", "Factura"
 
         // Check if "Metadatos" header exists, if not, add it
-        await sheet.loadHeaderRow();
-        const headers = sheet.headerValues;
-        if (!headers.includes("Metadatos")) {
-            await sheet.setHeaderRow([...headers, "Metadatos"]);
-        }
-
+        // 5. Prepare Row Data
         const rowData = {
-            "Folio": newFolio,
+            "Folio": folio,
             "Fecha": date, // e.g. "4/1/23"
             "Cliente": client.name,
             "Correo": client.email || "*", // Fallback per screenshot
@@ -89,13 +86,21 @@ export async function POST(req: Request) {
             "Refacciones": partsTotal,
             "Total": total,
             "Factura": facturaStatus,
+            "Estatus": "Pagado", // Default status
             "Metadatos": JSON.stringify(body) // Store full payload for templates
         };
 
-        // 4. Append Row
-        await sheet.addRow(rowData);
+        if (existingRowIndex >= 0) {
+            // UPDATE EXISTING
+            const row = rows[existingRowIndex];
+            row.assign(rowData);
+            await row.save();
+        } else {
+            // CREATE NEW
+            await sheet.addRow(rowData);
+        }
 
-        return NextResponse.json({ success: true, folio: newFolio });
+        return NextResponse.json({ success: true, folio });
 
     } catch (error) {
         console.error("Error saving service note:", error);

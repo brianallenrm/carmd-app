@@ -15,6 +15,23 @@ export default function ServiceNoteForm() {
         email: "",
     });
 
+    const [folio, setFolio] = useState("");
+    const [isLoadingFolio, setIsLoadingFolio] = useState(false);
+
+    const loadNextFolio = async () => {
+        setIsLoadingFolio(true);
+        try {
+            const res = await fetch("/api/notes/last-folio");
+            const data = await res.json();
+            const next = (parseInt(data.lastFolio) + 1).toString().padStart(5, '0');
+            setFolio(next);
+        } catch (e) {
+            console.error("Error loading folio", e);
+        } finally {
+            setIsLoadingFolio(false);
+        }
+    };
+
     const [vehicle, setVehicle] = useState<VehicleInfo>({
         brand: "",
         model: "",
@@ -79,24 +96,35 @@ export default function ServiceNoteForm() {
         }
     };
 
-    const applyTemplate = (note: any) => {
-        if (!confirm(`¿Usar la nota ${note.folio} como plantilla? Esto reemplazará los datos actuales.`)) return;
+    const applyTemplate = (note: any, asTemplate: boolean) => {
+        const action = asTemplate ? "usar como plantilla (generará nuevo folio)" : "modificar (sobrescribirá esta nota)";
+        if (!confirm(`¿Estás seguro de ${action} la nota ${note.folio}?`)) return;
 
         const data = note.data;
-        // Keep current client if they have typed one? Or overwrite? 
-        // User scenario: "use as template". Usually implies copying the service data, but maybe not the client?
-        // User said: "pueda abrir esa reciente y usarla como template y ya no llenar todo desde 0"
-        // Let's load everything BUT maybe reset the Date/Folio (Folio is generated on save).
-        // I'll overwrite client/vehicle too as that's often what they want (same car, same client).
-        // They can edit client name after.
 
         if (data.client) setClient(data.client);
         if (data.vehicle) setVehicle(data.vehicle);
-        if (data.services) setServices(data.services);
+
+        // Map services to ensure legacy notes without 'serviceName' work too
+        if (data.services) {
+            setServices(data.services.map((s: any) => ({
+                ...s,
+                serviceName: s.serviceName || s.description // Fallback for old notes
+            })));
+        }
+
         if (data.parts) setParts(data.parts);
         if (data.notes) setNotes(data.notes);
         if (data.includeIva !== undefined) setIncludeIva(data.includeIva);
         if (data.includeIsr !== undefined) setIncludeIsr(data.includeIsr);
+
+        if (asTemplate) {
+            // Reset Folio to next available
+            loadNextFolio();
+        } else {
+            // Set Folio to the note's folio for modification
+            setFolio(note.folio);
+        }
 
         setIsHistoryOpen(false);
     };
@@ -122,10 +150,15 @@ export default function ServiceNoteForm() {
                 setNotes(parsed.notes || "");
                 setIncludeIva(parsed.includeIva || false);
                 setIncludeIsr(parsed.includeIsr || false);
+                // Draft doesn't save folio usually, so we load next one
             } catch (e) {
                 console.error("Error loading draft", e);
             }
         }
+
+        // Always load next folio on mount (if not in draft logic which we just handled, but let's default to next)
+        loadNextFolio();
+
         setIsDraftLoaded(true);
     }, []);
 
@@ -298,6 +331,7 @@ export default function ServiceNoteForm() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    folio: folio === "" ? undefined : folio, // Send manual folio
                     client,
                     vehicle,
                     services,
@@ -344,14 +378,30 @@ export default function ServiceNoteForm() {
                         <p className="text-gray-500">CarMD Premium Service</p>
                     </div>
                 </div>
-                <button
-                    type="button"
-                    onClick={() => { setIsHistoryOpen(true); loadRecentNotes(); }}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200"
-                >
-                    <History size={18} />
-                    <span>Historial / Plantillas</span>
-                </button>
+
+                <div className="flex gap-4 items-center">
+                    <div className="flex flex-col items-end">
+                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Folio (Orden)</label>
+                        <div className="relative">
+                            <span className="absolute left-3 top-2 text-gray-400 font-mono text-lg">#</span>
+                            <input
+                                type="text"
+                                value={folio}
+                                onChange={(e) => setFolio(e.target.value)}
+                                className="w-32 pl-7 p-2 border border-gray-200 rounded-lg font-mono text-lg font-bold text-[#F37014] focus:ring-2 focus:ring-[#F37014] outline-none text-center bg-gray-50"
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => { setIsHistoryOpen(true); loadRecentNotes(); }}
+                        className="flex items-center gap-2 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200 h-full"
+                    >
+                        <History size={18} />
+                        <span>Historial</span>
+                    </button>
+                </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-10">
@@ -525,6 +575,7 @@ export default function ServiceNoteForm() {
                                             placeholder="Buscar servicio..."
                                             onSelect={(item) => {
                                                 updateService(service.id, "description", item.descripcion);
+                                                updateService(service.id, "serviceName", item.nombre); // Store Catalog Name persistence
                                                 if (item.costo_sugerido > 0) {
                                                     updateService(service.id, "laborCost", item.costo_sugerido);
                                                 }
@@ -633,6 +684,7 @@ export default function ServiceNoteForm() {
                                             placeholder="Buscar refacción..."
                                             onSelect={(item) => {
                                                 updatePart(part.id, "description", item.nombre);
+                                                updatePart(part.id, "serviceName", item.nombre); // Store persistence
                                                 if (item.costo_sugerido > 0) {
                                                     updatePart(part.id, "partsCost", item.costo_sugerido);
                                                 }
@@ -816,34 +868,55 @@ export default function ServiceNoteForm() {
                                 <div className="text-center py-8 text-gray-500">Cargando historial...</div>
                             ) : recentNotes.length === 0 ? (
                                 <div className="text-center py-8 text-gray-500">
-                                    No se encontraron notas recientes con datos de plantilla.
-                                    <br />
-                                    <span className="text-xs text-gray-400">(Solo las notas nuevas se pueden usar como plantilla)</span>
+                                    No se encontraron notas recientes.
                                 </div>
                             ) : (
-                                recentNotes.map((note) => (
-                                    <div key={note.folio} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex justify-between items-center">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <span className="font-mono font-bold text-[#F37014]">{note.folio}</span>
-                                                <span className="text-gray-300">|</span>
-                                                <span className="text-sm text-gray-500 flex items-center gap-1">
-                                                    <Clock size={12} />
-                                                    {note.date}
-                                                </span>
+                                recentNotes.map((note) => {
+                                    const serviceSummary = note.data?.services?.map((s: any) => s.serviceName || s.description).slice(0, 2).join(", ") + (note.data?.services?.length > 2 ? "..." : "") || "Sin servicios";
+
+                                    return (
+                                        <div key={note.folio} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3">
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="font-mono font-bold text-[#F37014]">{note.folio}</span>
+                                                        <span className="text-gray-300">|</span>
+                                                        <span className="text-sm text-gray-500 flex items-center gap-1">
+                                                            <Clock size={12} />
+                                                            {note.date}
+                                                        </span>
+                                                    </div>
+                                                    <h3 className="font-bold text-gray-800">{note.client}</h3>
+                                                    <p className="text-sm text-gray-600 truncate max-w-md mb-1">{note.vehicle}</p>
+                                                    <p className="text-xs text-gray-400 italic truncate max-w-md border-t pt-1 mt-1">
+                                                        {serviceSummary}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <h3 className="font-bold text-gray-800">{note.client}</h3>
-                                            <p className="text-sm text-gray-600 truncate max-w-md">{note.vehicle}</p>
+
+                                            <div className="flex gap-2 border-t pt-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => applyTemplate(note, true)}
+                                                    className="flex-1 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 font-medium text-sm border border-blue-200 transition-colors flex justify-center items-center gap-1"
+                                                    title="Crea una nota nueva usando estos datos"
+                                                >
+                                                    <FileText size={14} />
+                                                    Usar Plantilla
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => applyTemplate(note, false)}
+                                                    className="flex-1 px-3 py-2 bg-orange-50 text-[#F37014] rounded-lg hover:bg-orange-100 font-medium text-sm border border-orange-200 transition-colors flex justify-center items-center gap-1"
+                                                    title="Edita esta nota manteniendo el mismo folio"
+                                                >
+                                                    <Save size={14} />
+                                                    Modificar
+                                                </button>
+                                            </div>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => applyTemplate(note)}
-                                            className="ml-4 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 font-medium text-sm border border-indigo-200 transition-colors"
-                                        >
-                                            Usar Plantilla
-                                        </button>
-                                    </div>
-                                ))
+                                    );
+                                })
                             )}
                         </div>
 

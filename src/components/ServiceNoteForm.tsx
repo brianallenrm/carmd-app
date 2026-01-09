@@ -101,20 +101,24 @@ export default function ServiceNoteForm() {
         if (!confirm(`¿Estás seguro de ${action} la nota ${note.folio}?`)) return;
 
         const data = note.data;
+        // Check for rawData (preserved info with variables) or fallback to standard data
+        const sourceData = data.rawData || data;
 
-        if (data.client) setClient(data.client);
-        if (data.vehicle) setVehicle(data.vehicle);
+        if (sourceData.client && !asTemplate) setClient(sourceData.client);
+        if (asTemplate && data.client) setClient(data.client);
+
+        if (sourceData.vehicle) setVehicle(sourceData.vehicle);
 
         // Map services to ensure legacy notes without 'serviceName' work too
-        if (data.services) {
-            setServices(data.services.map((s: any) => ({
+        if (sourceData.services) {
+            setServices(sourceData.services.map((s: any) => ({
                 ...s,
                 serviceName: s.serviceName || s.description // Fallback for old notes
             })));
         }
 
-        if (data.parts) setParts(data.parts);
-        if (data.notes) setNotes(data.notes);
+        if (sourceData.parts) setParts(sourceData.parts);
+        if (sourceData.notes) setNotes(sourceData.notes);
         if (data.includeIva !== undefined) setIncludeIva(data.includeIva);
         if (data.includeIsr !== undefined) setIncludeIsr(data.includeIsr);
 
@@ -808,6 +812,21 @@ export default function ServiceNoteForm() {
                         onChange={(e) => setNotes(e.target.value)}
                         spellCheck={true}
                     />
+                </div>
+
+                {/* Variable Tokens Hint */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 text-sm md:flex md:items-center md:justify-between text-blue-800">
+                    <div className="flex items-center gap-2 mb-2 md:mb-0">
+                        <span className="font-bold">💡 Tip:</span>
+                        <span>Puedes usar "variables" que se llenan solas:</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 font-mono text-xs">
+                        <span className="px-2 py-1 bg-white rounded border border-blue-200" title="Nombre del Cliente">{'{cliente}'}</span>
+                        <span className="px-2 py-1 bg-white rounded border border-blue-200" title="Marca y Modelo">{'{vehiculo}'}</span>
+                        <span className="px-2 py-1 bg-white rounded border border-blue-200" title="Placas">{'{placas}'}</span>
+                        <span className="px-2 py-1 bg-white rounded border border-blue-200" title="Kilometraje">{'{km}'}</span>
+                        <span className="px-2 py-1 bg-white rounded border border-blue-200" title="Fecha">{'{fecha}'}</span>
+                    </div>
                 </div>
 
                 {/* Totals Section */}

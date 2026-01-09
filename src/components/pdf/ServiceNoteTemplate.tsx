@@ -175,7 +175,9 @@ export default function ServiceNoteTemplate({
                         </div>
                         <div className="col-span-2">
                             <span className="text-slate-400 block text-[9px] uppercase">Kilometraje</span>
-                            <span className="font-mono font-bold text-slate-900">{safeOdometer.toLocaleString()} km</span>
+                            <span className="font-mono font-bold text-slate-900">
+                                {safeOdometer > 0 ? `${safeOdometer.toLocaleString()} km` : "- km"}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -247,13 +249,17 @@ export default function ServiceNoteTemplate({
 
                 {/* Left Side: Notes & Maintenance */}
                 <div className="w-1/2 pr-4 space-y-3">
-                    <div className="bg-[#F37014]/10 p-3 rounded-lg border border-[#F37014]/20 text-center">
-                        <h4 className="text-[11px] font-bold text-[#F37014] uppercase mb-1">2 MANTENIMIENTOS PREVENTIVOS (GRATUITOS)</h4>
-                        <div className="text-[12px] text-slate-900 font-bold flex justify-center gap-4">
-                            <span>1- {nextMaintenance.first.toLocaleString()} km.</span>
-                            <span>2- {nextMaintenance.second.toLocaleString()} km.</span>
+                    {safeOdometer > 0 ? (
+                        <div className="bg-[#F37014]/10 p-3 rounded-lg border border-[#F37014]/20 text-center">
+                            <h4 className="text-[11px] font-bold text-[#F37014] uppercase mb-1">2 MANTENIMIENTOS PREVENTIVOS (GRATUITOS)</h4>
+                            <div className="text-[12px] text-slate-900 font-bold flex justify-center gap-4">
+                                <span>1- {nextMaintenance.first.toLocaleString()} km.</span>
+                                <span>2- {nextMaintenance.second.toLocaleString()} km.</span>
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="h-[4.5rem]"></div>
+                    )}
 
                     <div className="text-[9px] text-slate-500 leading-tight">
                         <p className="font-bold text-slate-900 mb-0.5">GARANTÍA:</p>

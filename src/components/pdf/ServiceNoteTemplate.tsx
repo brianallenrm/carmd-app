@@ -60,8 +60,8 @@ export default function ServiceNoteTemplate({
     // Calculcate totals based on split arrays
     const servicesTotal = services.reduce((sum, s) => sum + (s.laborCost || 0), 0);
     const safeParts = parts || [];
-    // Parts Total = (Unit Cost * Quantity)
-    const partsTotal = safeParts.reduce((sum, p) => sum + ((p.partsCost || 0) * (p.quantity || 1)), 0);
+    // Parts Total = Total Cost (user enters final price)
+    const partsTotal = safeParts.reduce((sum, p) => sum + (p.partsCost || 0), 0);
 
     const subtotal = servicesTotal + partsTotal;
     const totalIva = includeIva ? subtotal * 0.16 : 0;
@@ -224,7 +224,7 @@ export default function ServiceNoteTemplate({
                                     {renderRichText(part.description)}
                                 </td>
                                 <td className="py-1 pr-2 text-xs font-mono text-right text-slate-900 font-medium group-hover:bg-slate-50 transition-colors w-[15%] align-top">
-                                    {formatCost((part.partsCost || 0) * (part.quantity || 1))}
+                                    {formatCost(part.partsCost || 0)}
                                 </td>
                             </tr>
                         )) : (

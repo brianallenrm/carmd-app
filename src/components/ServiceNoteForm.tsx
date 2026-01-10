@@ -299,7 +299,7 @@ export default function ServiceNoteForm() {
     };
 
     const servicesTotal = services.reduce((sum, s) => sum + (s.laborCost || 0), 0);
-    const partsTotal = parts.reduce((sum, p) => sum + ((p.partsCost || 0) * (p.quantity || 1)), 0);
+    const partsTotal = parts.reduce((sum, p) => sum + (p.partsCost || 0), 0);
     const subtotal = servicesTotal + partsTotal;
     const totalIva = includeIva ? subtotal * 0.16 : 0;
     const totalIsr = includeIsr ? subtotal * 0.0125 : 0;

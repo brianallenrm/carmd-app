@@ -133,17 +133,24 @@ export default function ServiceNoteForm() {
         setIsHistoryOpen(false);
     };
 
-    useEffect(() => {
-        // Load suggestions from history
-        fetch('/api/services/history')
-            .then(res => res.json())
-            .then(data => {
-                if (data.services) setSuggestions(data.services);
-            })
-            .catch(err => console.error("Failed to load suggestions", err));
+    const [draftId, setDraftId] = useState<string>("");
 
-        // Load Draft from LocalStorage
-        const savedDraft = localStorage.getItem("service-note-draft");
+    useEffect(() => {
+        // 1. Resolve Draft ID from URL or Create New
+        const params = new URLSearchParams(window.location.search);
+        let currentId = params.get("draftId");
+
+        if (!currentId) {
+            currentId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+            // Update URL without reload
+            const newUrl = `${window.location.pathname}?draftId=${currentId}`;
+            window.history.replaceState({ path: newUrl }, '', newUrl);
+        }
+
+        setDraftId(currentId);
+
+        // 2. Load Specific Draft
+        const savedDraft = localStorage.getItem(`service-note-draft-${currentId}`);
         if (savedDraft) {
             try {
                 const parsed = JSON.parse(savedDraft);
@@ -158,17 +165,22 @@ export default function ServiceNoteForm() {
             } catch (e) {
                 console.error("Error loading draft", e);
             }
+        } else {
+            // Backward compatibility: Check safely for old global draft
+            // Only if this is a NEW draft session (no draftId was in URL originally)
+            // But to be safe and clean, let's just ignore the old global key to avoid confusion
+            // unless user explicitly wants to migrate. For now, fresh start is safer.
         }
 
-        // Always load next folio on mount (if not in draft logic which we just handled, but let's default to next)
+        // Always load next folio on mount
         loadNextFolio();
 
         setIsDraftLoaded(true);
-    }, []);
+    }, []); // Run once on mount
 
-    // Auto-Save Effect
+    // Multi-Tab Safe Auto-Save
     useEffect(() => {
-        if (!isDraftLoaded) return;
+        if (!isDraftLoaded || !draftId) return;
         const draft = {
             client,
             vehicle,
@@ -178,8 +190,8 @@ export default function ServiceNoteForm() {
             includeIva,
             includeIsr
         };
-        localStorage.setItem("service-note-draft", JSON.stringify(draft));
-    }, [client, vehicle, services, parts, notes, includeIva, includeIsr, isDraftLoaded]);
+        localStorage.setItem(`service-note-draft-${draftId}`, JSON.stringify(draft));
+    }, [client, vehicle, services, parts, notes, includeIva, includeIsr, isDraftLoaded, draftId]);
 
     const handleClearForm = () => {
         if (!confirm("¿Estás seguro de borrar toda la información y empezar de cero?")) return;
@@ -193,8 +205,19 @@ export default function ServiceNoteForm() {
         setIncludeIva(false);
         setIncludeIsr(false);
 
-        // Clear Storage
-        localStorage.removeItem("service-note-draft");
+        // Clear CURRENT Draft Storage
+        if (draftId) {
+            localStorage.removeItem(`service-note-draft-${draftId}`);
+        }
+
+        // Generate NEW Draft ID (Fresh Session)
+        const newId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+        setDraftId(newId);
+        const newUrl = `${window.location.pathname}?draftId=${newId}`;
+        window.history.replaceState({ path: newUrl }, '', newUrl);
+
+        // Reload Folio
+        loadNextFolio();
     };
 
     const addService = () => {

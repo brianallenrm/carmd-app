@@ -81,43 +81,55 @@ export default function ServiceNoteForm() {
         setParts(newParts);
     };
 
-    setRecentNotes(data.templates);
-}
-    } catch (error) {
-    console.error("Error loading history:", error);
-}
+};
 
-// Load Local Drafts
-try {
-    const drafts: any[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith("service-note-draft-")) {
-            try {
-                const raw = localStorage.getItem(key);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    const id = key.replace("service-note-draft-", "");
-                    // Basic validation that it has content
-                    if (parsed.client?.name || parsed.vehicle?.plates || parsed.services?.[0]?.description) {
-                        drafts.push({
-                            id,
-                            ...parsed,
-                            timestamp: Date.now() // Ideally we would save timestamp in draft, but for now just list them
-                            // TODO: Add timestamp to draft structure in future
-                        });
-                    }
-                }
-            } catch (e) { console.error("Bad draft", key); }
+const [activeTab, setActiveTab] = useState<'remote' | 'local'>('remote');
+const [localDrafts, setLocalDrafts] = useState<any[]>([]);
+
+const loadRecentNotes = async () => {
+    setIsLoadingHistory(true);
+    // Load Remote History
+    try {
+        const res = await fetch("/api/notes/recent");
+        const data = await res.json();
+        if (data.templates) {
+            setRecentNotes(data.templates);
         }
+    } catch (error) {
+        console.error("Error loading history:", error);
     }
-    // Sort by ID (usually chronological if using timestamp based IDs, but ours are random+time)
-    setLocalDrafts(drafts);
-} catch (e) {
-    console.error("Error loading local drafts", e);
-}
 
-setIsLoadingHistory(false);
+    // Load Local Drafts
+    try {
+        const drafts: any[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith("service-note-draft-")) {
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        const id = key.replace("service-note-draft-", "");
+                        // Basic validation that it has content
+                        if (parsed.client?.name || parsed.vehicle?.plates || parsed.services?.[0]?.description) {
+                            drafts.push({
+                                id,
+                                ...parsed,
+                                timestamp: Date.now() // Ideally we would save timestamp in draft, but for now just list them
+                                // TODO: Add timestamp to draft structure in future
+                            });
+                        }
+                    }
+                } catch (e) { console.error("Bad draft", key); }
+            }
+        }
+        // Sort by ID (usually chronological if using timestamp based IDs, but ours are random+time)
+        setLocalDrafts(drafts);
+    } catch (e) {
+        console.error("Error loading local drafts", e);
+    }
+
+    setIsLoadingHistory(false);
 };
 
 const deleteDraft = (id: string) => {

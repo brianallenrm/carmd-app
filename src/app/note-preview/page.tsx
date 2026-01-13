@@ -46,6 +46,7 @@ function NotePreviewContent() {
                 if (searchParams.get("notes")) data.notes = searchParams.get("notes");
                 if (searchParams.get("includeIva")) data.includeIva = searchParams.get("includeIva") === 'true';
                 if (searchParams.get("includeIsr")) data.includeIsr = searchParams.get("includeIsr") === 'true';
+                if (searchParams.get("isDiagnostic")) data.isDiagnostic = searchParams.get("isDiagnostic") === 'true';
             } catch (err) {
                 console.error("Error parsing URL params", err);
             }
@@ -59,6 +60,7 @@ function NotePreviewContent() {
     const date = sourceData.date || new Date().toLocaleDateString();
     const includeIva = sourceData.includeIva === true;
     const includeIsr = sourceData.includeIsr === true;
+    const isDiagnostic = sourceData.isDiagnostic === true;
     const notes = sourceData.notes || "";
 
     let client = sourceData.client || { name: "Cliente Ejemplo", address: "", phone: "", email: "" };
@@ -94,6 +96,7 @@ function NotePreviewContent() {
                     folio,
                     includeIva,
                     includeIsr,
+                    isDiagnostic,
                     notes,
                     date
                 }),
@@ -136,6 +139,7 @@ function NotePreviewContent() {
                     folio,
                     includeIva,
                     includeIsr,
+                    isDiagnostic,
                     notes,
                     date
                 }),
@@ -174,6 +178,7 @@ function NotePreviewContent() {
                     folio,
                     includeIva,
                     includeIsr,
+                    isDiagnostic,
                     notes,
                     date
                 }),
@@ -287,6 +292,7 @@ function NotePreviewContent() {
                     date={date}
                     includeIva={includeIva}
                     includeIsr={includeIsr}
+                    isDiagnostic={isDiagnostic}
                     notes={notes}
                 />
             </div>

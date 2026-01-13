@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
             date: body.date,
             includeIva: body.includeIva,
             includeIsr: body.includeIsr,
+            isDiagnostic: body.isDiagnostic || false,
             notes: body.notes
         };
 

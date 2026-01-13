@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
 
-        const { client, vehicle, services, parts, company, folio, notes, date } = body;
+        const { client, vehicle, services, parts, company, folio, notes, date, isDiagnostic } = body;
 
         // Determine base URL
         const host = req.headers.get("host") || "localhost:3000";
@@ -26,6 +26,7 @@ export async function POST(req: Request) {
             date: date || new Date().toLocaleDateString("es-MX"),
             includeIva: body.includeIva,
             includeIsr: body.includeIsr,
+            isDiagnostic: isDiagnostic || false,
             notes: notes
         };
 

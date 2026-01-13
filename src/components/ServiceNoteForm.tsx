@@ -44,6 +44,7 @@ export default function ServiceNoteForm() {
 
     const [includeIva, setIncludeIva] = useState(false);
     const [includeIsr, setIncludeIsr] = useState(false);
+    const [isDiagnostic, setIsDiagnostic] = useState(false);
     const [services, setServices] = useState<ServiceItem[]>([
         { id: "1", description: "", laborCost: 0, partsCost: 0 },
     ]);
@@ -201,6 +202,7 @@ export default function ServiceNoteForm() {
                 setNotes(parsed.notes || "");
                 setIncludeIva(parsed.includeIva || false);
                 setIncludeIsr(parsed.includeIsr || false);
+                setIsDiagnostic(parsed.isDiagnostic || false);
                 // Draft doesn't save folio usually, so we load next one
             } catch (e) {
                 console.error("Error loading draft", e);
@@ -228,10 +230,11 @@ export default function ServiceNoteForm() {
             parts,
             notes,
             includeIva,
-            includeIsr
+            includeIsr,
+            isDiagnostic
         };
         localStorage.setItem(`service-note-draft-${draftId}`, JSON.stringify(draft));
-    }, [client, vehicle, services, parts, notes, includeIva, includeIsr, isDraftLoaded, draftId]);
+    }, [client, vehicle, services, parts, notes, includeIva, includeIsr, isDiagnostic, isDraftLoaded, draftId]);
 
     const handleClearForm = () => {
         if (!confirm("¿Estás seguro de borrar toda la información y empezar de cero?")) return;
@@ -244,6 +247,7 @@ export default function ServiceNoteForm() {
         setNotes("");
         setIncludeIva(false);
         setIncludeIsr(false);
+        setIsDiagnostic(false);
 
         // Clear CURRENT Draft Storage
         if (draftId) {
@@ -368,6 +372,7 @@ export default function ServiceNoteForm() {
         params.set("folio", customFolio);
         params.set("includeIva", includeIva.toString());
         params.set("includeIsr", includeIsr.toString());
+        params.set("isDiagnostic", isDiagnostic.toString());
         params.set("date", customDate);
         return `/note-preview?${params.toString()}`;
     };
@@ -448,6 +453,7 @@ export default function ServiceNoteForm() {
                     company: COMPANY_DEFAULTS,
                     includeIva,
                     includeIsr,
+                    isDiagnostic,
                     date: currentDate,
                     // Preserve raw data for templates (so {cliente} persists in history)
                     rawData: {
@@ -936,6 +942,20 @@ export default function ServiceNoteForm() {
                                 </label>
                             </div>
                             <span>${totalIsr.toFixed(2)}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-gray-600">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="is-diagnostic"
+                                    checked={isDiagnostic}
+                                    onChange={(e) => setIsDiagnostic(e.target.checked)}
+                                    className="w-4 h-4 text-[#F37014] rounded border-gray-300 focus:ring-[#F37014] text-gray-900"
+                                />
+                                <label htmlFor="is-diagnostic" className="text-sm cursor-pointer select-none">
+                                    Es Diagnóstico (oculta refacciones y garantías)
+                                </label>
+                            </div>
                         </div>
                         <div className="flex justify-between text-2xl font-bold text-gray-900 border-t pt-4">
                             <span>Total</span>

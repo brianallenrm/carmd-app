@@ -46,4 +46,5 @@ export interface ServiceNoteData {
     company: CompanyInfo;
     includeIva: boolean; // 16%
     includeIsr: boolean; // 1.25% Retention
+    isDiagnostic?: boolean; // Flag for diagnostic notes (hides parts/warranty)
 }

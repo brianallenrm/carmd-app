@@ -14,6 +14,7 @@ interface ServiceNoteTemplateProps {
     company: CompanyInfo;
     includeIva: boolean;
     includeIsr: boolean;
+    isDiagnostic?: boolean;
 }
 
 export default function ServiceNoteTemplate({
@@ -27,6 +28,7 @@ export default function ServiceNoteTemplate({
     company,
     includeIva,
     includeIsr,
+    isDiagnostic = false,
 }: ServiceNoteTemplateProps) {
     // Helper to format cost: 0 -> "$0.00", undefined/null/empty -> ""
     const formatCost = (cost: number | undefined | null) => {
@@ -205,36 +207,39 @@ export default function ServiceNoteTemplate({
                 </table>
             </div>
 
-            {/* Parts Table */}
-            <div className="flex-grow mb-4">
-                <div className="flex items-end border-b border-slate-200 pb-1 mb-1">
-                    <h4 className="text-[10px] font-bold text-slate-900 uppercase w-[10%] text-center">CANT.</h4>
-                    <h4 className="text-[10px] font-bold text-slate-900 uppercase w-[75%] pl-2">Refacciones</h4>
-                    <h4 className="text-[10px] font-bold text-slate-900 uppercase w-[15%] text-right pr-2">IMPORTE</h4>
+
+            {/* Parts Table - Hidden in diagnostic mode */}
+            {!isDiagnostic && (
+                <div className="flex-grow mb-4">
+                    <div className="flex items-end border-b border-slate-200 pb-1 mb-1">
+                        <h4 className="text-[10px] font-bold text-slate-900 uppercase w-[10%] text-center">CANT.</h4>
+                        <h4 className="text-[10px] font-bold text-slate-900 uppercase w-[75%] pl-2">Refacciones</h4>
+                        <h4 className="text-[10px] font-bold text-slate-900 uppercase w-[15%] text-right pr-2">IMPORTE</h4>
+                    </div>
+                    <table className="w-full">
+                        <tbody className="divide-y divide-slate-100">
+                            {safeParts.length > 0 ? safeParts.map((part) => (
+                                <tr key={part.id} className="group">
+                                    <td className="py-1 text-[10px] font-mono font-bold text-slate-500 text-center w-[10%] align-top pt-1.5">
+                                        {/* Logic: Only show quantity if > 0. If 0 or null, show empty string. user request. */}
+                                        {(!part.quantity || part.quantity <= 0) ? "" : part.quantity}
+                                    </td>
+                                    <td className="py-1 pl-2 text-[10px] text-slate-700 whitespace-pre-wrap leading-snug group-hover:bg-slate-50 transition-colors w-[75%] text-justify pr-2 align-top">
+                                        {renderRichText(part.description)}
+                                    </td>
+                                    <td className="py-1 pr-2 text-xs font-mono text-right text-slate-900 font-medium group-hover:bg-slate-50 transition-colors w-[15%] align-top">
+                                        {formatCost(part.partsCost || 0)}
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan={3} className="py-1 pl-2 text-[10px] text-slate-400 italic">No se agregaron refacciones.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
-                <table className="w-full">
-                    <tbody className="divide-y divide-slate-100">
-                        {safeParts.length > 0 ? safeParts.map((part) => (
-                            <tr key={part.id} className="group">
-                                <td className="py-1 text-[10px] font-mono font-bold text-slate-500 text-center w-[10%] align-top pt-1.5">
-                                    {/* Logic: Only show quantity if > 0. If 0 or null, show empty string. user request. */}
-                                    {(!part.quantity || part.quantity <= 0) ? "" : part.quantity}
-                                </td>
-                                <td className="py-1 pl-2 text-[10px] text-slate-700 whitespace-pre-wrap leading-snug group-hover:bg-slate-50 transition-colors w-[75%] text-justify pr-2 align-top">
-                                    {renderRichText(part.description)}
-                                </td>
-                                <td className="py-1 pr-2 text-xs font-mono text-right text-slate-900 font-medium group-hover:bg-slate-50 transition-colors w-[15%] align-top">
-                                    {formatCost(part.partsCost || 0)}
-                                </td>
-                            </tr>
-                        )) : (
-                            <tr>
-                                <td colSpan={3} className="py-1 pl-2 text-[10px] text-slate-400 italic">No se agregaron refacciones.</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            )}
 
             {/* New: Optional Notes Section */}
             {notes && notes.trim().length > 0 && (
@@ -249,22 +254,26 @@ export default function ServiceNoteTemplate({
 
                 {/* Left Side: Notes & Maintenance */}
                 <div className="w-1/2 pr-4 space-y-3">
-                    {safeOdometer > 0 ? (
-                        <div className="bg-[#F37014]/10 p-3 rounded-lg border border-[#F37014]/20 text-center">
-                            <h4 className="text-[11px] font-bold text-[#F37014] uppercase mb-1">2 MANTENIMIENTOS PREVENTIVOS (GRATUITOS)</h4>
-                            <div className="text-[12px] text-slate-900 font-bold flex justify-center gap-4">
-                                <span>1- {nextMaintenance.first.toLocaleString()} km.</span>
-                                <span>2- {nextMaintenance.second.toLocaleString()} km.</span>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="h-[4.5rem]"></div>
-                    )}
+                    {!isDiagnostic && (
+                        <>
+                            {safeOdometer > 0 ? (
+                                <div className="bg-[#F37014]/10 p-3 rounded-lg border border-[#F37014]/20 text-center">
+                                    <h4 className="text-[11px] font-bold text-[#F37014] uppercase mb-1">2 MANTENIMIENTOS PREVENTIVOS (GRATUITOS)</h4>
+                                    <div className="text-[12px] text-slate-900 font-bold flex justify-center gap-4">
+                                        <span>1- {nextMaintenance.first.toLocaleString()} km.</span>
+                                        <span>2- {nextMaintenance.second.toLocaleString()} km.</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="h-[4.5rem]"></div>
+                            )}
 
-                    <div className="text-[9px] text-slate-500 leading-tight">
-                        <p className="font-bold text-slate-900 mb-0.5">GARANTÍA:</p>
-                        <p className="font-bold">1 AÑO DE GARANTÍA en mano de obra o 10,000 kms (lo que ocurra primero).</p>
-                    </div>
+                            <div className="text-[9px] text-slate-500 leading-tight">
+                                <p className="font-bold text-slate-900 mb-0.5">GARANTÍA:</p>
+                                <p className="font-bold">1 AÑO DE GARANTÍA en mano de obra o 10,000 kms (lo que ocurra primero).</p>
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 {/* Right Side: Totals */}

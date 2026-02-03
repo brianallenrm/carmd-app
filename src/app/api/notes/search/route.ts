@@ -51,36 +51,52 @@ export async function GET(request: Request) {
                 // If no JSON, construct basic fallback data from columns
                 // This handles "Legacy" notes or if JSON parsing failed
                 if (!rawData) {
-                    // console.log(`Legacy fallback for ${folio}`);
+                    // Mapeo Legacy Actualizado (2026-02-03):
+                    // A(0): Folio, B(1): Fecha, C(2): Cliente, E(4): Telefono
+                    // F(5): Marca, G(6): Modelo/Año, H(7): Placas, I(8): Km
+                    // J(9): Descripcion, K(10): Mano Obra, L(11): Refacciones, M(12): Total, N(13): Factura
+
+                    const facturaNote = String(sheet.getCell(i, 13).value || "").toLowerCase().includes("factura")
+                        ? "REQUIERE FACTURA"
+                        : "";
+
                     rawData = {
                         client: {
-                            name: String(sheet.getCell(i, 1).value || ""), // Col B: Cliente
-                            phone: String(sheet.getCell(i, 4).value || ""), // Col E: Phone usually here in legacy? Or maybe logic is: E=Placas
+                            name: String(sheet.getCell(i, 2).value || ""), // Col C: Cliente
+                            phone: String(sheet.getCell(i, 4).value || ""), // Col E: Telefono
+                            email: "",
+                            address: ""
                         },
                         vehicle: {
-                            // In legacy sheet:
-                            // A: Folio, B: Cliente, C: Vehiculo (Marca), D: Modelo, E: Placas, F: Km
-                            brand: String(sheet.getCell(i, 2).value || ""),
-                            model: String(sheet.getCell(i, 3).value || ""),
-                            plates: String(sheet.getCell(i, 4).value || ""), // Col E seems to be Placas based on code, but user screenshot showed phone?
-                            odometer: Number(String(sheet.getCell(i, 5).value || "0").replace(/[^0-9]/g, ''))
+                            brand: String(sheet.getCell(i, 5).value || ""), // Col F
+                            model: String(sheet.getCell(i, 6).value || ""), // Col G
+                            year: "",
+                            plates: String(sheet.getCell(i, 7).value || ""), // Col H
+                            odometer: Number(String(sheet.getCell(i, 8).value || "0").replace(/[^0-9]/g, '')) || 0 // Col I
                         },
                         services: [
                             {
-                                id: `legacy-${Date.now()}`,
-                                description: String(sheet.getCell(i, 6).value || "Detalles de servicio no estructurados"), // Col G
-                                laborCost: 0,
+                                id: `legacy-svc-${Date.now()}`,
+                                description: String(sheet.getCell(i, 9).value || "Servicio General"), // Col J
+                                laborCost: Number(sheet.getCell(i, 10).value || 0), // Col K
                                 partsCost: 0
                             }
                         ],
-                        parts: [],
-                        notes: "Nota importada de formato antiguo (Sin metadatos JSON).",
-                        date: sheet.getCell(i, 8).value // Col I
+                        parts: [
+                            {
+                                id: `legacy-part-${Date.now()}`,
+                                description: "Refacciones Varias (Nota Antigua)",
+                                quantity: 1,
+                                partsCost: Number(sheet.getCell(i, 11).value || 0), // Col L
+                                laborCost: 0
+                            }
+                        ],
+                        notes: `Nota importada de formato antiguo. ${facturaNote}`,
+                        company: {},
+                        includeIva: false,
+                        includeIsr: false,
+                        date: sheet.getCell(i, 1).value // Col B
                     };
-
-                    // Try to put total in labor cost for visibility
-                    const totalVal = sheet.getCell(i, 23).value; // Col X
-                    if (totalVal) rawData.services[0].laborCost = Number(totalVal);
                 }
 
                 results.push({

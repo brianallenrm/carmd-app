@@ -89,7 +89,14 @@ export async function GET(request: Request) {
                     vehicle: `${sheet.getCell(i, 2).value} ${sheet.getCell(i, 3).value}`,
                     date: sheet.getCell(i, 8).value,
                     total: sheet.getCell(i, 23).value,
-                    data: rawData // This is what the UI will load
+                    data: rawData, // This is what the UI will load
+                    // DEBUG INFO - REMOVE LATER
+                    _debug: {
+                        jsonCellType: typeof jsonCellValue,
+                        jsonCellPreview: String(jsonCellValue).substring(0, 50),
+                        hasJson: !!rawData,
+                        rowIndex: i
+                    }
                 });
 
                 matchCount++;

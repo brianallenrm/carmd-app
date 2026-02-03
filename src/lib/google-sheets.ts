@@ -113,25 +113,82 @@ export const lookupVehicleByPlate = async (plate: string) => {
         return val ? String(val) : '';
     };
 
+    // --- Sanitization Helpers ---
+    const toTitleCase = (str: string) => {
+        if (!str) return "";
+        return str.toLowerCase().replace(/(?:^|\s)\w/g, (match) => match.toUpperCase());
+    };
+
+    const cleanEmail = (email: string) => {
+        if (!email) return "";
+        // Check for company placeholder email (case insensitive)
+        if (email.toLowerCase().includes("car.md.mx@hotmail.com")) return "";
+        return email.toLowerCase();
+    };
+
+    const rawState = getVal(9); // Column J: Estado
+    const isCdmx = /cdmx|ciudad de m|d\.f\./i.test(rawState);
+
+    const formatStreet = (street: string) => {
+        if (!street) return "";
+        let clean = toTitleCase(street);
+        // Standardize "no." -> "No."
+        clean = clean.replace(/\bno\.\s*/gi, "No. ");
+        // Standardize "num." -> "No."
+        clean = clean.replace(/\bnum\.\s*/gi, "No. ");
+        return clean.trim();
+    };
+
+    const formatColonia = (col: string) => {
+        if (!col) return "";
+        let clean = toTitleCase(col);
+        // Prefix with Col. if missing
+        if (!/^col\./i.test(clean) && !/^colonia/i.test(clean)) {
+            clean = `Col. ${clean}`;
+        }
+        return clean.trim();
+    };
+
+    const formatMunDel = (val: string) => {
+        if (!val) return "";
+        let clean = toTitleCase(val);
+        // Determine prefix based on State
+        const prefix = isCdmx ? "Del." : "Mun.";
+
+        // Add prefix if missing
+        if (!clean.startsWith(prefix) && !clean.startsWith("Del") && !clean.startsWith("Mun")) {
+            clean = `${prefix} ${clean}`;
+        }
+        return clean.trim();
+    };
+
+    const formatState = (state: string) => {
+        if (!state) return "";
+        // Standardize common states
+        if (/cdmx|ciudad de/i.test(state)) return "CDMX";
+        if (/estado de m|mex|edo/i.test(state)) return "Edo. Méx.";
+        return toTitleCase(state);
+    };
+
     const client = {
-        name: getVal(2), // C
+        name: toTitleCase(getVal(2)), // C
         phone: getVal(4) || getVal(3), // E (Whatsapp) or D (Oficina)
-        email: getVal(5), // F
+        email: cleanEmail(getVal(5)), // F
         address: [
-            getVal(6), // G
-            getVal(7), // H
-            getVal(8), // I
-            getVal(9)  // J
+            formatStreet(getVal(6)),      // G: Domicilio Calle
+            formatColonia(getVal(7)),     // H: Colonia
+            formatMunDel(getVal(8)),      // I: Deleg. o Mun
+            formatState(getVal(9))        // J: Estado
         ].filter(Boolean).join(', '),
     };
 
     const vehicle = {
-        brand: getVal(10), // K
-        model: getVal(11), // L
+        brand: toTitleCase(getVal(10)), // K
+        model: toTitleCase(getVal(11)), // L
         year: getVal(12), // M
-        plates: getVal(13) || plate, // N
-        vin: getVal(14), // O
-        engine: getVal(15), // P
+        plates: (getVal(13) || plate).toUpperCase(), // N - Always uppercase plates
+        vin: getVal(14).toUpperCase(), // O
+        engine: getVal(15).toUpperCase(), // P
         odometer: parseInt(getVal(16).replace(/[^0-9]/g, '')) || 0, // Q
     };
 

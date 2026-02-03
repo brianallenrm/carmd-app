@@ -32,8 +32,8 @@ export async function GET(request: Request) {
             const plates = String(sheet.getCell(i, 4).value || "").toLowerCase(); // Col E (Index 4)
 
             if (folio.includes(query) || client.includes(query) || plates.includes(query)) {
-                // Determine if it has JSON data (Col Z -> Index 25)
-                const jsonCellValue = sheet.getCell(i, 25).value;
+                // Determine if it has JSON data (Col O -> Index 14)
+                const jsonCellValue = sheet.getCell(i, 14).value;
                 let rawData = null;
 
                 // Robust Parsing

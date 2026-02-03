@@ -272,6 +272,7 @@ export default function ServiceNoteForm() {
     };
 
     const removeService = (id: string) => {
+        if (!confirm("¿Seguro que quieres borrar este servicio?")) return;
         setServices(services.filter((s) => s.id !== id));
     };
 
@@ -291,6 +292,7 @@ export default function ServiceNoteForm() {
     };
 
     const removePart = (id: string) => {
+        if (!confirm("¿Seguro que quieres borrar esta refacción?")) return;
         setParts(parts.filter((p) => p.id !== id));
     };
 
@@ -400,6 +402,10 @@ export default function ServiceNoteForm() {
         e.preventDefault();
         if (!client.name || !vehicle.plates) {
             alert("Por favor complete los campos obligatorios (Cliente, Placas)");
+            return;
+        }
+
+        if (!confirm(`¿Estás seguro de generar esta nota? Se guardará con el folio ${folio || "auto-generado"}.`)) {
             return;
         }
 

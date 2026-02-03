@@ -8,16 +8,16 @@ import { ServiceItem, ClientInfo, VehicleInfo } from "@/types/service-note";
 import { COMPANY_DEFAULTS } from "@/lib/constants";
 
 const TUNEUP_KIT_PARTS = [
-    "Filtro de aire",
-    "Filtro de cabina (aire acondicionado)",
-    "Filtro de combustible",
-    "Spray cuerpo de aceleración",
-    "Líquido limpieza de inyectores",
-    "Filtro de aceite",
-    "Garrafa de aceite lavado interno de motor",
-    "Garrafa de aceite para motor",
-    "Materiales diversos, consumibles y artículos de limpieza",
-    "Bujías"
+    { description: "Filtro de aire", price: 0 },
+    { description: "Filtro de cabina (aire acondicionado)", price: 0 },
+    { description: "Filtro de combustible", price: 0 },
+    { description: "Spray cuerpo de aceleración", price: 280 },
+    { description: "Líquido limpieza de inyectores", price: 290 },
+    { description: "Filtro de aceite", price: 0 },
+    { description: "Garrafa de aceite lavado interno de motor", price: 398.50 },
+    { description: "Garrafa de aceite para motor", price: 1240 },
+    { description: "Materiales diversos, consumibles y artículos de limpieza", price: 0 },
+    { description: "Juego de bujías", price: 0 }
 ];
 
 export default function ServiceNoteForm() {
@@ -319,11 +319,11 @@ export default function ServiceNoteForm() {
 
     const loadTuneupKit = () => {
         if (!confirm("¿Agregar paquete de refacciones para afinación?")) return;
-        const newParts = TUNEUP_KIT_PARTS.map((desc, index) => ({
+        const newParts = TUNEUP_KIT_PARTS.map((item, index) => ({
             id: (Date.now() + index).toString(),
-            description: desc,
+            description: item.description,
             laborCost: 0,
-            partsCost: 0, // User must fill this in
+            partsCost: item.price, // Pre-filled price
             quantity: 1
         }));
         // Filter out empty initial part if it hasn't been touched

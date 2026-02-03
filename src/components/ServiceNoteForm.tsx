@@ -144,6 +144,30 @@ export default function ServiceNoteForm() {
         setIsLoadingHistory(false);
     };
 
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState<any[] | null>(null);
+    const [isSearchingHistory, setIsSearchingHistory] = useState(false);
+
+    const handleSearch = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        if (!searchQuery.trim()) {
+            setSearchResults(null);
+            return;
+        }
+
+        setIsSearchingHistory(true);
+        try {
+            const res = await fetch(`/api/notes/search?q=${encodeURIComponent(searchQuery)}`);
+            const data = await res.json();
+            setSearchResults(data.results || []);
+        } catch (err) {
+            console.error(err);
+            alert("Error al buscar notas");
+        } finally {
+            setIsSearchingHistory(false);
+        }
+    };
+
     const deleteDraft = (id: string) => {
         if (!confirm("¿Eliminar este borrador permanentemente?")) return;
         localStorage.removeItem(`service-note-draft-${id}`);
@@ -1075,15 +1099,45 @@ export default function ServiceNoteForm() {
                             {/* REMOTE NOTES TAB */}
                             {(!activeTab || activeTab === 'remote') && (
                                 <>
-                                    {isLoadingHistory ? (
-                                        <div className="text-center py-8 text-gray-500">Cargando historial...</div>
-                                    ) : recentNotes.length === 0 ? (
+                                    {/* Search Bar */}
+                                    <form onSubmit={handleSearch} className="mb-4 flex gap-2">
+                                        <div className="relative flex-1">
+                                            <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                                            <input
+                                                type="text"
+                                                placeholder="Buscar por Folio, Cliente o Placas..."
+                                                className="w-full pl-9 p-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#F37014] text-gray-900"
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                            />
+                                            {searchQuery && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setSearchQuery(""); setSearchResults(null); }}
+                                                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                                                >
+                                                    <X size={16} />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            disabled={isSearchingHistory}
+                                            className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-700 disabled:opacity-50"
+                                        >
+                                            {isSearchingHistory ? "..." : "Buscar"}
+                                        </button>
+                                    </form>
+
+                                    {isLoadingHistory || isSearchingHistory ? (
+                                        <div className="text-center py-8 text-gray-500">Cargando...</div>
+                                    ) : (searchResults || recentNotes).length === 0 ? (
                                         <div className="text-center py-8 text-gray-500">
-                                            No se encontraron notas recientes.
+                                            {searchQuery ? "No se encontraron resultados." : "No se encontraron notas recientes."}
                                         </div>
                                     ) : (
-                                        recentNotes.map((note) => {
-                                            const serviceSummary = note.data?.services?.map((s: any) => s.serviceName || s.description).slice(0, 2).join(", ") + (note.data?.services?.length > 2 ? "..." : "") || "Sin servicios";
+                                        (searchResults || recentNotes).map((note) => {
+                                            const serviceSummary = note.data?.services?.map((s: any) => s.serviceName || s.description || s.item || "Servicio").slice(0, 2).join(", ") + (note.data?.services?.length > 2 ? "..." : "") || "Sin servicios";
 
                                             return (
                                                 <div key={note.folio} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3">

@@ -33,40 +33,54 @@ export async function GET(request: Request) {
 
             if (folio.includes(query) || client.includes(query) || plates.includes(query)) {
                 // Determine if it has JSON data (Col Z -> Index 25)
-                const jsonCell = sheet.getCell(i, 25).value;
+                const jsonCellValue = sheet.getCell(i, 25).value;
                 let rawData = null;
 
-                if (typeof jsonCell === 'string' && jsonCell.startsWith('{')) {
-                    try {
-                        rawData = JSON.parse(jsonCell);
-                    } catch (e) {
-                        // Ignore bad JSON
+                // Robust Parsing
+                if (jsonCellValue) {
+                    const jsonString = String(jsonCellValue).trim();
+                    if (jsonString.startsWith('{')) {
+                        try {
+                            rawData = JSON.parse(jsonString);
+                        } catch (e) {
+                            console.error(`Failed to parse JSON for folio ${folio}:`, e);
+                        }
                     }
                 }
 
                 // If no JSON, construct basic fallback data from columns
-                // This handles "Legacy" notes
+                // This handles "Legacy" notes or if JSON parsing failed
                 if (!rawData) {
+                    // console.log(`Legacy fallback for ${folio}`);
                     rawData = {
-                        client: { name: sheet.getCell(i, 1).value },
+                        client: {
+                            name: String(sheet.getCell(i, 1).value || ""), // Col B: Cliente
+                            phone: String(sheet.getCell(i, 4).value || ""), // Col E: Phone usually here in legacy? Or maybe logic is: E=Placas
+                        },
                         vehicle: {
-                            plates: sheet.getCell(i, 4).value,
-                            brand: sheet.getCell(i, 2).value, // Col C
-                            model: sheet.getCell(i, 3).value, // Col D
-                            odometer: sheet.getCell(i, 5).value // Col F
+                            // In legacy sheet:
+                            // A: Folio, B: Cliente, C: Vehiculo (Marca), D: Modelo, E: Placas, F: Km
+                            brand: String(sheet.getCell(i, 2).value || ""),
+                            model: String(sheet.getCell(i, 3).value || ""),
+                            plates: String(sheet.getCell(i, 4).value || ""), // Col E seems to be Placas based on code, but user screenshot showed phone?
+                            odometer: Number(String(sheet.getCell(i, 5).value || "0").replace(/[^0-9]/g, ''))
                         },
                         services: [
                             {
-                                id: "legacy-1",
-                                description: String(sheet.getCell(i, 6).value || "Nota Antigua - Detalles no estructurados"), // Col G
-                                laborCost: Number(sheet.getCell(i, 23).value || 0), // Col X (Total)
+                                id: `legacy-${Date.now()}`,
+                                description: String(sheet.getCell(i, 6).value || "Detalles de servicio no estructurados"), // Col G
+                                laborCost: 0,
                                 partsCost: 0
                             }
                         ],
                         parts: [],
-                        notes: "Nota importada de formato antiguo. Verifique los detalles.",
+                        notes: "Nota importada de formato antiguo (Sin metadatos JSON).",
                         date: sheet.getCell(i, 8).value // Col I
                     };
+
+                    // Try to put total in labor cost for visibility
+                    const totalVal = sheet.getCell(i, 23).value; // Col X
+                    if (totalVal) rawData.services[0].laborCost = Number(totalVal);
                 }
 
                 results.push({

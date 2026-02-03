@@ -7,6 +7,19 @@ import CatalogSearch from './CatalogSearch';
 import { ServiceItem, ClientInfo, VehicleInfo } from "@/types/service-note";
 import { COMPANY_DEFAULTS } from "@/lib/constants";
 
+const TUNEUP_KIT_PARTS = [
+    "Filtro de aire",
+    "Filtro de cabina (aire acondicionado)",
+    "Filtro de combustible",
+    "Spray cuerpo de aceleración",
+    "Líquido limpieza de inyectores",
+    "Filtro de aceite",
+    "Garrafa de aceite lavado interno de motor",
+    "Garrafa de aceite para motor",
+    "Materiales diversos, consumibles y artículos de limpieza",
+    "Bujías"
+];
+
 export default function ServiceNoteForm() {
     const [client, setClient] = useState<ClientInfo>({
         name: "",
@@ -302,6 +315,20 @@ export default function ServiceNoteForm() {
                 p.id === id ? { ...p, [field]: value } : p
             )
         );
+    };
+
+    const loadTuneupKit = () => {
+        if (!confirm("¿Agregar paquete de refacciones para afinación?")) return;
+        const newParts = TUNEUP_KIT_PARTS.map((desc, index) => ({
+            id: (Date.now() + index).toString(),
+            description: desc,
+            laborCost: 0,
+            partsCost: 0, // User must fill this in
+            quantity: 1
+        }));
+        // Filter out empty initial part if it hasn't been touched
+        const currentParts = parts.filter(p => p.description !== "" || p.partsCost !== 0);
+        setParts([...currentParts, ...newParts]);
     };
 
     const servicesTotal = services.reduce((sum, s) => sum + (s.laborCost || 0), 0);
@@ -778,14 +805,24 @@ export default function ServiceNoteForm() {
                 <div className="space-y-4">
                     <div className="flex justify-between items-center border-b pb-2 text-gray-900">
                         <h3 className="text-lg font-semibold text-gray-800">Refacciones</h3>
-                        <button
-                            type="button"
-                            onClick={addPart}
-                            className="flex items-center gap-2 text-sm text-[#F37014] hover:text-orange-700 font-medium px-3 py-1.5 rounded-md hover:bg-orange-50 transition-colors"
-                        >
-                            <Plus size={16} />
-                            Agregar Refacción
-                        </button>
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={loadTuneupKit}
+                                className="flex items-center gap-2 text-sm text-purple-600 hover:text-purple-700 font-medium px-3 py-1.5 rounded-md hover:bg-purple-50 transition-colors border border-purple-100"
+                                title="Cargar lista estándar de afinación"
+                            >
+                                📦 Kit Afinación
+                            </button>
+                            <button
+                                type="button"
+                                onClick={addPart}
+                                className="flex items-center gap-2 text-sm text-[#F37014] hover:text-orange-700 font-medium px-3 py-1.5 rounded-md hover:bg-orange-50 transition-colors"
+                            >
+                                <Plus size={16} />
+                                Agregar Refacción
+                            </button>
+                        </div>
                     </div>
 
                     <div className="space-y-4">

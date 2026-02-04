@@ -33,7 +33,7 @@ export default function ServiceNoteTemplate({
     // Helper to format cost: 0 -> "$0.00", undefined/null/empty -> ""
     const formatCost = (cost: number | undefined | null) => {
         if (cost === undefined || cost === null || isNaN(cost)) return "";
-        return `$${cost.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+        return `$${cost.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     };
 
     // Helper to render "WhatsApp style" rich text (**bold**) and newlines
@@ -281,22 +281,22 @@ export default function ServiceNoteTemplate({
                     <div className="space-y-1 mb-2">
                         <div className="flex justify-between text-[10px] text-slate-500">
                             <span>Subtotal</span>
-                            <span className="font-mono">${subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                            <span className="font-mono">${subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                         <div className="flex justify-between text-[10px] text-slate-500">
                             <span>IVA (16%)</span>
-                            <span className="font-mono">${totalIva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                            <span className="font-mono">${totalIva.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                         {includeIsr && (
                             <div className="flex justify-between text-[10px] text-slate-500">
                                 <span>Retención I.S.R.</span>
-                                <span className="font-mono">${totalIsr.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                                <span className="font-mono">${totalIsr.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             </div>
                         )}
                     </div>
                     <div className="flex justify-between py-2 border-t border-slate-200 text-lg font-black text-slate-900 bg-slate-50 px-3 rounded-lg">
                         <span>Total</span>
-                        <span className="font-mono">${grandTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                        <span className="font-mono">${grandTotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                     <div className="text-[8px] text-slate-400 text-right mt-1 font-medium uppercase">
                         {numberToLetters(grandTotal)}

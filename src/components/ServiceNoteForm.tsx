@@ -179,24 +179,28 @@ export default function ServiceNoteForm() {
         if (!confirm(`¿Estás seguro de ${action} la nota ${note.folio}?`)) return;
 
         const data = note.data;
-        // Check for rawData (preserved info with variables) or fallback to standard data
-        const sourceData = data.rawData || data;
+        // FIX (2026-02-04): Hybrid loading strategy
+        // Client/Vehicle are always at root. Services/Parts might be in rawData (custom vars) or root.
 
-        if (sourceData.client && !asTemplate) setClient(sourceData.client);
-        if (asTemplate && data.client) setClient(data.client);
+        // 1. Client & Vehicle (Always from root)
+        if (data.client) setClient(data.client);
+        if (data.vehicle) setVehicle(data.vehicle);
 
-        if (sourceData.vehicle) setVehicle(sourceData.vehicle);
+        // 2. Services & Parts & Notes (Prefer rawData if available to keep variables like {cliente})
+        const sourceForItems = data.rawData || data;
 
         // Map services to ensure legacy notes without 'serviceName' work too
-        if (sourceData.services) {
-            setServices(sourceData.services.map((s: any) => ({
+        if (sourceForItems.services) {
+            setServices(sourceForItems.services.map((s: any) => ({
                 ...s,
                 serviceName: s.serviceName || s.description // Fallback for old notes
             })));
         }
 
-        if (sourceData.parts) setParts(sourceData.parts);
-        if (sourceData.notes) setNotes(sourceData.notes);
+        if (sourceForItems.parts) setParts(sourceForItems.parts);
+        if (sourceForItems.notes) setNotes(sourceForItems.notes);
+
+        // 3. Metadata
         if (data.includeIva !== undefined) setIncludeIva(data.includeIva);
         if (data.includeIsr !== undefined) setIncludeIsr(data.includeIsr);
 

@@ -21,7 +21,11 @@ export async function POST(req: NextRequest) {
             date: body.date,
             includeIva: body.includeIva,
             includeIsr: body.includeIsr,
-            isDiagnostic: body.isDiagnostic || false,
+            // Legacy support
+            isDiagnostic: false,
+            // New flags
+            hideParts: body.hideParts || (body.isDiagnostic === true),
+            hideWarranty: body.hideWarranty || (body.isDiagnostic === true),
             notes: body.notes
         };
 

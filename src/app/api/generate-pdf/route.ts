@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
 
-        const { client, vehicle, services, parts, company, folio, notes, date, isDiagnostic } = body;
+        const { client, vehicle, services, parts, company, folio, notes, date, isDiagnostic, hideParts, hideWarranty } = body;
 
         // Determine base URL
         const host = req.headers.get("host") || "localhost:3000";
@@ -26,7 +26,11 @@ export async function POST(req: Request) {
             date: date || new Date().toLocaleDateString("es-MX"),
             includeIva: body.includeIva,
             includeIsr: body.includeIsr,
-            isDiagnostic: isDiagnostic || false,
+            // Legacy support
+            isDiagnostic: false, // Deprecated in component but we might still receive it
+            // New flags
+            hideParts: hideParts || (isDiagnostic === true),
+            hideWarranty: hideWarranty || (isDiagnostic === true),
             notes: notes
         };
 

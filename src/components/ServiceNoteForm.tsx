@@ -44,6 +44,16 @@ const SUSPENSION_KIT_PARTS = [
     { description: "Materiales diversos, consumibles y artículos de limpieza", price: 0 }
 ];
 
+const DISTRIBUTION_KIT_PARTS = [
+    { description: "Kit de distribución", price: 0 },
+    { description: "Bomba de agua", price: 0 },
+    { description: "Juego de válvulas admisión y escape", price: 0 },
+    { description: "Juego de juntas", price: 0 },
+    { description: "Juego de sellos en cabeza", price: 0 },
+    { description: "Retenes árbol de levas", price: 0 },
+    { description: "Materiales diversos, consumibles y artículos de limpieza", price: 0 }
+];
+
 export default function ServiceNoteForm() {
     const [client, setClient] = useState<ClientInfo>({
         name: "",
@@ -414,6 +424,30 @@ export default function ServiceNoteForm() {
         }));
         const currentParts = parts.filter(p => p.description !== "" || p.partsCost !== 0);
         setParts([...currentParts, ...newParts]);
+    };
+
+    const loadSuspensionKit = () => {
+        if (!confirm("¿Agregar piezas del Kit de Suspensión a la lista actual?")) return;
+        const newParts = SUSPENSION_KIT_PARTS.map((p, index) => ({
+            id: Date.now().toString() + "-s-" + index,
+            description: p.description,
+            partsCost: p.price,
+            laborCost: 0,
+            quantity: 1
+        }));
+        setParts(prev => [...prev, ...newParts]);
+    };
+
+    const loadDistributionKit = () => {
+        if (!confirm("¿Agregar piezas del Kit de Distribución a la lista actual?")) return;
+        const newParts = DISTRIBUTION_KIT_PARTS.map((p, index) => ({
+            id: Date.now().toString() + "-d-" + index,
+            description: p.description,
+            partsCost: p.price,
+            laborCost: 0,
+            quantity: 1
+        }));
+        setParts(prev => [...prev, ...newParts]);
     };
 
     const servicesTotal = services.reduce((sum, s) => sum + (s.laborCost || 0), 0);
@@ -908,6 +942,22 @@ export default function ServiceNoteForm() {
                                 title="Cargar lista estándar de frenos"
                             >
                                 🛑 Kit Frenos
+                            </button>
+                            <button
+                                type="button"
+                                onClick={loadSuspensionKit}
+                                className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700 font-medium px-3 py-1.5 rounded-md hover:bg-orange-50 transition-colors border border-orange-100"
+                                title="Cargar lista de suspensión"
+                            >
+                                🚙 Kit Susp.
+                            </button>
+                            <button
+                                type="button"
+                                onClick={loadDistributionKit}
+                                className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors border border-blue-100"
+                                title="Cargar lista de distribución"
+                            >
+                                ⛓️ Kit Distr.
                             </button>
                             <button
                                 type="button"

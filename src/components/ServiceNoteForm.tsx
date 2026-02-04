@@ -33,6 +33,17 @@ const BRAKES_KIT_PARTS = [
     { description: "Materiales diversos, consumibles y artículos de limpieza", price: 0 }
 ];
 
+const SUSPENSION_KIT_PARTS = [
+    { description: "Rótulas", price: 0 },
+    { description: "Horquillas", price: 0 },
+    { description: "Tornillos estabilizadores", price: 0 },
+    { description: "Juego de bujes", price: 0 },
+    { description: "Gomas de barra estabilizadora", price: 0 },
+    { description: "Gomas de rebote", price: 0 },
+    { description: "Amortiguadores", price: 0 },
+    { description: "Materiales diversos, consumibles y artículos de limpieza", price: 0 }
+];
+
 export default function ServiceNoteForm() {
     const [client, setClient] = useState<ClientInfo>({
         name: "",

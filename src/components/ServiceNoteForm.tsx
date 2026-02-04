@@ -8,6 +8,7 @@ import { ServiceItem, ClientInfo, VehicleInfo } from "@/types/service-note";
 import { COMPANY_DEFAULTS } from "@/lib/constants";
 
 const TUNEUP_KIT_PARTS = [
+    { description: "Juego de bujías", price: 0 },
     { description: "Filtro de aire", price: 0 },
     { description: "Filtro de cabina (aire acondicionado)", price: 0 },
     { description: "Filtro de combustible", price: 0 },
@@ -16,8 +17,7 @@ const TUNEUP_KIT_PARTS = [
     { description: "Filtro de aceite", price: 0 },
     { description: "Garrafa de aceite lavado interno de motor", price: 398.50 },
     { description: "Garrafa de aceite para motor", price: 1240 },
-    { description: "Materiales diversos, consumibles y artículos de limpieza", price: 0 },
-    { description: "Juego de bujías", price: 0 }
+    { description: "Materiales diversos, consumibles y artículos de limpieza", price: 0 }
 ];
 
 export default function ServiceNoteForm() {

@@ -20,6 +20,19 @@ const TUNEUP_KIT_PARTS = [
     { description: "Materiales diversos, consumibles y artículos de limpieza", price: 0 }
 ];
 
+const BRAKES_KIT_PARTS = [
+    { description: "Juego de pastas delanteras", price: 0 },
+    { description: "Juego de pastas traseras", price: 0 },
+    { description: "Rectificación de discos delanteros", price: 0 },
+    { description: "Rectificación de discos traseros", price: 0 },
+    { description: "Líquido de frenos", price: 0 },
+    { description: "Espuma limpia frenos", price: 0 },
+    { description: "Liqui Moly / grasa anti-ruido para pastas", price: 0 },
+    { description: "Juego de pernos y bujes", price: 0 },
+    { description: "Servicio de torno (restauración de cuerdas)", price: 0 },
+    { description: "Materiales diversos, consumibles y artículos de limpieza", price: 0 }
+];
+
 export default function ServiceNoteForm() {
     const [client, setClient] = useState<ClientInfo>({
         name: "",
@@ -355,6 +368,19 @@ export default function ServiceNoteForm() {
             quantity: 1
         }));
         // Filter out empty initial part if it hasn't been touched
+        const currentParts = parts.filter(p => p.description !== "" || p.partsCost !== 0);
+        setParts([...currentParts, ...newParts]);
+    };
+
+    const loadBrakeKit = () => {
+        if (!confirm("¿Agregar paquete de refacciones para frenos?")) return;
+        const newParts = BRAKES_KIT_PARTS.map((item, index) => ({
+            id: (Date.now() + index).toString(),
+            description: item.description,
+            laborCost: 0,
+            partsCost: item.price,
+            quantity: 1
+        }));
         const currentParts = parts.filter(p => p.description !== "" || p.partsCost !== 0);
         setParts([...currentParts, ...newParts]);
     };
@@ -841,6 +867,14 @@ export default function ServiceNoteForm() {
                                 title="Cargar lista estándar de afinación"
                             >
                                 📦 Kit Afinación
+                            </button>
+                            <button
+                                type="button"
+                                onClick={loadBrakeKit}
+                                className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1.5 rounded-md hover:bg-red-50 transition-colors border border-red-100"
+                                title="Cargar lista estándar de frenos"
+                            >
+                                🛑 Kit Frenos
                             </button>
                             <button
                                 type="button"

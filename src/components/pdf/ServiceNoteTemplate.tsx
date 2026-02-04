@@ -14,7 +14,9 @@ interface ServiceNoteTemplateProps {
     company: CompanyInfo;
     includeIva: boolean;
     includeIsr: boolean;
-    isDiagnostic?: boolean;
+    // isDiagnostic?: boolean; // Deprecated
+    hideParts?: boolean;
+    hideWarranty?: boolean;
 }
 
 export default function ServiceNoteTemplate({
@@ -28,7 +30,8 @@ export default function ServiceNoteTemplate({
     company,
     includeIva,
     includeIsr,
-    isDiagnostic = false,
+    hideParts = false,
+    hideWarranty = false,
 }: ServiceNoteTemplateProps) {
     // Helper to format cost: 0 -> "$0.00", undefined/null/empty -> ""
     const formatCost = (cost: number | undefined | null) => {
@@ -209,7 +212,7 @@ export default function ServiceNoteTemplate({
 
 
             {/* Parts Table - Hidden in diagnostic mode */}
-            {!isDiagnostic && (
+            {!hideParts && (
                 <div className="flex-grow mb-4">
                     <div className="flex items-end border-b border-slate-200 pb-1 mb-1">
                         <h4 className="text-[10px] font-bold text-slate-900 uppercase w-[10%] text-center">CANT.</h4>
@@ -254,7 +257,7 @@ export default function ServiceNoteTemplate({
 
                 {/* Left Side: Notes & Maintenance */}
                 <div className="w-1/2 pr-4 space-y-3">
-                    {!isDiagnostic && (
+                    {!hideWarranty && (
                         <>
                             {safeOdometer > 0 ? (
                                 <div className="bg-[#F37014]/10 p-3 rounded-lg border border-[#F37014]/20 text-center">

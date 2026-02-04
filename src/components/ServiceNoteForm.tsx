@@ -70,7 +70,9 @@ export default function ServiceNoteForm() {
 
     const [includeIva, setIncludeIva] = useState(false);
     const [includeIsr, setIncludeIsr] = useState(false);
-    const [isDiagnostic, setIsDiagnostic] = useState(false);
+    // const [isDiagnostic, setIsDiagnostic] = useState(false); // DEPRECATED
+    const [hideParts, setHideParts] = useState(false);
+    const [hideWarranty, setHideWarranty] = useState(false);
     const [services, setServices] = useState<ServiceItem[]>([
         { id: "1", description: "", laborCost: 0, partsCost: 0 },
     ]);
@@ -217,6 +219,15 @@ export default function ServiceNoteForm() {
         if (data.includeIva !== undefined) setIncludeIva(data.includeIva);
         if (data.includeIsr !== undefined) setIncludeIsr(data.includeIsr);
 
+        // Handle migration from legacy isDiagnostic to granular controls
+        if (data.isDiagnostic) {
+            setHideParts(true);
+            setHideWarranty(true);
+        } else {
+            if (data.hideParts !== undefined) setHideParts(data.hideParts);
+            if (data.hideWarranty !== undefined) setHideWarranty(data.hideWarranty);
+        }
+
         if (asTemplate) {
             // Reset Folio to next available
             loadNextFolio();
@@ -256,7 +267,14 @@ export default function ServiceNoteForm() {
                 setNotes(parsed.notes || "");
                 setIncludeIva(parsed.includeIva || false);
                 setIncludeIsr(parsed.includeIsr || false);
-                setIsDiagnostic(parsed.isDiagnostic || false);
+                // Migration for drafts
+                if (parsed.isDiagnostic) {
+                    setHideParts(true);
+                    setHideWarranty(true);
+                } else {
+                    setHideParts(parsed.hideParts || false);
+                    setHideWarranty(parsed.hideWarranty || false);
+                }
                 // Draft doesn't save folio usually, so we load next one
             } catch (e) {
                 console.error("Error loading draft", e);
@@ -285,10 +303,11 @@ export default function ServiceNoteForm() {
             notes,
             includeIva,
             includeIsr,
-            isDiagnostic
+            hideParts,
+            hideWarranty
         };
         localStorage.setItem(`service-note-draft-${draftId}`, JSON.stringify(draft));
-    }, [client, vehicle, services, parts, notes, includeIva, includeIsr, isDiagnostic, isDraftLoaded, draftId]);
+    }, [client, vehicle, services, parts, notes, includeIva, includeIsr, hideParts, hideWarranty, isDraftLoaded, draftId]);
 
     const handleClearForm = () => {
         if (!confirm("¿Estás seguro de borrar toda la información y empezar de cero?")) return;
@@ -301,7 +320,8 @@ export default function ServiceNoteForm() {
         setNotes("");
         setIncludeIva(false);
         setIncludeIsr(false);
-        setIsDiagnostic(false);
+        setHideParts(false);
+        setHideWarranty(false);
 
         // Clear CURRENT Draft Storage
         if (draftId) {
@@ -455,7 +475,8 @@ export default function ServiceNoteForm() {
         params.set("folio", customFolio);
         params.set("includeIva", includeIva.toString());
         params.set("includeIsr", includeIsr.toString());
-        params.set("isDiagnostic", isDiagnostic.toString());
+        params.set("hideParts", hideParts.toString());
+        params.set("hideWarranty", hideWarranty.toString());
         params.set("date", customDate);
         return `/note-preview?${params.toString()}`;
     };
@@ -540,7 +561,8 @@ export default function ServiceNoteForm() {
                     company: COMPANY_DEFAULTS,
                     includeIva,
                     includeIsr,
-                    isDiagnostic,
+                    hideParts,
+                    hideWarranty,
                     date: currentDate,
                     // Preserve raw data for templates (so {cliente} persists in history)
                     rawData: {
@@ -1048,17 +1070,29 @@ export default function ServiceNoteForm() {
                             </div>
                             <span>${totalIsr.toFixed(2)}</span>
                         </div>
-                        <div className="flex items-center justify-between text-gray-600">
+                        <div className="flex flex-col gap-2 border-t pt-2 mt-2">
                             <div className="flex items-center gap-2">
                                 <input
                                     type="checkbox"
-                                    id="is-diagnostic"
-                                    checked={isDiagnostic}
-                                    onChange={(e) => setIsDiagnostic(e.target.checked)}
+                                    id="hide-parts"
+                                    checked={hideParts}
+                                    onChange={(e) => setHideParts(e.target.checked)}
                                     className="w-4 h-4 text-[#F37014] rounded border-gray-300 focus:ring-[#F37014] text-gray-900"
                                 />
-                                <label htmlFor="is-diagnostic" className="text-sm cursor-pointer select-none">
-                                    Es Diagnóstico (oculta refacciones y garantías)
+                                <label htmlFor="hide-parts" className="text-sm cursor-pointer select-none text-gray-600">
+                                    Ocultar Tabla de Refacciones
+                                </label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="hide-warranty"
+                                    checked={hideWarranty}
+                                    onChange={(e) => setHideWarranty(e.target.checked)}
+                                    className="w-4 h-4 text-[#F37014] rounded border-gray-300 focus:ring-[#F37014] text-gray-900"
+                                />
+                                <label htmlFor="hide-warranty" className="text-sm cursor-pointer select-none text-gray-600">
+                                    Ocultar Garantía y Mantenimiento
                                 </label>
                             </div>
                         </div>

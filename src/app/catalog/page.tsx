@@ -50,8 +50,8 @@ export default function CatalogManager() {
 
             // Map IDs if needed or assume string
             const allItems = [
-                ...(dataS.results || []).map((i: any) => ({ ...i, tipo: 'Servicio' })),
-                ...(dataP.results || []).map((i: any) => ({ ...i, tipo: 'Refaccion' }))
+                ...(dataS.results || []).map((i: any) => ({ ...i, tipo: 'Servicio', id: `S-${i.id}` })),
+                ...(dataP.results || []).map((i: any) => ({ ...i, tipo: 'Refaccion', id: `P-${i.id}` }))
             ];
 
             setItems(allItems);

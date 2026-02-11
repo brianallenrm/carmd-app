@@ -88,6 +88,6 @@ export const GOOGLE_SHEETS_CONFIG = {
     },
     MASTER: {
         ID: "1s-G5O_-VwbIJtX-CLy6PS0swraN7vF_y6OVMvlKeA4M", // PRODUCTION ID for Notes
-        TAB_NAME: "CATALOGO"
+        TAB_NAME: "TODOS" // Correct tab for Order Folios
     }
 };

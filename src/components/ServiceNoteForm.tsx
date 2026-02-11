@@ -1225,18 +1225,18 @@ export default function ServiceNoteForm() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex justify-between pt-8 border-t text-gray-900 mt-6 flex-wrap gap-4">
+                <div className="flex items-center justify-between pt-8 border-t text-gray-900 mt-6 gap-4">
                     <button
                         type="button"
                         onClick={handleClearForm}
-                        className="flex items-center gap-2 px-6 py-3 text-red-500 font-medium hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100 whitespace-nowrap"
+                        className="flex items-center gap-2 px-6 py-3 text-red-500 font-medium hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100 whitespace-nowrap shrink-0"
                         title="Borrar todo y empezar de cero"
                     >
                         <Trash2 size={20} />
                         Borrar Todo
                     </button>
 
-                    <div className="flex gap-4 flex-wrap justify-end">
+                    <div className="flex gap-4 items-center justify-end">
                         {/* New Buttons for Workflow Optimization */}
                         <button
                             type="button"

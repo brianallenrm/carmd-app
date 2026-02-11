@@ -35,59 +35,50 @@ export const numberToLetters = (amount: number): string => {
             }
             n %= 100;
         }
-
-        if (n >= 20) {
-            const ten = Math.floor(n / 10);
-            output += tens[ten];
-            if (n % 10 > 0) output += " Y " + units[n % 10];
-        } else if (n >= 10) {
+        if (n >= 10 && n <= 19) {
             output += teens[n - 10];
-        } else if (n > 0) {
+            return output;
+        }
+        if (n >= 20) {
+            output += tens[Math.floor(n / 10)];
+            if (n % 10 > 0) output += " Y " + units[n % 10];
+        } else {
             output += units[n];
         }
         return output;
     };
 
-    const thousands = Math.floor(amount / 1000);
-    const remainder = Math.floor(amount % 1000); // Use Math.floor to ignore pennies in letter conversion? Or handle them.
+    const integerPart = Math.floor(amount);
+    const decimalPart = Math.round((amount - integerPart) * 100);
 
-    // Simple logic for this use case:
-    let result = "";
-    if (thousands > 0) {
-        if (thousands === 1) result += "MIL ";
-        else result += getGroup(thousands) + " MIL ";
-    }
-    if (remainder > 0 || result === "") {
-        result += getGroup(remainder);
+    let text = "";
+    if (integerPart === 0) text = "CERO";
+    else if (integerPart < 1000) text = getGroup(integerPart);
+    else if (integerPart < 2000) text = "MIL " + getGroup(integerPart % 1000);
+    else if (integerPart < 1000000) {
+        text = getGroup(Math.floor(integerPart / 1000)) + " MIL ";
+        if (integerPart % 1000 > 0) text += getGroup(integerPart % 1000);
     }
 
-    return result.trim();
+    // Basic implementation for < 1 million. Can be expanded if needed.
+
+    return `(${text.trim()} PESOS ${decimalPart.toString().padStart(2, "0")}/100 M.N.)`;
 };
 
-export const calculateNextMaintenance = (currentKm: number): { first: number; second: number } => {
-    const interval = 5000;
-    const next = Math.ceil(currentKm / interval) * interval;
-    // If currentKm is exactly on an interval, the next one is +interval
-    const first = next === currentKm ? currentKm + interval : next;
-    const second = first + interval;
-    return { first, second };
-};
+export function calculateNextMaintenance(currentOdometer: number) {
+    return {
+        first: currentOdometer + 5000,
+        second: currentOdometer + 7500,
+    };
+}
 
 export const GOOGLE_SHEETS_CONFIG = {
-    // Shared ID for all tabs based on user input
-    // Old invalid ID: 1s-G5O_-VwbIJtX-CLy6PS0swraN7vF_y6OVMvlKeA4M
-    // New valid ID: 1Y3w26f6EVar5Tl6YfFolv3571PjjT8dbUV4ffGolO4c
-
     INVENTORY: {
         ID: "1Y3w26f6EVar5Tl6YfFolv3571PjjT8dbUV4ffGolO4c",
-        TAB_NAME: "Inventario_entorno_prueba" // Confirmed exists by script
-    },
-    CLIENTS: {
-        ID: "1Y3w26f6EVar5Tl6YfFolv3571PjjT8dbUV4ffGolO4c",
-        TAB_NAME: "Inventario_Vista" // Confirmed exists by script, likely the history view
+        TAB_NAME: "Respuestas de formulario 1"
     },
     MASTER: {
-        ID: "1s-G5O_-VwbIJtX-CLy6PS0swraN7vF_y6OVMvlKeA4M", // PRODUCTION ID for Notes
-        TAB_NAME: "TODOS" // Correct tab for Order Folios
+        ID: "1A35mdnUopNt-pk0yWdDxucPAe5zqO46ujgzN1r0jW9Q",
+        TAB_NAME: "TODOS"
     }
 };

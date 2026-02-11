@@ -1,15 +1,15 @@
-import { ServiceNoteData } from "@/types/service-note";
-
+// --- 1. Company Information (CarMD) ---
 export const COMPANY_DEFAULTS = {
     name: "Rivera Moya B.A.",
     rfc: "RIMB960505SXA",
     address: "Calle Palacio de Iturbide No. 233 Col. Metropolitana 2da. Secc. Cd. Nezahualcoyotl, Estado de Mexico C.P. 57740",
-    phone: "", // User said only WhatsApp exists
+    phone: "",
     whatsapp: "56 1190 4066",
     email: "contacto@carmd.com.mx",
     website: "carmd.com.mx",
 };
 
+// --- 2. Legal & Regional Formatting ---
 export const LEGAL_TEXT = `Por medio de la presente, autorizo a CarMD / Rivera Moya B.A. a realizar los servicios de mantenimiento y reparación descritos en la parte superior de esta Orden de Trabajo. Asimismo, autorizo la instalación de las refacciones necesarias, mismas que se cobran por separado y deberán ser nuevas, conforme al Art. 39 de la Ley Federal de Protección al Consumidor. El vehículo aquí descrito queda depositado en el(los) taller(es) de CarMD. En caso de ser necesaria una aclaración, inspección o reclamación ante autoridades, dichas reparaciones no podrán ser realizadas sin mi consentimiento, ya sea por escrito o vía telefónica. Autorizo el uso de mi vehículo dentro de los límites de esta ciudad y área metropolitana únicamente para pruebas y verificación de las reparaciones. CarMD no se hace responsable por pérdida de objetos personales dentro del vehículo, ni por daños derivados de causa de fuerza mayor. La garantía de los trabajos realizados se rige por el Art. 40 de la Ley Federal de Protección al Consumidor. Cualquier inconformidad deberá reclamarse dentro de los 30 días posteriores a la entrega del vehículo. Una vez notificado que el vehículo está listo, me comprometo a acudir al taller en un plazo no mayor a 24 horas para revisarlo y recogerlo. En caso de estar conforme, deberé liquidar el importe de los trabajos dentro de las 24 horas siguientes. Si no recojo el vehículo en ese plazo, se generará un cargo por almacenaje, conforme a la tarifa oficial vigente para este tipo de servicios. El vehículo descrito queda como garantía prendaria conforme al Art. 334 de la Ley General de Títulos y Operaciones de Crédito, hasta que el adeudo sea liquidado. En caso de cheque devuelto, CarMD se reserva el derecho de cobrar el 20% por indemnización, de acuerdo con el Art. 193 de la Ley antes citada. Ambas partes acuerdan nombrar a la Procuraduría Federal del Consumidor (PROFECO) como conciliador para resolver cualquier controversia relacionada con este documento. Después de revisar y aprobar el automóvil entregado, manifiesto estar conforme con los trabajos realizados, recibiendo en este acto las refacciones y piezas usadas que fueron sustituidas. Este pagaré es mercantil y se rige por la Ley General de Títulos y Operaciones de Crédito, Art. 173 y correlativos. El importe de esta factura causará intereses moratorios del 9% mensual en caso de no ser liquidado en el plazo convenido.`;
 
 export const numberToLetters = (amount: number): string => {
@@ -60,11 +60,10 @@ export const numberToLetters = (amount: number): string => {
         if (integerPart % 1000 > 0) text += getGroup(integerPart % 1000);
     }
 
-    // Basic implementation for < 1 million. Can be expanded if needed.
-
     return `(${text.trim()} PESOS ${decimalPart.toString().padStart(2, "0")}/100 M.N.)`;
 };
 
+// --- 3. Business Logic Helpers ---
 export function calculateNextMaintenance(currentOdometer: number) {
     return {
         first: currentOdometer + 5000,
@@ -72,17 +71,23 @@ export function calculateNextMaintenance(currentOdometer: number) {
     };
 }
 
+// --- 4. External Services Configuration (Google Sheets) ---
 export const GOOGLE_SHEETS_CONFIG = {
+    // [PRODUCTION] Service Notes Master (Order Folios)
+    MASTER: {
+        ID: "1A35mdnUopNt-pk0yWdDxucPAe5zqO46ujgzN1r0jW9Q",
+        TAB_NAME: "TODOS"
+    },
+
+    // [DEVELOPMENT] Inventory & Reception Tool (In testing)
     INVENTORY: {
         ID: "1Y3w26f6EVar5Tl6YfFolv3571PjjT8dbUV4ffGolO4c",
         TAB_NAME: "Respuestas de formulario 1"
     },
+
+    // [DEVELOPMENT] Client History / View (In testing)
     CLIENTS: {
         ID: "1Y3w26f6EVar5Tl6YfFolv3571PjjT8dbUV4ffGolO4c",
         TAB_NAME: "Inventario_Vista"
-    },
-    MASTER: {
-        ID: "1A35mdnUopNt-pk0yWdDxucPAe5zqO46ujgzN1r0jW9Q",
-        TAB_NAME: "TODOS"
     }
 };

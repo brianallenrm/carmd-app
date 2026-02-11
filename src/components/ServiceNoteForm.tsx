@@ -727,25 +727,6 @@ export default function ServiceNoteForm() {
                         <History size={18} />
                         <span>Historial</span>
                     </button>
-
-                    <div className="flex gap-2 ml-2 border-l pl-4 border-gray-200">
-                        <button
-                            type="button"
-                            onClick={() => handleDuplicateNote(true)}
-                            className="bg-purple-50 text-purple-600 p-3 rounded-lg hover:bg-purple-100 transition-colors border border-purple-200"
-                            title="Nueva nota (Mismo cliente)"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /><path d="M8 14h.01" /></svg>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => handleDuplicateNote(false)}
-                            className="bg-green-50 text-green-600 p-3 rounded-lg hover:bg-green-100 transition-colors border border-green-200"
-                            title="Nueva nota (Cliente nuevo)"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" x2="20" y1="8" y2="14" /><line x1="23" x2="17" y1="11" y2="11" /></svg>
-                        </button>
-                    </div>
                 </div>
             </div>
 
@@ -1244,22 +1225,42 @@ export default function ServiceNoteForm() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex justify-between pt-8 border-t text-gray-900 mt-6">
+                <div className="flex justify-between pt-8 border-t text-gray-900 mt-6 flex-wrap gap-4">
                     <button
                         type="button"
                         onClick={handleClearForm}
-                        className="flex items-center gap-2 px-6 py-3 text-red-500 font-medium hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                        className="flex items-center gap-2 px-6 py-3 text-red-500 font-medium hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100 whitespace-nowrap"
                         title="Borrar todo y empezar de cero"
                     >
                         <Trash2 size={20} />
                         Borrar Todo
                     </button>
 
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 flex-wrap justify-end">
+                        {/* New Buttons for Workflow Optimization */}
+                        <button
+                            type="button"
+                            onClick={() => handleDuplicateNote(true)}
+                            className="flex items-center gap-2 px-4 py-3 bg-purple-50 text-purple-700 font-bold rounded-lg hover:bg-purple-100 border border-purple-200 transition-colors whitespace-nowrap"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /><path d="M8 14h.01" /></svg>
+                            Mismo Cliente
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleDuplicateNote(false)}
+                            className="flex items-center gap-2 px-4 py-3 bg-green-50 text-green-700 font-bold rounded-lg hover:bg-green-100 border border-green-200 transition-colors whitespace-nowrap"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" x2="20" y1="8" y2="14" /><line x1="23" x2="17" y1="11" y2="11" /></svg>
+                            Nuevo Cliente
+                        </button>
+
+                        <div className="w-[1px] bg-gray-200 mx-2"></div>
+
                         <button
                             type="button"
                             onClick={handlePreview}
-                            className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm"
+                            className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm whitespace-nowrap"
                             title="Ver cómo quedará sin guardar"
                         >
                             <Eye size={20} />

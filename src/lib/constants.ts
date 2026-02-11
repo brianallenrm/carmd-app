@@ -87,7 +87,7 @@ export const GOOGLE_SHEETS_CONFIG = {
         TAB_NAME: "Inventario_Vista" // Confirmed exists by script, likely the history view
     },
     MASTER: {
-        ID: "1Y3w26f6EVar5Tl6YfFolv3571PjjT8dbUV4ffGolO4c",
-        TAB_NAME: "CATALOGO" // Note: Script did NOT list this tab. Expect failure here unless it's hidden or I misread.
+        ID: "1s-G5O_-VwbIJtX-CLy6PS0swraN7vF_y6OVMvlKeA4M", // PRODUCTION ID for Notes
+        TAB_NAME: "CATALOGO"
     }
 };

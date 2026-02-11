@@ -8,11 +8,13 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
 
-        const { client, vehicle, services, parts, company, folio, notes, date, isDiagnostic, hideParts, hideWarranty } = body;
+        const { client, vehicle, services, parts, company, folio, notes, date, isDiagnostic, hideParts, hideWarranty, isReception, inventory, functional, service, photos } = body;
 
         // Determine base URL
         const host = req.headers.get("host") || "localhost:3000";
-        const protocol = host.includes("localhost") ? "http" : "https";
+        // Fix: Use http for local IPs (e.g., 192.168.x.x) or localhost
+        const isLocal = host.includes("localhost") || /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(host);
+        const protocol = isLocal ? "http" : "https";
         const baseUrl = `${protocol}://${host}`;
 
         // 1. Prepare Data Object
@@ -31,7 +33,13 @@ export async function POST(req: Request) {
             // New flags
             hideParts: hideParts || (isDiagnostic === true),
             hideWarranty: hideWarranty || (isDiagnostic === true),
-            notes: notes
+            notes: notes,
+            // Reception-specific fields
+            isReception: isReception || false,
+            inventory: inventory || {},
+            functional: functional || {},
+            service: service || {},
+            photos: photos || {}
         };
 
         // 2. Launch Puppeteer
@@ -61,7 +69,7 @@ export async function POST(req: Request) {
         page.on('requestfailed', request => console.log('PAGE REQUEST FAILED:', request.failure()?.errorText, request.url()));
 
         try {
-            await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 });
+            await page.goto(url, { waitUntil: "networkidle0", timeout: 45000 });
         } catch (e) {
             console.error("Page Navigation Error:", e);
             throw new Error(`Failed to navigate to preview URL: ${e instanceof Error ? e.message : String(e)}`);
@@ -69,6 +77,19 @@ export async function POST(req: Request) {
 
         // Wait for the main note card to appear (replaces the "Loading..." fallback)
         await page.waitForSelector("#note-preview-container", { timeout: 30000 });
+
+        // Wait for all images (especially R2 photos) to finish loading
+        await page.evaluate(async () => {
+            const imgs = Array.from(document.querySelectorAll('img'));
+            await Promise.all(imgs.map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise((resolve) => {
+                    img.onload = resolve;
+                    img.onerror = resolve;
+                    setTimeout(resolve, 5000);
+                });
+            }));
+        });
 
         const pdfBuffer = await page.pdf({
             format: "A4",

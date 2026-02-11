@@ -21,40 +21,22 @@ export default function CatalogManager() {
     const [isCreating, setIsCreating] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
 
-    // Initial Load
-    useEffect(() => {
-        loadCatalog();
-    }, []);
-
-    const loadCatalog = async () => {
+    // Unified Fetch Logic
+    const fetchCatalog = async (query: string) => {
         setLoading(true);
         try {
-            // Load both types
             const [resS, resP] = await Promise.all([
-                fetch('/api/catalog?type=servicios&search='), // empty search returns top items, we might need a specific 'all' flag or just rely on search
-                fetch('/api/catalog?type=refacciones&search=')
+                fetch(`/api/catalog?type=servicios&search=${encodeURIComponent(query)}`),
+                fetch(`/api/catalog?type=refacciones&search=${encodeURIComponent(query)}`)
             ]);
 
-            // Note: The current GET /api/catalog is optimized for search (returns limited results).
-            // We might need to modify it to return ALL items if requested, or implement server-side pagination here too.
-            // For now, let's assume the user will Search to find what they want to edit, 
-            // OR we rely on the implementation returning filtered lists.
-            // Wait, standard GET returns top 20. 
-            // Let's implement a 'search' based flow primarily, or a 'load all' but 600 items is fine to load all if we add a 'limit=1000' param?
-            // The current API implementation (Sheet based) reads ALL rows anyway.
-            // Let's trust the search for now to find items to edit.
-
-            // Actually, for a manager, seeing the latest items is useful.
             const dataS = await resS.json();
             const dataP = await resP.json();
 
-            // Map IDs if needed or assume string
-            const allItems = [
+            setItems([
                 ...(dataS.results || []).map((i: any) => ({ ...i, tipo: 'Servicio', id: `S-${i.id}` })),
                 ...(dataP.results || []).map((i: any) => ({ ...i, tipo: 'Refaccion', id: `P-${i.id}` }))
-            ];
-
-            setItems(allItems);
+            ]);
 
         } catch (error) {
             console.error(error);
@@ -63,35 +45,17 @@ export default function CatalogManager() {
         }
     };
 
-    // Live Search
-    const handleSearch = async (query: string) => {
+    // Debounce Effect: Handles initial load AND search updates
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchCatalog(search);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    // Simple state update for input
+    const handleSearch = (query: string) => {
         setSearch(query);
-        if (query.length < 2) return;
-
-        setLoading(true);
-        try {
-            const res = await fetch(`/api/catalog?search=${query}`);
-            const data = await res.json();
-            // The API returns mixed results? No, based on type. 
-            // We need to query both?
-            // Actually currently API filters by type param.
-            // Let's just search services first as default? Or both in parallel.
-
-            const [res1, res2] = await Promise.all([
-                fetch(`/api/catalog?type=servicios&search=${query}`),
-                fetch(`/api/catalog?type=refacciones&search=${query}`)
-            ]);
-
-            const d1 = await res1.json();
-            const d2 = await res2.json();
-
-            setItems([
-                ...(d1.results || []).map((i: any) => ({ ...i, tipo: 'Servicio', id: `S-${i.id}` })),
-                ...(d2.results || []).map((i: any) => ({ ...i, tipo: 'Refaccion', id: `P-${i.id}` }))
-            ]);
-
-        } catch (e) { console.error(e); }
-        finally { setLoading(false); }
     };
 
     const handleSave = async (item: Partial<CatalogItem>) => {

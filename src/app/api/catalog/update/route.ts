@@ -27,8 +27,13 @@ export async function POST(req: NextRequest) {
         const rows = await sheet.getRows();
 
         if (action === 'update') {
-            const row = rows.find(r => r.get("ID") == item.id);
-            if (!row) throw new Error("Item not found");
+            console.log(`Update Request - Searching for ID: "${item.id}"`);
+            const row = rows.find(r => String(r.get("ID")).trim() === String(item.id).trim());
+
+            if (!row) {
+                console.error(`Update Failed: Item with ID "${item.id}" not found in ${rows.length} rows.`);
+                throw new Error("Item not found");
+            }
 
             // Update fields
             if (item.nombre) row.set("Nombre", item.nombre);
@@ -70,8 +75,13 @@ export async function POST(req: NextRequest) {
         }
 
         if (action === 'delete') {
-            const row = rows.find(r => r.get("ID") == item.id);
-            if (!row) throw new Error("Item not found");
+            console.log(`Delete Request - Searching for ID: "${item.id}"`);
+            const row = rows.find(r => String(r.get("ID")).trim() === String(item.id).trim());
+
+            if (!row) {
+                console.error(`Delete Failed: Item with ID "${item.id}" not found.`);
+                throw new Error("Item not found");
+            }
             await row.delete();
             return NextResponse.json({ success: true, message: "Item deleted" });
         }

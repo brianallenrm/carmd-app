@@ -1,0 +1,178 @@
+[2026-02-09T20:50:58.478Z] ERROR: Cannot read properties of undefined (reading 'ID')
+STACK: TypeError: Cannot read properties of undefined (reading 'ID')
+    at GET (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/[root-of-the-server]__cf16a927._.js:282:465)
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:80:14)
+    at AppRouteRouteModule.do (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37868)
+    at /Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:47830
+    at /Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/trace/tracer.js:185:36
+    at NoopContextManager.with (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854)
+    at /Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/trace/tracer.js:154:103
+    at NoopContextManager.with (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NextTracerImpl.trace (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/trace/tracer.js:154:28)
+    at /Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:47669
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at /Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45164
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at /Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45121
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at AppRouteRouteModule.handle (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45075)
+
+[2026-02-09T20:52:32.639Z] ERROR: Google API error - [404] Requested entity was not found.
+STACK: HTTPError: Google API error - [404] Requested entity was not found.
+    at function_ (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:7439:29)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async #retry (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:7674:20)
+    at async _GoogleSpreadsheet.loadInfo (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:9223:26)
+    at async GET (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/[root-of-the-server]__cf16a927._.js:274:13)
+    at async AppRouteRouteModule.do (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37789)
+    at async AppRouteRouteModule.handle (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45045)
+    at async responseGenerator (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14333:38)
+    at async AppRouteRouteModule.handleResponse (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187851)
+    at async handleResponse (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14395:32)
+    at async handler (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14448:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1413:9)
+    at async DevServer.renderPageComponent (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1465:24)
+    at async DevServer.renderToResponseImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1515:32)
+    at async DevServer.pipeImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1021:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/next-server.js:394:17)
+    at async DevServer.handleRequestImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:912:17)
+    at async /Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/dev/next-dev-server.js:382:20
+    at async Span.traceAsyncFn (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/dev/next-dev-server.js:378:24)
+    at async invokeRender (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:240:21)
+    at async handleRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:436:24)
+    at async requestHandlerImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:484:13)
+    at async Server.requestListener (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/start-server.js:226:13)
+
+[2026-02-09T20:53:31.551Z] ERROR: Google API error - [404] Requested entity was not found.
+STACK: HTTPError: Google API error - [404] Requested entity was not found.
+    at function_ (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:7439:29)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async #retry (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:7674:20)
+    at async _GoogleSpreadsheet.loadInfo (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:9223:26)
+    at async GET (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/[root-of-the-server]__cf16a927._.js:274:13)
+    at async AppRouteRouteModule.do (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37789)
+    at async AppRouteRouteModule.handle (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45045)
+    at async responseGenerator (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14333:38)
+    at async AppRouteRouteModule.handleResponse (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187851)
+    at async handleResponse (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14395:32)
+    at async handler (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14448:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1413:9)
+    at async DevServer.renderPageComponent (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1465:24)
+    at async DevServer.renderToResponseImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1515:32)
+    at async DevServer.pipeImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1021:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/next-server.js:394:17)
+    at async DevServer.handleRequestImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:912:17)
+    at async /Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/dev/next-dev-server.js:382:20
+    at async Span.traceAsyncFn (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/dev/next-dev-server.js:378:24)
+    at async invokeRender (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:240:21)
+    at async handleRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:436:24)
+    at async requestHandlerImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:484:13)
+    at async Server.requestListener (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/start-server.js:226:13)
+
+[2026-02-09T20:54:14.653Z] ERROR: Google API error - [404] Requested entity was not found.
+STACK: HTTPError: Google API error - [404] Requested entity was not found.
+    at function_ (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:7439:29)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async #retry (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:7674:20)
+    at async _GoogleSpreadsheet.loadInfo (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:9223:26)
+    at async GET (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/[root-of-the-server]__cf16a927._.js:274:13)
+    at async AppRouteRouteModule.do (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37789)
+    at async AppRouteRouteModule.handle (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45045)
+    at async responseGenerator (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14333:38)
+    at async AppRouteRouteModule.handleResponse (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187851)
+    at async handleResponse (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14395:32)
+    at async handler (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14448:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1413:9)
+    at async DevServer.renderPageComponent (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1465:24)
+    at async DevServer.renderToResponseImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1515:32)
+    at async DevServer.pipeImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1021:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/next-server.js:394:17)
+    at async DevServer.handleRequestImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:912:17)
+    at async /Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/dev/next-dev-server.js:382:20
+    at async Span.traceAsyncFn (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/dev/next-dev-server.js:378:24)
+    at async invokeRender (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:240:21)
+    at async handleRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:436:24)
+    at async requestHandlerImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:484:13)
+    at async Server.requestListener (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/start-server.js:226:13)
+
+[2026-02-09T20:55:25.910Z] ERROR: Google API error - [404] Requested entity was not found.
+STACK: HTTPError: Google API error - [404] Requested entity was not found.
+    at function_ (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:7439:29)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async #retry (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:7674:20)
+    at async _GoogleSpreadsheet.loadInfo (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:9223:26)
+    at async GET (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/[root-of-the-server]__cf16a927._.js:274:13)
+    at async AppRouteRouteModule.do (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37789)
+    at async AppRouteRouteModule.handle (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45045)
+    at async responseGenerator (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14333:38)
+    at async AppRouteRouteModule.handleResponse (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187851)
+    at async handleResponse (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14395:32)
+    at async handler (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14448:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1413:9)
+    at async DevServer.renderPageComponent (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1465:24)
+    at async DevServer.renderToResponseImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1515:32)
+    at async DevServer.pipeImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1021:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/next-server.js:394:17)
+    at async DevServer.handleRequestImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:912:17)
+    at async /Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/dev/next-dev-server.js:382:20
+    at async Span.traceAsyncFn (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/dev/next-dev-server.js:378:24)
+    at async invokeRender (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:240:21)
+    at async handleRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:436:24)
+    at async requestHandlerImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:484:13)
+    at async Server.requestListener (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/start-server.js:226:13)
+
+[2026-02-09T21:03:17.037Z] ERROR: Google API error - [404] Requested entity was not found.
+STACK: HTTPError: Google API error - [404] Requested entity was not found.
+    at function_ (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:7439:29)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async #retry (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:7674:20)
+    at async _GoogleSpreadsheet.loadInfo (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_9bc89206._.js:9223:26)
+    at async GET (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/[root-of-the-server]__cf16a927._.js:274:13)
+    at async AppRouteRouteModule.do (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37789)
+    at async AppRouteRouteModule.handle (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45045)
+    at async responseGenerator (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14333:38)
+    at async AppRouteRouteModule.handleResponse (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187851)
+    at async handleResponse (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14395:32)
+    at async handler (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/.next/dev/server/chunks/ce6f4_next_de0372cd._.js:14448:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1413:9)
+    at async DevServer.renderPageComponent (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1465:24)
+    at async DevServer.renderToResponseImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1515:32)
+    at async DevServer.pipeImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:1021:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/next-server.js:394:17)
+    at async DevServer.handleRequestImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/base-server.js:912:17)
+    at async /Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/dev/next-dev-server.js:382:20
+    at async Span.traceAsyncFn (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/dev/next-dev-server.js:378:24)
+    at async invokeRender (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:240:21)
+    at async handleRequest (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:436:24)
+    at async requestHandlerImpl (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/router-server.js:484:13)
+    at async Server.requestListener (/Users/BrianAllen/.gemini/antigravity/scratch/carmd-app/node_modules/next/dist/server/lib/start-server.js:226:13)
+
+[2026-02-09T21:29:38.950Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T21:42:34.929Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T21:43:33.383Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T21:44:31.811Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T21:45:37.006Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T21:46:16.024Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T21:52:56.175Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T21:54:57.806Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T21:57:51.097Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T22:08:06.959Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T22:39:56.318Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T22:41:16.008Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T22:53:39.097Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T23:10:52.394Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-09T23:11:32.370Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-10T21:42:34.135Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-10T22:06:15.483Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-10T22:09:32.411Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-10T22:30:59.474Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]
+[2026-02-10T22:52:50.955Z] INFO: Doc 'Inventario CarMD (Respuestas)' loaded. Sheets: [Inventario_Vista, Respuestas de formulario 1, Respuestas de formulario 5, Inventario_entorno_prueba]

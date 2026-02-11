@@ -42,9 +42,20 @@ function similarity(a: string, b: string): number {
     return matches / Math.max(aWords.length, bWords.length);
 }
 
+// Cache
+let cachedData: Catalog | null = null;
+let lastFetchTime = 0;
+const CACHE_TTL = 300000; // 5 minutes
+
 // Helper: Load from Sheets
-async function loadFromSheets(): Promise<Catalog | null> {
+async function loadFromSheets(forceRefresh = false): Promise<Catalog | null> {
     try {
+        const now = Date.now();
+        if (!forceRefresh && cachedData && (now - lastFetchTime < CACHE_TTL)) {
+            console.log("Serving from Cache");
+            return cachedData;
+        }
+
         if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY) return null;
 
         const auth = new JWT({
@@ -82,11 +93,13 @@ async function loadFromSheets(): Promise<Catalog | null> {
             else refacciones.push(item);
         });
 
-        return { servicios, refacciones };
+        cachedData = { servicios, refacciones };
+        lastFetchTime = now;
+        return cachedData;
 
     } catch (error) {
         console.error("Sheet Load Error:", error);
-        return null;
+        return null; // Return null to fallback to static
     }
 }
 

@@ -26,7 +26,13 @@ export async function POST(req: NextRequest) {
             // New flags
             hideParts: body.hideParts || (body.isDiagnostic === true),
             hideWarranty: body.hideWarranty || (body.isDiagnostic === true),
-            notes: body.notes
+            notes: body.notes,
+            // Reception-specific fields
+            isReception: body.isReception || false,
+            inventory: body.inventory || {},
+            functional: body.functional || {},
+            service: body.service || {},
+            photos: body.photos || {}
         };
 
         const baseUrl = req.nextUrl.origin;
@@ -48,10 +54,24 @@ export async function POST(req: NextRequest) {
         await page.setViewport({ width: 850, height: 1200, deviceScaleFactor: 3 });
 
         // 4. Navigate to Preview Page
-        await page.goto(previewUrl, { waitUntil: "domcontentloaded" });
+        await page.goto(previewUrl, { waitUntil: "networkidle0" });
 
         // Wait for the main note card to appear (replaces the "Loading..." fallback)
         await page.waitForSelector("#note-preview-container", { timeout: 30000 });
+
+        // Wait for all images (especially R2 photos) to finish loading
+        await page.evaluate(async () => {
+            const imgs = Array.from(document.querySelectorAll('img'));
+            await Promise.all(imgs.map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise((resolve) => {
+                    img.onload = resolve;
+                    img.onerror = resolve;
+                    // Timeout safety
+                    setTimeout(resolve, 5000);
+                });
+            }));
+        });
 
         // 5. Take Screenshot
         // Hide print buttons and Next.js dev overlay

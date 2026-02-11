@@ -3,6 +3,7 @@
 import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import ServiceNoteTemplate from "@/components/pdf/ServiceNoteTemplate";
+import ReceptionPDF from "@/components/pdf/ReceptionPDF";
 import { COMPANY_DEFAULTS } from "@/lib/constants";
 
 function NotePreviewContent() {
@@ -75,6 +76,11 @@ function NotePreviewContent() {
     let company = sourceData.company || COMPANY_DEFAULTS;
     let services = sourceData.services || [];
     let parts = sourceData.parts || [];
+    const isReception = sourceData.isReception === true;
+    const inventory = sourceData.inventory || {};
+    const functional = sourceData.functional || {};
+    const service = sourceData.service || {};
+    const photos = sourceData.photos || {};
 
     // Default services if empty (and not loading)
     if (isLoaded && services.length === 0 && parts.length === 0) {
@@ -106,7 +112,12 @@ function NotePreviewContent() {
                     hideParts,
                     hideWarranty,
                     notes,
-                    date
+                    date,
+                    isReception,
+                    inventory,
+                    functional,
+                    service,
+                    photos
                 }),
             });
             if (!response.ok) {
@@ -150,7 +161,12 @@ function NotePreviewContent() {
                     hideParts,
                     hideWarranty,
                     notes,
-                    date
+                    date,
+                    isReception,
+                    inventory,
+                    functional,
+                    service,
+                    photos
                 }),
             });
             if (!response.ok) {
@@ -190,7 +206,12 @@ function NotePreviewContent() {
                     hideParts,
                     hideWarranty,
                     notes,
-                    date
+                    date,
+                    isReception,
+                    inventory,
+                    functional,
+                    service,
+                    photos
                 }),
             });
             if (!response.ok) throw new Error("Error generating Image for sharing");
@@ -205,7 +226,7 @@ function NotePreviewContent() {
                     text: `Adjunto imagen de nota de servicio para ${client.name}.`
                 });
             } else {
-                alert("Tu dispositivo no soporta compartir archivos directamente. Usa el botón Imagen.");
+                alert("Tu dispositivo no soporta compartir este archivo directamente (posiblemente por seguridad en HTTP). \n\nSolución: Usa el botón 'Imagen' para descargarla y compártela desde tu galería.");
             }
         } catch (error) {
             console.error(error);
@@ -292,20 +313,26 @@ function NotePreviewContent() {
             </div>
 
             <div id="note-preview-container" className="shadow-2xl print:shadow-none">
-                <ServiceNoteTemplate
-                    client={client}
-                    vehicle={vehicle}
-                    services={services}
-                    parts={parts}
-                    company={company}
-                    folio={folio}
-                    date={date}
-                    includeIva={includeIva}
-                    includeIsr={includeIsr}
-                    hideParts={hideParts}
-                    hideWarranty={hideWarranty}
-                    notes={notes}
-                />
+                {isReception ? (
+                    <ReceptionPDF data={{
+                        client, vehicle, company, folio, date, inventory, functional, service, photos, notes
+                    }} />
+                ) : (
+                    <ServiceNoteTemplate
+                        client={client}
+                        vehicle={vehicle}
+                        services={services}
+                        parts={parts}
+                        company={company}
+                        folio={folio}
+                        date={date}
+                        includeIva={includeIva}
+                        includeIsr={includeIsr}
+                        hideParts={hideParts}
+                        hideWarranty={hideWarranty}
+                        notes={notes}
+                    />
+                )}
             </div>
         </div>
     );

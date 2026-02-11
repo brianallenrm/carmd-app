@@ -54,6 +54,13 @@ const DISTRIBUTION_KIT_PARTS = [
     { description: "Materiales diversos, consumibles y artículos de limpieza", price: 0 }
 ];
 
+const LUBRICATION_KIT_PARTS = [
+    { description: "Filtro de aceite", price: 0 },
+    { description: "Garrafa de aceite lavado interno de motor", price: 398.50 },
+    { description: "Garrafa de aceite para motor", price: 1240 },
+    { description: "Materiales diversos, consumibles y artículos de limpieza", price: 0 }
+];
+
 export default function ServiceNoteForm() {
     const [client, setClient] = useState<ClientInfo>({
         name: "",
@@ -267,10 +274,28 @@ export default function ServiceNoteForm() {
         const params = new URLSearchParams(window.location.search);
         let currentId = params.get("draftId");
 
+        // 1.5 Check for duplicate note params (same client/vehicle)
+        const duplicateClient = params.get("client");
+        const duplicateVehicle = params.get("vehicle");
+
+        if (duplicateClient && duplicateVehicle) {
+            try {
+                const parsedClient = JSON.parse(duplicateClient);
+                const parsedVehicle = JSON.parse(duplicateVehicle);
+                setClient(parsedClient);
+                setVehicle(parsedVehicle);
+                // Clear URL params to avoid re-populating on refresh if user changes data
+                // window.history.replaceState({}, '', window.location.pathname);
+            } catch (e) {
+                console.error("Error parsing duplicate note data", e);
+            }
+        }
+
         if (!currentId) {
             currentId = Date.now().toString(36) + Math.random().toString(36).substr(2);
             // Update URL without reload
-            const newUrl = `${window.location.pathname}?draftId=${currentId}`;
+            // Preserve other params if needed, but for now we just append draftId
+            const newUrl = `${window.location.pathname}?draftId=${currentId}${duplicateClient ? `&client=${duplicateClient}&vehicle=${duplicateVehicle}` : ''}`;
             window.history.replaceState({ path: newUrl }, '', newUrl);
         }
 
@@ -281,8 +306,10 @@ export default function ServiceNoteForm() {
         if (savedDraft) {
             try {
                 const parsed = JSON.parse(savedDraft);
-                setClient(parsed.client || client);
-                setVehicle(parsed.vehicle || vehicle);
+                // Only overwrite if draft exists, otherwise respect URL params (duplicate note)
+                if (parsed.client?.name) setClient(parsed.client);
+                if (parsed.vehicle?.plates) setVehicle(parsed.vehicle);
+
                 setServices(parsed.services || services);
                 setParts(parsed.parts || parts);
                 setNotes(parsed.notes || "");
@@ -450,6 +477,18 @@ export default function ServiceNoteForm() {
         setParts(prev => [...prev, ...newParts]);
     };
 
+    const loadLubricationKit = () => {
+        if (!confirm("¿Agregar piezas del Kit de Lubricación a la lista actual?")) return;
+        const newParts = LUBRICATION_KIT_PARTS.map((p, index) => ({
+            id: Date.now().toString() + "-l-" + index,
+            description: p.description,
+            partsCost: p.price,
+            laborCost: 0,
+            quantity: 1
+        }));
+        setParts(prev => [...prev, ...newParts]);
+    };
+
     const servicesTotal = services.reduce((sum, s) => sum + (s.laborCost || 0), 0);
     const partsTotal = parts.reduce((sum, p) => sum + (p.partsCost || 0), 0);
     const subtotal = servicesTotal + partsTotal;
@@ -542,6 +581,19 @@ export default function ServiceNoteForm() {
         const currentDate = `${year}-${month}-${day}`; // ISO format for template consistent parsing
 
         const url = buildPreviewUrl("BORRADOR", currentDate);
+        window.open(url, '_blank');
+    };
+
+    const handleDuplicateNote = (sameClient: boolean) => {
+        let url = window.location.pathname; // Root URL relative path
+
+        if (sameClient) {
+            const params = new URLSearchParams();
+            params.set("client", JSON.stringify(client));
+            params.set("vehicle", JSON.stringify(vehicle));
+            url += `?${params.toString()}`;
+        }
+
         window.open(url, '_blank');
     };
 
@@ -675,6 +727,25 @@ export default function ServiceNoteForm() {
                         <History size={18} />
                         <span>Historial</span>
                     </button>
+
+                    <div className="flex gap-2 ml-2 border-l pl-4 border-gray-200">
+                        <button
+                            type="button"
+                            onClick={() => handleDuplicateNote(true)}
+                            className="bg-purple-50 text-purple-600 p-3 rounded-lg hover:bg-purple-100 transition-colors border border-purple-200"
+                            title="Nueva nota (Mismo cliente)"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /><path d="M8 14h.01" /></svg>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleDuplicateNote(false)}
+                            className="bg-green-50 text-green-600 p-3 rounded-lg hover:bg-green-100 transition-colors border border-green-200"
+                            title="Nueva nota (Cliente nuevo)"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" x2="20" y1="8" y2="14" /><line x1="23" x2="17" y1="11" y2="11" /></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -927,6 +998,14 @@ export default function ServiceNoteForm() {
                     <div className="flex justify-between items-center border-b pb-2 text-gray-900">
                         <h3 className="text-lg font-semibold text-gray-800">Refacciones</h3>
                         <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={loadLubricationKit}
+                                className="flex items-center gap-2 text-sm text-yellow-600 hover:text-yellow-700 font-medium px-3 py-1.5 rounded-md hover:bg-yellow-50 transition-colors border border-yellow-100"
+                                title="Cargar lista estándar de lubricación"
+                            >
+                                🛢️ Kit Lubricación
+                            </button>
                             <button
                                 type="button"
                                 onClick={loadTuneupKit}

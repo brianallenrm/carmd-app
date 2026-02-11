@@ -116,18 +116,12 @@ export default function ServiceNoteTemplate({
                     <div className="text-xs text-slate-800 font-semibold bg-slate-100 px-2 py-0.5 rounded inline-block capitalize">
                         {(() => {
                             if (!date) return "";
-                            // Expects "YYYY-MM-DD" or similar. Robust split.
-                            // If user passes existing full date string, handle that too?
-                            // But we standardized on YYYY-MM-DD in Form.
+                            const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
                             if (date.includes('-')) {
                                 const [y, m, d] = date.split('-');
-                                const dateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
-                                const day = d;
-                                const month = dateObj.toLocaleDateString('es-MX', { month: 'long' });
-                                const year = y;
-                                return `${day} / ${month.charAt(0).toUpperCase() + month.slice(1)} / ${year}`;
+                                const month = MESES[parseInt(m) - 1] || m;
+                                return `${d} / ${month} / ${y}`;
                             } else {
-                                // Fallback for old links with "5/10/2025" or similar
                                 return date;
                             }
                         })()}
@@ -147,9 +141,9 @@ export default function ServiceNoteTemplate({
                         <div className="text-sm font-bold text-slate-900">{client.name}</div>
                         <div className="text-[10px] text-slate-600 leading-tight">{client.address}</div>
                         <div className="text-[10px] text-slate-600 flex gap-2">
-                            <span>{client.phone}</span>
-                            <span className="text-slate-300">|</span>
-                            <span>{client.email}</span>
+                            {client.phone && <span>{client.phone}</span>}
+                            {client.phone && client.email && client.email !== 'car.md.mx@hotmail.com' && <span className="text-slate-300">|</span>}
+                            {client.email && client.email !== 'car.md.mx@hotmail.com' && <span>{client.email}</span>}
                         </div>
                     </div>
                 </div>

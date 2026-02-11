@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEvent } from "react";
-import { Plus, Trash2, FileText, Save, Car, User, Search, Eye, History, X, Clock, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Trash2, FileText, Save, Car, User, Search, Eye, History, X, Clock, ArrowUp, ArrowDown, UserPlus } from "lucide-react";
 
 import CatalogSearch from './CatalogSearch';
 import { ServiceItem, ClientInfo, VehicleInfo } from "@/types/service-note";
@@ -84,6 +84,21 @@ export default function ServiceNoteForm() {
         } finally {
             setIsLoadingFolio(false);
         }
+    };
+
+    const handleDuplicateNote = () => {
+        const currentFolioNum = parseInt(folio);
+        const nextFolio = isNaN(currentFolioNum) ? "" : (currentFolioNum + 1).toString().padStart(5, '0');
+
+        const duplicationData = {
+            client,
+            vehicle,
+            folio: nextFolio,
+            timestamp: Date.now()
+        };
+
+        localStorage.setItem("service-note-duplicate-pending", JSON.stringify(duplicationData));
+        window.open(window.location.pathname, '_blank');
     };
 
     const [vehicle, setVehicle] = useState<VehicleInfo>({
@@ -270,55 +285,69 @@ export default function ServiceNoteForm() {
     const [draftId, setDraftId] = useState<string>("");
 
     useEffect(() => {
-        // 1. Resolve Draft ID from URL or Create New
+        // 1. Check for Smart Duplication (Mismo Cliente)
+        const pendingDuplication = localStorage.getItem("service-note-duplicate-pending");
+        let isDuplication = false;
+
+        if (pendingDuplication) {
+            try {
+                const data = JSON.parse(pendingDuplication);
+                // Only use if it's fresh (less than 10 seconds old)
+                if (Date.now() - data.timestamp < 10000) {
+                    if (data.client) setClient(data.client);
+                    if (data.vehicle) setVehicle(data.vehicle);
+                    if (data.folio) setFolio(data.folio);
+                    isDuplication = true;
+                }
+                localStorage.removeItem("service-note-duplicate-pending");
+            } catch (e) {
+                console.error("Error parsing duplication data", e);
+            }
+        }
+
+        // 2. Resolve Draft ID from URL or Create New
         const params = new URLSearchParams(window.location.search);
         let currentId = params.get("draftId");
 
         if (!currentId) {
             currentId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-            // Update URL without reload
             const newUrl = `${window.location.pathname}?draftId=${currentId}`;
             window.history.replaceState({ path: newUrl }, '', newUrl);
         }
 
         setDraftId(currentId);
 
-        // 2. Load Specific Draft
-        const savedDraft = localStorage.getItem(`service-note-draft-${currentId}`);
-        if (savedDraft) {
-            try {
-                const parsed = JSON.parse(savedDraft);
-                setClient(parsed.client || client);
-                setVehicle(parsed.vehicle || vehicle);
-                setServices(parsed.services || services);
-                setParts(parsed.parts || parts);
-                setNotes(parsed.notes || "");
-                setIncludeIva(parsed.includeIva || false);
-                setIncludeIsr(parsed.includeIsr || false);
-                // Migration for drafts
-                if (parsed.isDiagnostic) {
-                    setHideParts(true);
-                    setHideWarranty(true);
-                } else {
-                    setHideParts(parsed.hideParts || false);
-                    setHideWarranty(parsed.hideWarranty || false);
+        // 3. Load Specific Draft (skip if this is a fresh duplication)
+        if (!isDuplication) {
+            const savedDraft = localStorage.getItem(`service-note-draft-${currentId}`);
+            if (savedDraft) {
+                try {
+                    const parsed = JSON.parse(savedDraft);
+                    setClient(parsed.client || client);
+                    setVehicle(parsed.vehicle || vehicle);
+                    setServices(parsed.services || services);
+                    setParts(parsed.parts || parts);
+                    setNotes(parsed.notes || "");
+                    setIncludeIva(parsed.includeIva || false);
+                    setIncludeIsr(parsed.includeIsr || false);
+                    if (parsed.isDiagnostic) {
+                        setHideParts(true);
+                        setHideWarranty(true);
+                    } else {
+                        setHideParts(parsed.hideParts || false);
+                        setHideWarranty(parsed.hideWarranty || false);
+                    }
+                } catch (e) {
+                    console.error("Error loading draft", e);
                 }
-                // Draft doesn't save folio usually, so we load next one
-            } catch (e) {
-                console.error("Error loading draft", e);
             }
-        } else {
-            // Backward compatibility: Check safely for old global draft
-            // Only if this is a NEW draft session (no draftId was in URL originally)
-            // But to be safe and clean, let's just ignore the old global key to avoid confusion
-            // unless user explicitly wants to migrate. For now, fresh start is safer.
+            // Always load next folio on normal mount or draft load
+            loadNextFolio();
         }
 
-        // Always load next folio on mount
-        loadNextFolio();
-
         setIsDraftLoaded(true);
-    }, []); // Run once on mount
+    }, []);
+    // Run once on mount
 
     // Multi-Tab Safe Auto-Save
     useEffect(() => {
@@ -1204,6 +1233,15 @@ export default function ServiceNoteForm() {
                     </button>
 
                     <div className="flex gap-4">
+                        <button
+                            type="button"
+                            onClick={handleDuplicateNote}
+                            className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-orange-200 text-[#F37014] font-bold rounded-lg hover:bg-orange-50 hover:border-orange-300 transition-colors shadow-sm"
+                            title="Abrir nueva pestaña para el mismo cliente con folio consecutivo"
+                        >
+                            <UserPlus size={20} />
+                            Mismo Cliente
+                        </button>
                         <button
                             type="button"
                             onClick={handlePreview}

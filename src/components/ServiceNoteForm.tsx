@@ -86,16 +86,19 @@ export default function ServiceNoteForm() {
         }
     };
 
-    const handleDuplicateNote = () => {
+    const handleDuplicateNote = (keepData: boolean) => {
         const currentFolioNum = parseInt(folio);
         const nextFolio = isNaN(currentFolioNum) ? "" : (currentFolioNum + 1).toString().padStart(5, '0');
 
-        const duplicationData = {
-            client,
-            vehicle,
+        const duplicationData: any = {
             folio: nextFolio,
             timestamp: Date.now()
         };
+
+        if (keepData) {
+            duplicationData.client = client;
+            duplicationData.vehicle = vehicle;
+        }
 
         localStorage.setItem("service-note-duplicate-pending", JSON.stringify(duplicationData));
         window.open(window.location.pathname, '_blank');
@@ -1235,7 +1238,16 @@ export default function ServiceNoteForm() {
                     <div className="flex gap-4">
                         <button
                             type="button"
-                            onClick={handleDuplicateNote}
+                            onClick={() => handleDuplicateNote(false)}
+                            className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm"
+                            title="Abrir nueva pestaña limpia con el siguiente folio"
+                        >
+                            <Plus size={20} />
+                            Nuevo Cliente
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleDuplicateNote(true)}
                             className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-orange-200 text-[#F37014] font-bold rounded-lg hover:bg-orange-50 hover:border-orange-300 transition-colors shadow-sm"
                             title="Abrir nueva pestaña para el mismo cliente con folio consecutivo"
                         >

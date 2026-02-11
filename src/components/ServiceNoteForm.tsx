@@ -54,6 +54,13 @@ const DISTRIBUTION_KIT_PARTS = [
     { description: "Materiales diversos, consumibles y artículos de limpieza", price: 0 }
 ];
 
+const LUBRICATION_KIT_PARTS = [
+    { description: "Filtro de aceite", price: 0 },
+    { description: "Garrafa de aceite lavado interno de motor", price: 398.50 },
+    { description: "Garrafa de aceite para motor", price: 1240 },
+    { description: "Materiales diversos, consumibles y artículos de limpieza", price: 0 }
+];
+
 export default function ServiceNoteForm() {
     const [client, setClient] = useState<ClientInfo>({
         name: "",
@@ -442,6 +449,18 @@ export default function ServiceNoteForm() {
         if (!confirm("¿Agregar piezas del Kit de Distribución a la lista actual?")) return;
         const newParts = DISTRIBUTION_KIT_PARTS.map((p, index) => ({
             id: Date.now().toString() + "-d-" + index,
+            description: p.description,
+            partsCost: p.price,
+            laborCost: 0,
+            quantity: 1
+        }));
+        setParts(prev => [...prev, ...newParts]);
+    };
+
+    const loadLubricationKit = () => {
+        if (!confirm("¿Agregar piezas del Kit de Lubricación a la lista actual?")) return;
+        const newParts = LUBRICATION_KIT_PARTS.map((p, index) => ({
+            id: Date.now().toString() + "-l-" + index,
             description: p.description,
             partsCost: p.price,
             laborCost: 0,
@@ -927,6 +946,14 @@ export default function ServiceNoteForm() {
                     <div className="flex justify-between items-center border-b pb-2 text-gray-900">
                         <h3 className="text-lg font-semibold text-gray-800">Refacciones</h3>
                         <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={loadLubricationKit}
+                                className="flex items-center gap-2 text-sm text-yellow-600 hover:text-yellow-700 font-medium px-3 py-1.5 rounded-md hover:bg-yellow-50 transition-colors border border-yellow-100"
+                                title="Cargar lista estándar de lubricación"
+                            >
+                                🛢️ Kit Lubricación
+                            </button>
                             <button
                                 type="button"
                                 onClick={loadTuneupKit}

@@ -1235,25 +1235,28 @@ export default function ServiceNoteForm() {
                         Borrar Todo
                     </button>
 
-                    <div className="flex gap-4">
-                        <button
-                            type="button"
-                            onClick={() => handleDuplicateNote(false)}
-                            className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm"
-                            title="Abrir nueva pestaña limpia con el siguiente folio"
-                        >
-                            <Plus size={20} />
-                            Nuevo Cliente
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => handleDuplicateNote(true)}
-                            className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-orange-200 text-[#F37014] font-bold rounded-lg hover:bg-orange-50 hover:border-orange-300 transition-colors shadow-sm"
-                            title="Abrir nueva pestaña para el mismo cliente con folio consecutivo"
-                        >
-                            <UserPlus size={20} />
-                            Mismo Cliente
-                        </button>
+                    <div className="flex items-center gap-3">
+                        <div className="flex gap-2 mr-2">
+                            <button
+                                type="button"
+                                onClick={() => handleDuplicateNote(false)}
+                                className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 transition-all text-xs"
+                                title="Abrir nueva pestaña limpia con el siguiente folio"
+                            >
+                                <Plus size={14} />
+                                Nuevo Cliente
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleDuplicateNote(true)}
+                                className="flex items-center gap-1.5 px-3 py-2 bg-orange-50 border border-orange-100 text-[#F37014] font-bold rounded-lg hover:bg-orange-100 transition-all text-xs"
+                                title="Abrir nueva pestaña para el mismo cliente con folio consecutivo"
+                            >
+                                <UserPlus size={14} />
+                                Mismo Cliente
+                            </button>
+                        </div>
+
                         <button
                             type="button"
                             onClick={handlePreview}

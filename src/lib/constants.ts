@@ -77,6 +77,10 @@ export const GOOGLE_SHEETS_CONFIG = {
         ID: "1Y3w26f6EVar5Tl6YfFolv3571PjjT8dbUV4ffGolO4c",
         TAB_NAME: "Respuestas de formulario 1"
     },
+    CLIENTS: {
+        ID: "1Y3w26f6EVar5Tl6YfFolv3571PjjT8dbUV4ffGolO4c",
+        TAB_NAME: "Inventario_Vista"
+    },
     MASTER: {
         ID: "1A35mdnUopNt-pk0yWdDxucPAe5zqO46ujgzN1r0jW9Q",
         TAB_NAME: "TODOS"

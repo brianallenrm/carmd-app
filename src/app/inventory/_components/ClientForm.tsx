@@ -34,7 +34,7 @@ export default function ClientForm({ data, onChange, onNext, isNew = false }: Cl
     const isValid = data.name && data.phone && data.email;
 
     return (
-        <div className="w-full max-w-lg mx-auto space-y-6" id="tutorial-client-form">
+        <div className="w-full max-w-lg mx-auto space-y-6 pb-24" id="tutorial-client-form">
 
             <div className="text-center space-y-2">
                 <h3 className="text-xl font-bold text-slate-900">

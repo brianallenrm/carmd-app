@@ -58,8 +58,8 @@ const STEPS: TutorialStep[] = [
         icon: Car,
         appStep: 2,
         requireInteraction: true,
-        validateInteraction: (data) => !!(data?.vehicle?.brand && data?.vehicle?.model && data?.vehicle?.gas),
-        interactionHint: 'Selecciona Marca, Modelo y Gasolina'
+        validateInteraction: (data) => !!(data?.vehicle?.brand && data?.vehicle?.model),
+        interactionHint: 'Selecciona Marca y Modelo'
     },
     {
         elementId: 'tutorial-inventory-grid',
@@ -238,17 +238,8 @@ export default function TutorialOverlay({ isOpen, onClose, onSetAppStep, current
     const Icon = step.icon;
     const isWaiting = step.requireInteraction && !hasInteracted;
 
-    // Logic to avoid overlapping: 
-    // If the element persists into the bottom half of the screen, move card to TOP.
-    // We check BOTH the top and the bottom of the element.
-    const isElementCoveringBottom = (coords.top + coords.height) > (screenHeight * 0.55);
-    const isElementCoveringTop = coords.top < (screenHeight * 0.4);
-
-    // On mobile, we are more strict.
-    const isMobile = screenWidth < 768;
-    const useTopPosition = isMobile
-        ? isElementCoveringBottom
-        : (isElementCoveringBottom && !isElementCoveringTop) || (coords.top > screenHeight * 0.5);
+    // Simplified logic: Always keep it at the bottom as the user preferred.
+    const useTopPosition = false;
 
     return (
         <div className="fixed inset-0 z-[100] pointer-events-none overflow-hidden">

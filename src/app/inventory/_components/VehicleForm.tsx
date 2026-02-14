@@ -37,7 +37,7 @@ export default function VehicleForm({ data, onChange, onNext, lastKm }: VehicleF
     const isFormValid = data.brand && data.model && data.plates && data.km && data.serialNumber && data.motor;
 
     return (
-        <div className="w-full max-w-lg mx-auto space-y-6" id="tutorial-vehicle-form">
+        <div className="w-full max-w-lg mx-auto space-y-6 pb-24" id="tutorial-vehicle-form">
             <div className="text-center">
                 <h3 className="text-xl font-bold text-slate-900">Datos del Vehículo</h3>
                 <p className="text-slate-500 text-sm">Verifica o completa la información.</p>

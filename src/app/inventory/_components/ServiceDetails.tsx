@@ -29,11 +29,24 @@ export default function ServiceDetails({ data, onChange }: ServiceDetailsProps) 
     };
 
     const handleTagClick = (tag: string) => {
-        // Appends to existing text or starts new
-        const current = data.serviceType;
-        const newValue = current ? `${current}, ${tag}` : tag;
-        handleChange('serviceType', newValue);
+        // Parse existing tags and toggle
+        const currentTags = data.serviceType
+            ? data.serviceType.split(',').map(t => t.trim()).filter(Boolean)
+            : [];
+        const tagIndex = currentTags.indexOf(tag);
+        if (tagIndex >= 0) {
+            // Remove tag if already present
+            currentTags.splice(tagIndex, 1);
+        } else {
+            currentTags.push(tag);
+        }
+        handleChange('serviceType', currentTags.join(', '));
     };
+
+    // Check which tags are currently selected
+    const selectedTags = data.serviceType
+        ? data.serviceType.split(',').map(t => t.trim())
+        : [];
 
     return (
         <div className="w-full max-w-lg mx-auto space-y-6" id="tutorial-service-details">
@@ -51,17 +64,23 @@ export default function ServiceDetails({ data, onChange }: ServiceDetailsProps) 
                         <FileText size={14} className="text-[#F37014]" /> Presupuesto / Motivo de Ingreso *
                     </label>
 
-                    {/* Quick Tags */}
+                    {/* Quick Tags - Toggle on/off */}
                     <div className="flex flex-wrap gap-2 mb-2">
-                        {SERVICE_TAGS.map(tag => (
-                            <button
-                                key={tag}
-                                onClick={() => handleTagClick(tag)}
-                                className="px-3 py-1.5 bg-white hover:bg-slate-50 text-[10px] font-bold text-slate-600 rounded-full border border-slate-200 transition-all shadow-sm"
-                            >
-                                + {tag}
-                            </button>
-                        ))}
+                        {SERVICE_TAGS.map(tag => {
+                            const isSelected = selectedTags.includes(tag);
+                            return (
+                                <button
+                                    key={tag}
+                                    onClick={() => handleTagClick(tag)}
+                                    className={`px-3 py-1.5 text-[10px] font-bold rounded-full border transition-all shadow-sm ${isSelected
+                                            ? 'bg-[#F37014] text-white border-[#F37014]'
+                                            : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200'
+                                        }`}
+                                >
+                                    {isSelected ? '✓ ' : '+ '}{tag}
+                                </button>
+                            );
+                        })}
                     </div>
 
                     <textarea

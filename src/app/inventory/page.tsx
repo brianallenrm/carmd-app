@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Car, ClipboardList, CheckCircle, Camera, ChevronRight, ChevronLeft, Settings, FileText, Plus } from 'lucide-react';
+import { Search, Car, ClipboardList, CheckCircle, Camera, ChevronRight, ChevronLeft, Settings, FileText, Plus, Loader2, AlertTriangle } from 'lucide-react';
 import ClientSearch from './_components/ClientSearch';
 import ClientForm from './_components/ClientForm';
 import InventoryGrid from './_components/InventoryGrid';
@@ -91,8 +91,10 @@ export default function InventoryPage() {
         comments: ''
     });
 
-    // State for Success
+    // State for Success & Saving
     const [isSuccess, setIsSuccess] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveError, setSaveError] = useState('');
     const [savedFolio, setSavedFolio] = useState('');
 
     // Load ALL data from local storage on mount (Idea 1: Autoguardado)
@@ -412,6 +414,10 @@ export default function InventoryPage() {
                         <button
                             onClick={async () => {
                                 if (currentStep === STEPS.length - 1) {
+                                    if (isSaving) return; // Prevent double-click
+                                    setIsSaving(true);
+                                    setSaveError('');
+
                                     // FINAL SUBMISSION - Save to Pending List
                                     if (serviceData.advisorName) {
                                         localStorage.setItem('lastAdvisorName', serviceData.advisorName);
@@ -453,23 +459,51 @@ export default function InventoryPage() {
                                         setIsSuccess(true);
                                     } catch (error) {
                                         console.error("Sheet Save Error:", error);
-                                        alert("⚠️ Se guardó localmente pero hubo error al escribir en Google Sheets.");
+                                        setSaveError('Error al guardar en Google Sheets. Se guardó localmente.');
+                                    } finally {
+                                        setIsSaving(false);
                                     }
                                 } else {
                                     nextStep();
                                 }
                             }}
-                            disabled={!isStepValid()}
-                            className={`flex-1 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${isStepValid()
-                                ? 'bg-[#F37014] text-white shadow-lg shadow-[#F37014]/30'
-                                : 'bg-slate-200 text-slate-400'
+                            disabled={!isStepValid() || isSaving}
+                            className={`flex-1 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${(!isStepValid() || isSaving)
+                                ? 'bg-slate-200 text-slate-400'
+                                : 'bg-[#F37014] text-white shadow-lg shadow-[#F37014]/30'
                                 }`}
                         >
-                            {currentStep === STEPS.length - 1 ? 'Finalizar Orden' : 'Continuar'}
-                            <ChevronRight size={20} />
+                            {isSaving ? (
+                                <><Loader2 size={20} className="animate-spin" /> Guardando...</>
+                            ) : currentStep === STEPS.length - 1 ? (
+                                <>Finalizar Orden <ChevronRight size={20} /></>
+                            ) : (
+                                <>Continuar <ChevronRight size={20} /></>
+                            )}
                         </button>
                     </div>
                 </div>
+
+                {/* Save Error Toast */}
+                <AnimatePresence>
+                    {saveError && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            className="fixed bottom-24 left-4 right-4 max-w-3xl mx-auto bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 shadow-lg z-50"
+                        >
+                            <AlertTriangle size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                                <p className="text-sm font-bold text-amber-800">{saveError}</p>
+                                <button
+                                    onClick={() => setSaveError('')}
+                                    className="text-xs text-amber-600 underline mt-1"
+                                >Cerrar</button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* Tutorial Overlay */}

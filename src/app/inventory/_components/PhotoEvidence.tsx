@@ -30,10 +30,14 @@ const QUICK_TAGS = ['Sin Daño Aparente', 'Rayón', 'Golpe', 'Roto', 'Falta Piez
 
 export default function PhotoEvidence({ photos, onPhotoUpdate, plates }: PhotoEvidenceProps) {
     const [uploading, setUploading] = useState<Record<string, boolean>>({});
+    const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
 
     const handleFileChange = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        // Clear any previous error for this photo
+        setUploadErrors(prev => { const next = { ...prev }; delete next[id]; return next; });
 
         try {
             // Compress image client-side (~80-200KB)
@@ -47,7 +51,7 @@ export default function PhotoEvidence({ photos, onPhotoUpdate, plates }: PhotoEv
             // Show compressed preview immediately
             onPhotoUpdate(id, { file, previewUrl: dataUrl });
 
-            // Upload to R2 in background
+            // Upload to R2 in background with retry
             setUploading(prev => ({ ...prev, [id]: true }));
 
             const base64 = await blobToBase64(blob);
@@ -55,18 +59,34 @@ export default function PhotoEvidence({ photos, onPhotoUpdate, plates }: PhotoEv
             const platePrefix = plates?.trim() ? plates.trim().toUpperCase() : 'SIN_PLACA';
             const filename = `${platePrefix}_${id}.${ext}`;
 
-            const res = await fetch('/api/photos/upload', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: base64, filename }),
-            });
+            let lastError: any = null;
+            for (let attempt = 0; attempt < 2; attempt++) {
+                try {
+                    const res = await fetch('/api/photos/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: base64, filename }),
+                    });
 
-            if (res.ok) {
-                const { url } = await res.json();
-                onPhotoUpdate(id, { driveUrl: url });
-            } else {
-                const errData = await res.json();
-                console.error('Upload failed:', errData);
+                    if (res.ok) {
+                        const { url } = await res.json();
+                        onPhotoUpdate(id, { driveUrl: url });
+                        lastError = null;
+                        break;
+                    } else {
+                        const errData = await res.json().catch(() => ({}));
+                        lastError = errData.error || `HTTP ${res.status}`;
+                    }
+                } catch (err) {
+                    lastError = err;
+                }
+                // Brief wait before retry
+                if (attempt === 0) await new Promise(r => setTimeout(r, 1500));
+            }
+
+            if (lastError) {
+                console.error('Upload failed after retry:', lastError);
+                setUploadErrors(prev => ({ ...prev, [id]: 'Error al subir. La foto se guardó localmente.' }));
             }
         } catch (err) {
             console.error('Photo processing error:', err);
@@ -75,6 +95,7 @@ export default function PhotoEvidence({ photos, onPhotoUpdate, plates }: PhotoEv
                 onPhotoUpdate(id, { file, previewUrl: reader.result as string });
             };
             reader.readAsDataURL(file);
+            setUploadErrors(prev => ({ ...prev, [id]: 'Error al procesar la imagen.' }));
         } finally {
             setUploading(prev => ({ ...prev, [id]: false }));
         }
@@ -101,6 +122,7 @@ export default function PhotoEvidence({ photos, onPhotoUpdate, plates }: PhotoEv
                                 zone={zone}
                                 photo={photo}
                                 uploading={!!uploading[zone.id]}
+                                uploadError={uploadErrors[zone.id]}
                                 handleFileChange={handleFileChange}
                                 onPhotoUpdate={onPhotoUpdate}
                             />
@@ -152,13 +174,14 @@ interface PhotoSlotProps {
     zone: { id: string; label: string };
     photo: PhotoData;
     uploading: boolean;
+    uploadError?: string;
     handleFileChange: (id: string, e: React.ChangeEvent<HTMLInputElement>) => void;
     onPhotoUpdate: (id: string, data: Partial<PhotoData>) => void;
     isExtra?: boolean;
     onRemove?: () => void;
 }
 
-function PhotoSlot({ zone, photo, uploading, handleFileChange, onPhotoUpdate, isExtra, onRemove }: PhotoSlotProps) {
+function PhotoSlot({ zone, photo, uploading, uploadError, handleFileChange, onPhotoUpdate, isExtra, onRemove }: PhotoSlotProps) {
     const hasPhoto = !!photo.previewUrl;
     const hasDriveUrl = !!photo.driveUrl;
 
@@ -177,7 +200,8 @@ function PhotoSlot({ zone, photo, uploading, handleFileChange, onPhotoUpdate, is
                 </span>
                 <div className="flex items-center gap-1.5">
                     {uploading && <Loader2 size={14} className="text-[#F37014] animate-spin" />}
-                    {!uploading && hasDriveUrl && <span title="Guardada en la nube"><Cloud size={14} className="text-green-500" /></span>}
+                    {!uploading && uploadError && <span title={uploadError} className="text-amber-500 text-[9px] font-bold">⚠ Error</span>}
+                    {!uploading && !uploadError && hasDriveUrl && <span title="Guardada en la nube"><Cloud size={14} className="text-green-500" /></span>}
                     {hasPhoto && <CheckCircle size={18} className="text-green-500" />}
                 </div>
             </div>

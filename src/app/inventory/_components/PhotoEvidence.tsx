@@ -141,6 +141,7 @@ export default function PhotoEvidence({ photos, onPhotoUpdate, plates }: PhotoEv
                                         zone={{ id: photo.id, label: photo.label }}
                                         photo={photo}
                                         uploading={!!uploading[photo.id]}
+                                        uploadError={uploadErrors[photo.id]}
                                         handleFileChange={handleFileChange}
                                         onPhotoUpdate={onPhotoUpdate}
                                         isExtra

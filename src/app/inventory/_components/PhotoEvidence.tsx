@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Camera, Trash2, CheckCircle, Loader2, Cloud } from 'lucide-react';
+import { Camera, Trash2, CheckCircle, Loader2, Cloud, AlertTriangle } from 'lucide-react';
 import { compressImage, blobToBase64 } from '@/lib/image-utils';
 
 export interface PhotoData {
@@ -200,11 +200,15 @@ function PhotoSlot({ zone, photo, uploading, uploadError, handleFileChange, onPh
                 <span className={`text-xs font-bold uppercase tracking-wider ${hasPhoto ? 'text-green-600' : 'text-slate-500'}`}>
                     {photo.label || zone.label}
                 </span>
-                <div className="flex items-center gap-1.5">
-                    {uploading && <Loader2 size={14} className="text-[#F37014] animate-spin" />}
-                    {!uploading && uploadError && <span title={uploadError} className="text-amber-500 text-[9px] font-bold">⚠ Error</span>}
-                    {!uploading && !uploadError && hasDriveUrl && <span title="Guardada en la nube"><Cloud size={14} className="text-green-500" /></span>}
-                    {hasPhoto && <CheckCircle size={18} className="text-green-500" />}
+                <div className="flex items-center gap-1.5 overflow-hidden">
+                    {uploading && <Loader2 size={14} className="text-[#F37014] animate-spin flex-shrink-0" />}
+                    {!uploading && uploadError && (
+                        <div className="flex items-center gap-1 bg-amber-100 px-1.5 py-0.5 rounded text-[8px] font-bold text-amber-700 whitespace-nowrap animate-pulse">
+                            <AlertTriangle size={10} /> {uploadError.includes('Configuración') ? 'Error Config' : 'Error Red'}
+                        </div>
+                    )}
+                    {!uploading && !uploadError && hasDriveUrl && <span title="Guardada en la nube"><Cloud size={14} className="text-green-500 flex-shrink-0" /></span>}
+                    {hasPhoto && <CheckCircle size={18} className="text-green-500 flex-shrink-0" />}
                 </div>
             </div>
 

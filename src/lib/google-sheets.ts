@@ -61,16 +61,30 @@ export const findRowIndicesByColumn = async (doc: GoogleSpreadsheet, sheetIndex:
 
 export const lookupVehicleByPlate = async (plate: string) => {
     const doc = await getInventoryDoc();
-    const sheetIndex = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME]
-        ? doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME].index
-        : 0;
+
+    // --- Dual-Source Lookup Strategy ---
+    // 1. Try the modern tab first (Inventarios_app)
+    // 2. If not found, fall back to the legacy tab (Respuestas de formulario 1)
+    const tabsToSearch = [
+        GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME,
+        GOOGLE_SHEETS_CONFIG.INVENTORY.LEGACY_TAB_NAME
+    ].filter(Boolean);
+
+    let sheetIndex = -1;
+    let rowIndices: number[] = [];
+
+    for (const tabName of tabsToSearch) {
+        const targetSheet = doc.sheetsByTitle[tabName];
+        if (!targetSheet) continue;
+
+        sheetIndex = targetSheet.index;
+        rowIndices = await findRowIndicesByColumn(doc, sheetIndex, 'N', plate);
+        if (rowIndices.length > 0) break; // Found in this tab, stop searching
+    }
+
+    if (rowIndices.length === 0 || sheetIndex === -1) return null;
 
     const sheet = doc.sheetsByIndex[sheetIndex];
-
-    // 1. Find ALL Row Indices searching in Column N (Placas)
-    const rowIndices = await findRowIndicesByColumn(doc, sheetIndex, 'N', plate);
-
-    if (rowIndices.length === 0) return null;
 
     let bestRowIndex = rowIndices[rowIndices.length - 1]; // Default to last found (bottom-most)
 

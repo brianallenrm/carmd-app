@@ -82,7 +82,8 @@ export const GOOGLE_SHEETS_CONFIG = {
     // [DEVELOPMENT] Inventory & Reception Tool (In testing)
     INVENTORY: {
         ID: "1Y3w26f6EVar5Tl6YfFolv3571PjjT8dbUV4ffGolO4c",
-        TAB_NAME: "Inventarios_app"
+        TAB_NAME: "Inventarios_app",
+        LEGACY_TAB_NAME: "Respuestas de formulario 1"
     },
 
     // [DEVELOPMENT] Client History / View (In testing)

@@ -33,7 +33,7 @@ const ITEMS: { id: string; label: string; icon: React.ElementType }[] = [
 
 export default function InventoryGrid({ inventory, onToggleItem, otherDescription, onOtherDescriptionChange }: InventoryGridProps) {
     return (
-        <div className="w-full max-w-lg mx-auto">
+        <div className="w-full max-w-lg mx-auto" id="tutorial-inventory-grid">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {ITEMS.map((item) => {
                     const isPresent = !!inventory[item.id];
@@ -45,19 +45,19 @@ export default function InventoryGrid({ inventory, onToggleItem, otherDescriptio
                             onClick={() => onToggleItem(item.id)}
                             whileTap={{ scale: 0.95 }}
                             className={`
-                relative flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all duration-200 min-h-[100px]
+                relative flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all duration-200 min-h-[100px] shadow-sm
                 ${isPresent
-                                    ? 'bg-green-500/20 border-green-500 text-green-400'
-                                    : 'bg-neutral-800/50 border-neutral-700 text-neutral-500 hover:border-neutral-600'
+                                    ? 'bg-green-50 border-green-200 text-green-600 shadow-inner'
+                                    : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200 hover:bg-slate-50'
                                 }
               `}
                         >
                             <Icon size={24} className="mb-2" />
-                            <span className="font-medium text-xs sm:text-sm text-center leading-tight">{item.label}</span>
+                            <span className="font-bold text-xs sm:text-sm text-center leading-tight uppercase tracking-tight">{item.label}</span>
 
                             {/* Status Indicator */}
                             <div
-                                className={`absolute top-2 right-2 w-2 h-2 rounded-full transition-colors ${isPresent ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-neutral-700'
+                                className={`absolute top-2 right-2 w-2 h-2 rounded-full transition-colors ${isPresent ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-slate-100 border border-slate-200'
                                     }`}
                             />
                         </motion.button>
@@ -74,21 +74,21 @@ export default function InventoryGrid({ inventory, onToggleItem, otherDescriptio
                         exit={{ opacity: 0, height: 0 }}
                         className="mt-4 overflow-hidden"
                     >
-                        <label className="block text-xs text-neutral-400 mb-1 ml-1 uppercase font-bold">Describe el otro objeto:</label>
+                        <label className="block text-xs text-slate-400 mb-1 ml-1 uppercase font-bold tracking-wider">Describe el otro objeto:</label>
                         <input
                             type="text"
                             value={otherDescription || ''}
                             onChange={(e) => onOtherDescriptionChange(e.target.value)}
                             placeholder="Ej. Silla de bebé, GPS..."
-                            className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:border-rose-500 outline-none transition-colors"
+                            className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 focus:border-[#F37014] outline-none transition-colors shadow-sm"
                             autoFocus
                         />
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            <p className="text-center text-neutral-500 text-sm mt-6">
-                Marca SOLO los elementos que el vehículo <strong>TIENE</strong>.
+            <p className="text-center text-slate-400 text-[10px] uppercase font-bold tracking-widest mt-6">
+                Marca SOLO los elementos que el vehículo <strong className="text-[#F37014]">TIENE</strong>.
             </p>
         </div>
     );

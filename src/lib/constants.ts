@@ -91,3 +91,39 @@ export const GOOGLE_SHEETS_CONFIG = {
         TAB_NAME: "Inventario_Vista"
     }
 };
+
+// --- 5. Vehicle Catalog ---
+export const VEHICLE_CATALOG: Record<string, string[]> = {
+    'Acura': ['ILX', 'TLX', 'MDX', 'RDX'],
+    'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8'],
+    'BMW': ['X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Serie 1', 'Serie 2', 'Serie 3', 'Serie 4', 'Serie 5', 'Serie 7', 'Z4', 'M3', 'M4', 'M5'],
+    'Chevrolet': ['Aveo', 'Onix', 'Cavalier', 'Captiva', 'Tracker', 'Equinox', 'Blazer', 'Traverse', 'Tahoe', 'Suburban', 'Silverado', 'Cheyenne', 'Tornado'],
+    'Chrysler': ['Pacifica', 'Town & Country', '300'],
+    'Cupra': ['Formentor', 'Leon', 'Ateca'],
+    'Dodge': ['Attitude', 'Neon', 'Dart', 'Journey', 'Durango', 'Challenger', 'Charger'],
+    'Ford': ['Figo', 'EcoSport', 'Escape', 'Edge', 'Explorer', 'Expedition', 'F-150', 'Lobo', 'Ranger', 'Maverick', 'Mustang', 'Bronco'],
+    'GMC': ['Terrain', 'Acadia', 'Yukon', 'Sierra', 'Canyon'],
+    'Honda': ['City', 'Civic', 'Accord', 'HR-V', 'CR-V', 'Pilot', 'Odyssey', 'BR-V'],
+    'Hyundai': ['i10', 'Accent', 'Elantra', 'Creta', 'Tucson', 'Santa Fe', 'Palisade'],
+    'Infiniti': ['Q50', 'Q60', 'QX50', 'QX60', 'QX80'],
+    'Jeep': ['Renegade', 'Compass', 'Cherokee', 'Grand Cherokee', 'Wrangler', 'Gladiator'],
+    'Kia': ['Rio', 'Forte', 'Optima', 'Soul', 'Seltos', 'Sportage', 'Sorento', 'Sedona'],
+    'Land Rover': ['Defender', 'Discovery', 'Discovery Sport', 'Range Rover', 'Range Rover Evoque', 'Range Rover Sport', 'Range Rover Velar'],
+    'Lincoln': ['Navigator', 'Aviator', 'Corsair', 'Nautilus'],
+    'Mazda': ['Mazda 2', 'Mazda 3', 'Mazda 6', 'CX-3', 'CX-30', 'CX-5', 'CX-7', 'CX-9', 'MX-5'],
+    'Mercedes-Benz': ['Clase A', 'Clase B', 'Clase C', 'Clase E', 'Clase S', 'CLA', 'CLS', 'GLA', 'GLB', 'GLC', 'GLE', 'GLS', 'G-Class'],
+    'Mini': ['Cooper', 'Clubman', 'Countryman'],
+    'Mitsubishi': ['Mirage', 'Lancer', 'Eclipse Cross', 'Outlander', 'Montero', 'L200'],
+    'Nissan': ['March', 'Versa', 'Sentra', 'Altima', 'Maxima', 'Kicks', 'X-Trail', 'Pathfinder', 'Armada', 'Frontier', 'NP300'],
+    'Peugeot': ['208', '301', '308', '2008', '3008', '5008', 'Partner'],
+    'Porsche': ['911', '718 Boxster', '718 Cayman', 'Taycan', 'Panamera', 'Macan', 'Cayenne'],
+    'Ram': ['700', '1500', '2500', '4000'],
+    'Renault': ['Kwid', 'Logan', 'Stepway', 'Duster', 'Oroch', 'Koleos'],
+    'Seat': ['Ibiza', 'Leon', 'Arona', 'Ateca', 'Tarraco'],
+    'Subaru': ['Impreza', 'WRX', 'Forester', 'XV', 'Outback'],
+    'Suzuki': ['Swift', 'Ignis', 'Baleno', 'Ertiga', 'Vitara', 'S-Cross', 'Jimny'],
+    'Tesla': ['Model 3', 'Model Y', 'Model S', 'Model X'],
+    'Toyota': ['Yaris', 'Corolla', 'Camry', 'Prius', 'Raize', 'Corolla Cross', 'Rav4', 'Highlander', 'Sienna', 'Hilux', 'Tacoma', 'Tundra'],
+    'Volkswagen': ['Polo', 'Vento', 'Virtus', 'Jetta', 'Golf', 'Tiguan', 'Teramont', 'Taos', 'Nivus', 'Saveiro', 'Amarok', 'Pointer'],
+    'Volvo': ['XC40', 'XC60', 'XC90', 'S60', 'S90', 'V60']
+};

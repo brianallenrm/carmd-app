@@ -121,8 +121,8 @@ export const lookupVehicleByPlate = async (plate: string) => {
 
     const cleanEmail = (email: string) => {
         if (!email) return "";
-        // Check for company placeholder email (case insensitive)
-        if (email.toLowerCase().includes("car.md.mx@hotmail.com")) return "";
+        // Check for ANY company placeholder email (case insensitive)
+        if (email.toLowerCase().includes("car.md.mx")) return "";
         return email.toLowerCase();
     };
 

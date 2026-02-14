@@ -99,7 +99,9 @@ export async function compressImage(
 
         img.onerror = () => {
             URL.revokeObjectURL(url);
-            reject(new Error('Failed to load image'));
+            const errorMsg = `Failed to load image: ${file.name} (${file.type}, ${file.size} bytes)`;
+            console.error(errorMsg);
+            reject(new Error(errorMsg));
         };
 
         img.src = url;

@@ -108,7 +108,7 @@ export default function ServiceNoteTemplate({
                 <div className="w-1/3 text-right self-start pt-2">
 
                     <div className="text-xs text-slate-500 mb-0.5 font-medium uppercase tracking-wide">PRESUPUESTO NO.</div>
-                    <div className="text-2xl font-mono font-bold text-[#F37014] mb-1">#{folio}</div>
+                    <div className="text-2xl font-mono font-bold text-[#F37014] mb-1">{folio.startsWith('#') ? folio : `#${folio}`}</div>
 
                     <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mt-1 mb-2">* SIN VALOR FISCAL *</p>
 
@@ -142,8 +142,8 @@ export default function ServiceNoteTemplate({
                         <div className="text-[10px] text-slate-600 leading-tight">{client.address}</div>
                         <div className="text-[10px] text-slate-600 flex gap-2">
                             {client.phone && <span>{client.phone}</span>}
-                            {client.phone && client.email && client.email !== 'car.md.mx@hotmail.com' && <span className="text-slate-300">|</span>}
-                            {client.email && client.email !== 'car.md.mx@hotmail.com' && <span>{client.email}</span>}
+                            {client.phone && client.email && !client.email.toLowerCase().includes('car.md.mx') && <span className="text-slate-300">|</span>}
+                            {client.email && !client.email.toLowerCase().includes('car.md.mx') && <span>{client.email}</span>}
                         </div>
                     </div>
                 </div>

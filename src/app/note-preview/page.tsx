@@ -64,7 +64,14 @@ function NotePreviewContent() {
 
     // Derived values
     const folio = sourceData.folio || "00001";
-    const date = sourceData.date || new Date().toLocaleDateString();
+    // Fix hydration mismatch: Use a deterministic date format or wait for mount
+    const [date, setDate] = React.useState("");
+
+    React.useEffect(() => {
+        if (isLoaded) {
+            setDate(sourceData.date || new Date().toLocaleDateString('es-MX'));
+        }
+    }, [isLoaded, sourceData.date]);
     const includeIva = sourceData.includeIva === true;
     const includeIsr = sourceData.includeIsr === true;
     const hideParts = sourceData.hideParts === true;

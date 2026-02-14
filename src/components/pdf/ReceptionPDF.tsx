@@ -5,23 +5,35 @@ interface Props {
 }
 
 /**
- * Title-case a string: capitalize first letter of each word.
+ * Title-case a string (Unicode safe)
  */
 function toTitleCase(str: string): string {
     if (!str) return str;
-    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+    return str.toLowerCase().split(/\s+/).map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
 }
 
 export default function ReceptionPDF({ data }: Props) {
     const { client: rawClient, vehicle, company, folio, date, inventory, functional, service, photos, notes } = data;
 
-    const DEFAULT_EMAIL = 'car.md.mx@hotmail.com';
+    const FORBIDDEN_EMAILS = [
+        'car.md.mx@hotmail.com',
+        'contacto@carmd.com.mx'
+    ];
 
-    // Auto-capitalize client name, filter default email
+    // Auto-capitalize client name, filter default/corporate email
     const client = {
         ...rawClient,
         name: toTitleCase(rawClient?.name || ''),
-        email: rawClient?.email === DEFAULT_EMAIL ? '' : (rawClient?.email || ''),
+        email: (() => {
+            const rawEmail = (rawClient?.email || '').trim().toLowerCase();
+            if (!rawEmail) return '';
+            if (FORBIDDEN_EMAILS.some(fe => rawEmail.includes(fe.toLowerCase())) || rawEmail.includes('car.md.mx')) {
+                return '';
+            }
+            return rawClient.email;
+        })(),
     };
 
     // Helper to chunk inventory for layout
@@ -78,10 +90,19 @@ export default function ReceptionPDF({ data }: Props) {
                 {/* Right: Folio & Date */}
                 <div className="w-1/3 text-right self-start pt-2">
                     <div className="text-xs text-slate-500 mb-0.5 font-medium uppercase tracking-wide">RECEPCIÓN NO.</div>
-                    <div className="text-2xl font-mono font-bold text-[#F37014] mb-1">#{folio}</div>
+                    <div className="text-2xl font-mono font-bold text-[#F37014] mb-1">{folio.startsWith('#') ? folio : `#${folio}`}</div>
                     <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mt-1 mb-2">INGRESO VEHICULAR</p>
                     <div className="text-xs text-slate-800 font-semibold bg-slate-100 px-2 py-0.5 rounded inline-block capitalize">
-                        {date}
+                        {(() => {
+                            if (!date) return "";
+                            if (date.includes('-')) {
+                                const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                                const [y, m, d] = date.split('-');
+                                const month = MESES[parseInt(m) - 1] || m;
+                                return `${d} / ${month} / ${y}`;
+                            }
+                            return date;
+                        })()}
                     </div>
                 </div>
             </div>
@@ -146,18 +167,26 @@ export default function ReceptionPDF({ data }: Props) {
                     <span className="text-[10px] font-bold text-slate-400 uppercase">ASESOR: {service.advisorName || 'Staff'}</span>
                 </div>
 
-                <div className="grid grid-cols-1 gap-2">
-                    <div>
-                        <span className="text-[9px] text-slate-400 uppercase font-bold block mb-0.5">Motivo de Ingreso / Fallas Reportadas</span>
-                        <p className="text-xs font-medium text-slate-800">{service.serviceType || 'Revisión General'}</p>
-                        {service.comments && <p className="text-[10px] text-slate-600 mt-1 italic">&quot;{service.comments}&quot;</p>}
-                    </div>
-                    {service.hasValuables && (
-                        <div className="mt-2 p-2 bg-yellow-50 border border-yellow-100 rounded text-[10px] text-yellow-800 flex gap-2 items-start">
-                            <span className="text-lg leading-none">⚠️</span>
+                <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-6">
+                        <div>
+                            <span className="text-[9px] text-slate-400 uppercase font-bold block mb-0.5 tracking-wider">Motivo de Ingreso / Fallas Reportadas</span>
+                            <p className="text-xs font-bold text-slate-900 leading-tight">{service.serviceType || 'Revisión General'}</p>
+                        </div>
+                        {service.comments && (
                             <div>
-                                <strong>Objetos de Valor Reportados:</strong>
-                                <p>{service.valuablesDescription}</p>
+                                <span className="text-[9px] text-slate-400 uppercase font-bold block mb-0.5 tracking-wider">Comentarios Adicionales</span>
+                                <p className="text-xs font-medium text-slate-800 leading-tight">{service.comments}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {service.hasValuables && (
+                        <div className="p-3 bg-amber-50 border-l-4 border-[#F37014] rounded-r-lg text-xs text-slate-900 flex gap-3 items-center border border-slate-100 shadow-sm">
+                            <span className="text-xl leading-none">⚠️</span>
+                            <div>
+                                <strong className="uppercase font-black text-[10px] block mb-0.5 text-[#F37014]">OBJETOS DE VALOR REPORTADOS:</strong>
+                                <p className="font-bold">{service.valuablesDescription}</p>
                             </div>
                         </div>
                     )}
@@ -222,29 +251,30 @@ export default function ReceptionPDF({ data }: Props) {
                         {/* Groups: Lights */}
                         <StatusRow label="Iluminación" ok={functional?.lightsAllOk !== false} />
                         {functional?.lightsAllOk === false && (
-                            <div className="pl-4 text-[9px] text-rose-600 font-medium grid grid-cols-2 gap-1 mb-1">
-                                {functional.lightsHead === false && <span>• Faros</span>}
-                                {functional.lightsTail === false && <span>• Calaveras</span>}
-                                {functional.lightsStop === false && <span>• Stop</span>}
-                                {functional.lightsTurn === false && <span>• Intermitentes</span>}
+                            <div className="pl-4 flex flex-wrap gap-1.5 mb-1.5 mt-0.5">
+                                {functional.lightsHead === false && <span className="text-[8px] bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100 flex items-center gap-1 font-bold"><span className="w-1 h-1 bg-rose-500 rounded-full"></span> FAROS</span>}
+                                {functional.lightsTail === false && <span className="text-[8px] bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100 flex items-center gap-1 font-bold"><span className="w-1 h-1 bg-rose-500 rounded-full"></span> CALAVERAS</span>}
+                                {functional.lightsStop === false && <span className="text-[8px] bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100 flex items-center gap-1 font-bold"><span className="w-1 h-1 bg-rose-500 rounded-full"></span> STOP</span>}
+                                {functional.lightsTurn === false && <span className="text-[8px] bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100 flex items-center gap-1 font-bold"><span className="w-1 h-1 bg-rose-500 rounded-full"></span> INTERMITENTES</span>}
                             </div>
                         )}
 
                         {/* Groups: Windows */}
                         <StatusRow label="Cristales/Espejos" ok={functional?.windowsAllOk !== false} />
                         {functional?.windowsAllOk === false && (
-                            <div className="pl-4 text-[9px] text-rose-600 font-medium grid grid-cols-2 gap-1 mb-1">
-                                {functional.windowPiloto === false && <span>• Piloto</span>}
-                                {functional.windowCopiloto === false && <span>• Copiloto</span>}
-                                {functional.windowRearLeft === false && <span>• Trasera Izq</span>}
-                                {functional.windowRearRight === false && <span>• Trasera Der</span>}
-                                {functional.sunroof === false && <span>• Quemacocos</span>}
-                                {functional.mirrors === false && <span>• Espejos</span>}
+                            <div className="pl-4 flex flex-wrap gap-1.5 mb-1.5 mt-0.5">
+                                {functional.windowPiloto === false && <span className="text-[8px] bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100 flex items-center gap-1 font-bold"><span className="w-1 h-1 bg-rose-500 rounded-full"></span> PILOTO</span>}
+                                {functional.windowCopiloto === false && <span className="text-[8px] bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100 flex items-center gap-1 font-bold"><span className="w-1 h-1 bg-rose-500 rounded-full"></span> COPILOTO</span>}
+                                {functional.windowRearLeft === false && <span className="text-[8px] bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100 flex items-center gap-1 font-bold"><span className="w-1 h-1 bg-rose-500 rounded-full"></span> TRAS. IZQ</span>}
+                                {functional.windowRearRight === false && <span className="text-[8px] bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100 flex items-center gap-1 font-bold"><span className="w-1 h-1 bg-rose-500 rounded-full"></span> TRAS. DER</span>}
+                                {functional.sunroof === false && <span className="text-[8px] bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100 flex items-center gap-1 font-bold"><span className="w-1 h-1 bg-rose-500 rounded-full"></span> QUEMACOCOS</span>}
+                                {functional.mirrors === false && <span className="text-[8px] bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100 flex items-center gap-1 font-bold"><span className="w-1 h-1 bg-rose-500 rounded-full"></span> ESPEJOS</span>}
                             </div>
                         )}
 
                         <StatusRow label="Claxon" ok={functional?.horn !== false} />
                         <StatusRow label="Limpiaparabrisas" ok={functional?.wipers !== false} />
+                        <StatusRow label="Radio / Estéreo" ok={functional?.radio !== false} />
 
                     </div>
                 </div>
@@ -257,6 +287,8 @@ export default function ReceptionPDF({ data }: Props) {
                         <h4 className="text-[10px] font-bold text-slate-900 uppercase">Evidencia Fotográfica</h4>
                     </div>
                     <div className="grid grid-cols-4 gap-3">
+                        {/* Use ONLY the 4 principal zones for the PDF as requested by the user. 
+                            Additional photos are saved for digital evidence but excluded from the printed document. */}
                         {['frente', 'atras', 'izq', 'der'].map(zone => {
                             const photo = photos[zone];
                             const imgUrl = photo?.driveUrl || photo?.previewUrl;

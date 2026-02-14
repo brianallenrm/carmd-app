@@ -27,7 +27,8 @@ interface Client {
     colonia: string;
     municipality: string;
     state: string;
-    vehicles: Vehicle[];
+    vehicles: any[];
+    version?: string;
 }
 
 // Cache mechanism (simple in-memory for now)
@@ -88,70 +89,183 @@ export async function GET(request: NextRequest) {
             // C: Nombre, D: Telefono casa, E: Celular/Whatsapp, F: Email, G: Calle y Numero, H: Colonia, I: Mun, J: Edo
             // K: Marca, L: Submarca, M: Modelo(Ano), N: Placas, O: Serie, P: Motor, Q: Kilometraje
 
-            // NEW LOGIC: Show All History (No Merging)
-            // 1. Each row is a unique record of a visit.
-            // 2. Search matches against Name or Plate (case-insensitive).
-            // 3. Return all matching rows so user can see history.
-
-            const allVisits: Client[] = [];
+            // NEW LOGIC: Version 1.3 - Aggressive Client Merging (Fuzzy + Phone)
+            const initialMap = new Map<string, Client>();
             let rowIndex = 0;
+
+            // Helper to parse DD/MM/YYYY to timestamp
+            const parseDate = (d: string) => {
+                if (!d) return 0;
+                const parts = d.split('/');
+                if (parts.length !== 3) return 0;
+                const [day, month, year] = parts.map(Number);
+                if (isNaN(day) || isNaN(month) || isNaN(year)) return 0;
+                return new Date(year, month - 1, day).getTime();
+            };
+
+            // Helper to normalize strings (Alphanumeric only)
+            const norm = (s: any) => s?.toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z0-9]/g, '') || '';
+
+            // Helper to normalize Names (Simple: Upper, No Accents, No Extra Spaces)
+            const normName = (s: any) => s?.toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, ' ') || '';
+
+            // Helper for Title Case (Unicode safe)
+            const toTitleCase = (str: string) => {
+                if (!str) return str;
+                return str.toLowerCase().split(/\s+/).map(word =>
+                    word.charAt(0).toUpperCase() + word.slice(1)
+                ).join(' ');
+            };
 
             rows.forEach(row => {
                 const rawName = row.get("Nombre COMPLETO o Empresa:")?.trim();
                 const rawPhone = row.get("Teléfono (whatsapp):")?.toString().trim();
+                const phoneDigits = (rawPhone || "").replace(/\D/g, "");
 
-                // if (!rawName && !rawPhone) return; 
-                // Don't skip yet, debug
+                if (!rawName && !phoneDigits) return;
 
-                if (!rawName && !rawPhone) {
-                    return;
-                }
+                const normalizedName = normName(rawName);
 
-                // Unique ID for every row (visit)
-                const visitId = `visit_${rowIndex++}_${Date.now()}`;
+                // Grouping Key selection (Pass 1: Exact Phone or Exact Normalized Name)
+                const hasPhone = phoneDigits && phoneDigits.length > 5 && phoneDigits !== "00";
+                const clientKey = hasPhone ? `P:${phoneDigits}` : `N:${normalizedName}`;
 
                 // Normalize State
                 let state = row.get("Estado:")?.toString().trim() || "";
                 if (state === 'Estado de México') state = 'Edomex';
 
-                // Build Client Object (representing this specific visit)
-                const visit: Client = {
-                    id: visitId,
-                    name: rawName || "Sin Nombre",
-                    phone: rawPhone || "",
-                    email: row.get("Dirección de correo electrónico") || "",
-                    address: row.get("Domicilio Calle y NUMERO:") || "",
-                    colonia: row.get("Colonia:") || "",
-                    municipality: row.get("Deleg. o Municipio:") || "",
-                    state: state,
-                    vehicles: []
-                };
+                // Vehicle Info Normalization
+                const plates = row.get("Placas:")?.toString().trim().toUpperCase() || '';
+                const normPlates = norm(plates);
+                const serial = row.get("Número de serie:")?.toString().trim() || '';
+                const last8VIN = serial.length >= 8 ? serial.slice(-8).toUpperCase() : norm(serial);
 
-                // Add Vehicle info for this visit
-                const plates = row.get("Placas:")?.toString().trim().toUpperCase();
-                if (plates) {
-                    let brand = row.get("Marca:")?.toString().trim() || "";
-                    if (brand === 'VW') brand = 'Volkswagen';
+                // FIX: Column for date has NO NAME in header, row.get('') works for the first column
+                const visitDateStr = (row as any).get('')?.toString().trim() || "";
+                const visitTime = parseDate(visitDateStr);
 
-                    visit.vehicles.push({
-                        brand: brand,
-                        model: row.get("Sub marca:") || "",
-                        year: row.get("Modelo (año):") || "",
-                        plates: plates,
-                        serialNumber: row.get("Número de serie:") || "",
-                        motor: row.get("Tipo de Motor:") || "",
-                        km: row.get("Kilometraje:") || "",
-                        gas: "",
-                        lastServiceDate: row.get("Fecha de Ingreso:") || ""
-                    });
+                const vehicle = plates || serial ? {
+                    brand: row.get("Marca:")?.toString().trim() || "",
+                    model: row.get("Sub marca:")?.toString().trim() || "",
+                    year: row.get("Modelo (año):")?.toString().trim() || "",
+                    plates: plates,
+                    normPlates: normPlates,
+                    serialNumber: serial,
+                    last8VIN: last8VIN,
+                    motor: row.get("Tipo de Motor:")?.toString().trim() || "",
+                    km: row.get("Kilometraje:")?.toString().trim() || "",
+                    gas: "",
+                    lastServiceDate: visitDateStr,
+                    timestamp: visitTime
+                } as any : null;
+
+                if (initialMap.has(clientKey)) {
+                    const existing = initialMap.get(clientKey) as any;
+
+                    // NEW PRIORITY: If this row is NEWER than what we have, overwrite master profile
+                    if (visitTime > (existing.latestVisitTime || 0)) {
+                        existing.name = toTitleCase(rawName) || existing.name;
+                        existing.address = row.get("Domicilio Calle y NUMERO:")?.toString().trim() || existing.address;
+                        existing.colonia = row.get("Colonia:")?.toString().trim() || existing.colonia;
+                        existing.municipality = row.get("Deleg. o Municipio:")?.toString().trim() || existing.municipality;
+                        existing.state = state || existing.state;
+                        existing.email = row.get("Dirección de correo electrónico")?.toString().trim() || existing.email;
+                        existing.latestVisitTime = visitTime;
+                    } else if (!existing.latestVisitTime) {
+                        existing.latestVisitTime = visitTime;
+                    }
+
+                    if (vehicle) {
+                        const matchIdx = existing.vehicles.findIndex((v: any) =>
+                            (last8VIN && v.last8VIN === last8VIN) ||
+                            (normPlates && v.normPlates === normPlates)
+                        );
+                        if (matchIdx === -1) {
+                            existing.vehicles.push(vehicle);
+                        } else {
+                            const existingV = existing.vehicles[matchIdx] as any;
+                            if (visitTime >= (existingV.timestamp || 0)) {
+                                existing.vehicles[matchIdx] = vehicle;
+                            }
+                        }
+                    }
+                } else {
+                    initialMap.set(clientKey, {
+                        id: `client_${rowIndex++}`,
+                        name: toTitleCase(rawName) || "Sin Nombre",
+                        phone: rawPhone || "",
+                        email: row.get("Dirección de correo electrónico")?.toString().trim() || "",
+                        address: row.get("Domicilio Calle y NUMERO:")?.toString().trim() || "",
+                        colonia: row.get("Colonia:")?.toString().trim() || "",
+                        municipality: row.get("Deleg. o Municipio:")?.toString().trim() || "",
+                        state: state,
+                        vehicles: vehicle ? [vehicle] : [],
+                        latestVisitTime: visitTime
+                    } as any);
                 }
-
-                allVisits.push(visit);
             });
 
-            cachedClients = allVisits;
+            // Pass 2: Fuzzy Name Merge (Subset names) - Priority by DATE
+            const finalClients: any[] = [];
+            const sortedInitial = Array.from(initialMap.values()).sort((a: any, b: any) => (b.latestVisitTime || 0) - (a.latestVisitTime || 0));
+
+            const processed = new Set<string>();
+
+            for (let i = 0; i < sortedInitial.length; i++) {
+                if (processed.has(sortedInitial[i].id)) continue;
+
+                const master = sortedInitial[i];
+                const masterNorm = normName(master.name);
+                const masterPhone = master.phone.replace(/\D/g, "");
+
+                for (let j = i + 1; j < sortedInitial.length; j++) {
+                    const candidate = sortedInitial[j];
+                    if (processed.has(candidate.id)) continue;
+
+                    const candidateNorm = normName(candidate.name);
+                    const candidatePhone = candidate.phone.replace(/\D/g, "");
+
+                    // Criteria for Merge:
+                    // 1. One name contains the other (e.g. "Marco Lugo" in "Marco Antonio Lugo")
+                    // 2. AND they don't have conflicting valid phones
+                    const nameMatch = masterNorm.includes(candidateNorm) || candidateNorm.includes(masterNorm);
+                    const phoneConflict = masterPhone && candidatePhone && masterPhone !== candidatePhone && masterPhone !== "00" && candidatePhone !== "00";
+
+                    if (nameMatch && !phoneConflict) {
+                        // Merge vehicles into the YOUNGER master
+                        candidate.vehicles.forEach((cv: any) => {
+                            const vMatch = master.vehicles.find((mv: any) =>
+                                (cv.last8VIN && mv.last8VIN === cv.last8VIN) ||
+                                (cv.normPlates && mv.normPlates === cv.normPlates)
+                            );
+                            if (!vMatch) {
+                                master.vehicles.push(cv);
+                            } else if ((cv.timestamp || 0) > (vMatch.timestamp || 0)) {
+                                Object.assign(vMatch, cv);
+                            }
+                        });
+                        processed.add(candidate.id);
+                    }
+                }
+                finalClients.push(master);
+            }
+
+            // CLEAN UP and Sort overall results by latest activity
+            cachedClients = finalClients
+                .sort((a, b) => (b.latestVisitTime || 0) - (a.latestVisitTime || 0))
+                .map(client => ({
+                    ...client,
+                    version: '1.4',
+                    vehicles: client.vehicles
+                        .sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0))
+                        .map((v: any) => {
+                            const { normPlates, last8VIN, timestamp, ...cleanVehicle } = v;
+                            return cleanVehicle;
+                        })
+                }));
+
             lastFetchTime = now;
-            console.log(`✅ Cached ${cachedClients.length} visits`);
+            console.log(`✅ Cached ${cachedClients.length} unique clients from ${rows.length} rows`);
         }
 
         // Filter Logic
@@ -159,24 +273,34 @@ export async function GET(request: NextRequest) {
         console.log(`🔍 SEARCH DEBUG: Query='${query}'`);
 
         if (query) {
-            results = cachedClients.filter(c => {
-                // Check Name (Case Insensitive)
-                const nameMatch = c.name.toLowerCase().includes(query);
+            // Normalize query: strip accents and split into words
+            const queryClean = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+            const queryWords = queryClean.split(/\s+/).filter(w => w.length > 0);
 
-                // Check Phone (Digits Only) - Simplified for debug
+            results = cachedClients.filter(c => {
+                // Normalize client name for comparison
+                const nameClean = c.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+                const nameWords = nameClean.split(/\s+/).filter(w => w.length > 0);
+
+                // Check Name: Word intersection
+                // Match if: All query words are in the name OR all name words are in the query
+                const allQueryInName = queryWords.every(qw => nameClean.includes(qw));
+                const allNameInQuery = nameWords.every(nw => queryClean.includes(nw));
+                const nameMatch = allQueryInName || allNameInQuery;
+
+                // Check Phone (Digits Only)
                 const phoneDigits = c.phone.replace(/\D/g, '');
                 const queryDigits = query.replace(/\D/g, '');
                 const phoneMatch = queryDigits.length >= 4 && phoneDigits.includes(queryDigits);
 
-                // Check Plates (Case Insensitive)
-                const plateMatch = c.vehicles.some(v => v.plates.toLowerCase().includes(query));
+                // Check Plates (Case Insensitive, Normalize for accents just in case)
+                const plateMatch = c.vehicles.some(v =>
+                    v.plates.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(queryClean)
+                );
 
-                if (nameMatch || phoneMatch || plateMatch) {
-                    return true;
-                }
-                return false;
+                return nameMatch || phoneMatch || plateMatch;
             });
-            console.log(`✅ FOUND ${results.length} results`);
+            console.log(`✅ FOUND ${results.length} results (v1.5 Search)`);
         } else {
             // If no query, return empty
             results = [];

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Car, ClipboardList, CheckCircle, Camera, ChevronRight, ChevronLeft, Settings, FileText } from 'lucide-react';
+import { Search, Car, ClipboardList, CheckCircle, Camera, ChevronRight, ChevronLeft, Settings, FileText, Plus } from 'lucide-react';
 import ClientSearch from './_components/ClientSearch';
 import ClientForm from './_components/ClientForm';
 import InventoryGrid from './_components/InventoryGrid';
@@ -10,6 +10,8 @@ import VehicleForm from './_components/VehicleForm';
 import PhotoEvidence, { PhotoData } from './_components/PhotoEvidence';
 import FunctionalInspection, { FunctionalData } from './_components/FunctionalInspection';
 import ServiceDetails, { ServiceData } from './_components/ServiceDetails';
+import TutorialOverlay from './_components/TutorialOverlay';
+import { HelpCircle } from 'lucide-react';
 
 // Steps definition
 const STEPS = [
@@ -22,9 +24,18 @@ const STEPS = [
     { id: 'details', title: 'Detalles', icon: FileText },
 ];
 
+// Helper to title case names (Unicode safe)
+function toTitleCase(str: string): string {
+    if (!str) return str;
+    return str.toLowerCase().split(/\s+/).map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+}
+
 export default function InventoryPage() {
     const [currentStep, setCurrentStep] = useState(0);
     const [direction, setDirection] = useState(0);
+    const [showTutorial, setShowTutorial] = useState(false);
 
     // State
     const [clientData, setClientData] = useState({
@@ -68,6 +79,7 @@ export default function InventoryPage() {
         floormats: 'Completo',
         hubcaps: '4',
         hasRines: false,
+        radio: true,
     });
 
     // Service Details State
@@ -79,6 +91,42 @@ export default function InventoryPage() {
         comments: ''
     });
 
+    // State for Success
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [savedFolio, setSavedFolio] = useState('');
+
+    // Load ALL data from local storage on mount (Idea 1: Autoguardado)
+    useEffect(() => {
+        const savedData = localStorage.getItem('INVENTORY_FORM_DRAFT');
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData);
+                setClientData(parsed.clientData || clientData);
+                setVehicleData(parsed.vehicleData || vehicleData);
+                setInventory(parsed.inventory || {});
+                setInventoryOther(parsed.inventoryOther || '');
+                setFunctionalData(parsed.functionalData || functionalData);
+                setServiceData(parsed.serviceData || serviceData);
+                setPhotos(parsed.photos || {});
+                setIsNewClient(parsed.isNewClient || false);
+                setCurrentStep(parsed.currentStep || 0);
+            } catch (e) {
+                console.error("Error loading draft", e);
+            }
+        }
+    }, []);
+
+    // Save draft on every change (Idea 1: Autoguardado)
+    useEffect(() => {
+        if (!isSuccess) {
+            const draft = {
+                clientData, vehicleData, inventory, inventoryOther,
+                functionalData, serviceData, photos, isNewClient, currentStep
+            };
+            localStorage.setItem('INVENTORY_FORM_DRAFT', JSON.stringify(draft));
+        }
+    }, [clientData, vehicleData, inventory, inventoryOther, functionalData, serviceData, photos, isNewClient, currentStep, isSuccess]);
+
     // Load advisor name from local storage on mount
     useEffect(() => {
         const savedAdvisor = localStorage.getItem('lastAdvisorName');
@@ -87,11 +135,35 @@ export default function InventoryPage() {
         }
     }, []);
 
-    const updatePhoto = (id: string, data: Partial<PhotoData>) => {
-        setPhotos(prev => ({
-            ...prev,
-            [id]: { ...prev[id], ...data }
+    const resetForm = () => {
+        localStorage.removeItem('INVENTORY_FORM_DRAFT');
+        setClientData({ name: '', phone: '', phoneOffice: '', email: '', address: '', colonia: '', municipality: '', state: '' });
+        setVehicleData({ brand: '', model: '', year: '', plates: '', km: '', gas: '', serialNumber: '', motor: '' });
+        setInventory({});
+        setInventoryOther('');
+        setLastKm('');
+        setPhotos({});
+        setFunctionalData({
+            horn: true, wipers: true, lightsAllOk: true, lightsHead: true, lightsTail: true, lightsStop: true, lightsTurn: true,
+            windowsAllOk: true, windowPiloto: true, windowCopiloto: true, windowRearLeft: true, windowRearRight: true, sunroof: true, mirrors: true,
+            floormats: 'Completo', hubcaps: '4', hasRines: false, radio: true
+        });
+        setServiceData(prev => ({
+            serviceType: '', hasValuables: false, valuablesDescription: '', advisorName: prev.advisorName, comments: ''
         }));
+        setCurrentStep(0);
+        setIsSuccess(false);
+        setSavedFolio('');
+    };
+
+    const updatePhoto = (id: string, data: Partial<PhotoData>) => {
+        setPhotos(prev => {
+            const current = prev[id] || { id, label: '', previewUrl: null };
+            return {
+                ...prev,
+                [id]: { ...current, ...data }
+            };
+        });
     };
 
     const toggleInventory = (itemId: string) => {
@@ -117,26 +189,66 @@ export default function InventoryPage() {
 
     const CurrentIcon = STEPS[currentStep].icon;
 
+    if (isSuccess) {
+        return (
+            <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-4">
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="bg-white p-8 rounded-3xl border border-slate-200 max-w-sm w-full text-center space-y-6 shadow-2xl"
+                >
+                    <div className="w-20 h-20 bg-[#F37014]/10 rounded-full flex items-center justify-center mx-auto text-[#F37014]">
+                        <CheckCircle size={48} />
+                    </div>
+                    <div className="space-y-2">
+                        <h2 className="text-2xl font-black italic text-slate-900">¡LISTO!</h2>
+                        <p className="text-slate-500">La recepción se ha enviado correctamente a Administración.</p>
+                        <div className="bg-slate-50 py-2 px-4 rounded-lg inline-block border border-slate-200">
+                            <span className="text-xs text-slate-400 uppercase font-bold tracking-widest">Folio</span>
+                            <p className="text-xl font-mono font-bold text-[#F37014]">#{savedFolio}</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={resetForm}
+                        className="w-full py-4 bg-[#F37014] hover:bg-[#e06612] text-white rounded-2xl font-bold shadow-lg shadow-[#F37014]/30 transition-all flex items-center justify-center gap-2"
+                    >
+                        Nueva Recepción
+                        <Plus size={20} />
+                    </button>
+                    <p className="text-[10px] text-slate-400">CarMD OS - Sistema de Gestión de Taller</p>
+                </motion.div>
+            </div>
+        );
+    }
+
+    const isStepValid = () => {
+        const step = STEPS[currentStep].id;
+        if (step === 'client') return clientData.name && clientData.phone && clientData.email;
+        if (step === 'vehicle') return vehicleData.brand && vehicleData.model && vehicleData.plates && vehicleData.km && vehicleData.serialNumber && vehicleData.motor;
+        if (step === 'details') return serviceData.serviceType && serviceData.advisorName;
+        return true;
+    };
+
     return (
-        <div className="min-h-screen bg-neutral-900 text-white font-sans selection:bg-rose-500 selection:text-white">
+        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-[#F37014] selection:text-white">
             {/* Header / Progress */}
-            <div className="fixed top-0 left-0 right-0 z-50 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800">
+            <div className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
                 <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-rose-600 rounded-lg shadow-lg shadow-rose-600/20">
+                        <div className="p-2 bg-[#F37014] rounded-lg shadow-lg shadow-[#F37014]/20">
                             <CurrentIcon size={20} className="text-white" />
                         </div>
                         <div>
-                            <h1 className="text-sm font-medium text-neutral-400">Paso {currentStep + 1} de {STEPS.length}</h1>
-                            <p className="text-lg font-bold leading-none">{STEPS[currentStep].title}</p>
+                            <h1 className="text-sm font-medium text-slate-400">Paso {currentStep + 1} de {STEPS.length}</h1>
+                            <p className="text-lg font-bold leading-none text-slate-900">{STEPS[currentStep].title}</p>
                         </div>
                     </div>
 
-                    <div className="flex gap-1">
+                    <div className="flex gap-1" id="tutorial-progress-bar">
                         {STEPS.map((step, idx) => (
                             <div
                                 key={step.id}
-                                className={`h-1.5 rounded-full transition-all duration-500 ${idx <= currentStep ? 'w-8 bg-rose-600' : 'w-2 bg-neutral-800'
+                                className={`h-1.5 rounded-full transition-all duration-500 ${idx <= currentStep ? 'w-8 bg-[#F37014]' : 'w-2 bg-slate-200'
                                     }`}
                             />
                         ))}
@@ -149,11 +261,12 @@ export default function InventoryPage() {
                 <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
                         key={currentStep}
+                        id="tutorial-step-container"
                         initial={{ opacity: 0, x: direction > 0 ? 20 : -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: direction > 0 ? -20 : 20 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
-                        className="min-h-[60vh] flex flex-col p-6 border border-neutral-800 bg-neutral-900/50 rounded-2xl"
+                        className="min-h-[60vh] flex flex-col p-6 border border-slate-200 bg-white rounded-2xl shadow-sm"
                     >
 
 
@@ -163,7 +276,7 @@ export default function InventoryPage() {
                                 onClientFound={(data) => {
                                     console.log('Found:', data);
                                     setClientData({
-                                        name: data.name,
+                                        name: toTitleCase(data.name),
                                         phone: data.phone,
                                         phoneOffice: data.phoneOffice || '',
                                         email: data.email || '',
@@ -185,7 +298,6 @@ export default function InventoryPage() {
                                     nextStep();
                                 }}
                                 onNewClient={() => {
-                                    console.log('New Client');
                                     setIsNewClient(true);
                                     // Reset data for new entry
                                     setClientData({
@@ -203,7 +315,7 @@ export default function InventoryPage() {
                                     setInventory({});
                                     setInventoryOther('');
                                     setPhotos({});
-                                    setFunctionalData({ horn: true, wipers: true, lightsAllOk: true, lightsHead: true, lightsTail: true, lightsStop: true, lightsTurn: true, windowsAllOk: true, windowPiloto: true, windowCopiloto: true, windowRearLeft: true, windowRearRight: true, sunroof: true, mirrors: true, floormats: 'Completo', hubcaps: '4', hasRines: false });
+                                    setFunctionalData({ horn: true, wipers: true, lightsAllOk: true, lightsHead: true, lightsTail: true, lightsStop: true, lightsTurn: true, windowsAllOk: true, windowPiloto: true, windowCopiloto: true, windowRearLeft: true, windowRearRight: true, sunroof: true, mirrors: true, floormats: 'Completo', hubcaps: '4', hasRines: false, radio: true });
                                     setServiceData(prev => ({
                                         serviceType: '',
                                         hasValuables: false,
@@ -270,104 +382,114 @@ export default function InventoryPage() {
                             />
                         )}
 
-                        {/* Placeholder for other steps */}
-                        {currentStep !== 0 && STEPS[currentStep].id !== 'photos' && STEPS[currentStep].id !== 'inventory' && STEPS[currentStep].id !== 'vehicle' && STEPS[currentStep].id !== 'functional' && STEPS[currentStep].id !== 'details' && (
-                            <div className="text-center space-y-4 m-auto">
-                                <div className="w-16 h-16 bg-neutral-800 rounded-full flex items-center justify-center mx-auto text-neutral-600">
-                                    <CurrentIcon size={32} />
-                                </div>
-                                <h2 className="text-2xl font-bold text-neutral-200">
-                                    {STEPS[currentStep].title}
-                                </h2>
-                                <p className="text-neutral-500 max-w-sm mx-auto">
-                                    Aquí irá la interfaz para la sección de {STEPS[currentStep].title.toLowerCase()}.
-                                    Estamos construyendo esta funcionalidad.
-                                </p>
-                            </div>
-                        )}
+                        {/* Remove placeholder logic - all steps are now implemented */}
 
                     </motion.div>
                 </AnimatePresence>
             </div>
 
-            {/* Footer / Actions */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-neutral-900 border-t border-neutral-800">
-                <div className="max-w-3xl mx-auto flex gap-4">
+            {/* Footer Navigation */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 z-40">
+                <div className="max-w-3xl mx-auto flex gap-3">
                     <button
-                        onClick={prevStep}
-                        disabled={currentStep === 0}
-                        className={`flex-1 py-4 rounded-xl font-medium transition-all ${currentStep === 0
-                            ? 'bg-neutral-800 text-neutral-600 cursor-not-allowed'
-                            : 'bg-neutral-800 text-white hover:bg-neutral-700 active:scale-95'
-                            }`}
+                        onClick={() => setShowTutorial(true)}
+                        className="p-4 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100 font-bold flex items-center gap-2 hover:bg-blue-100 transition-colors"
+                        title="Ver Tutorial"
                     >
-                        Atrás
+                        <HelpCircle size={20} />
+                        <span className="hidden sm:inline">Guía</span>
                     </button>
 
-                    <button
-                        onClick={async () => {
-                            if (currentStep === STEPS.length - 1) {
-                                // FINAL SUBMISSION - Save to Pending List
-                                // Save advisor name
-                                if (serviceData.advisorName) {
-                                    localStorage.setItem('lastAdvisorName', serviceData.advisorName);
+                    <div className="flex-1 flex gap-3">
+                        <button
+                            onClick={prevStep}
+                            disabled={currentStep === 0}
+                            className="bg-slate-100 text-slate-400 p-4 rounded-2xl disabled:opacity-50 hover:bg-slate-200 transition-colors"
+                        >
+                            <ChevronLeft size={24} />
+                        </button>
+
+                        <button
+                            onClick={async () => {
+                                if (currentStep === STEPS.length - 1) {
+                                    // FINAL SUBMISSION - Save to Pending List
+                                    if (serviceData.advisorName) {
+                                        localStorage.setItem('lastAdvisorName', serviceData.advisorName);
+                                    }
+
+                                    const folio = `INV-${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`;
+                                    setSavedFolio(folio);
+
+                                    const receptionData = {
+                                        id: Date.now().toString(),
+                                        isReception: true,
+                                        date: new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }),
+                                        folio: folio,
+                                        client: clientData,
+                                        vehicle: vehicleData,
+                                        inventory: { ...inventory, otro: inventoryOther },
+                                        inventoryOther,
+                                        functional: functionalData,
+                                        service: serviceData,
+                                        photos,
+                                        notes: serviceData.comments
+                                    };
+
+                                    try {
+                                        const existing = JSON.parse(localStorage.getItem('PENDING_RECEPTIONS') || '[]');
+                                        existing.push(receptionData);
+                                        localStorage.setItem('PENDING_RECEPTIONS', JSON.stringify(existing));
+                                    } catch (e) {
+                                        console.warn("Local Storage Full", e);
+                                    }
+
+                                    try {
+                                        const res = await fetch('/api/inventory/save', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify(receptionData)
+                                        });
+                                        if (!res.ok) throw new Error('Failed to save to sheet');
+                                        setIsSuccess(true);
+                                    } catch (error) {
+                                        console.error("Sheet Save Error:", error);
+                                        alert("⚠️ Se guardó localmente pero hubo error al escribir en Google Sheets.");
+                                    }
+                                } else {
+                                    nextStep();
                                 }
-
-                                // Prepare Data
-                                const receptionData = {
-                                    id: Date.now().toString(), // Unique ID
-                                    isReception: true,
-                                    date: new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }),
-                                    folio: Math.floor(Math.random() * 10000).toString().padStart(5, '0'),
-                                    client: clientData,
-                                    vehicle: vehicleData,
-                                    inventory: { ...inventory, otro: inventoryOther },
-                                    inventoryOther,
-                                    functional: functionalData,
-                                    service: serviceData,
-                                    photos,
-                                    notes: serviceData.comments
-                                };
-
-                                // 1. Save locally (Backup/Admin Queue)
-                                try {
-                                    const existing = JSON.parse(localStorage.getItem('PENDING_RECEPTIONS') || '[]');
-                                    existing.push(receptionData);
-                                    localStorage.setItem('PENDING_RECEPTIONS', JSON.stringify(existing));
-                                } catch (e) {
-                                    console.warn("Local Storage Full - Skipping local backup", e);
-                                    // alerting user is optional, but sticking to console to avoid scaring them if online save works
-                                }
-
-                                // 2. Save to Google Sheets (Test Environment)
-                                try {
-                                    const res = await fetch('/api/inventory/save', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify(receptionData)
-                                    });
-                                    if (!res.ok) throw new Error('Failed to save to sheet');
-                                } catch (error) {
-                                    console.error("Sheet Save Error:", error);
-                                    alert("⚠️ Se guardó localmente pero hubo error al escribir en Google Sheets.");
-                                }
-
-                                // Success feedback
-                                alert("✅ Recepción guardada correctamente.");
-
-                                // Reset form
-                                window.location.reload();
-                            } else {
-                                nextStep();
-                            }
-                        }}
-                        className="flex-[2] py-4 bg-rose-600 text-white rounded-xl font-bold shadow-lg shadow-rose-600/20 hover:bg-rose-500 active:scale-95 transition-all flex items-center justify-center gap-2"
-                    >
-                        {currentStep === STEPS.length - 1 ? 'Finalizar Orden' : 'Continuar'}
-                        <ChevronRight size={20} />
-                    </button>
+                            }}
+                            disabled={!isStepValid()}
+                            className={`flex-1 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${isStepValid()
+                                ? 'bg-[#F37014] text-white shadow-lg shadow-[#F37014]/30'
+                                : 'bg-slate-200 text-slate-400'
+                                }`}
+                        >
+                            {currentStep === STEPS.length - 1 ? 'Finalizar Orden' : 'Continuar'}
+                            <ChevronRight size={20} />
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div >
+
+            {/* Tutorial Overlay */}
+            <TutorialOverlay
+                isOpen={showTutorial}
+                onClose={() => setShowTutorial(false)}
+                currentAppStep={currentStep}
+                receptionData={{
+                    client: clientData,
+                    vehicle: vehicleData,
+                    inventory: inventory,
+                    photos: photos,
+                    functional: functionalData,
+                    service: serviceData
+                }}
+                onSetAppStep={(step: number) => {
+                    setDirection(step > currentStep ? 1 : -1);
+                    setCurrentStep(step);
+                }}
+            />
+        </div>
     );
 }

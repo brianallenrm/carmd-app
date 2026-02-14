@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 export interface FunctionalData {
     horn: boolean;
     wipers: boolean;
+    radio: boolean;
 
     // Group: Lights
     lightsAllOk: boolean;
@@ -55,11 +56,11 @@ export default function FunctionalInspection({ data, onChange }: FunctionalInspe
     };
 
     return (
-        <div className="w-full max-w-lg mx-auto space-y-6 pb-20">
+        <div className="w-full max-w-lg mx-auto space-y-6 pb-20" id="tutorial-functional-inspection">
 
             <div className="text-center mb-4">
-                <h3 className="text-lg font-bold text-white">Inspección Funcional</h3>
-                <p className="text-neutral-400 text-xs">
+                <h3 className="text-lg font-bold text-slate-900">Inspección Funcional</h3>
+                <p className="text-slate-500 text-xs">
                     Verifica el funcionamiento de los sistemas clave.
                 </p>
             </div>
@@ -67,7 +68,7 @@ export default function FunctionalInspection({ data, onChange }: FunctionalInspe
             <div className="space-y-4">
 
                 {/* 1. Claxon & Limpias (Standalone) */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                     <FeatureToggle
                         label="Claxon"
                         icon={Volume2}
@@ -80,20 +81,26 @@ export default function FunctionalInspection({ data, onChange }: FunctionalInspe
                         active={data.wipers}
                         onClick={() => toggle('wipers')}
                     />
+                    <FeatureToggle
+                        label="Radio / Estéreo"
+                        icon={Zap}
+                        active={data.radio}
+                        onClick={() => toggle('radio')}
+                    />
                 </div>
 
                 {/* 2. Group: Lights - Always expanded */}
-                <div className={`p-4 rounded-xl border-2 transition-colors ${allLightsOk ? 'bg-green-500/10 border-green-500/50' : 'bg-neutral-800 border-neutral-700'}`}>
+                <div className={`p-4 rounded-xl border-2 transition-colors ${allLightsOk ? 'bg-green-50/50 border-green-200' : 'bg-white border-slate-200 shadow-sm'}`}>
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-full ${allLightsOk ? 'bg-green-500/20 text-green-400' : 'bg-neutral-700 text-neutral-400'}`}>
+                            <div className={`p-2 rounded-full ${allLightsOk ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'}`}>
                                 <Lightbulb size={20} />
                             </div>
-                            <span className="font-bold text-white">Iluminación Exterior</span>
+                            <span className="font-bold text-slate-900">Iluminación Exterior</span>
                         </div>
                         {allLightsOk
-                            ? <span className="text-green-400 text-xs font-bold uppercase flex items-center gap-1"><CheckCircle size={14} /> Todo OK</span>
-                            : <span className="text-rose-400 text-xs font-bold uppercase flex items-center gap-1">Falla Reportada</span>
+                            ? <span className="text-green-600 text-[10px] font-black uppercase flex items-center gap-1"><CheckCircle size={14} /> Todo OK</span>
+                            : <span className="text-red-500 text-[10px] font-black uppercase flex items-center gap-1">Falla Reportada</span>
                         }
                     </div>
                     <div className="grid grid-cols-2 gap-2">
@@ -105,20 +112,20 @@ export default function FunctionalInspection({ data, onChange }: FunctionalInspe
                 </div>
 
                 {/* 3. Group: Windows/Mirrors - Always expanded */}
-                <div className={`p-4 rounded-xl border-2 transition-colors ${allWindowsOk ? 'bg-green-500/10 border-green-500/50' : 'bg-neutral-800 border-neutral-700'}`}>
+                <div className={`p-4 rounded-xl border-2 transition-colors ${allWindowsOk ? 'bg-green-50/50 border-green-200' : 'bg-white border-slate-200 shadow-sm'}`}>
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-full ${allWindowsOk ? 'bg-green-500/20 text-green-400' : 'bg-neutral-700 text-neutral-400'}`}>
+                            <div className={`p-2 rounded-full ${allWindowsOk ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'}`}>
                                 <Zap size={20} />
                             </div>
                             <div className="flex flex-col">
-                                <span className="font-bold text-white">Cristales y Espejos</span>
-                                <span className="text-[10px] text-neutral-500">Solo si son eléctricos</span>
+                                <span className="font-bold text-slate-900">Cristales y Espejos</span>
+                                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Solo si son eléctricos</span>
                             </div>
                         </div>
                         {allWindowsOk
-                            ? <span className="text-green-400 text-xs font-bold uppercase flex items-center gap-1"><CheckCircle size={14} /> Todo OK</span>
-                            : <span className="text-rose-400 text-xs font-bold uppercase flex items-center gap-1">Falla Reportada</span>
+                            ? <span className="text-green-600 text-[10px] font-black uppercase flex items-center gap-1"><CheckCircle size={14} /> Todo OK</span>
+                            : <span className="text-red-500 text-[10px] font-black uppercase flex items-center gap-1">Falla Reportada</span>
                         }
                     </div>
                     <div className="grid grid-cols-2 gap-2">
@@ -132,7 +139,7 @@ export default function FunctionalInspection({ data, onChange }: FunctionalInspe
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-neutral-800">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
                 {/* Tapetes Count */}
                 <CountSelector
                     label="Tapetes (Juego)"
@@ -148,24 +155,25 @@ export default function FunctionalInspection({ data, onChange }: FunctionalInspe
                     <div className="flex items-center gap-2 mb-2">
                         <button
                             onClick={() => onChange({ ...data, hasRines: false, hubcaps: data.hasRines ? '4' : data.hubcaps })}
-                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${!data.hasRines
-                                ? 'bg-rose-600 text-white'
-                                : 'bg-neutral-800 text-neutral-500 hover:text-neutral-300'}`}
+                            className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${!data.hasRines
+                                ? 'bg-[#F37014] text-white'
+                                : 'bg-slate-100 text-slate-400 hover:text-slate-600'}`}
                         >
                             Tapones
                         </button>
                         <button
                             onClick={() => onChange({ ...data, hasRines: true, hubcaps: 'Rines' })}
-                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${data.hasRines
-                                ? 'bg-rose-600 text-white'
-                                : 'bg-neutral-800 text-neutral-500 hover:text-neutral-300'}`}
+                            className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${data.hasRines
+                                ? 'bg-[#F37014] text-white'
+                                : 'bg-slate-100 text-slate-400 hover:text-slate-600'}`}
                         >
                             Rines
                         </button>
                     </div>
                     {data.hasRines ? (
-                        <div className="bg-neutral-800/50 p-4 rounded-xl border border-neutral-700 text-center">
-                            <span className="text-green-400 text-sm font-bold">✓ Vehículo con Rines</span>
+                        <div className="bg-green-50 p-4 rounded-xl border border-green-200 text-center flex items-center justify-center gap-2">
+                            <CheckCircle size={16} className="text-green-600" />
+                            <span className="text-green-600 text-xs font-black uppercase tracking-widest">Vehículo con Rines</span>
                         </div>
                     ) : (
                         <CountSelector
@@ -188,15 +196,17 @@ function FeatureToggle({ label, icon: Icon, active, onClick }: { label: string, 
         <motion.div
             whileTap={{ scale: 0.98 }}
             onClick={onClick}
-            className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-colors h-24 text-center ${active
-                ? 'bg-green-500/10 border-green-500/50'
-                : 'bg-rose-500/10 border-rose-500/50'
+            className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-colors h-24 text-center shadow-sm ${active
+                ? 'bg-green-50 border-green-200'
+                : 'bg-red-50 border-red-200'
                 }`}
         >
-            <div className={`p-2 rounded-full mb-2 ${active ? 'bg-green-500/20 text-green-400' : 'bg-rose-500/20 text-rose-400'}`}>
+            <div className={`p-2 rounded-full mb-2 ${active ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'}`}>
                 <Icon size={20} />
             </div>
-            <span className={`text-xs font-bold leading-tight ${active ? 'text-green-100' : 'text-rose-100'}`}>{label}</span>
+            <span className={`text-[10px] sm:text-xs font-black uppercase tracking-tighter leading-tight ${active ? 'text-green-700' : 'text-red-700'}`}>
+                {label}
+            </span>
         </motion.div>
     );
 }
@@ -205,15 +215,15 @@ function SubFeatureToggle({ label, active, onClick }: { label: string, active: b
     return (
         <div
             onClick={onClick}
-            className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors border ${active
-                ? 'bg-neutral-800 border-neutral-700 hover:border-neutral-500'
-                : 'bg-rose-900/20 border-rose-500/50'
+            className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors border shadow-sm ${active
+                ? 'bg-white border-slate-100 hover:border-slate-300'
+                : 'bg-red-50 border-red-200'
                 }`}
         >
-            <span className={`text-xs font-medium ${active ? 'text-neutral-300' : 'text-rose-200'}`}>{label}</span>
+            <span className={`text-[10px] font-bold uppercase tracking-tighter ${active ? 'text-slate-600' : 'text-red-700'}`}>{label}</span>
             {active
-                ? <CheckCircle size={14} className="text-neutral-600" />
-                : <XCircle size={14} className="text-rose-500" />
+                ? <CheckCircle size={14} className="text-green-500" />
+                : <XCircle size={14} className="text-red-500" />
             }
         </div>
     );
@@ -221,19 +231,19 @@ function SubFeatureToggle({ label, active, onClick }: { label: string, active: b
 
 function CountSelector({ label, icon: Icon, value, onChange, options }: { label: string, icon: any, value: string, onChange: (v: string) => void, options: string[] }) {
     return (
-        <div className="bg-neutral-800/50 p-4 rounded-xl border border-neutral-700">
-            <div className="flex items-center gap-2 mb-3 text-neutral-300">
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-2 mb-3 text-slate-500">
                 <Icon size={16} />
-                <span className="text-sm font-bold">{label}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
             </div>
-            <div className="flex gap-1 bg-neutral-900/80 p-1 rounded-lg">
+            <div className="flex gap-1 bg-slate-50 p-1 rounded-lg border border-slate-100">
                 {options.map(opt => (
                     <button
                         key={opt}
                         onClick={() => onChange(opt)}
-                        className={`flex-1 py-1.5 px-1 rounded-md text-[10px] font-bold transition-all ${value === opt
-                            ? 'bg-rose-600 text-white shadow-sm'
-                            : 'text-neutral-500 hover:text-neutral-300'
+                        className={`flex-1 py-1.5 px-1 rounded-md text-[10px] font-black transition-all ${value === opt
+                            ? 'bg-[#F37014] text-white shadow-md'
+                            : 'text-slate-400 hover:text-slate-600'
                             }`}
                     >
                         {opt === 'Completo' ? 'Todo' : opt}

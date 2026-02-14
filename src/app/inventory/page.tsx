@@ -520,69 +520,6 @@ export default function InventoryPage() {
                         </button>
                     </div>
                 </div>
-
-                {/* Save Error Toast */}
-                <AnimatePresence>
-                    {saveError && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 20 }}
-                            className="fixed bottom-24 left-4 right-4 max-w-3xl mx-auto bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 shadow-lg z-50"
-                        >
-                            <AlertTriangle size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
-                            <div className="flex-1">
-                                <p className="text-sm font-bold text-amber-800">{saveError}</p>
-                                <button
-                                    onClick={() => setSaveError('')}
-                                    className="text-xs text-amber-600 underline mt-1"
-                                >Cerrar</button>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {/* Reset Confirmation Modal */}
-                <AnimatePresence>
-                    {showResetConfirm && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                                className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-100"
-                            >
-                                <div className="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <Trash2 size={24} />
-                                </div>
-
-                                <h3 className="text-lg font-bold text-slate-900 text-center mb-1">
-                                    ¿Borrar inventario actual?
-                                </h3>
-
-                                <p className="text-slate-500 text-center text-xs mb-6">
-                                    Esta acción eliminará todos los datos que has llenado y no se puede deshacer.
-                                </p>
-
-                                <div className="flex flex-col gap-2">
-                                    <button
-                                        onClick={handleClearForm}
-                                        className="w-full py-3.5 bg-red-500 text-white rounded-xl font-bold shadow-lg shadow-red-500/20 active:scale-95 transition-transform text-sm"
-                                    >
-                                        Sí, borrar todo
-                                    </button>
-
-                                    <button
-                                        onClick={() => setShowResetConfirm(false)}
-                                        className="w-full py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold active:scale-95 transition-transform text-sm"
-                                    >
-                                        No, continuar llenando
-                                    </button>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )}
-                </AnimatePresence>
             </div>
 
             {/* Tutorial Overlay */}
@@ -603,6 +540,69 @@ export default function InventoryPage() {
                     setCurrentStep(step);
                 }}
             />
+
+            {/* Save Error Toast - Moved to Root for visibility */}
+            <AnimatePresence>
+                {saveError && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        className="fixed bottom-24 left-4 right-4 max-w-3xl mx-auto bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 shadow-lg z-50"
+                    >
+                        <AlertTriangle size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                            <p className="text-sm font-bold text-amber-800">{saveError}</p>
+                            <button
+                                onClick={() => setSaveError('')}
+                                className="text-xs text-amber-600 underline mt-1"
+                            >Cerrar</button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Reset Confirmation Modal - Moved to Root for visibility */}
+            <AnimatePresence>
+                {showResetConfirm && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-100"
+                        >
+                            <div className="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <Trash2 size={24} />
+                            </div>
+
+                            <h3 className="text-lg font-bold text-slate-900 text-center mb-1">
+                                ¿Borrar inventario actual?
+                            </h3>
+
+                            <p className="text-slate-500 text-center text-xs mb-6">
+                                Esta acción eliminará todos los datos que has llenado y enviará la aplicación al inicio.
+                            </p>
+
+                            <div className="flex flex-col gap-2">
+                                <button
+                                    onClick={handleClearForm}
+                                    className="w-full py-3.5 bg-red-500 text-white rounded-xl font-bold shadow-lg shadow-red-500/20 active:scale-95 transition-transform text-sm"
+                                >
+                                    Sí, borrar todo
+                                </button>
+
+                                <button
+                                    onClick={() => setShowResetConfirm(false)}
+                                    className="w-full py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold active:scale-95 transition-transform text-sm"
+                                >
+                                    No, continuar llenando
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

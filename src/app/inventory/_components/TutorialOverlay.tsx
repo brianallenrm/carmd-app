@@ -140,6 +140,7 @@ export default function TutorialOverlay({ isOpen, onClose, onSetAppStep, current
         if (typeof window !== 'undefined') {
             setScreenHeight(window.innerHeight);
             setScreenWidth(window.innerWidth);
+
             const handleResize = () => {
                 setScreenHeight(window.innerHeight);
                 setScreenWidth(window.innerWidth);
@@ -150,12 +151,26 @@ export default function TutorialOverlay({ isOpen, onClose, onSetAppStep, current
             window.addEventListener('resize', handleResize);
             window.addEventListener('scroll', handleScroll, true);
 
+            // Mutation/Resize Observer to detect layout changes in the target element
+            let resizeObserver: ResizeObserver | null = null;
+            const step = STEPS[currentStep];
+            if (step?.elementId) {
+                const target = document.getElementById(step.elementId);
+                if (target) {
+                    resizeObserver = new ResizeObserver(() => {
+                        updateCoords();
+                    });
+                    resizeObserver.observe(target);
+                }
+            }
+
             return () => {
                 window.removeEventListener('resize', handleResize);
                 window.removeEventListener('scroll', handleScroll, true);
+                if (resizeObserver) resizeObserver.disconnect();
             };
         }
-    }, [updateCoords]);
+    }, [updateCoords, currentStep]);
 
     // Watch for App Step changes AND State changes to detect interactions automatically
     useEffect(() => {
@@ -223,8 +238,17 @@ export default function TutorialOverlay({ isOpen, onClose, onSetAppStep, current
     const Icon = step.icon;
     const isWaiting = step.requireInteraction && !hasInteracted;
 
-    // Logic to avoid overlapping: if the element is in the bottom half, move card to top
-    const isElementInBottomHalf = coords.top > (screenHeight / 2);
+    // Logic to avoid overlapping: 
+    // If the element persists into the bottom half of the screen, move card to TOP.
+    // We check BOTH the top and the bottom of the element.
+    const isElementCoveringBottom = (coords.top + coords.height) > (screenHeight * 0.55);
+    const isElementCoveringTop = coords.top < (screenHeight * 0.4);
+
+    // On mobile, we are more strict.
+    const isMobile = screenWidth < 768;
+    const useTopPosition = isMobile
+        ? isElementCoveringBottom
+        : (isElementCoveringBottom && !isElementCoveringTop) || (coords.top > screenHeight * 0.5);
 
     return (
         <div className="fixed inset-0 z-[100] pointer-events-none overflow-hidden">
@@ -278,10 +302,10 @@ export default function TutorialOverlay({ isOpen, onClose, onSetAppStep, current
             )}
 
             {/* Content Card */}
-            <div className={`absolute inset-0 flex p-3 md:p-6 pointer-events-none ${isElementInBottomHalf ? 'items-start pt-12' : 'items-end pb-4 md:pb-8'}`}>
+            <div className={`absolute inset-0 flex p-3 md:p-6 pointer-events-none ${useTopPosition ? 'items-start pt-20' : 'items-end pb-4 md:pb-8'}`}>
                 <motion.div
                     key={currentStep}
-                    initial={{ opacity: 0, y: isElementInBottomHalf ? -40 : 40, scale: 0.95 }}
+                    initial={{ opacity: 0, y: useTopPosition ? -40 : 40, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.3)] max-w-[95%] sm:max-w-sm w-full mx-auto pointer-events-auto border border-slate-200 transition-all relative overflow-hidden"
                 >
@@ -336,8 +360,8 @@ export default function TutorialOverlay({ isOpen, onClose, onSetAppStep, current
                                     }
                                 }}
                                 className={`px-4 md:px-6 py-2.5 md:py-3 rounded-lg md:rounded-xl font-bold text-sm md:text-base flex items-center gap-2 transition-all shadow-lg ${isWaiting
-                                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
-                                        : 'bg-[#F37014] text-white shadow-[#F37014]/30 hover:bg-[#e06612]'
+                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                                    : 'bg-[#F37014] text-white shadow-[#F37014]/30 hover:bg-[#e06612]'
                                     }`}
                             >
                                 {isWaiting ? (

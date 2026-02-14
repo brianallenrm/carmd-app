@@ -42,9 +42,9 @@ export default function PhotoEvidence({ photos, onPhotoUpdate, plates }: PhotoEv
         try {
             // Compress image client-side (~80-200KB)
             const { blob, dataUrl, actualFormat } = await compressImage(file, {
-                maxWidth: 1200,
-                maxHeight: 900,
-                quality: 0.7,
+                maxWidth: 1024, // Lowered from 1200 for better reliability
+                maxHeight: 768,  // Lowered from 900
+                quality: 0.6,    // Lowered from 0.7
                 format: 'image/webp',
             });
 
@@ -86,7 +86,8 @@ export default function PhotoEvidence({ photos, onPhotoUpdate, plates }: PhotoEv
 
             if (lastError) {
                 console.error('Upload failed after retry:', lastError);
-                setUploadErrors(prev => ({ ...prev, [id]: 'Error al subir. La foto se guardó localmente.' }));
+                const errorMessage = typeof lastError === 'string' ? lastError : 'Error de conexión';
+                setUploadErrors(prev => ({ ...prev, [id]: `Error: ${errorMessage}` }));
             }
         } catch (err) {
             console.error('Photo processing error:', err);

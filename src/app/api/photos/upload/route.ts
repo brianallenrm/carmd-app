@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
         const { R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT, R2_BUCKET_NAME, R2_PUBLIC_URL } = process.env;
 
         if (!R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_ENDPOINT || !R2_BUCKET_NAME || !R2_PUBLIC_URL) {
-            return NextResponse.json({ error: 'Missing R2 configuration' }, { status: 500 });
+            console.error('Missing R2 configuration environment variables');
+            return NextResponse.json({ error: 'Configuración R2 faltante en el servidor' }, { status: 500 });
         }
 
         // Setup R2 client (S3-compatible)

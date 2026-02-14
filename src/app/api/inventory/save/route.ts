@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
         const doc = new GoogleSpreadsheet(GOOGLE_SHEETS_CONFIG.INVENTORY.ID, auth);
         await doc.loadInfo();
 
-        // WRITE TO TEST SHEET
-        const sheet = doc.sheetsByTitle["Inventario_entorno_prueba"];
+        // WRITE TO PRODUCTION SHEET
+        const sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME];
         if (!sheet) {
             return NextResponse.json({ error: 'Target sheet not found' }, { status: 404 });
         }
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
         // Map data to columns matching the user's request
         await sheet.addRow({
-            "Fecha de Ingreso:": dateStr,
+            "FECHA": dateStr,
             "Hora de ingreso:": timeStr,
             "Nombre COMPLETO o Empresa:": body.client?.name || "",
             "Teléfono casa / oficina:": body.client?.phoneOffice || "",
@@ -70,7 +70,6 @@ export async function POST(request: NextRequest) {
                 return count > 0 ? `${count} Fotos (Ver PDF)` : "Sin fotos";
             })(),
             "Correo Electronico": body.client?.email || "", // Duplicate column per user request
-            "Puntuación": "", // Placeholder for Score if available, otherwise empty
             "Detalles de daños": body.service?.comments || "",
             "Presupuesto Solicitado:": body.service?.serviceType || "", // Legacy column name
             "Motivo de Ingreso": body.service?.serviceType || "",

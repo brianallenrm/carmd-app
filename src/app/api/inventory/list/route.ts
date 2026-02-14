@@ -54,8 +54,8 @@ export async function GET() {
         const doc = new GoogleSpreadsheet(GOOGLE_SHEETS_CONFIG.INVENTORY.ID, auth);
         await doc.loadInfo();
 
-        // Read from the test/production inventory sheet
-        const sheet = doc.sheetsByTitle['Inventario_entorno_prueba'];
+        // Read from the production inventory sheet
+        const sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME];
         if (!sheet) {
             return NextResponse.json({ error: 'Sheet not found' }, { status: 404 });
         }
@@ -64,7 +64,7 @@ export async function GET() {
 
         // Map rows to ReceptionData format
         const receptions: ReceptionData[] = rows.map((row, index) => {
-            const dateStr = row.get("Fecha de Ingreso:") || "";
+            const dateStr = row.get("FECHA") || "";
             const timeStr = row.get("Hora de ingreso:") || "";
 
             // Parse inventory items from comma-separated string back into a boolean object

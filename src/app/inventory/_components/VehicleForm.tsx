@@ -26,14 +26,22 @@ const BRANDS = Object.keys(VEHICLE_CATALOG).sort();
 
 export default function VehicleForm({ data, onChange, onNext, lastKm }: VehicleFormProps) {
     const [showManualModel, setShowManualModel] = React.useState(false);
+    const models = data.brand ? VEHICLE_CATALOG[data.brand] || [] : [];
+
+    // Sync manual model state when data changes (e.g. client selection)
+    React.useEffect(() => {
+        if (data.model && models.length > 0 && !models.includes(data.model)) {
+            setShowManualModel(true);
+        } else if (data.model === '') {
+            setShowManualModel(false);
+        }
+    }, [data.brand, data.model, models]);
 
     const handleChange = (field: keyof VehicleData, value: string) => {
         onChange({ ...data, [field]: value });
     };
 
-    const models = data.brand ? VEHICLE_CATALOG[data.brand] || [] : [];
     const hasModels = models.length > 0;
-
     const isFormValid = data.brand && data.model && data.plates && data.km && data.serialNumber && data.motor;
 
     return (

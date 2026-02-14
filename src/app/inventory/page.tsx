@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Car, ClipboardList, CheckCircle, Camera, ChevronRight, ChevronLeft, Settings, FileText, Plus, Loader2, AlertTriangle } from 'lucide-react';
+import { Search, Car, ClipboardList, CheckCircle, Camera, ChevronRight, ChevronLeft, Settings, FileText, Plus, Loader2, AlertTriangle, Trash2 } from 'lucide-react';
 import ClientSearch from './_components/ClientSearch';
 import ClientForm from './_components/ClientForm';
 import InventoryGrid from './_components/InventoryGrid';
@@ -96,6 +96,7 @@ export default function InventoryPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [saveError, setSaveError] = useState('');
     const [savedFolio, setSavedFolio] = useState('');
+    const [showResetConfirm, setShowResetConfirm] = useState(false);
 
     // Load ALL data from local storage on mount (Idea 1: Autoguardado)
     useEffect(() => {
@@ -159,13 +160,41 @@ export default function InventoryPage() {
     };
 
     const updatePhoto = (id: string, data: Partial<PhotoData>) => {
-        setPhotos(prev => {
-            const current = prev[id] || { id, label: '', previewUrl: null };
-            return {
-                ...prev,
-                [id]: { ...current, ...data }
-            };
+        setPhotos(prev => ({
+            ...prev,
+            [id]: { ...prev[id], ...data, id }
+        }));
+    };
+
+    // Reset all form states
+    const handleClearForm = () => {
+        setClientData({
+            name: '',
+            phone: '',
+            phoneOffice: '',
+            email: '',
+            address: '',
+            colonia: '',
+            municipality: '',
+            state: ''
         });
+        setVehicleData({ brand: '', model: '', year: '', plates: '', km: '', gas: '', serialNumber: '', motor: '' });
+        setLastKm('');
+        setInventory({});
+        setInventoryOther('');
+        setPhotos({});
+        setFunctionalData({ horn: true, wipers: true, lightsAllOk: true, lightsHead: true, lightsTail: true, lightsStop: true, lightsTurn: true, windowsAllOk: true, windowPiloto: true, windowCopiloto: true, windowRearLeft: true, windowRearRight: true, sunroof: true, mirrors: true, floormats: 'Completo', hubcaps: '4', hasRines: false, radio: true });
+        setServiceData({
+            serviceType: '',
+            hasValuables: false,
+            valuablesDescription: '',
+            advisorName: localStorage.getItem('lastAdvisorName') || '',
+            comments: ''
+        });
+        setCurrentStep(0);
+        setIsNewClient(false);
+        localStorage.removeItem('INVENTORY_DRAFT');
+        setShowResetConfirm(false);
     };
 
     const toggleInventory = (itemId: string) => {
@@ -394,6 +423,14 @@ export default function InventoryPage() {
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 z-40">
                 <div className="max-w-3xl mx-auto flex gap-3">
                     <button
+                        onClick={() => setShowResetConfirm(true)}
+                        className="p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100 font-bold flex items-center gap-2 hover:bg-red-100 transition-colors"
+                        title="Borrar Inventario Actual"
+                    >
+                        <Trash2 size={24} />
+                    </button>
+
+                    <button
                         onClick={() => setShowTutorial(true)}
                         className="p-4 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100 font-bold flex items-center gap-2 hover:bg-blue-100 transition-colors"
                         title="Ver Tutorial"
@@ -502,6 +539,48 @@ export default function InventoryPage() {
                                 >Cerrar</button>
                             </div>
                         </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Reset Confirmation Modal */}
+                <AnimatePresence>
+                    {showResetConfirm && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-100"
+                            >
+                                <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Trash2 size={32} />
+                                </div>
+
+                                <h3 className="text-xl font-bold text-slate-900 text-center mb-2">
+                                    ¿Borrar inventario actual?
+                                </h3>
+
+                                <p className="text-slate-500 text-center text-sm mb-8">
+                                    Esta acción eliminará todos los datos que has llenado y no se puede deshacer. Regresarás al paso 1.
+                                </p>
+
+                                <div className="flex flex-col gap-3">
+                                    <button
+                                        onClick={handleClearForm}
+                                        className="w-full py-4 bg-red-500 text-white rounded-2xl font-bold shadow-lg shadow-red-500/20 active:scale-95 transition-transform"
+                                    >
+                                        Sí, borrar todo
+                                    </button>
+
+                                    <button
+                                        onClick={() => setShowResetConfirm(false)}
+                                        className="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold active:scale-95 transition-transform"
+                                    >
+                                        No, continuar llenando
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
                     )}
                 </AnimatePresence>
             </div>

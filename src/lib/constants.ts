@@ -82,13 +82,13 @@ export const GOOGLE_SHEETS_CONFIG = {
     // [DEVELOPMENT] Inventory & Reception Tool (In testing)
     INVENTORY: {
         ID: "1Y3w26f6EVar5Tl6YfFolv3571PjjT8dbUV4ffGolO4c",
-        TAB_NAME: "Respuestas de formulario 1"
+        TAB_NAME: "Inventarios_app"
     },
 
     // [DEVELOPMENT] Client History / View (In testing)
     CLIENTS: {
         ID: "1Y3w26f6EVar5Tl6YfFolv3571PjjT8dbUV4ffGolO4c",
-        TAB_NAME: "Inventario_Vista"
+        TAB_NAME: "Inventarios_app"
     }
 };
 

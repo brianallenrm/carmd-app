@@ -24,7 +24,7 @@ async function checkHeaders() {
     const doc = new GoogleSpreadsheet(spreadsheetId, auth);
     await doc.loadInfo();
 
-    const sheet = doc.sheetsByTitle["Inventario_Vista"];
+    const sheet = doc.sheetsByTitle["Respuestas de formulario 1"];
     if (!sheet) {
         console.error("Sheet not found");
         return;

@@ -552,29 +552,29 @@ export default function InventoryPage() {
                                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                                 className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-100"
                             >
-                                <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Trash2 size={32} />
+                                <div className="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <Trash2 size={24} />
                                 </div>
 
-                                <h3 className="text-xl font-bold text-slate-900 text-center mb-2">
+                                <h3 className="text-lg font-bold text-slate-900 text-center mb-1">
                                     ¿Borrar inventario actual?
                                 </h3>
 
-                                <p className="text-slate-500 text-center text-sm mb-8">
-                                    Esta acción eliminará todos los datos que has llenado y no se puede deshacer. Regresarás al paso 1.
+                                <p className="text-slate-500 text-center text-xs mb-6">
+                                    Esta acción eliminará todos los datos que has llenado y no se puede deshacer.
                                 </p>
 
-                                <div className="flex flex-col gap-3">
+                                <div className="flex flex-col gap-2">
                                     <button
                                         onClick={handleClearForm}
-                                        className="w-full py-4 bg-red-500 text-white rounded-2xl font-bold shadow-lg shadow-red-500/20 active:scale-95 transition-transform"
+                                        className="w-full py-3.5 bg-red-500 text-white rounded-xl font-bold shadow-lg shadow-red-500/20 active:scale-95 transition-transform text-sm"
                                     >
                                         Sí, borrar todo
                                     </button>
 
                                     <button
                                         onClick={() => setShowResetConfirm(false)}
-                                        className="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold active:scale-95 transition-transform"
+                                        className="w-full py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold active:scale-95 transition-transform text-sm"
                                     >
                                         No, continuar llenando
                                     </button>

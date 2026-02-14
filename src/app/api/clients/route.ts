@@ -140,8 +140,8 @@ export async function GET(request: NextRequest) {
                 const serial = row.get("Número de serie:")?.toString().trim() || '';
                 const last8VIN = serial.length >= 8 ? serial.slice(-8).toUpperCase() : norm(serial);
 
-                // FIX: Column for date has NO NAME in header, row.get('') works for the first column
-                const visitDateStr = (row as any).get('')?.toString().trim() || "";
+                // FIX: Column for date is named 'FECHA'
+                const visitDateStr = (row as any).get('FECHA')?.toString().trim() || "";
                 const visitTime = parseDate(visitDateStr);
 
                 const vehicle = plates || serial ? {

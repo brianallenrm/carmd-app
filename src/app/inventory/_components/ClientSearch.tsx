@@ -138,7 +138,7 @@ export default function ClientSearch({ onClientFound, onNewClient }: ClientSearc
                                                                 {car.plates}
                                                             </span>
                                                             {car.lastServiceDate && car.lastServiceDate !== "" && (
-                                                                <span className="text-slate-400 text-[10px] italic">
+                                                                <span className="text-slate-600 text-[10px] font-medium">
                                                                     Última: {car.lastServiceDate}
                                                                 </span>
                                                             )}

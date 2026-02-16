@@ -14,28 +14,12 @@ function NotePreviewContent() {
     const [isLoaded, setIsLoaded] = React.useState(false);
 
     React.useEffect(() => {
-        // 1. Check for simple window injection
-        if (typeof window !== 'undefined' && (window as any).__PDF_DATA__) {
-            console.log("Loaded data from window injection");
-            setSourceData((window as any).__PDF_DATA__);
-        }
-        // 2. Check for localStorage injection (more persistent)
-        else if (typeof window !== 'undefined' && window.localStorage.getItem('PDF_DATA')) {
-            console.log("Loaded data from localStorage");
-            try {
-                const lsData = JSON.parse(window.localStorage.getItem('PDF_DATA') || "{}");
-                setSourceData(lsData);
-                // Clear after use to prevent pollution
-                // window.localStorage.removeItem('PDF_DATA'); // Optional: keep for debugging
-            } catch (e) {
-                console.error("Error parsing localStorage data", e);
-            }
-        }
-        else {
-            // 3. Fallback: Construct data from URL Search Params
-            // This runs if opened directly in browser or if injection fails
-            const data: any = {};
+        const hasUrlData = searchParams.has("client") || searchParams.has("folio");
 
+        // 1. Priority: URL Search Params (if explicitly provided)
+        if (hasUrlData) {
+            console.log("Loading data from URL Params");
+            const data: any = {};
             try {
                 if (searchParams.get("client")) data.client = JSON.parse(searchParams.get("client") || "{}");
                 if (searchParams.get("vehicle")) data.vehicle = JSON.parse(searchParams.get("vehicle") || "{}");
@@ -47,18 +31,36 @@ function NotePreviewContent() {
                 if (searchParams.get("notes")) data.notes = searchParams.get("notes");
                 if (searchParams.get("includeIva")) data.includeIva = searchParams.get("includeIva") === 'true';
                 if (searchParams.get("includeIsr")) data.includeIsr = searchParams.get("includeIsr") === 'true';
-                // Backward compatibility for isDiagnostic
-                if (searchParams.get("isDiagnostic") === 'true') {
-                    data.hideParts = true;
-                    data.hideWarranty = true;
-                }
                 if (searchParams.get("hideParts")) data.hideParts = searchParams.get("hideParts") === 'true';
                 if (searchParams.get("hideWarranty")) data.hideWarranty = searchParams.get("hideWarranty") === 'true';
+                
+                // If we have URL data, we should clear any stale localStorage data to prevent confusion
+                if (typeof window !== 'undefined') {
+                    window.localStorage.removeItem('PDF_DATA');
+                }
             } catch (err) {
                 console.error("Error parsing URL params", err);
             }
             setSourceData(data);
         }
+        // 2. Secondary: window injection
+        else if (typeof window !== 'undefined' && (window as any).__PDF_DATA__) {
+            console.log("Loaded data from window injection");
+            setSourceData((window as any).__PDF_DATA__);
+        }
+        // 3. Final Fallback: localStorage (used by Admin/Inventory Tool)
+        else if (typeof window !== 'undefined' && window.localStorage.getItem('PDF_DATA')) {
+            console.log("Loaded data from localStorage");
+            try {
+                const lsData = JSON.parse(window.localStorage.getItem('PDF_DATA') || "{}");
+                setSourceData(lsData);
+                // Clear after use to prevent pollution in subsequent opens
+                window.localStorage.removeItem('PDF_DATA');
+            } catch (e) {
+                console.error("Error parsing localStorage data", e);
+            }
+        }
+        
         setIsLoaded(true);
     }, [searchParams]);
 

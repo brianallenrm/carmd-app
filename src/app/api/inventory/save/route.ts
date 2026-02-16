@@ -57,8 +57,10 @@ export async function POST(request: NextRequest) {
 
         // Step 4: Build data row matching header order
         const now = new Date();
-        const dateStr = now.toLocaleDateString('es-MX');
-        const timeStr = now.toLocaleTimeString('es-MX');
+        const timezone = 'America/Mexico_City';
+
+        const dateStr = now.toLocaleDateString('es-MX', { timeZone: timezone });
+        const timeStr = now.toLocaleTimeString('es-MX', { timeZone: timezone, hour12: true });
 
         const dataMap: Record<string, string> = {
             "FECHA": dateStr,

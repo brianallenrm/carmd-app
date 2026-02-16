@@ -323,19 +323,7 @@ export default function ReceptionPDF({ data }: Props) {
                     Cualquier revisión o diagnóstico genera honorarios.
                 </p>
 
-                <div className="flex justify-between items-end px-12">
-                    <div className="text-center w-48">
-                        <div className="border-b border-slate-400 mb-1 h-8"></div>
-                        <p className="text-[9px] font-bold text-slate-800">{service.advisorName || 'Asesor de Servicio'}</p>
-                        <p className="text-[8px] text-slate-500 uppercase tracking-wider">Recibe Vehículo</p>
-                    </div>
-
-                    <div className="text-center w-48">
-                        <div className="border-b border-slate-400 mb-1 h-8"></div>
-                        <p className="text-[9px] font-bold text-slate-800">{client.name}</p>
-                        <p className="text-[8px] text-slate-500 uppercase tracking-wider">Firma de Conformidad</p>
-                    </div>
-                </div>
+                {/* Signatures removed per user request - to be re-implemented with digital signatures later */}
             </div>
 
         </div>

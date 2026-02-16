@@ -307,12 +307,7 @@ export default function ServiceNoteTemplate({
                     {LEGAL_TEXT}
                 </div>
 
-                <div className="flex justify-center gap-20">
-                    <div className="text-center">
-                        <div className="w-40 h-12 border-b border-slate-300 mb-1"></div>
-                        <p className="text-[8px] font-bold text-slate-700 uppercase">Firma de Conformidad</p>
-                    </div>
-                </div>
+                {/* Signatures removed per user request - to be re-implemented with digital signatures later */}
             </div>
 
         </div>

@@ -167,9 +167,9 @@ export async function GET() {
             };
         });
 
-        // Return newest first
+        // Return data (already newest first in sheet)
         return NextResponse.json({
-            receptions: receptions.reverse()
+            receptions: receptions
         });
 
     } catch (error) {

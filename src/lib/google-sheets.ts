@@ -62,57 +62,48 @@ export const findRowIndicesByColumn = async (doc: GoogleSpreadsheet, sheetIndex:
 export const lookupVehicleByPlate = async (plate: string) => {
     const doc = await getInventoryDoc();
 
-    // --- Dual-Source Lookup Strategy ---
-    // 1. Try the modern tab first (Inventarios_app)
-    // 2. If not found, fall back to the legacy tab (Respuestas de formulario 1)
-    const tabsToSearch = [
-        GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME,
-        GOOGLE_SHEETS_CONFIG.INVENTORY.LEGACY_TAB_NAME
-    ].filter(Boolean);
+    // --- Search only the modern tab (Inventarios_app) ---
+    const tabName = GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME;
+    const targetSheet = doc.sheetsByTitle[tabName];
+    
+    if (!targetSheet) return null;
 
-    let sheetIndex = -1;
-    let rowIndices: number[] = [];
+    const sheetIndex = targetSheet.index;
+    const rowIndices = await findRowIndicesByColumn(doc, sheetIndex, 'N', plate);
 
-    for (const tabName of tabsToSearch) {
-        const targetSheet = doc.sheetsByTitle[tabName];
-        if (!targetSheet) continue;
-
-        sheetIndex = targetSheet.index;
-        rowIndices = await findRowIndicesByColumn(doc, sheetIndex, 'N', plate);
-        if (rowIndices.length > 0) break; // Found in this tab, stop searching
-    }
-
-    if (rowIndices.length === 0 || sheetIndex === -1) return null;
+    if (rowIndices.length === 0) return null;
 
     const sheet = doc.sheetsByIndex[sheetIndex];
 
-    let bestRowIndex = rowIndices[rowIndices.length - 1]; // Default to last found (bottom-most)
+    // Default to the FIRST match (since new entries are inserted at the top / Row 2)
+    let bestRowIndex = rowIndices[0]; 
 
-    // 2. If multiple matches, find the one with the most recent date (Column A)
+    // If multiple matches, find the one with the most recent date (Column A)
     if (rowIndices.length > 1) {
-        // Load Column A (Date) for the matching rows
-        // Optimization: Just load the specific cells we need? 
-        // google-spreadsheet loadCells limits are loose, loading specific ranges is better.
-        // We'll construct a range list or just load the whole column A if matches are scattered?
-        // Loading whole column A is safest/easiest given 1000 rows.
         await sheet.loadCells(`A2:A${sheet.rowCount}`);
 
-        // Sort indices by Date descending
-        rowIndices.sort((a, b) => {
-            const getJsDate = (rowIndex: number) => {
-                const val = sheet.getCell(rowIndex, 0).value; // Col A is 0
-                if (!val) return 0;
-                // Handle Serial Number (Excel date)
-                if (typeof val === 'number') {
-                    return (val - 25569) * 86400 * 1000;
-                }
-                // Handle String
-                const d = new Date(String(val));
+        // Helper to parse dates in DD/MM/YYYY or similar formats
+        const parseSpanishDate = (val: any) => {
+            if (!val) return 0;
+            if (typeof val === 'number') return (val - 25569) * 86400 * 1000;
+            
+            const str = String(val);
+            // Try to handle DD/MM/YYYY HH:MM:SS
+            const parts = str.split(/[\/\s:]/);
+            if (parts.length >= 3) {
+                const day = parseInt(parts[0]);
+                const month = parseInt(parts[1]) - 1; // 0-based
+                const year = parseInt(parts[2]);
+                const d = new Date(year, month, day);
                 return isNaN(d.getTime()) ? 0 : d.getTime();
-            };
+            }
+            
+            const fallback = new Date(str);
+            return isNaN(fallback.getTime()) ? 0 : fallback.getTime();
+        };
 
-            return getJsDate(b) - getJsDate(a); // Descending (Newest first)
-        });
+        // Sort indices by Date descending
+        rowIndices.sort((a, b) => parseSpanishDate(sheet.getCell(b, 0).value) - parseSpanishDate(sheet.getCell(a, 0).value));
 
         bestRowIndex = rowIndices[0];
     }

@@ -91,12 +91,10 @@ export default function PhotoEvidence({ photos, onPhotoUpdate, plates }: PhotoEv
             }
         } catch (err) {
             console.error('Photo processing error:', err);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                onPhotoUpdate(id, { file, previewUrl: reader.result as string });
-            };
-            reader.readAsDataURL(file);
-            setUploadErrors(prev => ({ ...prev, [id]: 'Error al procesar la imagen.' }));
+            // Safety fallback: Use a local object URL instead of a massive base64 string
+            const localUrl = URL.createObjectURL(file);
+            onPhotoUpdate(id, { file, previewUrl: localUrl });
+            setUploadErrors(prev => ({ ...prev, [id]: 'Error al comprimir imagen.' }));
         } finally {
             setUploading(prev => ({ ...prev, [id]: false }));
         }

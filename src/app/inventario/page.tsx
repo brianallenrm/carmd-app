@@ -100,9 +100,9 @@ export default function InventoryPage() {
 
     // Load ALL data from local storage on mount (Idea 1: Autoguardado)
     useEffect(() => {
-        const savedData = localStorage.getItem('INVENTORY_FORM_DRAFT');
-        if (savedData) {
-            try {
+        try {
+            const savedData = localStorage.getItem('INVENTORY_FORM_DRAFT');
+            if (savedData) {
                 const parsed = JSON.parse(savedData);
                 setClientData(parsed.clientData || clientData);
                 setVehicleData(parsed.vehicleData || vehicleData);
@@ -113,20 +113,40 @@ export default function InventoryPage() {
                 setPhotos(parsed.photos || {});
                 setIsNewClient(parsed.isNewClient || false);
                 setCurrentStep(parsed.currentStep || 0);
-            } catch (e) {
-                console.error("Error loading draft", e);
             }
+        } catch (e) {
+            console.error("Error loading draft", e);
+            // In case of corruption, clear it
+            try { localStorage.removeItem('INVENTORY_FORM_DRAFT'); } catch (err) { }
         }
     }, []);
 
     // Save draft on every change (Idea 1: Autoguardado)
     useEffect(() => {
         if (!isSuccess) {
-            const draft = {
-                clientData, vehicleData, inventory, inventoryOther,
-                functionalData, serviceData, photos, isNewClient, currentStep
-            };
-            localStorage.setItem('INVENTORY_FORM_DRAFT', JSON.stringify(draft));
+            try {
+                // EXTREMELY IMPORTANT: Filter photos to avoid localStorage Quota Exceeded error
+                // We only keep photos that have a driveUrl. 
+                // We REMOVE the previewUrl (base64) for anything else to save space.
+                const filteredPhotos = { ...photos };
+                Object.keys(filteredPhotos).forEach(key => {
+                    if (!filteredPhotos[key].driveUrl) {
+                        // If not uploaded yet, we remove the base64 to prevent crash
+                        // Note: This means if user refreshes mid-upload, they lose that photo.
+                        // But it's better than the whole app crashing.
+                        const { previewUrl, file, ...metadata } = filteredPhotos[key];
+                        filteredPhotos[key] = metadata as PhotoData;
+                    }
+                });
+
+                const draft = {
+                    clientData, vehicleData, inventory, inventoryOther,
+                    functionalData, serviceData, photos: filteredPhotos, isNewClient, currentStep
+                };
+                localStorage.setItem('INVENTORY_FORM_DRAFT', JSON.stringify(draft));
+            } catch (e) {
+                console.warn("Could not save draft to localStorage (Quota likely exceeded)", e);
+            }
         }
     }, [clientData, vehicleData, inventory, inventoryOther, functionalData, serviceData, photos, isNewClient, currentStep, isSuccess]);
 

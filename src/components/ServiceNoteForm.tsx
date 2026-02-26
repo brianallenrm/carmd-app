@@ -184,12 +184,11 @@ export default function ServiceNoteForm() {
                             const parsed = JSON.parse(raw);
                             const id = key.replace("service-note-draft-", "");
                             // Basic validation that it has content
-                            if (parsed.client?.name || parsed.vehicle?.plates || parsed.services?.[0]?.description) {
+                            if (parsed.client?.name || parsed.vehicle?.plates || parsed.services?.[0]?.description || parsed.folio) {
                                 drafts.push({
                                     id,
                                     ...parsed,
-                                    timestamp: Date.now() // Ideally we would save timestamp in draft, but for now just list them
-                                    // TODO: Add timestamp to draft structure in future
+                                    timestamp: parsed.timestamp || parsed.lastSaved || Date.now()
                                 });
                             }
                         }
@@ -333,6 +332,8 @@ export default function ServiceNoteForm() {
                     setNotes(parsed.notes || "");
                     setIncludeIva(parsed.includeIva || false);
                     setIncludeIsr(parsed.includeIsr || false);
+                    if (parsed.folio) setFolio(parsed.folio);
+                    
                     if (parsed.isDiagnostic) {
                         setHideParts(true);
                         setHideWarranty(true);
@@ -340,11 +341,17 @@ export default function ServiceNoteForm() {
                         setHideParts(parsed.hideParts || false);
                         setHideWarranty(parsed.hideWarranty || false);
                     }
+
+                    // If we loaded a draft with a folio, we don't need to load the "next" global folio
+                    if (parsed.folio) {
+                        setIsDraftLoaded(true);
+                        return;
+                    }
                 } catch (e) {
                     console.error("Error loading draft", e);
                 }
             }
-            // Always load next folio on normal mount or draft load
+            // Always load next folio on fresh mount or if draft had no folio
             loadNextFolio();
         }
 
@@ -364,10 +371,35 @@ export default function ServiceNoteForm() {
             includeIva,
             includeIsr,
             hideParts,
-            hideWarranty
+            hideWarranty,
+            folio,
+            timestamp: Date.now() // Update timestamp on every changes
         };
         localStorage.setItem(`service-note-draft-${draftId}`, JSON.stringify(draft));
-    }, [client, vehicle, services, parts, notes, includeIva, includeIsr, hideParts, hideWarranty, isDraftLoaded, draftId]);
+    }, [client, vehicle, services, parts, notes, includeIva, includeIsr, hideParts, hideWarranty, isDraftLoaded, draftId, folio]);
+
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+    const handleManualSave = () => {
+        setSaveStatus('saving');
+        const draft = {
+            client,
+            vehicle,
+            services,
+            parts,
+            notes,
+            includeIva,
+            includeIsr,
+            hideParts,
+            hideWarranty,
+            folio,
+            timestamp: Date.now()
+        };
+        localStorage.setItem(`service-note-draft-${draftId}`, JSON.stringify(draft));
+        setTimeout(() => {
+            setSaveStatus('saved');
+            setTimeout(() => setSaveStatus('idle'), 2000);
+        }, 500);
+    };
 
     const handleClearForm = () => {
         if (!confirm("¿Estás seguro de borrar toda la información y empezar de cero?")) return;
@@ -718,14 +750,26 @@ export default function ServiceNoteForm() {
                         </div>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={() => { setIsHistoryOpen(true); loadRecentNotes(); }}
-                        className="flex items-center gap-2 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200 h-full"
-                    >
-                        <History size={18} />
-                        <span>Historial</span>
-                    </button>
+                    <div className="flex gap-2 h-full">
+                        <button
+                            type="button"
+                            onClick={handleManualSave}
+                            className={`flex items-center gap-2 px-3 py-3 rounded-lg transition-all font-medium border ${saveStatus === 'saved' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-orange-50 text-[#F37014] border-orange-100 hover:bg-orange-100'}`}
+                            title="Guardar borrador ahora"
+                        >
+                            <Save size={18} className={saveStatus === 'saving' ? 'animate-pulse' : ''} />
+                            <span className="text-sm">{saveStatus === 'saved' ? 'Guardado' : saveStatus === 'saving' ? '...' : 'Guardar'}</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => { setIsHistoryOpen(true); loadRecentNotes(); }}
+                            className="flex items-center gap-2 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200"
+                        >
+                            <History size={18} />
+                            <span>Historial</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 

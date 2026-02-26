@@ -18,47 +18,12 @@ export async function POST(request: NextRequest) {
 
         const sheets = google.sheets({ version: 'v4', auth });
         const spreadsheetId = GOOGLE_SHEETS_CONFIG.INVENTORY.ID;
-        const tabName = GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME;
+        const primaryTab = GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME;
+        const legacyTab = GOOGLE_SHEETS_CONFIG.INVENTORY.LEGACY_TAB_NAME;
 
-        // Step 1: Read headers from row 1
-        const headerRes = await sheets.spreadsheets.values.get({
-            spreadsheetId,
-            range: `'${tabName}'!1:1`,
-        });
-        const headers = headerRes.data.values?.[0] || [];
-
-        // Step 2: Get sheet ID (gid) for batchUpdate
-        const spreadsheetMeta = await sheets.spreadsheets.get({
-            spreadsheetId,
-            fields: 'sheets.properties',
-        });
-        const sheetMeta = spreadsheetMeta.data.sheets?.find(
-            s => s.properties?.title === tabName
-        );
-        const sheetId = sheetMeta?.properties?.sheetId ?? 0;
-
-        // Step 3: Insert a blank row at position 2 (index 1, just below headers)
-        await sheets.spreadsheets.batchUpdate({
-            spreadsheetId,
-            requestBody: {
-                requests: [{
-                    insertDimension: {
-                        range: {
-                            sheetId,
-                            dimension: 'ROWS',
-                            startIndex: 1,
-                            endIndex: 2,
-                        },
-                        inheritFromBefore: false,
-                    }
-                }]
-            }
-        });
-
-        // Step 4: Build data row matching header order
+        // Build the common data map
         const now = new Date();
         const timezone = 'America/Mexico_City';
-
         const dateStr = now.toLocaleDateString('es-MX', { timeZone: timezone });
         const timeStr = now.toLocaleTimeString('es-MX', { timeZone: timezone, hour12: true });
 
@@ -107,17 +72,58 @@ export async function POST(request: NextRequest) {
             "Datos Inspección Visual": JSON.stringify(body.functional || {})
         };
 
-        const rowValues = headers.map((h: string) => dataMap[h] || "");
+        // --- PART 1: Save to PRIMARY TAB (Inventarios_app) - INSERT AT TOP ---
+        try {
+            const headerRes = await sheets.spreadsheets.values.get({ spreadsheetId, range: `'${primaryTab}'!1:1` });
+            const headers = headerRes.data.values?.[0] || [];
 
-        // Step 5: Write data to the newly inserted row 2
-        await sheets.spreadsheets.values.update({
-            spreadsheetId,
-            range: `'${tabName}'!A2`,
-            valueInputOption: 'RAW',
-            requestBody: {
-                values: [rowValues],
-            },
-        });
+            const spreadsheetMeta = await sheets.spreadsheets.get({ spreadsheetId, fields: 'sheets.properties' });
+            const sheetId = spreadsheetMeta.data.sheets?.find(s => s.properties?.title === primaryTab)?.properties?.sheetId ?? 0;
+
+            await sheets.spreadsheets.batchUpdate({
+                spreadsheetId,
+                requestBody: {
+                    requests: [{
+                        insertDimension: {
+                            range: { sheetId, dimension: 'ROWS', startIndex: 1, endIndex: 2 },
+                            inheritFromBefore: false,
+                        }
+                    }]
+                }
+            });
+
+            const rowValues = headers.map((h: string) => dataMap[h] || "");
+            await sheets.spreadsheets.values.update({
+                spreadsheetId,
+                range: `'${primaryTab}'!A2`,
+                valueInputOption: 'RAW',
+                requestBody: { values: [rowValues] },
+            });
+        } catch (error) {
+            console.error("Critical error saving to PRIMARY tab:", error);
+            throw error; // Rethrow because primary failure is a failure
+        }
+
+        // --- PART 2: Save to LEGACY TAB (Respuestas de formulario 1) - APPEND AT BOTTOM ---
+        if (legacyTab) {
+            try {
+                const headerRes = await sheets.spreadsheets.values.get({ spreadsheetId, range: `'${legacyTab}'!1:1` });
+                const headers = headerRes.data.values?.[0] || [];
+                
+                if (headers.length > 0) {
+                    const rowValues = headers.map((h: string) => dataMap[h] || "");
+                    await sheets.spreadsheets.values.append({
+                        spreadsheetId,
+                        range: `'${legacyTab}'!A1`,
+                        valueInputOption: 'RAW',
+                        requestBody: { values: [rowValues] },
+                    });
+                }
+            } catch (error) {
+                // We LOG but don't THROW if legacy tab fails (paz mental strategy)
+                console.warn("Non-critical error saving to LEGACY tab:", error);
+            }
+        }
 
         return NextResponse.json({ success: true });
 

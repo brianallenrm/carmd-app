@@ -97,6 +97,8 @@ export default function InventoryPage() {
     const [saveError, setSaveError] = useState('');
     const [savedFolio, setSavedFolio] = useState('');
     const [showResetConfirm, setShowResetConfirm] = useState(false);
+    const [submissionId, setSubmissionId] = useState<string | null>(null);
+    const [submissionFolio, setSubmissionFolio] = useState<string | null>(null);
 
     // Load ALL data from local storage on mount (Idea 1: Autoguardado)
     useEffect(() => {
@@ -177,6 +179,8 @@ export default function InventoryPage() {
         setCurrentStep(0);
         setIsSuccess(false);
         setSavedFolio('');
+        setSubmissionId(null);
+        setSubmissionFolio(null);
     };
 
     const updatePhoto = (id: string, data: Partial<PhotoData>) => {
@@ -213,6 +217,8 @@ export default function InventoryPage() {
         });
         setCurrentStep(0);
         setIsNewClient(false);
+        setSubmissionId(null);
+        setSubmissionFolio(null);
         localStorage.removeItem('INVENTORY_DRAFT');
         setShowResetConfirm(false);
     };
@@ -471,7 +477,7 @@ export default function InventoryPage() {
                         <button
                             onClick={async () => {
                                 if (currentStep === STEPS.length - 1) {
-                                    if (isSaving) return; // Prevent double-click
+                                    if (isSaving || isSuccess) return; // Prevent double-click or re-submission
                                     setIsSaving(true);
                                     setSaveError('');
 
@@ -480,14 +486,19 @@ export default function InventoryPage() {
                                         localStorage.setItem('lastAdvisorName', serviceData.advisorName);
                                     }
 
-                                    const folio = `INV-${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`;
-                                    setSavedFolio(folio);
+                                    // ID STABILIZATION: Generate once and keep it for retries
+                                    const finalId = submissionId || Date.now().toString();
+                                    const finalFolio = submissionFolio || `INV-${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`;
+
+                                    if (!submissionId) setSubmissionId(finalId);
+                                    if (!submissionFolio) setSubmissionFolio(finalFolio);
+                                    setSavedFolio(finalFolio);
 
                                     const receptionData = {
-                                        id: Date.now().toString(),
+                                        id: finalId,
                                         isReception: true,
                                         date: new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }),
-                                        folio: folio,
+                                        folio: finalFolio,
                                         client: clientData,
                                         vehicle: vehicleData,
                                         inventory: { ...inventory, otro: inventoryOther },
@@ -499,9 +510,11 @@ export default function InventoryPage() {
                                     };
 
                                     try {
+                                        // Update local pending list (id-stable)
                                         const existing = JSON.parse(localStorage.getItem('PENDING_RECEPTIONS') || '[]');
-                                        existing.push(receptionData);
-                                        localStorage.setItem('PENDING_RECEPTIONS', JSON.stringify(existing));
+                                        const filtered = existing.filter((r: any) => r.id !== finalId); // Replace if exists (id stabilization)
+                                        filtered.push(receptionData);
+                                        localStorage.setItem('PENDING_RECEPTIONS', JSON.stringify(filtered));
                                     } catch (e) {
                                         console.warn("Local Storage Full", e);
                                     }
@@ -516,7 +529,7 @@ export default function InventoryPage() {
                                         setIsSuccess(true);
                                     } catch (error) {
                                         console.error("Sheet Save Error:", error);
-                                        setSaveError('Error al guardar en Google Sheets. Se guardó localmente.');
+                                        setSaveError('Error de red al guardar en Google Sheets. El registro se guardó en este dispositivo, puedes intentar de nuevo.');
                                     } finally {
                                         setIsSaving(false);
                                     }
@@ -525,13 +538,17 @@ export default function InventoryPage() {
                                 }
                             }}
                             disabled={!isStepValid() || isSaving}
-                            className={`flex-1 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${(!isStepValid() || isSaving)
-                                ? 'bg-slate-200 text-slate-400'
-                                : 'bg-[#F37014] text-white shadow-lg shadow-[#F37014]/30'
+                            className={`flex-1 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${(isSuccess)
+                                ? 'bg-green-500 text-white cursor-default'
+                                : (!isStepValid() || isSaving)
+                                    ? 'bg-slate-200 text-slate-400'
+                                    : 'bg-[#F37014] text-white shadow-lg shadow-[#F37014]/30'
                                 }`}
                         >
-                            {isSaving ? (
-                                <><Loader2 size={20} className="animate-spin" /> Guardando...</>
+                            {isSuccess ? (
+                                <><CheckCircle size={20} /> Inventario Guardado</>
+                            ) : isSaving ? (
+                                <><Loader2 size={20} className="animate-spin" /> Guardando en Google Sheets...</>
                             ) : currentStep === STEPS.length - 1 ? (
                                 <>Finalizar Orden <ChevronRight size={20} /></>
                             ) : (

@@ -18,8 +18,8 @@ export async function POST(request: NextRequest) {
 
         const sheets = google.sheets({ version: 'v4', auth });
         const spreadsheetId = GOOGLE_SHEETS_CONFIG.INVENTORY.ID;
-        const primaryTab = GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME;
-        const legacyTab = GOOGLE_SHEETS_CONFIG.INVENTORY.LEGACY_TAB_NAME;
+        const primaryTabName = GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME;
+        const legacyTabName = GOOGLE_SHEETS_CONFIG.INVENTORY.LEGACY_TAB_NAME;
 
         // Build the common data map
         const now = new Date();
@@ -72,55 +72,59 @@ export async function POST(request: NextRequest) {
             "Datos Inspección Visual": JSON.stringify(body.functional || {})
         };
 
-        // --- PART 1: Save to PRIMARY TAB (Inventarios_app) - INSERT AT TOP ---
+        // --- STEP 1: PARALLEL METADATA GATHERING ---
+        // We fetch headers and sheet properties for both tabs at once
+        const [primaryHeadersRes, legacyHeadersRes, spreadsheetMeta] = await Promise.all([
+            sheets.spreadsheets.values.get({ spreadsheetId, range: `'${primaryTabName}'!1:1` }),
+            legacyTabName ? sheets.spreadsheets.values.get({ spreadsheetId, range: `'${legacyTabName}'!1:1` }) : Promise.resolve({ data: { values: [] } }),
+            sheets.spreadsheets.get({ spreadsheetId, fields: 'sheets.properties' })
+        ]);
+
+        const primaryHeaders = primaryHeadersRes.data.values?.[0] || [];
+        const legacyHeaders = legacyHeadersRes.data.values?.[0] || [];
+        const primarySheetId = spreadsheetMeta.data.sheets?.find(s => s.properties?.title === primaryTabName)?.properties?.sheetId ?? 0;
+
+        // --- STEP 2: PRIMARY TAB SAVE (CRITICAL) - INSERT AT TOP ---
         try {
-            const headerRes = await sheets.spreadsheets.values.get({ spreadsheetId, range: `'${primaryTab}'!1:1` });
-            const headers = headerRes.data.values?.[0] || [];
-
-            const spreadsheetMeta = await sheets.spreadsheets.get({ spreadsheetId, fields: 'sheets.properties' });
-            const sheetId = spreadsheetMeta.data.sheets?.find(s => s.properties?.title === primaryTab)?.properties?.sheetId ?? 0;
-
+            // We still need to batchUpdate (Insert Row) and update (Write Data)
+            // But now we already have the headers and sheetId
             await sheets.spreadsheets.batchUpdate({
                 spreadsheetId,
                 requestBody: {
                     requests: [{
                         insertDimension: {
-                            range: { sheetId, dimension: 'ROWS', startIndex: 1, endIndex: 2 },
+                            range: { sheetId: primarySheetId, dimension: 'ROWS', startIndex: 1, endIndex: 2 },
                             inheritFromBefore: false,
                         }
                     }]
                 }
             });
 
-            const rowValues = headers.map((h: string) => dataMap[h] || "");
+            const primaryRowValues = primaryHeaders.map((h: string) => dataMap[h] || "");
             await sheets.spreadsheets.values.update({
                 spreadsheetId,
-                range: `'${primaryTab}'!A2`,
+                range: `'${primaryTabName}'!A2`,
                 valueInputOption: 'RAW',
-                requestBody: { values: [rowValues] },
+                requestBody: { values: [primaryRowValues] },
             });
         } catch (error) {
             console.error("Critical error saving to PRIMARY tab:", error);
-            throw error; // Rethrow because primary failure is a failure
+            throw error;
         }
 
-        // --- PART 2: Save to LEGACY TAB (Respuestas de formulario 1) - APPEND AT BOTTOM ---
-        if (legacyTab) {
+        // --- STEP 3: LEGACY TAB SAVE (NON-CRITICAL) - APPEND AT BOTTOM ---
+        if (legacyTabName && legacyHeaders.length > 0) {
+            // Fire and forget (almost) legacy save in background? 
+            // In a Serverless function, we should await but legacy failure shouldn't block return
             try {
-                const headerRes = await sheets.spreadsheets.values.get({ spreadsheetId, range: `'${legacyTab}'!1:1` });
-                const headers = headerRes.data.values?.[0] || [];
-                
-                if (headers.length > 0) {
-                    const rowValues = headers.map((h: string) => dataMap[h] || "");
-                    await sheets.spreadsheets.values.append({
-                        spreadsheetId,
-                        range: `'${legacyTab}'!A1`,
-                        valueInputOption: 'RAW',
-                        requestBody: { values: [rowValues] },
-                    });
-                }
+                const legacyRowValues = legacyHeaders.map((h: string) => dataMap[h] || "");
+                await sheets.spreadsheets.values.append({
+                    spreadsheetId,
+                    range: `'${legacyTabName}'!A1`,
+                    valueInputOption: 'RAW',
+                    requestBody: { values: [legacyRowValues] },
+                });
             } catch (error) {
-                // We LOG but don't THROW if legacy tab fails (paz mental strategy)
                 console.warn("Non-critical error saving to LEGACY tab:", error);
             }
         }

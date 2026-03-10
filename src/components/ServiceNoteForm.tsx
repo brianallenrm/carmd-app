@@ -195,7 +195,8 @@ export default function ServiceNoteForm() {
                     } catch (e) { console.error("Bad draft", key); }
                 }
             }
-            // Sort by ID (usually chronological if using timestamp based IDs, but ours are random+time)
+            // Sort by Timestamp (Newest first)
+            drafts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
             setLocalDrafts(drafts);
         } catch (e) {
             console.error("Error loading local drafts", e);

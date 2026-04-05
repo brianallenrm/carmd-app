@@ -167,12 +167,12 @@ export default function LandingPage() {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/citas" className="w-full sm:w-auto">
+              <Link href="/web-test/citas" className="w-full sm:w-auto">
                 <button className="w-full bg-[#f16315] hover:bg-[#d95300] text-white px-10 py-5 rounded-full text-lg font-bold transition-all shadow-2xl shadow-orange-500/20">
                   Reserva tu inspección
                 </button>
               </Link>
-              <Link href="/nosotros" className="w-full sm:w-auto">
+              <Link href="/web-test/nosotros" className="w-full sm:w-auto">
                 <button className="w-full bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 text-white px-10 py-5 rounded-full text-lg font-bold transition-all">
                   Conoce nuestra historia
                 </button>

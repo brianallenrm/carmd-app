@@ -199,3 +199,69 @@ export const lookupVehicleByPlate = async (plate: string) => {
 
     return { client, vehicle };
 };
+
+/**
+ * Securely checks if a plate exists without returning data.
+ */
+export const checkVehiclePlate = async (plate: string) => {
+    const doc = await getInventoryDoc();
+    const tabName = GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME;
+    const targetSheet = doc.sheetsByTitle[tabName];
+    if (!targetSheet) return { exists: false };
+
+    const rowIndices = await findRowIndicesByColumn(doc, targetSheet.index, 'N', plate);
+    return { exists: rowIndices.length > 0 };
+};
+
+/**
+ * Unlocks vehicle data only if the last 4 digits of the phone match.
+ */
+export const unlockVehicleData = async (plate: string, last4: string) => {
+    const data = await lookupVehicleByPlate(plate);
+    if (!data) return { success: false };
+
+    const cleanPhone = data.client.phone.replace(/[^0-9]/g, '');
+    const actualLast4 = cleanPhone.slice(-4);
+
+    if (actualLast4 === last4) {
+        return { 
+            success: true, 
+            userData: {
+                name: data.client.name,
+                phone: data.client.phone,
+                email: data.client.email,
+                vehicle: `${data.vehicle.brand} ${data.vehicle.model}`,
+                year: data.vehicle.year,
+                vin: data.vehicle.vin,
+                km: data.vehicle.odometer
+            } 
+        };
+    }
+    return { success: false };
+};
+
+/**
+ * Retrieves all appointments from the CITAS_2025 tab.
+ */
+export const getCitas = async () => {
+    const doc = await getInventoryDoc();
+    const sheet = doc.sheetsByTitle["CITAS_2025"];
+    if (!sheet) return [];
+
+    const rows = await sheet.getRows();
+    return rows.map(r => ({
+        timestamp: r.get("Fecha_Registro"),
+        plate: r.get("Placa"),
+        name: r.get("Nombre"),
+        phone: r.get("WhatsApp"),
+        email: r.get("Email"),
+        vehicle: r.get("Vehiculo"),
+        year: r.get("Año"),
+        km: r.get("KM"),
+        date: r.get("Fecha_Cita"),
+        time: r.get("Hora_Cita"),
+        problem: r.get("Problema"),
+        status: r.get("Estatus") || "Pendiente",
+        id: r.rowNumber
+    }));
+};

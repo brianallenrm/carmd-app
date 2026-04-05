@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Luis Rafael Arreola Hernández",
+    "stars": 5,
+    "text": "Excelente servicio, el diagnóstico fue muy preciso y el trato muy profesional. Recomendado 100%.",
+    "date": "Hace 2 semanas",
+    "verified": true
+  },
+  {
+    "id": 2,
+    "name": "Irving Quiroz",
+    "stars": 5,
+    "text": "Muy buena atención, explican todo a detalle y con mucha transparencia. Difícil encontrar talleres así en la ciudad.",
+    "date": "Hace 1 mes",
+    "verified": true
+  },
+  {
+    "id": 3,
+    "name": "Ricardo Gomez",
+    "stars": 5,
+    "text": "Puntualidad y honestidad. Llevaron el mantenimiento de mi unidad y quedó perfecta. Se nota la experiencia.",
+    "date": "Hace 3 meses",
+    "verified": true
+  },
+  {
+    "id": 4,
+    "name": "Alejandra M.",
+    "stars": 5,
+    "text": "Excelente trato, me sentí muy segura dejando mi auto aquí. Te mandan fotos de todo el proceso y evidencias reales.",
+    "date": "Hace 1 semana",
+    "verified": true
+  },
+  {
+    "id": 5,
+    "name": "Juan Carlos P.",
+    "stars": 5,
+    "text": "Ingeniería de verdad. No son improvisados. Gran servicio y atención al detalle en cada paso.",
+    "date": "Hace 2 meses",
+    "verified": true
+  },
+  {
+    "id": 6,
+    "name": "Arturo V.",
+    "stars": 5,
+    "text": "Servicio de primera. El escaneo fue muy profesional y resolvieron la falla que en otros lados no podían.",
+    "date": "Hace 1 mes",
+    "verified": true
+  }
+]

@@ -847,7 +847,7 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <div className="text-sm font-bold text-white/30 uppercase">Horarios de Atención</div>
-                    <div className="text-xl font-bold italic">Lun - Vie: 9:00 - 18:30 | Sab: 9:00 - 14:00</div>
+                    <div className="text-xl font-bold italic">Lun - Vie: 7:45 - 17:00 | Sab: 7:45 - 14:00</div>
                   </div>
                 </div>
 

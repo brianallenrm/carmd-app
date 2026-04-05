@@ -123,23 +123,24 @@ export default function BookingPage() {
     if (!dateString) return [];
     const date = new Date(dateString + "T12:00:00");
     const isSaturday = date.getDay() === 6;
-    
-    const times = [];
-    const start = 8;
-    // Weekdays: 8am - 5pm (17:00). Sat: 8am - 2pm (14:00)
-    const end = isSaturday ? 14 : 17; 
 
-    for (let h = start; h <= end; h += 0.5) {
+    const times: string[] = [];
+    // Weekdays: 7:45 - 17:00. Sat: 7:45 - 14:00
+    const endHour = isSaturday ? 14 : 17;
+
+    for (let h = 7.75; h <= endHour; h += 0.5) {
       if (isSaturday && h > 14) break;
       if (!isSaturday && h > 17) break;
-      
+
       const hour = Math.floor(h);
       const minutes = (h % 1 === 0) ? "00" : "30";
+      // Special case: 7.75 = 7:45
+      const displayMinutes = (h === 7.75) ? "45" : minutes;
       const ampm = hour >= 12 ? 'PM' : 'AM';
       let displayHour = hour > 12 ? hour - 12 : hour;
       if (displayHour === 0) displayHour = 12;
-      
-      times.push(`${displayHour}:${minutes} ${ampm}`);
+
+      times.push(`${displayHour}:${displayMinutes} ${ampm}`);
     }
     return times;
   };

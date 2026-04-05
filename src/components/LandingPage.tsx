@@ -494,7 +494,7 @@ export default function LandingPage() {
                 Si tu auto lo siente, nosotros lo solucionamos.
               </p>
             </div>
-            <Link href="/servicios">
+            <Link href="/web-test/servicios">
               <button className="flex items-center gap-2 text-[#f16315] font-bold text-lg group bg-white/5 px-6 py-3 rounded-full border border-[#f16315]/20 hover:bg-[#f16315]/10 transition-all">
                 Explorar Catálogo Completo <ArrowRight className="group-hover:translate-x-1 transition-transform" />
               </button>
@@ -550,7 +550,7 @@ export default function LandingPage() {
                   </p>
                 </div>
 
-                <Link href="/servicios" className="absolute inset-0 z-20" />
+                <Link href="/web-test/servicios" className="absolute inset-0 z-20" />
               </motion.div>
             ))}
           </motion.div>
@@ -690,7 +690,7 @@ export default function LandingPage() {
                 </div>
 
                 <div className="pt-4">
-                  <Link href="/nosotros">
+                  <Link href="/web-test/nosotros">
                     <button className="group flex items-center gap-3 text-white font-bold uppercase tracking-widest text-xs hover:text-[#f16315] transition-colors">
                       Conoce nuestra historia completa <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                     </button>

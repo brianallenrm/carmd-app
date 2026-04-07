@@ -538,7 +538,7 @@ export default function BookingPage() {
                       className="w-full bg-black border border-white/10 p-6 rounded-3xl focus:border-[#f16315] outline-none text-lg"
                       placeholder="Ej: Hace un ruido al frenar, requiere afinación, etc."
                     />
-                    <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 grid grid-cols-2 gap-y-3 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+                    <div className="p-8 rounded-3xl bg-white/[0.02] border border-white/5 grid grid-cols-2 gap-y-4 text-sm font-black uppercase tracking-[0.2em] text-white/40">
                        <div>Cita:</div>
                        <div className="text-right text-[#f16315]">{formData.date} @ {formData.time}</div>
                        <div>Vehículo:</div>
@@ -548,7 +548,7 @@ export default function BookingPage() {
                     </div>
                  </div>
                  <button onClick={submitBooking} disabled={!formData.problem || loading} className="w-full bg-[#f16315] py-8 rounded-[40px] font-black uppercase tracking-[0.3em] text-xl shadow-2xl shadow-[#f16315]/50">
-                    {loading ? "Confirmando..." : "Confirmar Cita"}
+                    {loading ? "Enviando..." : "Enviar Solicitud de Cita"}
                  </button>
               </motion.div>
             )}
@@ -593,10 +593,11 @@ export default function BookingPage() {
                  </div>
 
                  <div className="space-y-4">
-                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter italic">Cita Confirmada</h1>
+                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter italic">Solicitud Enviada</h1>
                     <div className="h-1 w-20 bg-[#f16315] mx-auto rounded-full" />
-                    <p className="text-white/40 text-lg font-medium max-w-md mx-auto leading-relaxed">
-                      Tu espacio ha sido reservado con éxito. Hemos enviado los detalles a <span className="text-white font-bold">{formData.email}</span>.
+                    <p className="text-white/40 text-lg font-medium max-w-lg mx-auto leading-relaxed">
+                       Hemos recibido los detalles de tu vehículo junto con el espacio que requieres. <br />
+                       En un momento confirmaremos disponibilidad a <span className="text-white font-bold">{formData.email}</span>.
                     </p>
                  </div>
 

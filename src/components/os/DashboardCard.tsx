@@ -39,10 +39,10 @@ export default function DashboardCard({
         "relative overflow-hidden rounded-2xl p-6 transition-all duration-300 h-full",
         "border shadow-sm group cursor-pointer",
         variant === 'primary' 
-          ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-100/50" 
+          ? "bg-[#f16315] border-[#f16315] text-white shadow-md shadow-orange-500/20" 
           : variant === 'external'
             ? "bg-emerald-50/50 border-emerald-100 text-emerald-900 hover:bg-emerald-50"
-            : "bg-white border-gray-100 text-gray-900 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-50/50",
+            : "bg-white border-gray-100 text-gray-900 hover:border-orange-200 hover:shadow-lg hover:shadow-orange-50/50",
         isLarge ? "md:col-span-2" : ""
       )}
     >
@@ -55,9 +55,9 @@ export default function DashboardCard({
         <div className="flex items-start justify-between">
           <div className={cn(
             "p-3 rounded-xl transition-colors duration-300",
-            variant === 'primary' ? "bg-white/10 ring-1 ring-white/30" : 
+            variant === 'primary' ? "bg-white/20 ring-1 ring-white/30" : 
             variant === 'external' ? "bg-emerald-100 text-emerald-600" :
-            "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white"
+            "bg-orange-50 text-[#f16315] group-hover:bg-[#f16315] group-hover:text-white"
           )}>
             <Icon size={24} />
           </div>
@@ -76,8 +76,8 @@ export default function DashboardCard({
             {title}
           </h3>
           <p className={cn(
-            "mt-2 text-sm leading-relaxed",
-            variant === 'primary' ? "text-blue-100" : "text-gray-500"
+             "mt-2 text-sm leading-relaxed",
+            variant === 'primary' ? "text-orange-100" : "text-gray-500"
           )}>
             {description}
           </p>
@@ -86,8 +86,8 @@ export default function DashboardCard({
         {/* Action hint (visible on hover) */}
         <div className={cn(
           "mt-auto pt-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider transition-all opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0",
-          variant === 'primary' ? "text-white/80" : 
-          variant === 'external' ? "text-emerald-600" : "text-blue-600"
+          variant === 'primary' ? "text-white/90" : 
+          variant === 'external' ? "text-emerald-600" : "text-[#f16315]"
         )}>
           {isExternal ? "Abrir Documento" : "Entrar ahora"}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
@@ -97,8 +97,8 @@ export default function DashboardCard({
       {/* Decorative background circle */}
       <div className={cn(
         "absolute -right-8 -bottom-8 h-32 w-32 rounded-full blur-3xl transition-all duration-500 group-hover:scale-110",
-        variant === 'primary' ? "bg-blue-400/30" : 
-        variant === 'external' ? "bg-emerald-200/20" : "bg-blue-100/40"
+        variant === 'primary' ? "bg-orange-400/30" : 
+        variant === 'external' ? "bg-emerald-200/20" : "bg-orange-100/40"
       )} />
     </motion.div>
   );

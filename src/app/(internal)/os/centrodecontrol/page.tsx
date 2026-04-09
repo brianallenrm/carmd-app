@@ -23,7 +23,7 @@ export default function ControlCenter() {
       <header className="bg-white border-b border-gray-100 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-200">
+            <div className="bg-[#f16315] p-2.5 rounded-xl text-white shadow-lg shadow-orange-500/30">
               <LayoutDashboard size={22} />
             </div>
             <div>
@@ -48,7 +48,7 @@ export default function ControlCenter() {
         {/* Section 1: Herramientas Principales (Priority) */}
         <section>
           <div className="flex items-center gap-3 mb-8">
-            <h2 className="text-[11px] font-black text-blue-600 uppercase tracking-[0.3em] bg-blue-50 px-3 py-1 rounded-md">
+            <h2 className="text-[11px] font-black text-[#f16315] uppercase tracking-[0.3em] bg-orange-50 px-3 py-1 rounded-md">
               Herramientas de Alto Uso
             </h2>
             <div className="h-px bg-gray-100 flex-grow" />

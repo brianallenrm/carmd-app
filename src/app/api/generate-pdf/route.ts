@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
         // 4. Navigate to minimal URL
         // We only pass folio/date purely for fallback or logging, but the real data is in window
-        const url = `${baseUrl}/note-preview`; // No query params needed for data
+        const url = `${baseUrl}/os/note-preview`; // No query params needed for data
 
         // Set viewport to A4 size (approximate pixels at 96 DPI)
         // A4 is 210mm x 297mm. 

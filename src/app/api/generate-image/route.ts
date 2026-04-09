@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
         const baseUrl = req.nextUrl.origin;
         // Clean URL without data params
-        const previewUrl = `${baseUrl}/note-preview`;
+        const previewUrl = `${baseUrl}/os/note-preview`;
 
         // 2. Launch Puppeteer
         const browser = await getBrowser();

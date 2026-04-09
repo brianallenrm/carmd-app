@@ -607,7 +607,7 @@ export default function ServiceNoteForm() {
         params.set("hideParts", hideParts.toString());
         params.set("hideWarranty", hideWarranty.toString());
         params.set("date", customDate);
-        return `/note-preview?${params.toString()}`;
+        return `/os/note-preview?${params.toString()}`;
     };
 
     const handlePreview = () => {

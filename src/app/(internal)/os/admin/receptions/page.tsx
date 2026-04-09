@@ -67,7 +67,7 @@ export default function ReceptionsDashboard() {
             // Ensure isReception is always true for items from this page
             // (API data from /api/inventory/list may not include this flag)
             localStorage.setItem('PDF_DATA', JSON.stringify({ ...item, isReception: true }));
-            window.open('/note-preview', '_blank');
+            window.open('/os/note-preview', '_blank');
         }
     };
 

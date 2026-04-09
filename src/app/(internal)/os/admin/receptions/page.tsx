@@ -80,7 +80,7 @@ export default function ReceptionsDashboard() {
                         <h1 className="text-2xl font-black text-slate-900 tracking-tight">Recepciones Pendientes</h1>
                         <p className="text-slate-500">Supervisa y envía los inventarios realizados por los asesores.</p>
                     </div>
-                    <Link href="/inventario" className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-800 transition-colors">
+                    <Link href="/os/inventario" className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-800 transition-colors">
                         + Nueva Recepción
                     </Link>
                 </header>

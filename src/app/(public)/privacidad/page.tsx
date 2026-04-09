@@ -11,10 +11,10 @@ export default function PrivacyPolicy() {
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 p-8 border-b border-white/5 bg-black/80 backdrop-blur-lg">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <Link href="/web-test" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <BrandLogo size="md" />
           </Link>
-          <Link href="/web-test" className="text-white/50 hover:text-white transition-colors text-sm font-bold flex items-center gap-2 group">
+          <Link href="/" className="text-white/50 hover:text-white transition-colors text-sm font-bold flex items-center gap-2 group">
             <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Volver al Inicio
           </Link>
         </div>

@@ -101,10 +101,10 @@ export default function ServiciosPage() {
         <div className="mb-24 flex flex-col md:flex-row justify-between items-start md:items-end gap-12">
           <div className="max-w-3xl">
             <div className="flex items-center justify-between mb-10">
-              <Link href="/web-test" className="inline-flex items-center gap-2 text-white/40 hover:text-[#f16315] transition-colors uppercase font-black text-xs tracking-widest group">
+              <Link href="/" className="inline-flex items-center gap-2 text-white/40 hover:text-[#f16315] transition-colors uppercase font-black text-xs tracking-widest group">
                 <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Volver al Inicio
               </Link>
-              <Link href="/web-test" className="md:hidden">
+              <Link href="/" className="md:hidden">
                 <BrandLogo size="sm" />
               </Link>
             </div>
@@ -118,7 +118,7 @@ export default function ServiciosPage() {
             </p>
           </div>
           <div className="flex flex-col items-end gap-6 leading-none">
-            <Link href="/web-test" className="hidden md:block">
+            <Link href="/" className="hidden md:block">
               <BrandLogo size="md" />
             </Link>
             <div className="hidden lg:block rotate-90 origin-right translate-y-[-20%]">
@@ -167,7 +167,7 @@ export default function ServiciosPage() {
                   <p className="text-white/60 text-sm leading-relaxed mb-8 uppercase font-medium">
                     {service.desc}
                   </p>
-                  <Link href="/web-test/citas">
+                  <Link href="/citas">
                     <button className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs rounded-full hover:bg-[#f16315] hover:text-white transition-all active:scale-95 flex items-center justify-center gap-2 group/btn">
                       Agendar Cita <Calendar size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                     </button>
@@ -188,7 +188,7 @@ export default function ServiciosPage() {
             <p className="text-white/20 font-black uppercase tracking-[0.3em] text-[10px] mb-12">
                Protocolos estandarizados bajo normas de calidad internacional
             </p>
-            <Link href="/web-test/citas">
+            <Link href="/citas">
                 <button className="px-16 py-8 bg-[#f16315] text-white font-black uppercase tracking-[0.4em] text-sm rounded-full hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-orange-500/20">
                     Solicitar Diagnóstico Especializado
                 </button>
@@ -196,14 +196,14 @@ export default function ServiciosPage() {
 
             {/* Legal Links */}
             <div className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 opacity-40">
-               <Link href="/web-test">
+               <Link href="/">
                  <BrandLogo size="sm" className="opacity-40 hover:opacity-100 transition-opacity" />
                </Link>
                <div className="text-[10px] uppercase font-black tracking-widest">© 2026 CarMD Diagnóstico Mecánico Automotriz</div>
                <div className="flex gap-6 text-[10px] uppercase font-black tracking-widest">
-                  <Link href="/web-test/privacidad" className="hover:text-white transition-colors">Privacidad</Link>
-                  <Link href="/web-test/terminos" className="hover:text-white transition-colors">Términos</Link>
-                  <Link href="/web-test/cookies" className="hover:text-white transition-colors">Cookies</Link>
+                  <Link href="/privacidad" className="hover:text-white transition-colors">Privacidad</Link>
+                  <Link href="/terminos" className="hover:text-white transition-colors">Términos</Link>
+                  <Link href="/cookies" className="hover:text-white transition-colors">Cookies</Link>
                </div>
             </div>
         </div>

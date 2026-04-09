@@ -40,7 +40,7 @@ export default function CookieBanner() {
                 <h4 className="text-white font-black uppercase text-xs tracking-widest">Control de Privacidad</h4>
                 <p className="text-white/50 text-[11px] leading-relaxed font-medium">
                   Utilizamos cookies técnicas para asegurar la mejor experiencia en tu reserva y diagnóstico. 
-                  Al continuar, aceptas nuestra <Link href="/web-test/cookies" className="text-[#f16315] border-b border-[#f16315]/20 hover:border-[#f16315]">Política de Cookies</Link>.
+                  Al continuar, aceptas nuestra <Link href="/cookies" className="text-[#f16315] border-b border-[#f16315]/20 hover:border-[#f16315]">Política de Cookies</Link>.
                 </p>
                 <div className="flex gap-3 pt-2">
                   <button 

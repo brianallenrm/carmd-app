@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,50 @@ export const metadata: Metadata = {
   },
 };
 
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "AutoRepair",
+  "name": "CarMD Diagnóstico Mecánico Automotriz",
+  "image": "https://carmd.com.mx/logo.png",
+  "@id": "https://carmd.com.mx",
+  "url": "https://carmd.com.mx",
+  "telephone": "+525611904066",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Calle Palacio de Iturbide No. 233 Col. Metropolitana 2da. Secc.",
+    "addressLocality": "Nezahualcóyotl",
+    "addressRegion": "Estado de México",
+    "postalCode": "57740",
+    "addressCountry": "MX"
+  },
+  "priceRange": "$$",
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "opens": "09:00",
+      "closes": "18:00"
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Saturday"
+      ],
+      "opens": "09:00",
+      "closes": "14:00"
+    }
+  ],
+  "sameAs": [
+    "https://wa.me/525611904066"
+  ]
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -45,8 +90,36 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        />
         {children}
         <CookieBanner />
+        
+        {/* Google Analytics 4 */}
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <>
+            <Script
+              strategy="afterInteractive"
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+            />
+            <Script
+              id="google-analytics"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
+                    page_path: window.location.pathname,
+                  });
+                `,
+              }}
+            />
+          </>
+        )}
       </body>
     </html>
   );

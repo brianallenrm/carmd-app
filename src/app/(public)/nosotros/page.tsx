@@ -57,15 +57,15 @@ export default function NosotrosPage() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <Link href="/web-test">
+          <Link href="/">
             <BrandLogo size="md" />
           </Link>
           
           <div className="hidden md:flex items-center gap-10 text-xs font-black uppercase tracking-widest text-white/50">
-            <Link href="/web-test" className="hover:text-white transition-colors">Inicio</Link>
-            <Link href="/web-test#servicios" className="hover:text-white transition-colors">Servicios</Link>
+            <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
+            <Link href="/#servicios" className="hover:text-white transition-colors">Servicios</Link>
             <span className="text-[#f16315]">Trayectoria</span>
-            <Link href="/web-test/citas">
+            <Link href="/citas">
               <button className="bg-[#f16315] text-white hover:bg-white hover:text-[#f16315] px-6 py-2.5 rounded-full transition-all text-[11px] font-black">
                 Agendar Cita
               </button>
@@ -248,7 +248,7 @@ export default function NosotrosPage() {
                SI TU AUTO LO SIENTE, <br />
                <span className="text-white/20">NOSOTROS LO SOLUCIONAMOS.</span>
             </h2>
-            <Link href="/web-test/citas">
+            <Link href="/citas">
               <button className="bg-[#f16315] hover:bg-white hover:text-[#f16315] text-white px-12 py-6 rounded-full text-xl font-black uppercase tracking-[.2em] transition-all transform hover:scale-105 active:scale-95 shadow-2xl shadow-orange-500/20">
                 Agendar Cita Ahora
               </button>
@@ -259,14 +259,14 @@ export default function NosotrosPage() {
       {/* --- Simple Footer --- */}
       <footer className="py-20 border-t border-white/5 opacity-40">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-           <Link href="/web-test">
+           <Link href="/">
              <BrandLogo size="sm" className="opacity-40 hover:opacity-100 transition-opacity" />
            </Link>
            <div className="text-[10px] uppercase font-black tracking-widest">© 2026 CarMD Diagnóstico Mecánico Automotriz</div>
            <div className="flex gap-6 text-[10px] uppercase font-black tracking-widest">
-              <Link href="/web-test/privacidad" className="hover:text-white transition-colors">Privacidad</Link>
-              <Link href="/web-test/terminos" className="hover:text-white transition-colors">Términos</Link>
-              <Link href="/web-test/cookies" className="hover:text-white transition-colors">Cookies</Link>
+              <Link href="/privacidad" className="hover:text-white transition-colors">Privacidad</Link>
+              <Link href="/terminos" className="hover:text-white transition-colors">Términos</Link>
+              <Link href="/cookies" className="hover:text-white transition-colors">Cookies</Link>
            </div>
         </div>
       </footer>

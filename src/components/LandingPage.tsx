@@ -114,16 +114,16 @@ export default function LandingPage() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <Link href="/web-test" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <BrandLogo size="md" />
           </Link>
           
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
-            <Link href="/web-test#inicio" className="hover:text-white transition-colors">Inicio</Link>
-            <Link href="/web-test#servicios" className="hover:text-white transition-colors">Servicios</Link>
-            <Link href="/web-test/nosotros" className="hover:text-white transition-colors">Nosotros</Link>
-            <Link href="/web-test#contacto" className="hover:text-white transition-colors">Contacto</Link>
-            <Link href="/web-test/citas">
+            <Link href="/#inicio" className="hover:text-white transition-colors">Inicio</Link>
+            <Link href="/#servicios" className="hover:text-white transition-colors">Servicios</Link>
+            <Link href="/nosotros" className="hover:text-white transition-colors">Nosotros</Link>
+            <Link href="/#contacto" className="hover:text-white transition-colors">Contacto</Link>
+            <Link href="/citas">
               <button className="bg-[#f16315] hover:bg-[#d95300] text-white px-5 py-2.5 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-95 font-bold">
                 Agendar Cita
               </button>
@@ -167,12 +167,12 @@ export default function LandingPage() {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/web-test/citas" className="w-full sm:w-auto">
+              <Link href="/citas" className="w-full sm:w-auto">
                 <button className="w-full bg-[#f16315] hover:bg-[#d95300] text-white px-10 py-5 rounded-full text-lg font-bold transition-all shadow-2xl shadow-orange-500/20">
                   Reserva tu inspección
                 </button>
               </Link>
-              <Link href="/web-test/nosotros" className="w-full sm:w-auto">
+              <Link href="/nosotros" className="w-full sm:w-auto">
                 <button className="w-full bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 text-white px-10 py-5 rounded-full text-lg font-bold transition-all">
                   Conoce nuestra historia
                 </button>
@@ -494,7 +494,7 @@ export default function LandingPage() {
                 Si tu auto lo siente, nosotros lo solucionamos.
               </p>
             </div>
-            <Link href="/web-test/servicios">
+            <Link href="/servicios">
               <button className="flex items-center gap-2 text-[#f16315] font-bold text-lg group bg-white/5 px-6 py-3 rounded-full border border-[#f16315]/20 hover:bg-[#f16315]/10 transition-all">
                 Explorar Catálogo Completo <ArrowRight className="group-hover:translate-x-1 transition-transform" />
               </button>
@@ -550,7 +550,7 @@ export default function LandingPage() {
                   </p>
                 </div>
 
-                <Link href="/web-test/servicios" className="absolute inset-0 z-20" />
+                <Link href="/servicios" className="absolute inset-0 z-20" />
               </motion.div>
             ))}
           </motion.div>
@@ -690,7 +690,7 @@ export default function LandingPage() {
                 </div>
 
                 <div className="pt-4">
-                  <Link href="/web-test/nosotros">
+                  <Link href="/nosotros">
                     <button className="group flex items-center gap-3 text-white font-bold uppercase tracking-widest text-xs hover:text-[#f16315] transition-colors">
                       Conoce nuestra historia completa <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                     </button>
@@ -892,17 +892,17 @@ export default function LandingPage() {
       <footer className="py-20 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="flex justify-center mb-8">
-            <Link href="/web-test">
+            <Link href="/">
               <BrandLogo size="lg" className="opacity-40 hover:opacity-100 transition-opacity" />
             </Link>
           </div>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 mb-12">
             {[
-              { name: 'Citas', url: '/web-test/citas' },
+              { name: 'Citas', url: '/citas' },
               { name: 'Ubicación', url: 'https://maps.app.goo.gl/EHV9HVbhVHRv5Zwm6' },
-              { name: 'Privacidad', url: '/web-test/privacidad' },
-              { name: 'Términos', url: '/web-test/terminos' },
-              { name: 'Cookies', url: '/web-test/cookies' },
+              { name: 'Privacidad', url: '/privacidad' },
+              { name: 'Términos', url: '/terminos' },
+              { name: 'Cookies', url: '/cookies' },
               { name: 'Email', url: 'mailto:contacto@carmd.com.mx' }
             ].map((link) => (
               <a key={link.name} href={link.url} className="text-sm font-black uppercase tracking-widest text-white/30 hover:text-[#f16315] transition-colors">

@@ -169,10 +169,10 @@ export default function BookingPage() {
       {/* Navigation */}
       <nav className="absolute top-0 w-full z-50 p-8 border-b border-white/5">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <Link href="/web-test" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <BrandLogo size="md" />
           </Link>
-          <Link href="/web-test" className="text-white/50 hover:text-white transition-colors text-sm font-bold flex items-center gap-2 group">
+          <Link href="/" className="text-white/50 hover:text-white transition-colors text-sm font-bold flex items-center gap-2 group">
             <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Volver al Inicio
           </Link>
         </div>
@@ -621,7 +621,7 @@ export default function BookingPage() {
                  </div>
 
                  <div className="pt-8 opacity-20">
-                    <Link href="/web-test" className="text-xs font-black uppercase tracking-[0.4em] hover:text-[#f16315] transition-colors">
+                    <Link href="/" className="text-xs font-black uppercase tracking-[0.4em] hover:text-[#f16315] transition-colors">
                        Cerrar y volver al inicio
                     </Link>
                  </div>

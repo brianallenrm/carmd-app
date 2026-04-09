@@ -14,6 +14,9 @@ export default function middleware(request: NextRequest) {
   if (pathname === "/web-test") {
     return NextResponse.redirect(new URL("/", request.url));
   }
+  if (pathname === "/sobre-nosotros") {
+    return NextResponse.redirect(new URL("/nosotros", request.url));
+  }
   if (pathname.startsWith("/web-test/")) {
     const newPath = pathname.replace("/web-test/", "/");
     return NextResponse.redirect(new URL(newPath, request.url));

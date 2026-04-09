@@ -67,7 +67,7 @@ export default function ReceptionsDashboard() {
             // Ensure isReception is always true for items from this page
             // (API data from /api/inventory/list may not include this flag)
             localStorage.setItem('PDF_DATA', JSON.stringify({ ...item, isReception: true }));
-            window.open('/note-preview', '_blank');
+            window.open('/os/note-preview', '_blank');
         }
     };
 
@@ -80,7 +80,7 @@ export default function ReceptionsDashboard() {
                         <h1 className="text-2xl font-black text-slate-900 tracking-tight">Recepciones Pendientes</h1>
                         <p className="text-slate-500">Supervisa y envía los inventarios realizados por los asesores.</p>
                     </div>
-                    <Link href="/inventario" className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-800 transition-colors">
+                    <Link href="/os/inventario" className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-800 transition-colors">
                         + Nueva Recepción
                     </Link>
                 </header>

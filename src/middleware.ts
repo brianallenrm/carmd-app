@@ -31,7 +31,7 @@ export default function middleware(request: NextRequest) {
   
   if (legacyTool && !pathname.startsWith("/os/")) {
     const newPath = pathname.replace(legacyTool, `/os${legacyTool}`);
-    return NextResponse.redirect(new URL(newPath, request.url));
+    return NextResponse.redirect(new URL(newPath + request.nextUrl.search, request.url));
   }
 
   // 2. Proteger las rutas operativas (/os y legadas)

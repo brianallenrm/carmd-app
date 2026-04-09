@@ -607,7 +607,7 @@ export default function ServiceNoteForm() {
         params.set("hideParts", hideParts.toString());
         params.set("hideWarranty", hideWarranty.toString());
         params.set("date", customDate);
-        return `/note-preview?${params.toString()}`;
+        return `/os/note-preview?${params.toString()}`;
     };
 
     const handlePreview = () => {
@@ -952,7 +952,7 @@ export default function ServiceNoteForm() {
                                             }}
                                         />
                                         <div className="mt-1 flex justify-end">
-                                            <a href="/catalog" target="_blank" className="text-[10px] uppercase font-bold text-[#F37014] hover:underline flex items-center gap-1 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
+                                            <a href="/os/catalog" target="_blank" className="text-[10px] uppercase font-bold text-[#F37014] hover:underline flex items-center gap-1 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
                                                 ⚙️ Gestionar Catálogo
                                             </a>
                                         </div>

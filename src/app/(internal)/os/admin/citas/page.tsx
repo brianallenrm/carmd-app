@@ -92,10 +92,10 @@ Agendado para: ${cita.date} a las ${cita.time}.
            </div>
            <nav className="space-y-2">
               <div className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-4 ml-2">Módulos</div>
-              <a href="/admin/receptions" className="flex items-center gap-3 p-3 rounded-xl text-white/40 hover:bg-white/5 transition-all">
+              <a href="/os/admin/receptions" className="flex items-center gap-3 p-3 rounded-xl text-white/40 hover:bg-white/5 transition-all">
                  <Car size={18} /> Recepciones
               </a>
-              <a href="/admin/citas" className="flex items-center gap-3 p-3 rounded-xl bg-[#f16315]/10 text-[#f16315] font-bold">
+              <a href="/os/admin/citas" className="flex items-center gap-3 p-3 rounded-xl bg-[#f16315]/10 text-[#f16315] font-bold">
                  <Calendar size={18} /> Citas Vision 2.0
               </a>
            </nav>

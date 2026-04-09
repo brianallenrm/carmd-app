@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
         const baseUrl = req.nextUrl.origin;
         // Clean URL without data params
-        const previewUrl = `${baseUrl}/note-preview`;
+        const previewUrl = `${baseUrl}/os/note-preview`;
 
         // 2. Launch Puppeteer
         const browser = await getBrowser();
@@ -53,8 +53,19 @@ export async function POST(req: NextRequest) {
         // Max Quality: Scale 3 (Ultra HD)
         await page.setViewport({ width: 850, height: 1200, deviceScaleFactor: 3 });
 
+        // Forward cookies so Puppeteer passes middleware auth
+        const cookiesStr = req.headers.get("cookie") || "";
+        if (cookiesStr) {
+            const domain = new URL(baseUrl).hostname;
+            const cookies = cookiesStr.split(";").map(c => {
+                const [name, ...rest] = c.trim().split("=");
+                return { name, value: rest.join("="), domain, path: '/' };
+            }).filter(c => c.name);
+            if (cookies.length > 0) await page.setCookie(...cookies);
+        }
+
         // 4. Navigate to Preview Page
-        await page.goto(previewUrl, { waitUntil: "networkidle0" });
+        await page.goto(previewUrl, { waitUntil: "networkidle0", timeout: 45000 });
 
         // Wait for the main note card to appear (replaces the "Loading..." fallback)
         await page.waitForSelector("#note-preview-container", { timeout: 30000 });

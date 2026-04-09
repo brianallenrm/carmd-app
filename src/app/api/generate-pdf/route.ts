@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
         // 4. Navigate to minimal URL
         // We only pass folio/date purely for fallback or logging, but the real data is in window
-        const url = `${baseUrl}/note-preview`; // No query params needed for data
+        const url = `${baseUrl}/os/note-preview`; // No query params needed for data
 
         // Set viewport to A4 size (approximate pixels at 96 DPI)
         // A4 is 210mm x 297mm. 
@@ -69,6 +69,17 @@ export async function POST(req: Request) {
         page.on('requestfailed', request => console.log('PAGE REQUEST FAILED:', request.failure()?.errorText, request.url()));
 
         try {
+            // Forward cookies so Puppeteer passes middleware auth
+            const cookiesStr = req.headers.get("cookie") || "";
+            if (cookiesStr) {
+                const domain = new URL(baseUrl).hostname;
+                const cookies = cookiesStr.split(";").map(c => {
+                    const [name, ...rest] = c.trim().split("=");
+                    return { name, value: rest.join("="), domain, path: '/' };
+                }).filter(c => c.name);
+                if (cookies.length > 0) await page.setCookie(...cookies);
+            }
+
             await page.goto(url, { waitUntil: "networkidle0", timeout: 45000 });
         } catch (e) {
             console.error("Page Navigation Error:", e);

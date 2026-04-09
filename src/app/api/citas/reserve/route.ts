@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getInventoryDoc } from '@/lib/google-sheets';
 import { resend } from '@/lib/resend';
-import { readFileSync } from 'fs';
-import path from 'path';
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,20 +37,12 @@ export async function POST(request: NextRequest) {
     // -------------------------------------------------------------------------
     if (process.env.RESEND_API_KEY) {
       
-      // Load logo as base64 to avoid email hotlink blocking by Siteground
-      let base64Logo = "";
-      try {
-        const logoPath = path.join(process.cwd(), 'public', 'logo.png');
-        const logoBuffer = readFileSync(logoPath);
-        base64Logo = `data:image/png;base64,${logoBuffer.toString('base64')}`;
-      } catch (e) {
-        console.error("Could not load logo for email", e);
-      }
+      const logoUrl = "https://carmd.com.mx/logo.png";
 
       const emailContent = `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
           <div style="text-align: center; padding: 40px 20px; background-color: #ffffff;">
-            ${base64Logo ? `<img src="${base64Logo}" alt="CarMD Logo" style="max-width: 180px; height: auto;" />` : `<h1 style="color:#f16315; margin:0;">CarMD</h1>`}
+            <img src="${logoUrl}" alt="CarMD Logo" style="max-width: 180px; height: auto;" />
           </div>
           <div style="padding: 0 40px 40px 40px; text-align: left;">
             <p style="font-size: 18px; font-weight: bold; color: #1a202c; margin-bottom: 16px;">¡Hola ${name}!</p>
@@ -97,12 +87,15 @@ export async function POST(request: NextRequest) {
 
       // A. Send to Client
       if (email && email !== "N/A") {
-        await resend.emails.send({
+        const { error: clientEmailError } = await resend.emails.send({
           from: 'CarMD Citas <citas@carmd.com.mx>', 
           to: email,
           subject: `Confirmación de Cita: ${vehicle} - ${date}`,
           html: emailContent,
         });
+        if (clientEmailError) {
+          console.error("Error sending client email:", clientEmailError);
+        }
       }
 
       // B. Send to Admin (Detailed with Green Buttons)
@@ -115,7 +108,7 @@ export async function POST(request: NextRequest) {
       const adminMessage = `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; max-width: 650px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
           <div style="text-align: center; padding: 30px 20px; background-color: #f8fafc; border-bottom: 4px solid #10b981;">
-            ${base64Logo ? `<img src="${base64Logo}" alt="CarMD Logo" style="max-width: 160px; height: auto;" />` : `<h1 style="color:#10b981; margin:0;">CarMD</h1>`}
+            <img src="${logoUrl}" alt="CarMD Logo" style="max-width: 160px; height: auto;" />
           </div>
           <div style="padding: 30px 40px; text-align: left;">
             <div style="background-color: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #dcfce7; margin-bottom: 24px; text-align: center;">
@@ -154,12 +147,15 @@ export async function POST(request: NextRequest) {
         </div>
       `;
 
-      await resend.emails.send({
+      const { error: adminEmailError } = await resend.emails.send({
         from: 'Sistema CarMD <citas@carmd.com.mx>',
         to: ['contacto@carmd.com.mx', 'car.md.mx@hotmail.com'],
         subject: `Nueva cita generada | CarMD`,
         html: adminMessage,
       });
+      if (adminEmailError) {
+        console.error("Error sending admin email:", adminEmailError);
+      }
     }
 
     return NextResponse.json({ success: true });

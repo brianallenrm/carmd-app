@@ -2,8 +2,8 @@ import LandingPage from "@/components/LandingPage";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "CarMD | Visión 2.0 Prototipo",
-  description: "Propuesta de diseño premium para CarMD.",
+  title: "CarMD® | Diagnóstico Mecánico Automotriz",
+  description: "38 años redefiniendo la perfección mecánica. Diagnóstico avanzado y mantenimiento preventivo con garantía real.",
 };
 
 export default function WebTestPage() {

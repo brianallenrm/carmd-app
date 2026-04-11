@@ -172,34 +172,15 @@ export default function ServiceNoteForm() {
             console.error("Error loading history:", error);
         }
 
-        // Load Local Drafts
+        // Load Cloud Drafts
         try {
-            const drafts: any[] = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith("service-note-draft-")) {
-                    try {
-                        const raw = localStorage.getItem(key);
-                        if (raw) {
-                            const parsed = JSON.parse(raw);
-                            const id = key.replace("service-note-draft-", "");
-                            // Basic validation that it has content
-                            if (parsed.client?.name || parsed.vehicle?.plates || parsed.services?.[0]?.description || parsed.folio) {
-                                drafts.push({
-                                    id,
-                                    ...parsed,
-                                    timestamp: parsed.timestamp || parsed.lastSaved || Date.now()
-                                });
-                            }
-                        }
-                    } catch (e) { console.error("Bad draft", key); }
-                }
+            const draftsRes = await fetch("/api/notes/drafts/list");
+            const draftsData = await draftsRes.json();
+            if (draftsData.success && draftsData.drafts) {
+                setLocalDrafts(draftsData.drafts);
             }
-            // Sort by Timestamp (Newest first)
-            drafts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            setLocalDrafts(drafts);
         } catch (e) {
-            console.error("Error loading local drafts", e);
+            console.error("Error loading cloud drafts", e);
         }
 
         setIsLoadingHistory(false);
@@ -229,10 +210,15 @@ export default function ServiceNoteForm() {
         }
     };
 
-    const deleteDraft = (id: string) => {
+    const deleteDraft = async (id: string) => {
         if (!confirm("¿Eliminar este borrador permanentemente?")) return;
         localStorage.removeItem(`service-note-draft-${id}`);
         setLocalDrafts(prev => prev.filter(d => d.id !== id));
+        
+        // Delete from Cloud
+        try {
+            await fetch(`/api/notes/drafts/delete?draftId=${id}`, { method: 'DELETE' });
+        } catch (e) { console.error("Cloud delete failed", e); }
     };
 
     const applyTemplate = (note: any, asTemplate: boolean) => {
@@ -379,10 +365,10 @@ export default function ServiceNoteForm() {
         localStorage.setItem(`service-note-draft-${draftId}`, JSON.stringify(draft));
     }, [client, vehicle, services, parts, notes, includeIva, includeIsr, hideParts, hideWarranty, isDraftLoaded, draftId, folio]);
 
-    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-    const handleManualSave = () => {
+    const handleManualSave = async () => {
         setSaveStatus('saving');
         const draft = {
+            draftId, // explicitly pass draftId to the cloud
             client,
             vehicle,
             services,
@@ -395,11 +381,23 @@ export default function ServiceNoteForm() {
             folio,
             timestamp: Date.now()
         };
+        // Auto local save
         localStorage.setItem(`service-note-draft-${draftId}`, JSON.stringify(draft));
-        setTimeout(() => {
+
+        try {
+            // Push to cloud explicitly
+            await fetch("/api/notes/drafts/save", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(draft)
+            });
             setSaveStatus('saved');
-            setTimeout(() => setSaveStatus('idle'), 2000);
-        }, 500);
+        } catch (e) {
+            console.error(e);
+            setSaveStatus('idle'); // Back to idle on error
+        }
+
+        setTimeout(() => setSaveStatus('idle'), 2000);
     };
 
     const handleClearForm = () => {
@@ -419,6 +417,7 @@ export default function ServiceNoteForm() {
         // Clear CURRENT Draft Storage
         if (draftId) {
             localStorage.removeItem(`service-note-draft-${draftId}`);
+            fetch(`/api/notes/drafts/delete?draftId=${draftId}`, { method: 'DELETE' }).catch(console.error);
         }
 
         // Generate NEW Draft ID (Fresh Session)
@@ -703,6 +702,11 @@ export default function ServiceNoteForm() {
             });
 
             if (!saveRes.ok) throw new Error("Error guardando la nota");
+
+            // Clean up cloud draft since we finalized it
+            if (draftId) {
+                fetch(`/api/notes/drafts/delete?draftId=${draftId}`, { method: 'DELETE' }).catch(console.error);
+            }
 
             const saveData = await saveRes.json();
             const newFolio = saveData.folio;

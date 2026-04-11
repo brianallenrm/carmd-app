@@ -76,7 +76,8 @@ export const GOOGLE_SHEETS_CONFIG = {
     // [PRODUCTION] Service Notes Master (Order Folios)
     MASTER: {
         ID: "1A35mdnUopNt-pk0yWdDxucPAe5zqO46ujgzN1r0jW9Q",
-        TAB_NAME: "TODOS"
+        TAB_NAME: "TODOS",
+        DRAFTS_TAB_NAME: "BORRADORES"
     },
 
     // [DEVELOPMENT] Inventory & Reception Tool (In testing)

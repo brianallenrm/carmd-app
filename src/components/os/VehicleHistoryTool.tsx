@@ -15,7 +15,7 @@ const fmt = (num: number) =>
 
 const fmtKm = (km: number) => km > 0 ? `${km.toLocaleString("es-MX")} km` : "—";
 
-interface MaintenanceAlert { level: "ok" | "warn" | "danger"; type: string; message: string; }
+interface MaintenanceAlert { level: "ok" | "warn" | "danger" | "info"; type: string; message: string; }
 interface HistoryEntry {
     type: "note" | "inventory";
     folio?: string;
@@ -51,18 +51,20 @@ interface HistoryData {
 }
 
 function AlertBadge({ alert }: { alert: MaintenanceAlert }) {
-    const styles = {
+    const styles: Record<string, string> = {
         danger: "bg-red-50 border-red-200 text-red-800",
         warn: "bg-amber-50 border-amber-200 text-amber-800",
         ok: "bg-emerald-50 border-emerald-200 text-emerald-800",
+        info: "bg-blue-50 border-blue-200 text-blue-800",
     };
-    const icons = {
+    const icons: Record<string, React.ReactNode> = {
         danger: <AlertTriangle className="w-4 h-4 text-red-500" />,
         warn: <Zap className="w-4 h-4 text-amber-500" />,
         ok: <CheckCircle className="w-4 h-4 text-emerald-500" />,
+        info: <Info className="w-4 h-4 text-blue-500" />,
     };
     return (
-        <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium ${styles[alert.level]}`}>
+        <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium ${styles[alert.level] ?? styles.info}`}>
             {icons[alert.level]}
             {alert.message}
         </div>
@@ -238,7 +240,7 @@ export default function VehicleHistoryTool() {
                 setNotFound(true);
             } else {
                 setResult(data);
-                // Only show manual KM input if there is truly no KM data anywhere
+                // Only prompt for manual km if absolutely no km data exists in the whole record
                 if (!data.maintenance.effectiveCurrentKm) setShowKmInput(true);
             }
         } catch (err: any) {

@@ -207,12 +207,23 @@ export async function GET(request: NextRequest) {
         const todayInventory = sortedInventory.find(i => i.vehicle.km > 0 && toDateOnlyMx(i.dateTs) === todayMx);
         const latestInventoryWithKm = sortedInventory.find(i => i.vehicle.km > 0);
 
-        // Priority: manual input > today's KM > most recent inventory KM > last note KM
-        const effectiveCurrentKm = currentKm || todayInventory?.vehicle?.km || latestInventoryWithKm?.vehicle?.km || 0;
+        // Priority: manual param > today inventory > most recent inventory > last note > vehicleInfo (always non-zero if any km exists)
+        const effectiveCurrentKm =
+            currentKm ||
+            todayInventory?.vehicle?.km ||
+            latestInventoryWithKm?.vehicle?.km ||
+            lastVisitKm ||
+            (vehicleInfo as any)?.km ||
+            0;
         const hasTodayInventory = !!todayInventory;
+        const isFirstVisit = matchedNotes.length === 0; // Only inventories, no service notes yet
+
         const effectiveReferenceKm = lastAfinacionKm || lastVisitKm;
-        const kmSinceLastAfinacion = effectiveReferenceKm > 0 && effectiveCurrentKm > 0
-            ? effectiveCurrentKm - effectiveReferenceKm : null;
+        // Meaningful delta only when we have two distinct reference points
+        const kmSinceLastAfinacion =
+            effectiveReferenceKm > 0 && effectiveCurrentKm > 0 && effectiveCurrentKm !== effectiveReferenceKm
+                ? effectiveCurrentKm - effectiveReferenceKm
+                : null;
 
         // Count preventivos since last afinacion
         const notesSinceAfinacion = lastAfinacion
@@ -239,14 +250,22 @@ export async function GET(request: NextRequest) {
         }
 
         // --- Maintenance Alerts ---
-        const maintenanceAlerts: { level: 'ok' | 'warn' | 'danger'; type: string; message: string }[] = [];
-        if (kmSinceLastAfinacion !== null) {
+        const maintenanceAlerts: { level: 'ok' | 'warn' | 'danger' | 'info'; type: string; message: string }[] = [];
+        if (isFirstVisit) {
+            // First-time client or no service notes yet — no comparison possible
+            const kmStr = effectiveCurrentKm > 0 ? `${effectiveCurrentKm.toLocaleString('es-MX')} km registrados` : 'sin km registrado';
+            maintenanceAlerts.push({
+                level: 'info',
+                type: 'new_client',
+                message: `Parece ser la primera visita al taller. ${kmStr}. No hay historial previo de servicios para comparar.`,
+            });
+        } else if (kmSinceLastAfinacion !== null) {
             if (kmSinceLastAfinacion >= 10000) {
                 maintenanceAlerts.push({ level: 'danger', type: 'afinacion', message: `+${kmSinceLastAfinacion.toLocaleString('es-MX')} km desde la última afinación. ¡Afinación requerida!` });
             } else if (kmSinceLastAfinacion >= 5000) {
                 maintenanceAlerts.push({ level: 'warn', type: 'preventivo', message: `+${kmSinceLastAfinacion.toLocaleString('es-MX')} km desde la última afinación. Mantenimiento preventivo disponible.` });
             } else {
-                maintenanceAlerts.push({ level: 'ok', type: 'ok', message: `+${kmSinceLastAfinacion.toLocaleString('es-MX')} km. Todo en orden.` });
+                maintenanceAlerts.push({ level: 'ok', type: 'ok', message: `+${kmSinceLastAfinacion.toLocaleString('es-MX')} km desde la última afinación. Todo en orden.` });
             }
         }
 

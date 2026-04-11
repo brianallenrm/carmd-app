@@ -365,6 +365,7 @@ export default function ServiceNoteForm() {
         localStorage.setItem(`service-note-draft-${draftId}`, JSON.stringify(draft));
     }, [client, vehicle, services, parts, notes, includeIva, includeIsr, hideParts, hideWarranty, isDraftLoaded, draftId, folio]);
 
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
     const handleManualSave = async () => {
         setSaveStatus('saving');
         const draft = {

@@ -8,9 +8,11 @@ import {
   Calendar, 
   Car, 
   Search,
-  LayoutDashboard
+  LayoutDashboard,
+  History
 } from 'lucide-react';
 import DashboardCard from '@/components/os/DashboardCard';
+import VehicleHistoryTool from '@/components/os/VehicleHistoryTool';
 import { GOOGLE_SHEETS_CONFIG } from '@/lib/constants';
 
 export default function ControlCenter() {
@@ -19,7 +21,7 @@ export default function ControlCenter() {
 
   return (
     <div className="min-h-screen bg-gray-50/50">
-      {/* Header Area */}
+      {/* Header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -34,7 +36,6 @@ export default function ControlCenter() {
               </div>
             </div>
           </div>
-          
           <div className="hidden md:flex items-center gap-2">
             <div className="px-3 py-1 bg-gray-100 rounded-full text-[10px] font-bold text-gray-500">
               SISTEMA ACTIVO
@@ -44,8 +45,8 @@ export default function ControlCenter() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
-        
-        {/* Section 1: Herramientas Principales (Priority) */}
+
+        {/* ── Section 1: Herramientas de Alto Uso ── */}
         <section>
           <div className="flex items-center gap-3 mb-8">
             <h2 className="text-[11px] font-black text-[#f16315] uppercase tracking-[0.3em] bg-orange-50 px-3 py-1 rounded-md">
@@ -54,7 +55,6 @@ export default function ControlCenter() {
             <div className="h-px bg-gray-100 flex-grow" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-            {/* Note generation is the most prominent */}
             <div className="md:col-span-4">
               <DashboardCard
                 title="Generación de Notas de Servicio"
@@ -65,7 +65,6 @@ export default function ControlCenter() {
                 isLarge
               />
             </div>
-            {/* Database links are very important but secondary in size */}
             <div className="md:col-span-2 flex flex-col gap-6">
               <DashboardCard
                 title="B.D. Maestra (Folios)"
@@ -85,7 +84,27 @@ export default function ControlCenter() {
           </div>
         </section>
 
-        {/* Section 2: Operación & Gestión */}
+        {/* ── Section 2: Expediente del Vehículo ── */}
+        <section>
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-[11px] font-black text-[#f16315] uppercase tracking-[0.3em] bg-orange-50 px-3 py-1 rounded-md flex items-center gap-1.5">
+              <History size={11} />
+              Expediente del Vehículo
+            </h2>
+            <div className="h-px bg-gray-100 flex-grow" />
+          </div>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <p className="text-sm text-gray-500 leading-relaxed mb-5">
+              Consulta el historial completo de cualquier vehículo. Busca por{" "}
+              <strong className="text-gray-700">placa</strong> o{" "}
+              <strong className="text-gray-700">nombre del cliente</strong> para ver todas sus
+              visitas, servicios realizados, costos y estado de mantenimiento.
+            </p>
+            <VehicleHistoryTool />
+          </div>
+        </section>
+
+        {/* ── Section 3: Gestión Operativa ── */}
         <section>
           <div className="flex items-center gap-3 mb-8">
             <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] bg-gray-100 px-3 py-1 rounded-md">
@@ -115,7 +134,7 @@ export default function ControlCenter() {
           </div>
         </section>
 
-        {/* Section 3: Soporte & Catálogo */}
+        {/* ── Section 4: Catálogos ── */}
         <section>
           <div className="flex items-center gap-3 mb-8">
             <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] bg-gray-100 px-3 py-1 rounded-md">
@@ -135,11 +154,11 @@ export default function ControlCenter() {
 
       </main>
 
-      {/* Footer Status */}
+      {/* Footer */}
       <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-100">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-[11px] text-gray-400 font-medium tracking-wide">
-            POWERED BY CARMD OS • VERSIÓN 2.4.0 • 2026
+            POWERED BY CARMD OS • VERSIÓN 2.5.0 • 2026
           </p>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">

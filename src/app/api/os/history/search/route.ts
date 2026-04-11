@@ -24,17 +24,38 @@ const isPreventivo = (text: string) => {
 
 const parseDate = (val: any): number => {
     if (!val) return 0;
+    // Google Sheets serial number
     if (typeof val === 'number') return (val - 25569) * 86400 * 1000;
-    const str = String(val);
-    // Try DD/MM/YYYY
-    const dmy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-    if (dmy) {
-        const d = new Date(parseInt(dmy[3]), parseInt(dmy[2]) - 1, parseInt(dmy[1]));
+    const str = String(val).trim();
+    // 1. Try ISO YYYY-MM-DD first (saved by our app)
+    if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+        const d = new Date(str);
         return isNaN(d.getTime()) ? 0 : d.getTime();
     }
-    // Try YYYY-MM-DD
-    const ymd = new Date(str);
-    return isNaN(ymd.getTime()) ? 0 : ymd.getTime();
+    // 2. Try D/M/YYYY or DD/MM/YYYY (Mexican format, typical in Sheets)
+    const dmy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (dmy) {
+        const day = parseInt(dmy[1]);
+        const month = parseInt(dmy[2]) - 1;
+        const year = parseInt(dmy[3]);
+        // Sanity: month must be 0-11, day must be 1-31
+        if (month >= 0 && month <= 11 && day >= 1 && day <= 31) {
+            const d = new Date(year, month, day);
+            return isNaN(d.getTime()) ? 0 : d.getTime();
+        }
+    }
+    // 3. Fallback: let JS try to parse it
+    const fallback = new Date(str);
+    return isNaN(fallback.getTime()) ? 0 : fallback.getTime();
+};
+
+// Parse numbers that may come formatted as "$3,500.00" or "3,500" from Google Sheets
+const parseMXNumber = (val: any): number => {
+    if (!val) return 0;
+    if (typeof val === 'number') return val;
+    // Remove currency symbols, spaces, and thousand separators (commas), keep decimals
+    const cleaned = String(val).replace(/[^0-9.]/g, '');
+    return parseFloat(cleaned) || 0;
 };
 
 const formatDateDisplay = (val: any): string => {
@@ -72,15 +93,19 @@ export async function GET(request: NextRequest) {
         ]);
 
         const nq = normalize(query);
-        // Detect search type: plates look like at least 2 letters + digits combo
+        // Detect search type: plate if it looks like letters+numbers combo (min 5 chars, no spaces)
         const isPlateSearch = /^[a-zA-Z0-9\-]{5,}$/.test(query.replace(/\s/g, ''));
+        // Normalize query for plate matching: keep only alphanumeric uppercase
+        const nqAlpha = query.toUpperCase().replace(/[^A-Z0-9]/g, '');
 
         // --- Search MASTER (Service Notes) ---
         const matchedNotes: any[] = [];
         for (const row of masterRows) {
             const plate = normalize(row.get('Placa') || '');
+            const plateAlpha = (row.get('Placa') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
             const clientName = normalize(row.get('Cliente') || '');
-            const matchesPlate = plate && plate.replace(/\D/g,'').includes(nq.replace(/\D/g,'')) && isPlateSearch;
+            // Exact alphanumeric plate match to avoid false positives from digit-only substring
+            const matchesPlate = isPlateSearch && !!plateAlpha && plateAlpha === nqAlpha;
             const matchesName = !isPlateSearch && clientName.includes(nq);
             const matchesPlateFallback = !isPlateSearch && plate.includes(nq);
 
@@ -88,11 +113,12 @@ export async function GET(request: NextRequest) {
                 const folio = row.get('Folio') || '';
                 const dateRaw = row.get('Fecha') || '';
                 const servicio = row.get('Servicio') || '';
-                const mo = parseFloat(row.get('MO') || '0') || 0;
-                const refacciones = parseFloat(row.get('Refacciones') || '0') || 0;
-                const total = parseFloat(row.get('Total') || '0') || 0;
+                // Use parseMXNumber to handle "3,500" → 3500 correctly (parseFloat alone gives 3)
+                const mo = parseMXNumber(row.get('MO'));
+                const refacciones = parseMXNumber(row.get('Refacciones'));
+                const total = parseMXNumber(row.get('Total'));
                 const hasFactura = String(row.get('Factura') || '').toLowerCase() === 'factura';
-                const kmRaw = parseInt(String(row.get('KM') || '0').replace(/\D/g, '')) || 0;
+                const kmRaw = parseInt(String(row.get('KM') || '0').replace(/[^0-9]/g, '')) || 0;
                 const estatus = row.get('Estatus') || 'Pagado';
 
                 let metadatos: any = null;
@@ -139,8 +165,9 @@ export async function GET(request: NextRequest) {
         const matchedInventory: any[] = [];
         for (const row of inventoryRows) {
             const plate = normalize(row.get('Placas:') || '');
+            const plateAlpha = (row.get('Placas:') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
             const clientName = normalize(row.get('Nombre COMPLETO o Empresa:') || '');
-            const matchesPlate = plate && isPlateSearch && plate.replace(/\D/g,'').includes(nq.replace(/\D/g,''));
+            const matchesPlate = isPlateSearch && !!plateAlpha && plateAlpha === nqAlpha;
             const matchesName = !isPlateSearch && clientName.includes(nq);
             const matchesPlateFallback = !isPlateSearch && plate.includes(nq);
 

@@ -196,13 +196,20 @@ export async function GET(request: NextRequest) {
         const lastAfinacionKm = lastAfinacion?.vehicle?.km ?? 0;
         const lastVisitKm = latestNote?.vehicle?.km ?? 0;
 
-        // Use currentKm from params if provided (manually input), or from same-day inventory, or from latest note
-        const today = new Date().toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' });
-        const todayInventory = matchedInventory.find(i => {
-            const dsp = i.dateDisplay;
-            return i.vehicle.km > 0 && (i.dateRaw === today || dsp === formatDateDisplay(today));
-        });
-        const effectiveCurrentKm = currentKm || todayInventory?.vehicle?.km || 0;
+        // Use currentKm from params if provided (manually input), or from same-day inventory, or from latest inventory
+        // Use date-only comparison in Mexico City timezone to avoid format mismatch issues
+        const todayMx = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' }); // YYYY-MM-DD
+        const toDateOnlyMx = (ts: number) =>
+            ts > 0 ? new Date(ts).toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' }) : '';
+
+        // Sort inventory by date descending so [0] is the most recent
+        const sortedInventory = [...matchedInventory].sort((a, b) => b.dateTs - a.dateTs);
+        const todayInventory = sortedInventory.find(i => i.vehicle.km > 0 && toDateOnlyMx(i.dateTs) === todayMx);
+        const latestInventoryWithKm = sortedInventory.find(i => i.vehicle.km > 0);
+
+        // Priority: manual input > today's KM > most recent inventory KM > last note KM
+        const effectiveCurrentKm = currentKm || todayInventory?.vehicle?.km || latestInventoryWithKm?.vehicle?.km || 0;
+        const hasTodayInventory = !!todayInventory;
         const effectiveReferenceKm = lastAfinacionKm || lastVisitKm;
         const kmSinceLastAfinacion = effectiveReferenceKm > 0 && effectiveCurrentKm > 0
             ? effectiveCurrentKm - effectiveReferenceKm : null;
@@ -252,6 +259,7 @@ export async function GET(request: NextRequest) {
                 lastAfinacionDate: lastAfinacion?.dateDisplay ?? null,
                 lastAfinacionKm,
                 effectiveCurrentKm,
+                hasTodayInventory,
                 kmSinceLastAfinacion,
                 preventivosSinceAfinacion,
                 preventivosDisponibles,

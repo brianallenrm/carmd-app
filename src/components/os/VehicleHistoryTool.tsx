@@ -40,6 +40,7 @@ interface HistoryData {
         lastAfinacionDate: string | null;
         lastAfinacionKm: number;
         effectiveCurrentKm: number;
+        hasTodayInventory: boolean;
         kmSinceLastAfinacion: number | null;
         preventivosSinceAfinacion: number;
         preventivosDisponibles: number;
@@ -237,7 +238,7 @@ export default function VehicleHistoryTool() {
                 setNotFound(true);
             } else {
                 setResult(data);
-                // If no current km found, show input for manual entry
+                // Only show manual KM input if there is truly no KM data anywhere
                 if (!data.maintenance.effectiveCurrentKm) setShowKmInput(true);
             }
         } catch (err: any) {
@@ -341,7 +342,7 @@ export default function VehicleHistoryTool() {
                     <div className="flex items-start gap-2 text-amber-800 flex-grow">
                         <Info size={16} className="flex-shrink-0 mt-0.5" />
                         <p className="text-sm">
-                            <strong>No se encontró inventario de hoy.</strong> Ingresa el kilometraje actual del vehículo para calcular los indicadores de mantenimiento.
+                            <strong>Sin registro de kilometraje.</strong> No se encontró km en ningún inventario o nota anterior. Ingresa el km actual para calcular los indicadores de mantenimiento.
                         </p>
                     </div>
                     <form onSubmit={handleKmSubmit} className="flex gap-2 flex-shrink-0">

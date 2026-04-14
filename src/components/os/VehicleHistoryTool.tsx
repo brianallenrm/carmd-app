@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Search, Car, User, Phone, Mail, AlertTriangle, CheckCircle,
@@ -40,13 +40,11 @@ interface HistoryData {
         lastAfinacionDate: string | null;
         lastAfinacionKm: number;
         effectiveCurrentKm: number;
-        hasTodayInventory: boolean;
         kmSinceLastAfinacion: number | null;
-        preventivosSinceAfinacion: number;
-        preventivosDisponibles: number;
+        daysSinceLastVisit: number | null;
+        avgMonthlyKm: number | null;
         alerts: MaintenanceAlert[];
     };
-    priceRef: Record<string, { mo: number; refacciones: number; total: number; date: string; hasFactura: boolean }>;
     entries: HistoryEntry[];
 }
 
@@ -84,8 +82,8 @@ function NoteCard({ entry, index }: { entry: HistoryEntry; index: number }) {
         >
             {/* Timeline dot & line */}
             <div className={`absolute left-0 top-4 w-4 h-4 rounded-full border-2 flex items-center justify-center
-                ${isNote ? "bg-white border-[#f16315]" : "bg-white border-slate-300"}`}>
-                <div className={`w-1.5 h-1.5 rounded-full ${isNote ? "bg-[#f16315]" : "bg-slate-400"}`} />
+                ${isNote ? (entry.hasAfinacion ? "bg-[#f16315] border-[#f16315]" : "bg-white border-[#f16315]") : "bg-white border-slate-300"}`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${isNote ? (entry.hasAfinacion ? "bg-white" : "bg-[#f16315]") : "bg-slate-400"}`} />
             </div>
 
             <div className={`ml-4 mb-5 rounded-xl border bg-white shadow-sm transition-all duration-200
@@ -98,7 +96,7 @@ function NoteCard({ entry, index }: { entry: HistoryEntry; index: number }) {
                 >
                     <div className="flex items-start gap-3">
                         <div className={`p-2 rounded-lg mt-0.5 flex-shrink-0
-                            ${isNote ? "bg-orange-50 text-[#f16315]" : "bg-slate-100 text-slate-500"}`}>
+                            ${isNote ? (entry.hasAfinacion ? "bg-orange-500 text-white" : "bg-orange-50 text-[#f16315]") : "bg-slate-100 text-slate-500"}`}>
                             {isNote ? <FileText size={16} /> : <ReceiptText size={16} />}
                         </div>
                         <div>
@@ -111,14 +109,9 @@ function NoteCard({ entry, index }: { entry: HistoryEntry; index: number }) {
                                         Afinación
                                     </span>
                                 )}
-                                {entry.hasPreventivo && (
-                                    <span className="text-[10px] font-black bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                        Preventivo
-                                    </span>
-                                )}
                                 {entry.pricing?.hasFactura && (
                                     <span className="text-[10px] font-black bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                        Factura (IVA)
+                                        Factura
                                     </span>
                                 )}
                             </div>
@@ -185,7 +178,7 @@ function NoteCard({ entry, index }: { entry: HistoryEntry; index: number }) {
                                         </div>
                                         <div className={`rounded-lg p-1 ${entry.pricing.hasFactura ? "bg-indigo-50" : "bg-orange-50"}`}>
                                             <p className="text-[10px] text-slate-400 uppercase font-bold flex items-center justify-center gap-1">
-                                                <ReceiptText size={10} /> Total {entry.pricing.hasFactura && "(+ IVA)"}
+                                                <ReceiptText size={10} /> Total
                                             </p>
                                             <p className={`text-sm font-black mt-1 ${entry.pricing.hasFactura ? "text-indigo-700" : "text-[#f16315]"}`}>
                                                 {fmt(entry.pricing.total)}
@@ -223,15 +216,14 @@ export default function VehicleHistoryTool() {
     const [showKmInput, setShowKmInput] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const search = async (km?: string) => {
-        if (query.trim().length < 3) return;
+    const search = useCallback(async (q: string, km?: string) => {
+        if (q.trim().length < 3) return;
         setLoading(true);
         setResult(null);
         setNotFound(false);
         setError(null);
-
         try {
-            const params = new URLSearchParams({ q: query.trim() });
+            const params = new URLSearchParams({ q: q.trim() });
             if (km) params.set("km", km);
             const res = await fetch(`/api/os/history/search?${params}`);
             const data = await res.json();
@@ -240,7 +232,6 @@ export default function VehicleHistoryTool() {
                 setNotFound(true);
             } else {
                 setResult(data);
-                // Only prompt for manual km if absolutely no km data exists in the whole record
                 if (!data.maintenance.effectiveCurrentKm) setShowKmInput(true);
             }
         } catch (err: any) {
@@ -248,17 +239,30 @@ export default function VehicleHistoryTool() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    // Listen for external trigger (e.g. from RecentVehiclesFeed Expediente button)
+    useEffect(() => {
+        const handler = (e: Event) => {
+            const { query: externalQuery } = (e as CustomEvent).detail;
+            if (externalQuery) {
+                setQuery(externalQuery);
+                search(externalQuery);
+            }
+        };
+        window.addEventListener('carmd:expediente-search', handler);
+        return () => window.removeEventListener('carmd:expediente-search', handler);
+    }, [search]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        search(currentKm || undefined);
+        search(query, currentKm || undefined);
     };
 
     const handleKmSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (currentKm) {
-            search(currentKm);
+            search(query, currentKm);
             setShowKmInput(false);
         }
     };
@@ -275,9 +279,9 @@ export default function VehicleHistoryTool() {
 
     const noteCount = result?.entries.filter(e => e.type === "note").length ?? 0;
     const inventoryCount = result?.entries.filter(e => e.type === "inventory").length ?? 0;
-    const totalInvested = result?.entries
-        .filter(e => e.type === "note")
-        .reduce((sum, e) => sum + (e.pricing?.total ?? 0), 0) ?? 0;
+
+    const needsAfinacion = result?.maintenance?.kmSinceLastAfinacion !== null && (result?.maintenance?.kmSinceLastAfinacion ?? 0) >= 10000;
+    const daysSinceLast = result?.maintenance?.daysSinceLastVisit;
 
     return (
         <div className="w-full">
@@ -344,7 +348,7 @@ export default function VehicleHistoryTool() {
                     <div className="flex items-start gap-2 text-amber-800 flex-grow">
                         <Info size={16} className="flex-shrink-0 mt-0.5" />
                         <p className="text-sm">
-                            <strong>Sin registro de kilometraje.</strong> No se encontró km en ningún inventario o nota anterior. Ingresa el km actual para calcular los indicadores de mantenimiento.
+                            <strong>Sin registro de kilometraje.</strong> Ingresa el km actual para calcular el estado de la afinación.
                         </p>
                     </div>
                     <form onSubmit={handleKmSubmit} className="flex gap-2 flex-shrink-0">
@@ -388,14 +392,17 @@ export default function VehicleHistoryTool() {
                                     </div>
                                 </div>
                                 {/* Quick action: Start new note with this client data */}
-                                <Link
-                                    href={`/os?prefill=${encodeURIComponent(JSON.stringify({ client: result.client, vehicle: result.vehicle }))}`}
+                                <button
+                                    onClick={() => {
+                                        localStorage.setItem('carmd:prefill:note', JSON.stringify({ client: result.client, vehicle: result.vehicle }));
+                                        window.location.href = '/os';
+                                    }}
                                     className="flex items-center gap-1.5 px-3 py-2 bg-[#f16315] hover:bg-orange-600 text-white rounded-lg text-xs font-bold transition-colors flex-shrink-0"
                                 >
                                     <FileText size={13} />
                                     Nueva Nota
                                     <ArrowRight size={12} />
-                                </Link>
+                                </button>
                             </div>
 
                             {/* Client Info Row */}
@@ -431,26 +438,44 @@ export default function VehicleHistoryTool() {
                         {/* Stats Bar */}
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-3 text-center">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Visitas Totales</p>
-                                <p className="text-2xl font-black text-slate-800 mt-1">{result.total}</p>
-                                <p className="text-[10px] text-slate-400">{noteCount} notas · {inventoryCount} inventarios</p>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Última Visita</p>
+                                <p className="text-xl font-black text-slate-800 mt-1">
+                                    {daysSinceLast === 0 ? "Hoy" : daysSinceLast === null ? "—" : `Hace ${daysSinceLast} d`}
+                                </p>
+                                <p className="text-[10px] text-slate-400">{noteCount} notas · {inventoryCount} inv.</p>
                             </div>
                             <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-3 text-center">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Inversión Total</p>
-                                <p className="text-xl font-black text-[#f16315] mt-1">{fmt(totalInvested)}</p>
-                                <p className="text-[10px] text-slate-400">en {noteCount} servicios</p>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">KM Afinación</p>
+                                <p className={`text-xl font-black mt-1 ${needsAfinacion ? "text-red-500" : "text-emerald-500"}`}>
+                                    {result.maintenance.kmSinceLastAfinacion !== null ? `+${result.maintenance.kmSinceLastAfinacion.toLocaleString("es-MX")}` : "—"}
+                                </p>
+                                <p className="text-[10px] text-slate-400">km desde la última</p>
                             </div>
                             <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-3 text-center">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center justify-center gap-1"><ShieldCheck size={10} /> Preventivos</p>
-                                <p className="text-2xl font-black text-blue-600 mt-1">{result.maintenance.preventivosDisponibles}</p>
-                                <p className="text-[10px] text-slate-400">disponibles de 2</p>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Estado</p>
+                                <div className="mt-1 flex justify-center">
+                                    {needsAfinacion ? (
+                                        <span className="flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 text-[10px] font-bold rounded-lg border border-red-100">
+                                            <AlertTriangle size={10} /> REQUERIDA
+                                        </span>
+                                    ) : result.maintenance.kmSinceLastAfinacion === null ? (
+                                        <span className="px-2 py-0.5 bg-slate-50 text-slate-500 text-[10px] font-bold rounded-lg border border-slate-100">
+                                            SIN RASTRO
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-lg border border-emerald-100">
+                                            <CheckCircle size={10} /> AL DÍA
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-[10px] text-slate-400 mt-1">mantenimiento</p>
                             </div>
                             <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-3 text-center">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Últ. Afinación</p>
-                                <p className="text-xs font-bold text-slate-700 mt-2 leading-tight">{result.maintenance.lastAfinacionDate ?? "—"}</p>
-                                {result.maintenance.lastAfinacionKm > 0 && (
-                                    <p className="text-[10px] text-slate-400">{fmtKm(result.maintenance.lastAfinacionKm)}</p>
-                                )}
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">KM Mensuales</p>
+                                <p className="text-xl font-black text-slate-800 mt-1">
+                                    {result.maintenance.avgMonthlyKm ? result.maintenance.avgMonthlyKm.toLocaleString("es-MX") : "—"}
+                                </p>
+                                <p className="text-[10px] text-slate-400">uso promedio</p>
                             </div>
                         </div>
 

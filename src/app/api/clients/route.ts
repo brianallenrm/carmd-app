@@ -93,14 +93,42 @@ export async function GET(request: NextRequest) {
             const initialMap = new Map<string, Client>();
             let rowIndex = 0;
 
-            // Helper to parse DD/MM/YYYY to timestamp
-            const parseDate = (d: string) => {
-                if (!d) return 0;
-                const parts = d.split('/');
-                if (parts.length !== 3) return 0;
-                const [day, month, year] = parts.map(Number);
-                if (isNaN(day) || isNaN(month) || isNaN(year)) return 0;
-                return new Date(year, month - 1, day).getTime();
+            // Helper to parse dates robustly from Google Sheets (ISO, D/M/Y, etc.)
+            const parseDate = (val: any): number => {
+                if (!val) return 0;
+                if (typeof val === 'number') return (val - 25569) * 86400 * 1000;
+                const str = String(val).trim();
+                
+                // 1. ISO YYYY-MM-DD
+                if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+                    const d = new Date(str);
+                    return isNaN(d.getTime()) ? 0 : d.getTime();
+                }
+                
+                // 2. D/M/YY or D/M/YYYY (Ambiguous format handling)
+                const dmy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+                if (dmy) {
+                    const a = parseInt(dmy[1]);
+                    const b = parseInt(dmy[2]);
+                    let year = parseInt(dmy[3]);
+                    if (year < 100) year += 2000;
+                    const now = Date.now();
+                    
+                    if (a > 12) { // DD/MM unambiguously
+                        const d = new Date(year, b - 1, a);
+                        return isNaN(d.getTime()) ? 0 : d.getTime();
+                    }
+                    
+                    const asDDMM = new Date(year, b - 1, a).getTime();
+                    if (asDDMM > now) { // Likely MM/DD since DD/MM resulted in future
+                        const asMDDD = new Date(year, a - 1, b).getTime();
+                        return isNaN(asMDDD) ? asDDMM : asMDDD;
+                    }
+                    return isNaN(asDDMM) ? 0 : asDDMM;
+                }
+                
+                const fallback = new Date(str);
+                return isNaN(fallback.getTime()) ? 0 : fallback.getTime();
             };
 
             // Helper to normalize strings (Alphanumeric only)

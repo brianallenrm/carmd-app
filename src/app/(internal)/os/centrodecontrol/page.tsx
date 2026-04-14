@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { 
   FileText, 
   Table, 
@@ -9,15 +9,28 @@ import {
   Car, 
   Search,
   LayoutDashboard,
-  History
+  History,
+  Radio
 } from 'lucide-react';
 import DashboardCard from '@/components/os/DashboardCard';
 import VehicleHistoryTool from '@/components/os/VehicleHistoryTool';
+import RecentVehiclesFeed from '@/components/os/RecentVehiclesFeed';
 import { GOOGLE_SHEETS_CONFIG } from '@/lib/constants';
 
 export default function ControlCenter() {
   const masterSheetUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_CONFIG.MASTER.ID}`;
   const inventorySheetUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_CONFIG.INVENTORY.ID}`;
+
+  // Ref to the VehicleHistoryTool search input so the feed can trigger a search
+  const expedienteRef = useRef<{ triggerSearch: (plates: string) => void } | null>(null);
+  const expedienteSectionRef = useRef<HTMLDivElement>(null);
+
+  const handleExpedienteSearch = (plates: string) => {
+    // Scroll smoothly to the Expediente section
+    expedienteSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Trigger the search (we'll use a custom event since VehicleHistoryTool is a separate component)
+    window.dispatchEvent(new CustomEvent('carmd:expediente-search', { detail: { query: plates } }));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50/50">
@@ -45,6 +58,24 @@ export default function ControlCenter() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+
+        {/* ── Section 0: Últimos Ingresos (Live Feed) ── */}
+        <section>
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-[11px] font-black text-[#f16315] uppercase tracking-[0.3em] bg-orange-50 px-3 py-1 rounded-md flex items-center gap-1.5">
+              <Radio size={11} className="animate-pulse" />
+              Últimos Ingresos
+            </h2>
+            <div className="h-px bg-gray-100 flex-grow" />
+          </div>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <p className="text-sm text-gray-500 leading-relaxed mb-5">
+              Los <strong className="text-gray-700">últimos 10 vehículos</strong> registrados, del más reciente al más antiguo.
+              Aquí puedes ver el estado actual de cada uno y generar o consultar su nota de servicio.
+            </p>
+            <RecentVehiclesFeed onExpedienteSearch={handleExpedienteSearch} />
+          </div>
+        </section>
 
         {/* ── Section 1: Herramientas de Alto Uso ── */}
         <section>
@@ -85,7 +116,7 @@ export default function ControlCenter() {
         </section>
 
         {/* ── Section 2: Expediente del Vehículo ── */}
-        <section>
+        <section ref={expedienteSectionRef}>
           <div className="flex items-center gap-3 mb-6">
             <h2 className="text-[11px] font-black text-[#f16315] uppercase tracking-[0.3em] bg-orange-50 px-3 py-1 rounded-md flex items-center gap-1.5">
               <History size={11} />
@@ -158,7 +189,7 @@ export default function ControlCenter() {
       <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-100">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-[11px] text-gray-400 font-medium tracking-wide">
-            POWERED BY CARMD OS • VERSIÓN 2.5.0 • 2026
+            POWERED BY CARMD OS • VERSIÓN 2.6.0 • 2026
           </p>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">

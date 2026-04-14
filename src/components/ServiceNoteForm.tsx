@@ -274,6 +274,20 @@ export default function ServiceNoteForm() {
     const [draftId, setDraftId] = useState<string>("");
 
     useEffect(() => {
+        // 0. Check for Direct Prefill (from Centro de Control)
+        const prefillData = localStorage.getItem("carmd:prefill:note");
+        if (prefillData) {
+            try {
+                const parsed = JSON.parse(prefillData);
+                if (parsed.client) setClient(prev => ({ ...prev, ...parsed.client }));
+                if (parsed.vehicle) setVehicle(prev => ({ ...prev, ...parsed.vehicle }));
+                localStorage.removeItem("carmd:prefill:note");
+                // We'll still continue to load the next folio
+            } catch (e) {
+                console.error("Error parsing prefill data", e);
+            }
+        }
+
         // 1. Check for Smart Duplication (Mismo Cliente)
         const pendingDuplication = localStorage.getItem("service-note-duplicate-pending");
         let isDuplication = false;
@@ -297,7 +311,6 @@ export default function ServiceNoteForm() {
         // 2. Resolve Draft ID from URL or Create New
         const params = new URLSearchParams(window.location.search);
         let currentId = params.get("draftId");
-
         if (!currentId) {
             currentId = Date.now().toString(36) + Math.random().toString(36).substr(2);
             const newUrl = `${window.location.pathname}?draftId=${currentId}`;
@@ -306,8 +319,10 @@ export default function ServiceNoteForm() {
 
         setDraftId(currentId);
 
-        // 3. Load Specific Draft (skip if this is a fresh duplication)
-        if (!isDuplication) {
+        // 3. Load Specific Draft (skip if this is a fresh duplication or pre-filled)
+        // If we just pre-filled from Centro de Control, we probably want a FRESH note,
+        // so we skip loading any existing draft for this ID.
+        if (!isDuplication && !prefillData) {
             const savedDraft = localStorage.getItem(`service-note-draft-${currentId}`);
             if (savedDraft) {
                 try {
@@ -339,6 +354,9 @@ export default function ServiceNoteForm() {
                 }
             }
             // Always load next folio on fresh mount or if draft had no folio
+            loadNextFolio();
+        } else if (prefillData || isDuplication) {
+            // Mandatory folio load for prefilled or duplicated notes
             loadNextFolio();
         }
 

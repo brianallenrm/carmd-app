@@ -15,79 +15,82 @@ const parseMXNumber = (val: any): number => {
 const parseDate = (dateVal: any, timeVal?: any): number => {
     if (!dateVal) return 0;
     
-    let baseTs = 0;
+    let year: number, month: number, day: number;
+
+    // 1. Parse Base Date
     if (typeof dateVal === 'number') {
-        baseTs = (dateVal - 25569) * 86400 * 1000;
+        // Excel serial date
+        const d = new Date((dateVal - 25569) * 86400 * 1000);
+        year = d.getUTCFullYear();
+        month = d.getUTCMonth();
+        day = d.getUTCDate();
     } else {
         const str = String(dateVal).trim();
-        if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
-            baseTs = new Date(str).getTime();
-        } else {
-            const dmy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
-            if (dmy) {
-                const a = parseInt(dmy[1]);
-                const b = parseInt(dmy[2]);
-                let year = parseInt(dmy[3]);
-                if (year < 100) year += 2000;
-                const now = Date.now();
-                if (a > 12) {
-                    baseTs = new Date(year, b - 1, a).getTime();
-                } else {
-                    const asDDMM = new Date(year, b - 1, a).getTime();
-                    if (asDDMM > now) {
-                        baseTs = new Date(year, a - 1, b).getTime();
-                    } else {
-                        baseTs = asDDMM;
-                    }
-                }
+        const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        const dmyMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+
+        if (isoMatch) {
+            year = parseInt(isoMatch[1]);
+            month = parseInt(isoMatch[2]) - 1;
+            day = parseInt(isoMatch[3]);
+        } else if (dmyMatch) {
+            let a = parseInt(dmyMatch[1]);
+            let b = parseInt(dmyMatch[2]);
+            year = parseInt(dmyMatch[3]);
+            if (year < 100) year += 2000;
+
+            const now = new Date();
+            // Ambiguous D/M vs M/D: try D/M first if valid, check if future
+            // Mexico standard is D/M/Y
+            const testDate = new Date(year, b - 1, a);
+            if (a <= 12 && testDate > now) {
+                // Swap identifying as M/D
+                month = a - 1;
+                day = b;
             } else {
-                baseTs = new Date(str).getTime();
+                month = b - 1;
+                day = a;
             }
+        } else {
+            const d = new Date(str);
+            if (isNaN(d.getTime())) return 0;
+            year = d.getFullYear();
+            month = d.getMonth();
+            day = d.getDate();
         }
     }
 
-    if (isNaN(baseTs) || baseTs === 0) return 0;
-
-    // Reset clock to 0:00:00 local time for the base date
-    const d = new Date(baseTs);
-    d.setHours(0, 0, 0, 0);
-
-    // Apply time if provided
+    // 2. Parse Time
+    let hours = 0, minutes = 0, seconds = 0;
     if (timeVal !== undefined && timeVal !== null && timeVal !== '') {
-        // Case 1: Time is a number (Excel/Google Sheets serial time: fraction of 1 day)
         if (typeof timeVal === 'number' || (!isNaN(Number(timeVal)) && !String(timeVal).includes(':'))) {
             const fraction = parseFloat(String(timeVal));
-            if (fraction >= 0 && fraction < 1) {
-                const totalSeconds = Math.round(fraction * 86400);
-                const hrs = Math.floor(totalSeconds / 3600);
-                const mins = Math.floor((totalSeconds % 3600) / 60);
-                const secs = totalSeconds % 60;
-                d.setHours(hrs, mins, secs, 0);
-                return d.getTime();
+            const totalSeconds = Math.round(fraction * 86400);
+            hours = Math.floor(totalSeconds / 3600);
+            minutes = Math.floor((totalSeconds % 3600) / 60);
+            seconds = totalSeconds % 60;
+        } else {
+            const timeStr = String(timeVal).trim().toLowerCase();
+            const match = timeStr.match(/(\d{1,2})[:.](\d{1,2})(?::(\d{1,2}))?\s*([ap][\s.]*[m][.]?)?/);
+            if (match) {
+                hours = parseInt(match[1]);
+                minutes = parseInt(match[2]);
+                seconds = match[3] ? parseInt(match[3]) : 0;
+                const ampm = match[4];
+                if (ampm) {
+                    if (ampm.includes('p') && hours < 12) hours += 12;
+                    if (ampm.includes('a') && hours === 12) hours = 0;
+                }
             }
-        }
-
-        // Case 2: Time is a string (e.g., "9:02 a.m.")
-        const timeStr = String(timeVal).trim().toLowerCase();
-        // More flexible regex to match various formats: "9:02", "9:02:20", "09:02 am", "9:02 p. m."
-        const match = timeStr.match(/(\d{1,2})[:.](\d{1,2})(?::(\d{1,2}))?\s*([ap][\s.]*[m][.]?)?/);
-        if (match) {
-            let hours = parseInt(match[1]);
-            const minutes = parseInt(match[2]);
-            const seconds = match[3] ? parseInt(match[3]) : 0;
-            const ampm = match[4];
-
-            if (ampm) {
-                if (ampm.includes('p') && hours < 12) hours += 12;
-                if (ampm.includes('a') && hours === 12) hours = 0;
-            }
-
-            d.setHours(hours, minutes, seconds, 0);
-            return d.getTime();
         }
     }
 
-    return d.getTime();
+    // 3. Construct absolute timestamp in America/Mexico_City TZ
+    // Mexico City is UTC-6 (no DST since 2023)
+    const isoString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}-06:00`;
+    const finalTs = new Date(isoString).getTime();
+    
+    return isNaN(finalTs) ? 0 : finalTs;
 };
 
 const formatDateDisplay = (ts: number): string => {

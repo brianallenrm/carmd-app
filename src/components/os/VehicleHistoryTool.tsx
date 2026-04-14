@@ -395,7 +395,7 @@ export default function VehicleHistoryTool() {
                                 <button
                                     onClick={() => {
                                         localStorage.setItem('carmd:prefill:note', JSON.stringify({ client: result.client, vehicle: result.vehicle }));
-                                        window.location.href = '/os';
+                                        window.open('/os', '_blank');
                                     }}
                                     className="flex items-center gap-1.5 px-3 py-2 bg-[#f16315] hover:bg-orange-600 text-white rounded-lg text-xs font-bold transition-colors flex-shrink-0"
                                 >

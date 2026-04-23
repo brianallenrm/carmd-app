@@ -110,6 +110,11 @@ function NotePreviewContent() {
     const service = sourceData.service || {};
     const photos = sourceData.photos || {};
 
+    // These hooks MUST be before any conditional returns (Rules of Hooks)
+    const [isGeneratingPdf, setIsGeneratingPdf] = React.useState(false);
+    const [isGeneratingImg, setIsGeneratingImg] = React.useState(false);
+    const [isSharing, setIsSharing] = React.useState(false);
+
     // Default services if empty (and not loading)
     // NOTE: Do NOT show placeholder services if we are fetching from API (folio-only mode)
     const isFolioOnlyMode = !!(searchParams.get('folio') && !searchParams.has('services'));
@@ -139,9 +144,6 @@ function NotePreviewContent() {
         );
     }
 
-    const [isGeneratingPdf, setIsGeneratingPdf] = React.useState(false);
-    const [isGeneratingImg, setIsGeneratingImg] = React.useState(false);
-    const [isSharing, setIsSharing] = React.useState(false);
 
     const handleDownloadPdf = async () => {
         if (isGeneratingPdf) return;

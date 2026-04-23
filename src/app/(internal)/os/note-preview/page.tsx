@@ -12,12 +12,14 @@ function NotePreviewContent() {
     // State to hold the final data source
     const [sourceData, setSourceData] = React.useState<any>({});
     const [isLoaded, setIsLoaded] = React.useState(false);
+    const [fetchError, setFetchError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
-        const hasUrlData = searchParams.has("client") || searchParams.has("folio");
+        const folio = searchParams.get("folio");
+        const hasRichData = searchParams.has("client") || searchParams.has("services");
 
-        // 1. Priority: URL Search Params (if explicitly provided)
-        if (hasUrlData) {
+        // 1. Priority: URL Search Params with full data (from ServiceNoteForm)
+        if (hasRichData) {
             console.log("Loading data from URL Params");
             const data: any = {};
             try {
@@ -26,42 +28,59 @@ function NotePreviewContent() {
                 if (searchParams.get("company")) data.company = JSON.parse(searchParams.get("company") || "{}");
                 if (searchParams.get("services")) data.services = JSON.parse(searchParams.get("services") || "[]");
                 if (searchParams.get("parts")) data.parts = JSON.parse(searchParams.get("parts") || "[]");
-                data.folio = searchParams.get("folio");
+                data.folio = folio;
                 data.date = searchParams.get("date");
                 if (searchParams.get("notes")) data.notes = searchParams.get("notes");
                 if (searchParams.get("includeIva")) data.includeIva = searchParams.get("includeIva") === 'true';
                 if (searchParams.get("includeIsr")) data.includeIsr = searchParams.get("includeIsr") === 'true';
                 if (searchParams.get("hideParts")) data.hideParts = searchParams.get("hideParts") === 'true';
                 if (searchParams.get("hideWarranty")) data.hideWarranty = searchParams.get("hideWarranty") === 'true';
-                
-                // If we have URL data, we should clear any stale localStorage data to prevent confusion
-                if (typeof window !== 'undefined') {
-                    window.localStorage.removeItem('PDF_DATA');
-                }
+                if (typeof window !== 'undefined') window.localStorage.removeItem('PDF_DATA');
             } catch (err) {
                 console.error("Error parsing URL params", err);
             }
             setSourceData(data);
+            setIsLoaded(true);
         }
-        // 2. Secondary: window injection
+        // 2. Only folio provided → fetch from Google Sheets
+        else if (folio) {
+            console.log("Fetching note data from API for folio:", folio);
+            fetch(`/api/os/note-by-folio?folio=${encodeURIComponent(folio)}`)
+                .then(res => {
+                    if (!res.ok) throw new Error(`Note not found (${res.status})`);
+                    return res.json();
+                })
+                .then(data => {
+                    setSourceData(data);
+                    setIsLoaded(true);
+                })
+                .catch(err => {
+                    console.error("Error fetching note by folio:", err);
+                    setFetchError(err.message);
+                    setSourceData({ folio });
+                    setIsLoaded(true);
+                });
+        }
+        // 3. window injection (Puppeteer PDF generation)
         else if (typeof window !== 'undefined' && (window as any).__PDF_DATA__) {
             console.log("Loaded data from window injection");
             setSourceData((window as any).__PDF_DATA__);
+            setIsLoaded(true);
         }
-        // 3. Final Fallback: localStorage (used by Admin/Inventory Tool)
+        // 4. Final Fallback: localStorage (used by Admin/Inventory Tool)
         else if (typeof window !== 'undefined' && window.localStorage.getItem('PDF_DATA')) {
             console.log("Loaded data from localStorage");
             try {
                 const lsData = JSON.parse(window.localStorage.getItem('PDF_DATA') || "{}");
                 setSourceData(lsData);
-                // Clear after use to prevent pollution in subsequent opens
                 window.localStorage.removeItem('PDF_DATA');
             } catch (e) {
                 console.error("Error parsing localStorage data", e);
             }
+            setIsLoaded(true);
+        } else {
+            setIsLoaded(true);
         }
-        
-        setIsLoaded(true);
     }, [searchParams]);
 
     // Derived values
@@ -92,10 +111,32 @@ function NotePreviewContent() {
     const photos = sourceData.photos || {};
 
     // Default services if empty (and not loading)
-    if (isLoaded && services.length === 0 && parts.length === 0) {
+    // NOTE: Do NOT show placeholder services if we are fetching from API (folio-only mode)
+    const isFolioOnlyMode = !!(searchParams.get('folio') && !searchParams.has('services'));
+    if (isLoaded && !isFolioOnlyMode && services.length === 0 && parts.length === 0) {
         services = [
             { id: "1", description: "Diagnóstico General Computarizado", laborCost: 850 },
         ];
+    }
+
+    if (!isLoaded) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-slate-500">
+                <div className="w-10 h-10 border-4 border-slate-200 border-t-[#f16315] rounded-full animate-spin" />
+                <p className="text-sm font-medium">Cargando nota #{searchParams.get('folio')}...</p>
+            </div>
+        );
+    }
+
+    if (fetchError) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center gap-3 text-slate-500 p-8">
+                <p className="text-4xl">🔍</p>
+                <p className="text-lg font-bold text-slate-700">Nota no encontrada</p>
+                <p className="text-sm text-center">No se encontró la nota con folio <span className="font-mono font-bold">#{searchParams.get('folio')}</span> en el sistema.</p>
+                <p className="text-xs text-red-400 mt-2">{fetchError}</p>
+            </div>
+        );
     }
 
     const [isGeneratingPdf, setIsGeneratingPdf] = React.useState(false);

@@ -200,7 +200,11 @@ export async function GET(request: NextRequest) {
             }
         }
 
-        // --- Merge & Sort by date DESC ---
+        // --- Sort individually by date DESC ---
+        matchedNotes.sort((a, b) => b.dateTs - a.dateTs);
+        matchedInventory.sort((a, b) => b.dateTs - a.dateTs);
+
+        // --- Merge & Sort overall by date DESC ---
         const allEntries = [...matchedNotes, ...matchedInventory].sort((a, b) => b.dateTs - a.dateTs);
 
         if (allEntries.length === 0) {
@@ -224,9 +228,9 @@ export async function GET(request: NextRequest) {
         const toDateOnlyMx = (ts: number) =>
             ts > 0 ? new Date(ts).toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' }) : '';
 
-        const sortedInventory = [...matchedInventory].sort((a, b) => b.dateTs - a.dateTs);
-        const todayInventory = sortedInventory.find(i => i.vehicle.km > 0 && toDateOnlyMx(i.dateTs) === todayMx);
-        const latestInventoryWithKm = sortedInventory.find(i => i.vehicle.km > 0);
+        // matchedInventory is already sorted DESC
+        const todayInventory = matchedInventory.find(i => i.vehicle.km > 0 && toDateOnlyMx(i.dateTs) === todayMx);
+        const latestInventoryWithKm = matchedInventory.find(i => i.vehicle.km > 0);
 
         const effectiveCurrentKm =
             currentKm ||

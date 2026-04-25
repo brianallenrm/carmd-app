@@ -19,6 +19,15 @@ export const metadata: Metadata = {
   description: "38 años redefiniendo la perfección mecánica. Diagnóstico avanzado, reparación de motores y mantenimiento preventivo con garantía real de 1 año en CDMX y Nezahualcóyotl.",
   keywords: ["mecánica automotriz", "diagnóstico avanzado", "reparación de motores", "taller mecánico Neza", "garantía automotriz", "CarMD"],
   authors: [{ name: "CarMD Engineering Team" }],
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "CarMD OS",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     title: "CarMD® | El Estándar Maestro en Mecánica",
     description: "Tecnología de vanguardia y un trato obsesivo por la calidad. Reserva tu inspección hoy.",

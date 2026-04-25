@@ -748,8 +748,8 @@ export default function ServiceNoteForm() {
     };
 
     return (
-        <div className="max-w-5xl mx-auto p-8 bg-white rounded-xl shadow-xl border border-gray-100 text-gray-900">
-            <div className="flex justify-between items-center mb-10 border-b pb-6 text-gray-900">
+        <div className="max-w-5xl mx-auto p-4 md:p-8 bg-white rounded-xl shadow-xl border border-gray-100 text-gray-900">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 md:mb-10 border-b pb-6 text-gray-900">
                 <div className="flex items-center gap-4">
                     <div className="p-4 bg-[#F37014] rounded-xl text-white shadow-lg shadow-[#F37014]/20">
                         <FileText size={32} />
@@ -760,25 +760,25 @@ export default function ServiceNoteForm() {
                     </div>
                 </div>
 
-                <div className="flex gap-4 items-center">
-                    <div className="flex flex-col items-end">
-                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Folio (Orden)</label>
+                <div className="flex flex-col sm:flex-row gap-4 items-center w-full md:w-auto">
+                    <div className="flex flex-row md:flex-col items-center md:items-end gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                        <label className="text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider md:mb-1 whitespace-nowrap">Folio (Orden)</label>
                         <div className="relative">
-                            <span className="absolute left-3 top-2 text-gray-400 font-mono text-lg">#</span>
+                            <span className="absolute left-3 top-1.5 md:top-2 text-gray-400 font-mono text-base md:text-lg">#</span>
                             <input
                                 type="text"
                                 value={folio}
                                 onChange={(e) => setFolio(e.target.value)}
-                                className="w-32 pl-7 p-2 border border-gray-200 rounded-lg font-mono text-lg font-bold text-[#F37014] focus:ring-2 focus:ring-[#F37014] outline-none text-center bg-gray-50"
+                                className="w-24 md:w-32 pl-7 p-1.5 md:p-2 border border-gray-200 rounded-lg font-mono text-base md:text-lg font-bold text-[#F37014] focus:ring-2 focus:ring-[#F37014] outline-none text-center bg-gray-50"
                             />
                         </div>
                     </div>
 
-                    <div className="flex gap-2 h-full">
+                    <div className="flex gap-2 w-full sm:w-auto">
                         <button
                             type="button"
                             onClick={handleManualSave}
-                            className={`flex items-center gap-2 px-3 py-3 rounded-lg transition-all font-medium border ${saveStatus === 'saved' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-orange-50 text-[#F37014] border-orange-100 hover:bg-orange-100'}`}
+                            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2.5 md:py-3 rounded-lg transition-all font-medium border ${saveStatus === 'saved' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-orange-50 text-[#F37014] border-orange-100 hover:bg-orange-100'}`}
                             title="Guardar borrador ahora"
                         >
                             <Save size={18} className={saveStatus === 'saving' ? 'animate-pulse' : ''} />
@@ -788,10 +788,10 @@ export default function ServiceNoteForm() {
                         <button
                             type="button"
                             onClick={() => { setIsHistoryOpen(true); loadRecentNotes(); }}
-                            className="flex items-center gap-2 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2.5 md:py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200"
                         >
                             <History size={18} />
-                            <span>Historial</span>
+                            <span className="text-sm">Historial</span>
                         </button>
                     </div>
                 </div>
@@ -854,7 +854,7 @@ export default function ServiceNoteForm() {
                         <Car className="text-[#F37014]" size={20} />
                         <h3>Datos del Vehículo</h3>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">Marca</label>
                             <input
@@ -944,12 +944,12 @@ export default function ServiceNoteForm() {
 
                 {/* Services Section */}
                 <div className="space-y-4">
-                    <div className="flex justify-between items-center border-b pb-2 text-gray-900">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-2 text-gray-900 gap-2">
                         <h3 className="text-lg font-semibold text-gray-800">Servicios (Mano de Obra)</h3>
                         <button
                             type="button"
                             onClick={addService}
-                            className="flex items-center gap-2 text-sm text-[#F37014] hover:text-orange-700 font-medium px-3 py-1.5 rounded-md hover:bg-orange-50 transition-colors"
+                            className="flex items-center gap-2 text-sm text-[#F37014] hover:text-orange-700 font-medium px-3 py-1.5 rounded-md hover:bg-orange-50 transition-colors w-full sm:w-auto justify-center"
                         >
                             <Plus size={16} />
                             Agregar Servicio
@@ -958,25 +958,32 @@ export default function ServiceNoteForm() {
 
                     <div className="space-y-4">
                         {services.map((service, index) => (
-                            <div key={service.id} className="flex gap-4 items-start group bg-white p-4 border border-gray-200 rounded-lg hover:border-[#F37014]/50 transition-colors shadow-sm text-gray-900">
-                                <div className="flex-1 space-y-3">
+                            <div key={service.id} className="flex flex-col md:flex-row gap-4 items-start group bg-white p-4 border border-gray-200 rounded-lg hover:border-[#F37014]/50 transition-colors shadow-sm text-gray-900">
+                                <div className="w-full md:flex-1 space-y-3">
                                     {/* Service Search & Description */}
                                     <div className="space-y-1">
-                                        <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Servicio</span>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Servicio</span>
+                                            <div className="md:hidden flex gap-2">
+                                                <button onClick={() => moveService(index, 'up')} disabled={index === 0} className="p-1 text-gray-400 disabled:opacity-20"><ArrowUp size={14} /></button>
+                                                <button onClick={() => moveService(index, 'down')} disabled={index === services.length - 1} className="p-1 text-gray-400 disabled:opacity-20"><ArrowDown size={14} /></button>
+                                                <button onClick={() => removeService(service.id)} className="p-1 text-red-400"><Trash2 size={14} /></button>
+                                            </div>
+                                        </div>
                                         <CatalogSearch
                                             type="servicios"
                                             placeholder="Buscar servicio..."
                                             onSelect={(item) => {
                                                 updateService(service.id, "description", item.descripcion);
-                                                updateService(service.id, "serviceName", item.nombre); // Store Catalog Name persistence
+                                                updateService(service.id, "serviceName", item.nombre);
                                                 if (item.costo_sugerido > 0) {
                                                     updateService(service.id, "laborCost", item.costo_sugerido);
                                                 }
                                             }}
                                         />
                                         <div className="mt-1 flex justify-end">
-                                            <a href="/os/catalog" target="_blank" className="text-[10px] uppercase font-bold text-[#F37014] hover:underline flex items-center gap-1 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
-                                                ⚙️ Gestionar Catálogo
+                                            <a href="/os/catalog" target="_blank" className="text-[9px] md:text-[10px] uppercase font-bold text-[#F37014] hover:underline flex items-center gap-1 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
+                                                ⚙️ Catálogo
                                             </a>
                                         </div>
                                     </div>
@@ -986,34 +993,31 @@ export default function ServiceNoteForm() {
                                         <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Descripción</span>
                                         <textarea
                                             placeholder="Descripción detallada del servicio..."
-                                            className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-sm text-gray-900 min-h-[50px]"
+                                            className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-sm text-gray-900 min-h-[60px] md:min-h-[50px]"
                                             value={service.description}
                                             onChange={(e) => updateService(service.id, "description", e.target.value)}
                                             spellCheck={true}
                                         />
                                     </div>
                                 </div>
-                                <div className="w-40 space-y-2">
-                                    <div className="space-y-1">
+                                    <div className="flex-1 md:flex-none md:w-40 space-y-1">
                                         <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Costo</span>
                                         <div className="relative">
                                             <span className="absolute left-2 top-2.5 text-slate-400 text-xs">$</span>
                                             <input
                                                 type="number"
-                                                placeholder=""
                                                 className="w-full p-2 pl-5 border border-slate-200 rounded focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 text-right font-mono text-sm"
                                                 value={service.laborCost === undefined ? "" : service.laborCost}
                                                 onChange={(e) => updateService(service.id, "laborCost", e.target.value === "" ? undefined : parseFloat(e.target.value))}
                                             />
                                         </div>
                                     </div>
-                                    <div className="flex gap-1 mt-1">
+                                    <div className="hidden md:flex gap-1 mt-1">
                                         <button
                                             type="button"
                                             onClick={() => moveService(index, 'up')}
                                             disabled={index === 0}
-                                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors flex-1 flex justify-center disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400"
-                                            title="Mover arriba"
+                                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors flex-1 flex justify-center disabled:opacity-30"
                                         >
                                             <ArrowUp size={16} />
                                         </button>
@@ -1021,8 +1025,7 @@ export default function ServiceNoteForm() {
                                             type="button"
                                             onClick={() => moveService(index, 'down')}
                                             disabled={index === services.length - 1}
-                                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors flex-1 flex justify-center disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400"
-                                            title="Mover abajo"
+                                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors flex-1 flex justify-center disabled:opacity-30"
                                         >
                                             <ArrowDown size={16} />
                                         </button>
@@ -1030,155 +1033,130 @@ export default function ServiceNoteForm() {
                                             type="button"
                                             onClick={() => removeService(service.id)}
                                             className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors flex-1 flex justify-center"
-                                            title="Eliminar servicio"
                                         >
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
                                 </div>
-                            </div>
                         ))}
                     </div>
                 </div>
 
                 {/* Parts Section */}
                 <div className="space-y-4">
-                    <div className="flex justify-between items-center border-b pb-2 text-gray-900">
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b pb-2 text-gray-900 gap-4">
                         <h3 className="text-lg font-semibold text-gray-800">Refacciones</h3>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2 w-full lg:w-auto">
                             <button
                                 type="button"
                                 onClick={loadLubricationKit}
-                                className="flex items-center gap-2 text-sm text-yellow-600 hover:text-yellow-700 font-medium px-3 py-1.5 rounded-md hover:bg-yellow-50 transition-colors border border-yellow-100"
-                                title="Cargar lista estándar de lubricación"
+                                className="flex items-center gap-1.5 text-[10px] md:text-sm text-yellow-600 hover:text-yellow-700 font-bold px-2 md:px-3 py-1.5 rounded-md hover:bg-yellow-50 transition-colors border border-yellow-100 flex-1 md:flex-none justify-center"
                             >
-                                🛢️ Kit Lubricación
+                                🛢️ Kit Lubr.
                             </button>
                             <button
                                 type="button"
                                 onClick={loadTuneupKit}
-                                className="flex items-center gap-2 text-sm text-purple-600 hover:text-purple-700 font-medium px-3 py-1.5 rounded-md hover:bg-purple-50 transition-colors border border-purple-100"
-                                title="Cargar lista estándar de afinación"
+                                className="flex items-center gap-1.5 text-[10px] md:text-sm text-purple-600 hover:text-purple-700 font-bold px-2 md:px-3 py-1.5 rounded-md hover:bg-purple-50 transition-colors border border-purple-100 flex-1 md:flex-none justify-center"
                             >
-                                📦 Kit Afinación
+                                📦 Kit Afin.
                             </button>
                             <button
                                 type="button"
                                 onClick={loadBrakeKit}
-                                className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1.5 rounded-md hover:bg-red-50 transition-colors border border-red-100"
-                                title="Cargar lista estándar de frenos"
+                                className="flex items-center gap-1.5 text-[10px] md:text-sm text-red-600 hover:text-red-700 font-bold px-2 md:px-3 py-1.5 rounded-md hover:bg-red-50 transition-colors border border-red-100 flex-1 md:flex-none justify-center"
                             >
                                 🛑 Kit Frenos
                             </button>
                             <button
                                 type="button"
                                 onClick={loadSuspensionKit}
-                                className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700 font-medium px-3 py-1.5 rounded-md hover:bg-orange-50 transition-colors border border-orange-100"
-                                title="Cargar lista de suspensión"
+                                className="flex items-center gap-1.5 text-[10px] md:text-sm text-orange-600 hover:text-orange-700 font-bold px-2 md:px-3 py-1.5 rounded-md hover:bg-orange-50 transition-colors border border-orange-100 flex-1 md:flex-none justify-center"
                             >
                                 🚙 Kit Susp.
                             </button>
                             <button
                                 type="button"
                                 onClick={loadDistributionKit}
-                                className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors border border-blue-100"
-                                title="Cargar lista de distribución"
+                                className="flex items-center gap-1.5 text-[10px] md:text-sm text-blue-600 hover:text-blue-700 font-bold px-2 md:px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors border border-blue-100 flex-1 md:flex-none justify-center"
                             >
-                                ⛓️ Kit Distr.
+                                ⚙️ Kit Dist.
                             </button>
                             <button
                                 type="button"
                                 onClick={addPart}
-                                className="flex items-center gap-2 text-sm text-[#F37014] hover:text-orange-700 font-medium px-3 py-1.5 rounded-md hover:bg-orange-50 transition-colors"
+                                className="flex items-center gap-1.5 text-[10px] md:text-sm text-[#F37014] hover:text-orange-700 font-bold px-2 md:px-3 py-1.5 rounded-md hover:bg-orange-50 transition-colors border border-orange-100 flex-1 md:flex-none justify-center"
                             >
-                                <Plus size={16} />
-                                Agregar Refacción
+                                <Plus size={14} />
+                                Agregar
                             </button>
                         </div>
                     </div>
 
                     <div className="space-y-4">
                         {parts.map((part, index) => (
-                            <div key={part.id} className="flex gap-4 items-start group bg-white p-4 border border-gray-200 rounded-lg hover:border-[#F37014]/50 transition-colors shadow-sm text-gray-900">
-                                <div className="flex gap-2 w-full">
-                                    <div className="w-16 space-y-1">
-                                        <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Cant.</span>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            placeholder="1"
-                                            className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 text-sm font-mono text-center"
-                                            value={part.quantity !== undefined ? part.quantity : ""}
-                                            onChange={(e) => updatePart(part.id, "quantity", e.target.value === "" ? 0 : parseInt(e.target.value))}
-                                        />
-                                    </div>
-                                    <div className="flex-1 space-y-1">
-                                        <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Refacción</span>
-                                        <CatalogSearch
-                                            type="refacciones"
-                                            placeholder="Buscar refacción..."
-                                            onSelect={(item) => {
-                                                updatePart(part.id, "description", item.nombre);
-                                                updatePart(part.id, "serviceName", item.nombre); // Store persistence
-                                                if (item.costo_sugerido > 0) {
-                                                    updatePart(part.id, "partsCost", item.costo_sugerido);
-                                                }
-                                            }}
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Nombre de la refacción..."
-                                            className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 text-sm"
-                                            value={part.description}
-                                            onChange={(e) => updatePart(part.id, "description", e.target.value)}
-                                            spellCheck={true}
-                                        />
+                            <div key={part.id} className="flex flex-col md:flex-row gap-4 items-start group bg-white p-4 border border-gray-200 rounded-lg hover:border-[#F37014]/50 transition-colors shadow-sm text-gray-900">
+                                <div className="w-full md:flex-1 space-y-3">
+                                    <div className="flex gap-2 w-full">
+                                        <div className="w-16 space-y-1">
+                                            <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Cant.</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 text-sm font-mono text-center"
+                                                value={part.quantity !== undefined ? part.quantity : ""}
+                                                onChange={(e) => updatePart(part.id, "quantity", e.target.value === "" ? 0 : parseInt(e.target.value))}
+                                            />
+                                        </div>
+                                        <div className="flex-1 space-y-1">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Refacción</span>
+                                                <div className="md:hidden flex gap-2">
+                                                    <button onClick={() => movePart(index, 'up')} disabled={index === 0} className="p-1 text-gray-400 disabled:opacity-20"><ArrowUp size={14} /></button>
+                                                    <button onClick={() => movePart(index, 'down')} disabled={index === parts.length - 1} className="p-1 text-gray-400 disabled:opacity-20"><ArrowDown size={14} /></button>
+                                                    <button onClick={() => removePart(part.id)} className="p-1 text-red-400"><Trash2 size={14} /></button>
+                                                </div>
+                                            </div>
+                                            <CatalogSearch
+                                                type="refacciones"
+                                                placeholder="Buscar refacción..."
+                                                onSelect={(item) => {
+                                                    updatePart(part.id, "description", item.nombre);
+                                                    updatePart(part.id, "serviceName", item.nombre);
+                                                    if (item.costo_sugerido > 0) {
+                                                        updatePart(part.id, "partsCost", item.costo_sugerido);
+                                                    }
+                                                }}
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Nombre..."
+                                                className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 text-sm"
+                                                value={part.description}
+                                                onChange={(e) => updatePart(part.id, "description", e.target.value)}
+                                                spellCheck={true}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="w-40 space-y-2">
-                                    <div className="space-y-1">
+                                    <div className="flex-1 md:flex-none md:w-40 space-y-1">
                                         <span className="text-[10px] uppercase text-gray-500 font-semibold tracking-wider">Costo Unit.</span>
                                         <div className="relative">
                                             <span className="absolute left-2 top-2.5 text-slate-400 text-xs">$</span>
                                             <input
                                                 type="number"
-                                                placeholder=""
                                                 className="w-full p-2 pl-5 border border-slate-200 rounded focus:ring-2 focus:ring-[#F37014] outline-none text-gray-900 text-right font-mono text-sm"
                                                 value={part.partsCost === undefined ? "" : part.partsCost}
                                                 onChange={(e) => updatePart(part.id, "partsCost", e.target.value === "" ? undefined : parseFloat(e.target.value))}
                                             />
                                         </div>
                                     </div>
-                                    <div className="flex gap-1 mt-1">
-                                        <button
-                                            type="button"
-                                            onClick={() => movePart(index, 'up')}
-                                            disabled={index === 0}
-                                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors flex-1 flex justify-center disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400"
-                                            title="Mover arriba"
-                                        >
-                                            <ArrowUp size={16} />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => movePart(index, 'down')}
-                                            disabled={index === parts.length - 1}
-                                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors flex-1 flex justify-center disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400"
-                                            title="Mover abajo"
-                                        >
-                                            <ArrowDown size={16} />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => removePart(part.id)}
-                                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors flex-1 flex justify-center"
-                                            title="Eliminar refacción"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                    <div className="hidden md:flex gap-1 mt-1">
+                                        <button onClick={() => movePart(index, 'up')} disabled={index === 0} className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors flex-1 flex justify-center disabled:opacity-30"><ArrowUp size={16} /></button>
+                                        <button onClick={() => movePart(index, 'down')} disabled={index === parts.length - 1} className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors flex-1 flex justify-center disabled:opacity-30"><ArrowDown size={16} /></button>
+                                        <button onClick={() => removePart(part.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors flex-1 flex justify-center"><Trash2 size={16} /></button>
                                     </div>
                                 </div>
-                            </div>
                         ))}
                     </div>
                 </div>
@@ -1215,7 +1193,7 @@ export default function ServiceNoteForm() {
 
                 {/* Totals Section */}
                 <div className="border-t pt-6 flex justify-end text-gray-900">
-                    <div className="w-72 space-y-3">
+                    <div className="w-full md:w-72 space-y-3">
                         <div className="flex justify-between text-gray-600">
                             <span>Mano de Obra</span>
                             <span>${servicesTotal.toFixed(2)}</span>
@@ -1292,23 +1270,23 @@ export default function ServiceNoteForm() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex justify-between pt-8 border-t text-gray-900 mt-6">
+                <div className="flex flex-col md:flex-row justify-between pt-8 border-t text-gray-900 mt-6 gap-6">
                     <button
                         type="button"
                         onClick={handleClearForm}
-                        className="flex items-center gap-2 px-6 py-3 text-red-500 font-medium hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                        className="flex items-center justify-center gap-2 px-6 py-3 text-red-500 font-bold hover:bg-red-50 rounded-lg transition-colors border border-red-100 md:border-transparent md:hover:border-red-100 order-2 md:order-1"
                         title="Borrar todo y empezar de cero"
                     >
                         <Trash2 size={20} />
                         Borrar Todo
                     </button>
 
-                    <div className="flex items-center gap-3">
-                        <div className="flex gap-2 mr-2">
+                    <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 order-1 md:order-2">
+                        <div className="grid grid-cols-2 md:flex gap-2">
                             <button
                                 type="button"
                                 onClick={() => handleDuplicateNote(false)}
-                                className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 transition-all text-xs"
+                                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 transition-all text-[11px] md:text-xs"
                                 title="Abrir nueva pestaña limpia con el siguiente folio"
                             >
                                 <Plus size={14} />
@@ -1317,7 +1295,7 @@ export default function ServiceNoteForm() {
                             <button
                                 type="button"
                                 onClick={() => handleDuplicateNote(true)}
-                                className="flex items-center gap-1.5 px-3 py-2 bg-orange-50 border border-orange-100 text-[#F37014] font-bold rounded-lg hover:bg-orange-100 transition-all text-xs"
+                                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-orange-50 border border-orange-100 text-[#F37014] font-bold rounded-lg hover:bg-orange-100 transition-all text-[11px] md:text-xs"
                                 title="Abrir nueva pestaña para el mismo cliente con folio consecutivo"
                             >
                                 <UserPlus size={14} />
@@ -1325,31 +1303,33 @@ export default function ServiceNoteForm() {
                             </button>
                         </div>
 
-                        <button
-                            type="button"
-                            onClick={handlePreview}
-                            className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm"
-                            title="Ver cómo quedará sin guardar"
-                        >
-                            <Eye size={20} />
-                            Previsualizar
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isSaving}
-                            className={`flex items-center gap-2 px-6 py-3 bg-[#F37014] hover:bg-orange-600 text-white font-bold rounded-lg transition-colors shadow-lg shadow-orange-500/20 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                            <Save size={20} />
-                            {isSaving ? "Guardando..." : "Generar Nota PDF"}
-                        </button>
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={handlePreview}
+                                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm"
+                            >
+                                <Eye size={20} />
+                                <span className="md:inline hidden">Previsualizar</span>
+                                <span className="md:hidden">Previs.</span>
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={isSaving}
+                                className={`flex-[2] md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-[#F37014] hover:bg-orange-600 text-white font-bold rounded-lg transition-colors shadow-lg shadow-orange-500/20 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                <Save size={20} />
+                                {isSaving ? "Guardando..." : "Generar Nota PDF"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </form>
 
             {/* History Modal */}
             {isHistoryOpen && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+                <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-0 md:p-4 backdrop-blur-sm">
+                    <div className="bg-white md:rounded-xl shadow-2xl w-full h-full md:h-auto md:max-w-2xl md:max-h-[80vh] flex flex-col">
                         <div className="flex justify-between items-center p-4 border-b">
                             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                                 <History className="text-[#F37014]" />
@@ -1421,20 +1401,20 @@ export default function ServiceNoteForm() {
                                             const serviceSummary = note.data?.services?.map((s: any) => s.serviceName || s.description || s.item || "Servicio").slice(0, 2).join(", ") + (note.data?.services?.length > 2 ? "..." : "") || "Sin servicios";
 
                                             return (
-                                                <div key={note.folio} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3">
+                                                <div key={note.folio} className="bg-white p-3 md:p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3">
                                                     <div className="flex justify-between items-start">
-                                                        <div className="flex-1">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <span className="font-mono font-bold text-[#F37014]">{note.folio}</span>
-                                                                <span className="text-gray-300">|</span>
-                                                                <span className="text-sm text-gray-500 flex items-center gap-1">
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                                <span className="font-mono font-bold text-[#F37014] text-sm md:text-base">{note.folio}</span>
+                                                                <span className="text-gray-300 hidden sm:inline">|</span>
+                                                                <span className="text-[10px] md:text-sm text-gray-500 flex items-center gap-1">
                                                                     <Clock size={12} />
                                                                     {note.date}
                                                                 </span>
                                                             </div>
-                                                            <h3 className="font-bold text-gray-800">{note.client}</h3>
-                                                            <p className="text-sm text-gray-600 truncate max-w-md mb-1">{note.vehicle}</p>
-                                                            <p className="text-xs text-gray-400 italic truncate max-w-md border-t pt-1 mt-1">
+                                                            <h3 className="font-bold text-gray-800 text-sm md:text-base truncate">{note.client}</h3>
+                                                            <p className="text-xs md:text-sm text-gray-600 truncate mb-1">{note.vehicle}</p>
+                                                            <p className="text-[10px] md:text-xs text-gray-400 italic truncate border-t pt-1 mt-1">
                                                                 {serviceSummary}
                                                             </p>
                                                         </div>
@@ -1444,20 +1424,18 @@ export default function ServiceNoteForm() {
                                                         <button
                                                             type="button"
                                                             onClick={() => applyTemplate(note, true)}
-                                                            className="flex-1 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 font-medium text-sm border border-blue-200 transition-colors flex justify-center items-center gap-1"
-                                                            title="Crea una nota nueva usando estos datos"
+                                                            className="flex-1 px-2 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 font-bold text-[10px] md:text-sm border border-blue-200 transition-colors flex justify-center items-center gap-1"
                                                         >
-                                                            <FileText size={14} />
-                                                            Usar Plantilla
+                                                            <FileText size={14} className="hidden xs:block" />
+                                                            PLANTILLA
                                                         </button>
                                                         <button
                                                             type="button"
                                                             onClick={() => applyTemplate(note, false)}
-                                                            className="flex-1 px-3 py-2 bg-orange-50 text-[#F37014] rounded-lg hover:bg-orange-100 font-medium text-sm border border-orange-200 transition-colors flex justify-center items-center gap-1"
-                                                            title="Edita esta nota manteniendo el mismo folio"
+                                                            className="flex-1 px-2 py-2 bg-orange-50 text-[#F37014] rounded-lg hover:bg-orange-100 font-bold text-[10px] md:text-sm border border-orange-200 transition-colors flex justify-center items-center gap-1"
                                                         >
-                                                            <Save size={14} />
-                                                            Modificar
+                                                            <Save size={14} className="hidden xs:block" />
+                                                            MODIFICAR
                                                         </button>
                                                     </div>
                                                 </div>

@@ -150,12 +150,11 @@ function VehicleRow({ v, index, onExpediente }: {
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex gap-2 flex-shrink-0 flex-wrap sm:flex-nowrap">
+                <div className="grid grid-cols-1 xs:grid-cols-2 sm:flex gap-2 flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
                     {/* Inventario */}
                     <Link
                         href={`/os/admin/receptions`}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-colors border border-slate-200"
-                        title="Ver inventario de recepción"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold transition-colors border border-slate-200"
                     >
                         <ClipboardList size={13} />
                         Inventario
@@ -167,10 +166,10 @@ function VehicleRow({ v, index, onExpediente }: {
                             href={`/os/note-preview?folio=${v.note!.folio}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition-colors border border-emerald-200"
+                            className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition-colors border border-emerald-200 col-span-2 xs:col-span-1"
                         >
                             <FileText size={13} />
-                            Ver Nota #{v.note!.folio}
+                            <span className="hidden md:inline">Ver </span>Nota #{v.note!.folio}
                         </a>
                     ) : (
                         <button
@@ -178,18 +177,17 @@ function VehicleRow({ v, index, onExpediente }: {
                                 localStorage.setItem('carmd:prefill:note', v.prefillJson);
                                 window.open('/os', '_blank');
                             }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f16315] hover:bg-orange-600 text-white rounded-lg text-xs font-bold transition-colors shadow-sm shadow-orange-200"
+                            className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[#f16315] hover:bg-orange-600 text-white rounded-lg text-xs font-bold transition-colors shadow-sm shadow-orange-200 col-span-2 xs:col-span-1"
                         >
                             <PlusCircle size={13} />
                             Generar Nota
-                            <ChevronRight size={11} />
                         </button>
                     )}
 
                     {/* Expediente */}
                     <button
                         onClick={() => onExpediente(v.vehicle.plates)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition-colors border border-indigo-200"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition-colors border border-indigo-200"
                     >
                         <History size={13} />
                         Expediente

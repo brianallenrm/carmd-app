@@ -36,16 +36,16 @@ export default function ControlCenter() {
     <div className="min-h-screen bg-gray-50/50">
       {/* Header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="bg-[#f16315] p-2.5 rounded-xl text-white shadow-lg shadow-orange-500/30">
-              <LayoutDashboard size={22} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="bg-[#f16315] p-2 md:p-2.5 rounded-xl text-white shadow-lg shadow-orange-500/30">
+              <LayoutDashboard size={18} className="md:w-[22px] md:h-[22px]" />
             </div>
             <div>
-              <h1 className="text-xl font-black text-gray-900 tracking-tight">CENTRO DE CONTROL</h1>
+              <h1 className="text-lg md:text-xl font-black text-gray-900 tracking-tight">CENTRO DE CONTROL</h1>
               <div className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">CarMD OS • Sistema Operativo Central</p>
+                <p className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-[0.1em] md:tracking-[0.2em]">CarMD OS • Staff</p>
               </div>
             </div>
           </div>
@@ -57,7 +57,7 @@ export default function ControlCenter() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 space-y-10 md:space-y-16">
 
         {/* ── Section 0: Últimos Ingresos (Live Feed) ── */}
         <section>
@@ -68,10 +68,10 @@ export default function ControlCenter() {
             </h2>
             <div className="h-px bg-gray-100 flex-grow" />
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <p className="text-sm text-gray-500 leading-relaxed mb-5">
-              Los <strong className="text-gray-700">últimos 10 vehículos</strong> registrados, del más reciente al más antiguo.
-              Aquí puedes ver el estado actual de cada uno y generar o consultar su nota de servicio.
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 md:p-6">
+            <p className="text-xs md:text-sm text-gray-500 leading-relaxed mb-5">
+              Los <strong className="text-gray-700">últimos 10 vehículos</strong> registrados. 
+              Consulta su nota de servicio o el estado actual.
             </p>
             <RecentVehiclesFeed onExpedienteSearch={handleExpedienteSearch} />
           </div>
@@ -124,12 +124,11 @@ export default function ControlCenter() {
             </h2>
             <div className="h-px bg-gray-100 flex-grow" />
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <p className="text-sm text-gray-500 leading-relaxed mb-5">
-              Consulta el historial completo de cualquier vehículo. Busca por{" "}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 md:p-6">
+            <p className="text-xs md:text-sm text-gray-500 leading-relaxed mb-5">
+              Consulta el historial completo de cualquier vehículo por{" "}
               <strong className="text-gray-700">placa</strong> o{" "}
-              <strong className="text-gray-700">nombre del cliente</strong> para ver todas sus
-              visitas, servicios realizados, costos y estado de mantenimiento.
+              <strong className="text-gray-700">nombre</strong>.
             </p>
             <VehicleHistoryTool />
           </div>

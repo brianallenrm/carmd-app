@@ -99,38 +99,40 @@ function NoteCard({ entry, index }: { entry: HistoryEntry; index: number }) {
                             ${isNote ? (entry.hasAfinacion ? "bg-orange-500 text-white" : "bg-orange-50 text-[#f16315]") : "bg-slate-100 text-slate-500"}`}>
                             {isNote ? <FileText size={16} /> : <ReceiptText size={16} />}
                         </div>
-                        <div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-bold text-slate-800 text-sm">
-                                    {isNote ? `Nota #${entry.folio}` : "Inventario de Recepción"}
-                                </span>
-                                {entry.hasAfinacion && (
-                                    <span className="text-[10px] font-black bg-orange-100 text-[#f16315] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                        Afinación
+                        <div className="flex-grow min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                                    <span className="font-bold text-slate-800 text-sm truncate">
+                                        {isNote ? `Nota #${entry.folio}` : <><span className="hidden md:inline">Inventario de Recepción</span><span className="md:hidden">Inventario</span></>}
                                     </span>
-                                )}
-                                {entry.pricing?.hasFactura && (
-                                    <span className="text-[10px] font-black bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                        Factura
-                                    </span>
-                                )}
+                                    {entry.hasAfinacion && (
+                                        <span className="text-[9px] font-black bg-orange-100 text-[#f16315] px-1.5 py-0.5 rounded-full uppercase">
+                                            Afinación
+                                        </span>
+                                    )}
+                                    {entry.pricing?.hasFactura && (
+                                        <span className="text-[9px] font-black bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full uppercase">
+                                            Factura
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="text-slate-400 flex-shrink-0">
+                                    {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                </div>
                             </div>
-                            <div className="flex items-center gap-3 mt-1 text-xs text-slate-400">
-                                <span className="flex items-center gap-1"><Calendar size={11} /> {entry.dateDisplay}</span>
+                            <div className="flex items-center gap-2 mt-1 text-[10px] sm:text-xs text-slate-400 flex-wrap">
+                                <span className="flex items-center gap-1 whitespace-nowrap"><Calendar size={11} /> {entry.dateDisplay}</span>
                                 {entry.vehicle.km > 0 && (
-                                    <span className="flex items-center gap-1"><Gauge size={11} /> {fmtKm(entry.vehicle.km)}</span>
+                                    <span className="flex items-center gap-1 whitespace-nowrap"><Gauge size={11} /> {fmtKm(entry.vehicle.km)}</span>
                                 )}
                                 {isNote && entry.pricing && (
-                                    <span className="font-bold text-slate-600">{fmt(entry.pricing.total)}</span>
+                                    <span className="font-bold text-slate-600 whitespace-nowrap">{fmt(entry.pricing.total)}</span>
                                 )}
                                 {!isNote && entry.motivoIngreso && (
-                                    <span className="italic truncate max-w-[200px]">{entry.motivoIngreso}</span>
+                                    <span className="italic truncate">{entry.motivoIngreso}</span>
                                 )}
                             </div>
                         </div>
-                    </div>
-                    <div className="text-slate-400 flex-shrink-0 mt-1">
-                        {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </div>
                 </button>
 

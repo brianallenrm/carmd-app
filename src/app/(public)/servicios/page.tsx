@@ -117,11 +117,11 @@ export default function ServiciosPage() {
               forjados durante más de 38 años de rigor.
             </p>
           </div>
-          <div className="flex flex-col items-end gap-6 leading-none">
+          <div className="flex flex-col items-end gap-20 leading-none">
             <Link href="/" className="hidden md:block">
               <BrandLogo size="md" />
             </Link>
-            <div className="hidden lg:block rotate-90 origin-right translate-y-[-20%]">
+            <div className="hidden lg:block rotate-90 origin-right translate-y-12">
                 <span className="text-[10px] font-black tracking-[1em] uppercase text-white/20 whitespace-nowrap">
                   CARMD PRECISION SYSTEMS (1988-2026)
                 </span>

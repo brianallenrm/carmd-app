@@ -26,6 +26,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import reviewsData from '@/data/reviews.json';
 import BrandLogo from "./BrandLogo";
+import { COMPANY_DEFAULTS, getWhatsAppLink } from "@/lib/constants";
 
 // --- Design Tokens ---
 const COLORS = {
@@ -405,7 +406,7 @@ export default function LandingPage() {
               </p>
             </div>
             <a 
-              href="https://wa.me/525611904066?text=Hola,%20quisiera%20solicitar%20un%20presupuesto%20para%20mi%20vehículo."
+              href={getWhatsAppLink("Hola, quisiera solicitar un presupuesto para mi vehículo.")}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-white text-black px-12 py-5 rounded-full font-black uppercase tracking-widest hover:bg-[#f16315] hover:text-white transition-all shadow-xl shadow-white/5 active:scale-95"
@@ -837,7 +838,7 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <div className="text-sm font-bold text-white/30 uppercase">WhatsApp / Teléfono</div>
-                    <a href="https://wa.me/525611904066" className="text-xl font-bold hover:text-[#f16315] transition-colors">+52 56 1190 4066</a>
+                    <a href={getWhatsAppLink()} className="text-xl font-bold hover:text-[#f16315] transition-colors">{COMPANY_DEFAULTS.whatsapp}</a>
                   </div>
                 </div>
 
@@ -920,7 +921,7 @@ export default function LandingPage() {
       {/* --- CTA Floating Button --- */}
       <div className="fixed bottom-8 right-8 z-50">
         <a 
-          href="https://wa.me/525611904066?text=Hola,%20quisiera%20solicitar%20un%20servicio%20de%20mantenimiento%20para%20mi%20auto."
+          href={getWhatsAppLink("Hola, quisiera solicitar un servicio de mantenimiento para mi auto.")}
           target="_blank"
           rel="noopener noreferrer"
         >

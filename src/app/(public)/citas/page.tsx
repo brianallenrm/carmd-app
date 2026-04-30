@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { VEHICLE_CATALOG } from "@/lib/constants";
+import { VEHICLE_CATALOG, getWhatsAppLink, COMPANY_DEFAULTS } from "@/lib/constants";
 import BrandLogo from "@/components/BrandLogo";
 
 // --- Design Tokens ---
@@ -603,7 +603,7 @@ export default function BookingPage() {
 
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-8">
                     <a 
-                      href={`https://wa.me/525611904066?text=Hola,%20acabo%20de%20agendar%20una%20cita%20para%20mi%20${formData.brand}%20el%20día%20${formData.date}%20a%20las%20${formData.time}.`}
+                      href={getWhatsAppLink(`Hola, acabo de agendar una cita para mi ${formData.brand} el día ${formData.date} a las ${formData.time}.`)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-3 bg-green-500 hover:bg-green-600 text-white py-5 rounded-[30px] font-black uppercase tracking-widest text-xs transition-all transform hover:scale-105 active:scale-95 shadow-2xl shadow-green-500/20"

@@ -4,7 +4,7 @@ export const COMPANY_DEFAULTS = {
     rfc: "RIMB960505SXA",
     address: "Calle Palacio de Iturbide No. 233 Col. Metropolitana 2da. Secc. Cd. Nezahualcoyotl, Estado de Mexico C.P. 57740",
     phone: "",
-    whatsapp: "56 1190 4066",
+    whatsapp: "56 1026 9599",
     email: "contacto@carmd.com.mx",
     website: "carmd.com.mx",
 };
@@ -62,6 +62,19 @@ export const numberToLetters = (amount: number): string => {
 
     return `(${text.trim()} PESOS ${decimalPart.toString().padStart(2, "0")}/100 M.N.)`;
 };
+
+/**
+ * Generates a clean WhatsApp link with the international prefix (52 for Mexico)
+ * and optional pre-filled text.
+ */
+export function getWhatsAppLink(text?: string, phone?: string) {
+    const cleanPhone = (phone || COMPANY_DEFAULTS.whatsapp).replace(/\D/g, '');
+    const baseUrl = `https://wa.me/52${cleanPhone}`;
+    if (text) {
+        return `${baseUrl}?text=${encodeURIComponent(text)}`;
+    }
+    return baseUrl;
+}
 
 // --- 3. Business Logic Helpers ---
 export function calculateNextMaintenance(currentOdometer: number) {

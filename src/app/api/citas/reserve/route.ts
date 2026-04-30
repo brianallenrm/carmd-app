@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getInventoryDoc } from '@/lib/google-sheets';
 import { resend } from '@/lib/resend';
+import { COMPANY_DEFAULTS, getWhatsAppLink } from '@/lib/constants';
 
 export async function POST(request: NextRequest) {
   try {
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
 
             <div style="text-align: center; margin: 32px 0;">
               <p style="font-size: 15px; color: #718096; margin-bottom: 16px;">¿Necesitas agilizar la confirmación?</p>
-              <a href="https://wa.me/525611904066" style="display: inline-block; background-color: #f16315; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(241, 99, 21, 0.2);">Escríbenos por WhatsApp</a>
+              <a href="${getWhatsAppLink()}" style="display: inline-block; background-color: #f16315; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(241, 99, 21, 0.2);">Escríbenos por WhatsApp</a>
             </div>
             
             <p style="font-size: 14px; line-height: 1.6; color: #718096; text-align: center; border-top: 1px solid #edf2f7; padding-top: 24px; margin-top: 40px;">
@@ -99,11 +100,11 @@ export async function POST(request: NextRequest) {
       }
 
       // B. Send to Admin (Detailed with Green Buttons)
-      const whatsappClientText = encodeURIComponent(`Hola ${name}! 👋\n\nGracias por confiar en CarMD para el cuidado de tu vehículo.\n\n- 🚗 Vehículo: ${vehicle} ${year}\n- 📅 Fecha: ${date}\n- 🕐 Hora: ${time}\n- 🔧 Servicio: ${problem}\n\nEn breve nos comunicaremos contigo para confirmar tu cita. Si tienes alguna duda, escríbenos. 😊\n\nAtentamente, El equipo de *CarMD*`);
-      const whatsappClientLink = `https://wa.me/52${phone.replace(/\D/g, '')}?text=${whatsappClientText}`;
+      const whatsappClientText = `Hola ${name}! 👋\n\nGracias por confiar en CarMD para el cuidado de tu vehículo.\n\n- 🚗 Vehículo: ${vehicle} ${year}\n- 📅 Fecha: ${date}\n- 🕐 Hora: ${time}\n- 🔧 Servicio: ${problem}\n\nEn breve nos comunicaremos contigo para confirmar tu cita. Si tienes alguna duda, escríbenos. 😊\n\nAtentamente, El equipo de *CarMD*`;
+      const whatsappClientLink = getWhatsAppLink(whatsappClientText, phone);
       
-      const whatsappRafaText = encodeURIComponent(`👤 *NUEVA CITA GENERADA*\n\nSe ha recibido una nueva solicitud de inspección:\n\n- 👤 *Nombre:* ${name}\n- 📞 *Teléfono:* ${phone}\n- 🚗 *Vehículo:* ${vehicle} ${year}\n- 🛞 *Kilometraje:* ${km || 'N/A'} KM\n- 📅 *Fecha:* ${date}\n- 🕐 *Hora:* ${time}\n- 🔧 *Problema:* ${problem}\n\nPor favor confirma con el cliente lo antes posible.`);
-      const whatsappRafaLink = `https://wa.me/525516473084?text=${whatsappRafaText}`;
+      const whatsappRafaText = `👤 *NUEVA CITA GENERADA*\n\nSe ha recibido una nueva solicitud de inspección:\n\n- 👤 *Nombre:* ${name}\n- 📞 *Teléfono:* ${phone}\n- 🚗 *Vehículo:* ${vehicle} ${year}\n- 🛞 *Kilometraje:* ${km || 'N/A'} KM\n- 📅 *Fecha:* ${date}\n- 🕐 *Hora:* ${time}\n- 🔧 *Problema:* ${problem}\n\nPor favor confirma con el cliente lo antes posible.`;
+      const whatsappRafaLink = getWhatsAppLink(whatsappRafaText, "5516473084");
 
       const adminMessage = `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; max-width: 650px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
               
               <table style="width: 100%; border-collapse: collapse; font-size: 15px; color: #4a5568;">
                 <tr><td style="padding: 6px 0; font-weight: bold; width: 35%;">Nombre:</td><td style="padding: 6px 0; color: #1a202c;">${name}</td></tr>
-                <tr><td style="padding: 6px 0; font-weight: bold;">WhatsApp:</td><td style="padding: 6px 0;"><a href="https://wa.me/52${phone.replace(/\D/g, '')}" style="color: #10b981; text-decoration: none;">${phone}</a></td></tr>
+                <tr><td style="padding: 6px 0; font-weight: bold;">WhatsApp:</td><td style="padding: 6px 0;"><a href="${getWhatsAppLink(undefined, phone)}" style="color: #10b981; text-decoration: none;">${phone}</a></td></tr>
                 <tr><td style="padding: 6px 0; font-weight: bold;">Email:</td><td style="padding: 6px 0; color: #1a202c;">${email || 'N/A'}</td></tr>
                 <tr><td style="padding: 6px 0; font-weight: bold;">Vehículo:</td><td style="padding: 6px 0; color: #1a202c;">${vehicle} ${year}</td></tr>
                 <tr><td style="padding: 6px 0; font-weight: bold;">Kilometraje:</td><td style="padding: 6px 0; color: #1a202c;">${km || 'No provisto'} KM</td></tr>

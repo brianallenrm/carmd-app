@@ -52,7 +52,7 @@ const localBusinessSchema = {
   "image": "https://carmd.com.mx/logo.png",
   "@id": "https://carmd.com.mx",
   "url": "https://carmd.com.mx",
-  "telephone": "+525611904066",
+  "telephone": "+525610269599",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "Calle Palacio de Iturbide No. 233 Col. Metropolitana 2da. Secc.",
@@ -85,7 +85,7 @@ const localBusinessSchema = {
     }
   ],
   "sameAs": [
-    "https://wa.me/525611904066"
+    "https://wa.me/525610269599"
   ]
 };
 

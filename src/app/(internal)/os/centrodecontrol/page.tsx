@@ -111,7 +111,7 @@ export default function ControlCenter() {
                     Atención rápida a clientes que solicitaron informes vía <span className="text-[#25D366] font-bold">WhatsApp</span>.
                   </p>
                 </div>
-                <div className="max-w-4xl">
+                <div className="w-full">
                   <AppointmentsInbox />
                 </div>
               </div>

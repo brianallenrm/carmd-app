@@ -19,11 +19,11 @@ import AppointmentsInbox from '@/components/os/AppointmentsInbox';
 import { GOOGLE_SHEETS_CONFIG } from '@/lib/constants';
 
 export default function ControlCenter() {
+  const [activeTab, setActiveTab] = React.useState<'ingresos' | 'citas'>('ingresos');
   const masterSheetUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_CONFIG.MASTER.ID}`;
   const inventorySheetUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_CONFIG.INVENTORY.ID}`;
 
   // Ref to the VehicleHistoryTool search input so the feed can trigger a search
-  const expedienteRef = useRef<{ triggerSearch: (plates: string) => void } | null>(null);
   const expedienteSectionRef = useRef<HTMLDivElement>(null);
 
   const handleExpedienteSearch = (plates: string) => {
@@ -60,40 +60,62 @@ export default function ControlCenter() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 space-y-10 md:space-y-16">
 
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Últimos Ingresos (8/12) */}
-          <div className="lg:col-span-8 space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <h2 className="text-[11px] font-black text-[#f16315] uppercase tracking-[0.3em] bg-orange-50 px-3 py-1 rounded-md flex items-center gap-1.5">
-                <Radio size={11} className="animate-pulse" />
+        {/* ── Section 0: Live Feeds (Ingresos & Citas) ── */}
+        <section className="space-y-6">
+          {/* Tabs Selector */}
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <div className="flex bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm">
+              <button 
+                onClick={() => setActiveTab('ingresos')}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                  activeTab === 'ingresos' 
+                    ? "bg-[#f16315] text-white shadow-lg shadow-orange-500/20" 
+                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                <Radio size={14} className={activeTab === 'ingresos' ? "animate-pulse" : ""} />
                 Últimos Ingresos
-              </h2>
-              <div className="h-px bg-gray-100 flex-grow" />
+              </button>
+              <button 
+                onClick={() => setActiveTab('citas')}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                  activeTab === 'citas' 
+                    ? "bg-[#f16315] text-white shadow-lg shadow-orange-500/20" 
+                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                <Calendar size={14} />
+                Bandeja de Citas
+              </button>
             </div>
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 md:p-8">
-              <p className="text-xs md:text-sm text-gray-500 leading-relaxed mb-6 font-medium">
-                Los <strong className="text-gray-900">últimos 10 vehículos</strong> registrados. 
-                Consulta su nota de servicio o el estado actual.
-              </p>
-              <RecentVehiclesFeed onExpedienteSearch={handleExpedienteSearch} />
-            </div>
+            <div className="h-px bg-gray-100 flex-grow" />
           </div>
 
-          {/* Right Column: Bandeja de Citas (4/12) */}
-          <div className="lg:col-span-4 space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <h2 className="text-[11px] font-black text-[#f16315] uppercase tracking-[0.3em] bg-orange-50 px-3 py-1 rounded-md flex items-center gap-1.5">
-                <Calendar size={11} />
-                Bandeja de Citas
-              </h2>
-              <div className="h-px bg-gray-100 flex-grow" />
-            </div>
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8">
-              <p className="text-xs text-gray-400 leading-relaxed mb-6 font-bold uppercase tracking-widest">
-                Solicitudes de clientes vía <span className="text-[#25D366]">WhatsApp</span>
-              </p>
-              <AppointmentsInbox />
-            </div>
+          {/* Conditional Views */}
+          <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-6 md:p-10 min-h-[400px]">
+            {activeTab === 'ingresos' ? (
+              <div className="space-y-6">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-lg font-black text-gray-900 uppercase">Vehículos en Piso</h3>
+                  <p className="text-xs md:text-sm text-gray-400 leading-relaxed font-medium">
+                    Consulta el estado de los últimos <strong className="text-gray-600">10 ingresos</strong> al taller.
+                  </p>
+                </div>
+                <RecentVehiclesFeed onExpedienteSearch={handleExpedienteSearch} />
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-lg font-black text-gray-900 uppercase">Solicitudes de Citas</h3>
+                  <p className="text-xs md:text-sm text-gray-400 leading-relaxed font-medium">
+                    Atención rápida a clientes que solicitaron informes vía <span className="text-[#25D366] font-bold">WhatsApp</span>.
+                  </p>
+                </div>
+                <div className="max-w-4xl">
+                  <AppointmentsInbox />
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

@@ -15,6 +15,7 @@ import {
 import DashboardCard from '@/components/os/DashboardCard';
 import VehicleHistoryTool from '@/components/os/VehicleHistoryTool';
 import RecentVehiclesFeed from '@/components/os/RecentVehiclesFeed';
+import AppointmentsInbox from '@/components/os/AppointmentsInbox';
 import { GOOGLE_SHEETS_CONFIG } from '@/lib/constants';
 
 export default function ControlCenter() {
@@ -59,21 +60,40 @@ export default function ControlCenter() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 space-y-10 md:space-y-16">
 
-        {/* ── Section 0: Últimos Ingresos (Live Feed) ── */}
-        <section>
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-[11px] font-black text-[#f16315] uppercase tracking-[0.3em] bg-orange-50 px-3 py-1 rounded-md flex items-center gap-1.5">
-              <Radio size={11} className="animate-pulse" />
-              Últimos Ingresos
-            </h2>
-            <div className="h-px bg-gray-100 flex-grow" />
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Últimos Ingresos (8/12) */}
+          <div className="lg:col-span-8 space-y-6">
+            <div className="flex items-center gap-3 mb-6">
+              <h2 className="text-[11px] font-black text-[#f16315] uppercase tracking-[0.3em] bg-orange-50 px-3 py-1 rounded-md flex items-center gap-1.5">
+                <Radio size={11} className="animate-pulse" />
+                Últimos Ingresos
+              </h2>
+              <div className="h-px bg-gray-100 flex-grow" />
+            </div>
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 md:p-8">
+              <p className="text-xs md:text-sm text-gray-500 leading-relaxed mb-6 font-medium">
+                Los <strong className="text-gray-900">últimos 10 vehículos</strong> registrados. 
+                Consulta su nota de servicio o el estado actual.
+              </p>
+              <RecentVehiclesFeed onExpedienteSearch={handleExpedienteSearch} />
+            </div>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 md:p-6">
-            <p className="text-xs md:text-sm text-gray-500 leading-relaxed mb-5">
-              Los <strong className="text-gray-700">últimos 10 vehículos</strong> registrados. 
-              Consulta su nota de servicio o el estado actual.
-            </p>
-            <RecentVehiclesFeed onExpedienteSearch={handleExpedienteSearch} />
+
+          {/* Right Column: Bandeja de Citas (4/12) */}
+          <div className="lg:col-span-4 space-y-6">
+            <div className="flex items-center gap-3 mb-6">
+              <h2 className="text-[11px] font-black text-[#f16315] uppercase tracking-[0.3em] bg-orange-50 px-3 py-1 rounded-md flex items-center gap-1.5">
+                <Calendar size={11} />
+                Bandeja de Citas
+              </h2>
+              <div className="h-px bg-gray-100 flex-grow" />
+            </div>
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8">
+              <p className="text-xs text-gray-400 leading-relaxed mb-6 font-bold uppercase tracking-widest">
+                Solicitudes de clientes vía <span className="text-[#25D366]">WhatsApp</span>
+              </p>
+              <AppointmentsInbox />
+            </div>
           </div>
         </section>
 

@@ -83,116 +83,134 @@ export default function AppointmentsInbox() {
         window.open(getWhatsAppLink(text, app.phone), "_blank");
     };
 
-    if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
-                <Loader2 size={24} className="animate-spin text-[#f16315]" />
-                <span className="text-xs font-bold uppercase tracking-widest">Sincronizando Citas...</span>
-            </div>
-        );
-    }
-
     return (
-        <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-1 rounded">
-                        {appointments.length} Pendientes
-                    </span>
+        <div className="w-full">
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                    <div className="bg-orange-50 text-[#f16315] p-2 rounded-lg">
+                        <Calendar size={18} />
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight leading-none">Solicitudes en Espera</h4>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{appointments.length} Citas por gestionar</p>
+                    </div>
                 </div>
                 <button 
                     onClick={load} 
                     disabled={refreshing}
-                    className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-400"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-lg text-[10px] font-bold uppercase transition-all border border-slate-100"
                 >
-                    <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+                    <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
+                    Sincronizar
                 </button>
             </div>
 
-            <div className="flex-grow space-y-3 overflow-y-auto pr-1 max-h-[600px] scrollbar-thin scrollbar-thumb-slate-200">
-                <AnimatePresence mode="popLayout">
-                    {appointments.length === 0 ? (
-                        <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200"
-                        >
-                            <Calendar size={32} className="mx-auto mb-2 text-slate-200" />
-                            <p className="text-xs font-bold text-slate-400 uppercase">Sin citas nuevas</p>
-                        </motion.div>
-                    ) : (
-                        appointments.map((app, index) => (
-                            <motion.div
-                                key={app.id}
-                                layout
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                transition={{ delay: index * 0.05 }}
-                                className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm hover:border-[#f16315]/20 transition-all group"
-                            >
-                                <div className="flex items-start justify-between gap-3 mb-3">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-[#f16315]">
-                                            <User size={16} />
-                                        </div>
-                                        <div>
-                                            <h4 className="text-sm font-black text-slate-800 leading-none">{app.name}</h4>
-                                            <p className="text-[10px] text-slate-400 font-medium mt-1">{app.timestamp}</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-[10px] font-black text-[#f16315] uppercase">{app.date}</div>
-                                        <div className="text-[10px] font-bold text-slate-400">{app.time}</div>
-                                    </div>
-                                </div>
+            <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="border-b border-slate-50 bg-slate-50/50 text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">
+                                <th className="px-6 py-4">Vehículo / Placa</th>
+                                <th className="px-6 py-4">Propietario</th>
+                                <th className="px-6 py-4">Fecha Cita</th>
+                                <th className="px-6 py-4">Problema</th>
+                                <th className="px-6 py-4 text-right">Gestión</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                            <AnimatePresence mode="popLayout">
+                                {appointments.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="py-20 text-center">
+                                            <div className="flex flex-col items-center gap-2 opacity-20">
+                                                <Calendar size={40} className="text-slate-400" />
+                                                <p className="text-xs font-black uppercase tracking-widest text-slate-500">Bandeja Vacía</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    appointments.map((app, index) => (
+                                        <motion.tr
+                                            key={app.id}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            transition={{ delay: index * 0.05 }}
+                                            className="hover:bg-slate-50/80 transition-colors group"
+                                        >
+                                            <td className="px-6 py-5">
+                                                <div className="font-black text-slate-800 text-xs uppercase group-hover:text-[#f16315] transition-colors">
+                                                    {app.vehicle} ({app.year})
+                                                </div>
+                                                <div className="text-[10px] font-bold text-slate-400 tracking-widest mt-0.5">{app.plate}</div>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <div className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                                                    {app.name}
+                                                </div>
+                                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{app.phone}</div>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <div className="flex items-center gap-1.5 text-[#f16315] font-black uppercase text-[11px]">
+                                                    <Calendar size={12} /> {app.date}
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] mt-0.5">
+                                                    <Clock size={11} /> {app.time}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <p className="text-[11px] text-slate-500 line-clamp-2 max-w-[200px] italic leading-tight">
+                                                    "{app.problem}"
+                                                </p>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    {/* Enviar a Rafael */}
+                                                    <button 
+                                                        onClick={() => {
+                                                            const msg = `Hola Rafael, se generó una nueva cita:\n👤 Cliente: ${app.name}\n🚗 Vehículo: ${app.vehicle} (${app.year})\n📅 Fecha: ${app.date}\n⏰ Hora: ${app.time}\n📋 Placa: ${app.plate}\n⚠️ Problema: ${app.problem}\n📱 WhatsApp Cliente: wa.me/${app.phone.replace(/[^0-9]/g, '')}`;
+                                                            window.open(`https://wa.me/525516473084?text=${encodeURIComponent(msg)}`, '_blank');
+                                                        }}
+                                                        className="flex items-center gap-2 px-3 py-2 bg-[#f16315] text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
+                                                    >
+                                                        ENVIARA RAFAEL <MessageCircle size={13} />
+                                                    </button>
 
-                                <div className="space-y-2 mb-4">
-                                    <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                                        <Car size={12} className="text-slate-400" />
-                                        {app.vehicle} {app.year}
-                                        <span className="text-[9px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-400 font-mono">{app.plate}</span>
-                                    </div>
-                                    <div className="flex items-start gap-2 text-xs text-slate-500 bg-slate-50 p-2 rounded-lg italic">
-                                        <Wrench size={12} className="mt-0.5 flex-shrink-0 text-[#f16315]/40" />
-                                        <span className="line-clamp-2">{app.problem}</span>
-                                    </div>
-                                </div>
+                                                    {/* Contactar Cliente */}
+                                                    <button 
+                                                        onClick={() => handleWhatsApp(app)}
+                                                        className="flex items-center gap-2 px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
+                                                    >
+                                                        CLIENTE <ExternalLink size={13} />
+                                                    </button>
 
-                                <div className="flex gap-2">
-                                    <button 
-                                        onClick={() => handleWhatsApp(app)}
-                                        className="flex-grow flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-green-500/10"
-                                    >
-                                        <MessageCircle size={14} /> Contactar
-                                    </button>
-                                    <button 
-                                        onClick={() => handleUpdateStatus(app.id, "Atendida")}
-                                        disabled={updatingId === app.id}
-                                        className="w-10 flex items-center justify-center bg-slate-50 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 border border-slate-100 rounded-lg transition-all"
-                                        title="Marcar como atendida"
-                                    >
-                                        {updatingId === app.id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
-                                    </button>
-                                    <button 
-                                        onClick={() => handleUpdateStatus(app.id, "Cancelada")}
-                                        disabled={updatingId === app.id}
-                                        className="w-10 flex items-center justify-center bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-100 rounded-lg transition-all"
-                                        title="Cancelar cita"
-                                    >
-                                        {updatingId === app.id ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ))
-                    )}
-                </AnimatePresence>
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-slate-100">
-                <div className="flex items-center gap-2 text-[9px] font-bold text-slate-300 uppercase tracking-widest">
-                    <AlertCircle size={10} />
-                    Las citas atendidas se archivan automáticamente
+                                                    {/* Archivar (Pequeño) */}
+                                                    <div className="flex gap-1 ml-2 border-l border-slate-100 pl-2">
+                                                        <button 
+                                                            onClick={() => handleUpdateStatus(app.id, "Atendida")}
+                                                            disabled={updatingId === app.id}
+                                                            className="p-1.5 text-slate-300 hover:text-emerald-500 transition-colors"
+                                                            title="Atendida"
+                                                        >
+                                                            {updatingId === app.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={14} />}
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleUpdateStatus(app.id, "Cancelada")}
+                                                            disabled={updatingId === app.id}
+                                                            className="p-1.5 text-slate-300 hover:text-rose-500 transition-colors"
+                                                            title="Cancelar"
+                                                        >
+                                                            {updatingId === app.id ? <Loader2 size={12} className="animate-spin" /> : <XCircle size={14} />}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </motion.tr>
+                                    ))
+                                )}
+                            </AnimatePresence>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

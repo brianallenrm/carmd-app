@@ -14,7 +14,8 @@ import {
     Wrench,
     XCircle,
     ChevronRight,
-    AlertCircle
+    AlertCircle,
+    ExternalLink
 } from "lucide-react";
 import { getWhatsAppLink } from "@/lib/constants";
 

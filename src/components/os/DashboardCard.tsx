@@ -48,8 +48,8 @@ export default function DashboardCard({
     >
       <Link 
         href={href} 
-        target={isExternal ? "_blank" : undefined}
-        rel={isExternal ? "noopener noreferrer" : undefined}
+        target="_blank"
+        rel="noopener noreferrer"
         className="flex flex-col h-full"
       >
         <div className="flex items-start justify-between">

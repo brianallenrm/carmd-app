@@ -190,7 +190,7 @@ export default function ControlCenter() {
             </Link>
 
             {/* Catálogo Refacciones */}
-            <Link href="/os/catalog" className="flex items-center gap-3 p-3.5 bg-white hover:bg-orange-50/40 border border-gray-100 hover:border-orange-200 rounded-xl shadow-sm transition-all group">
+            <Link href="/os/catalog" target="_blank" className="flex items-center gap-3 p-3.5 bg-white hover:bg-orange-50/40 border border-gray-100 hover:border-orange-200 rounded-xl shadow-sm transition-all group">
               <div className="p-2 bg-orange-50 text-[#f16315] group-hover:bg-[#f16315] group-hover:text-white rounded-lg transition-colors flex-shrink-0">
                 <Search size={16} />
               </div>

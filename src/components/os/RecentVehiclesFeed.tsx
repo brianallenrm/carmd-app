@@ -154,6 +154,7 @@ function VehicleRow({ v, index, onExpediente }: {
                     {/* Inventario */}
                     <Link
                         href={`/os/admin/receptions`}
+                        target="_blank"
                         className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold transition-colors border border-slate-200"
                     >
                         <ClipboardList size={13} />

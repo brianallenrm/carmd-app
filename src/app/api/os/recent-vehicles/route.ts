@@ -3,7 +3,7 @@ import { JWT } from 'google-auth-library';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { GOOGLE_SHEETS_CONFIG } from '@/lib/constants';
 
-const LIMIT = 10;
+const LIMIT = 30;
 
 const parseMXNumber = (val: any): number => {
     if (!val) return 0;

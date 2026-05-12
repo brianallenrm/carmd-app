@@ -98,7 +98,7 @@ export default function ControlCenter() {
                 <div className="flex flex-col gap-1">
                   <h3 className="text-lg font-black text-gray-900 uppercase">Vehículos en Piso</h3>
                   <p className="text-xs md:text-sm text-gray-400 leading-relaxed font-medium">
-                    Consulta el estado de los últimos <strong className="text-gray-600">10 ingresos</strong> al taller.
+                    Consulta el estado de los <strong className="text-gray-600">ingresos recientes</strong> al taller.
                   </p>
                 </div>
                 <RecentVehiclesFeed onExpedienteSearch={handleExpedienteSearch} />

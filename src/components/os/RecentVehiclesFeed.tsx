@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     Car, User, Clock, FileText, ClipboardList, History,
     Loader2, AlertTriangle, RefreshCw, Gauge, Fuel,
-    CheckCircle, PlusCircle, ChevronRight, Wrench, UserCheck, UserPlus
+    CheckCircle, PlusCircle, ChevronRight, ChevronLeft, Wrench, UserCheck, UserPlus
 } from "lucide-react";
 import Link from "next/link";
 
@@ -207,6 +207,7 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+    const [page, setPage] = useState(0);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -289,7 +290,7 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
             ) : (
                 <AnimatePresence mode="wait">
                     <div className="space-y-3">
-                        {vehicles.map((v, i) => (
+                        {vehicles.slice(page * 10, (page + 1) * 10).map((v, i) => (
                             <VehicleRow
                                 key={`${v.vehicle.plates}-${v.dateTs}-${i}`}
                                 v={v}
@@ -297,6 +298,36 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
                                 onExpediente={onExpedienteSearch}
                             />
                         ))}
+
+                        {/* Pagination Controls */}
+                        {vehicles.length > 10 && (
+                            <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-400">
+                                <span className="font-medium">
+                                    Mostrando {page * 10 + 1} - {Math.min((page + 1) * 10, vehicles.length)} de {vehicles.length}
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                    <button
+                                        onClick={() => setPage(p => Math.max(0, p - 1))}
+                                        disabled={page === 0}
+                                        className="p-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                        title="Anteriores 10"
+                                    >
+                                        <ChevronLeft size={14} />
+                                    </button>
+                                    <span className="font-bold px-2 text-slate-600">
+                                        Pág {page + 1}
+                                    </span>
+                                    <button
+                                        onClick={() => setPage(p => (p + 1) * 10 < vehicles.length ? p + 1 : p)}
+                                        disabled={(page + 1) * 10 >= vehicles.length}
+                                        className="p-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                        title="Siguientes 10"
+                                    >
+                                        <ChevronRight size={14} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </AnimatePresence>
             )}

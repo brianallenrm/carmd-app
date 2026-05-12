@@ -149,10 +149,10 @@ export default function ControlCenter() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <DashboardCard
-              title="Crear Nuevo Inventario"
-              description="Inspección visual de daños físicos, fotos de ingreso y registro de pertenencias."
-              href="/os/inventario"
-              icon={ClipboardList}
+              title="Ver Inventarios"
+              description="Control técnico e historial del flujo de entrada de vehículos en tiempo real."
+              href="/os/admin/receptions"
+              icon={Car}
             />
             <DashboardCard
               title="Agenda de Citas"
@@ -161,10 +161,10 @@ export default function ControlCenter() {
               icon={Calendar}
             />
             <DashboardCard
-              title="Ver Inventarios"
-              description="Control técnico e historial del flujo de entrada de vehículos en tiempo real."
-              href="/os/admin/receptions"
-              icon={Car}
+              title="Crear Nuevo Inventario"
+              description="Inspección visual de daños físicos, fotos de ingreso y registro de pertenencias."
+              href="/os/inventario"
+              icon={ClipboardList}
             />
           </div>
         </section>

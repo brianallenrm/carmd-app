@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef } from 'react';
+import Link from 'next/link';
 import { 
   FileText, 
   Table, 
@@ -119,45 +120,7 @@ export default function ControlCenter() {
           </div>
         </section>
 
-        {/* ── Section 1: Herramientas de Alto Uso ── */}
-        <section>
-          <div className="flex items-center gap-3 mb-8">
-            <h2 className="text-[11px] font-black text-[#f16315] uppercase tracking-[0.3em] bg-orange-50 px-3 py-1 rounded-md">
-              Herramientas de Alto Uso
-            </h2>
-            <div className="h-px bg-gray-100 flex-grow" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-            <div className="md:col-span-4">
-              <DashboardCard
-                title="Generación de Notas de Servicio"
-                description="Motor principal de folios. Crea órdenes de trabajo, presupuestos y registros maestros con un solo clic."
-                href="/os"
-                icon={FileText}
-                variant="primary"
-                isLarge
-              />
-            </div>
-            <div className="md:col-span-2 flex flex-col gap-6">
-              <DashboardCard
-                title="B.D. Maestra (Folios)"
-                description="Consultar historial de notas."
-                href={masterSheetUrl}
-                icon={Table}
-                variant="external"
-              />
-              <DashboardCard
-                title="B.D. Inventarios"
-                description="Historial de recepciones."
-                href={inventorySheetUrl}
-                icon={Table}
-                variant="external"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ── Section 2: Expediente del Vehículo ── */}
+        {/* ── Section 1: Expediente del Vehículo ── */}
         <section ref={expedienteSectionRef}>
           <div className="flex items-center gap-3 mb-6">
             <h2 className="text-[11px] font-black text-[#f16315] uppercase tracking-[0.3em] bg-orange-50 px-3 py-1 rounded-md flex items-center gap-1.5">
@@ -176,7 +139,7 @@ export default function ControlCenter() {
           </div>
         </section>
 
-        {/* ── Section 3: Gestión Operativa ── */}
+        {/* ── Section 2: Gestión Operativa ── */}
         <section>
           <div className="flex items-center gap-3 mb-8">
             <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] bg-gray-100 px-3 py-1 rounded-md">
@@ -186,7 +149,7 @@ export default function ControlCenter() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <DashboardCard
-              title="Inventario & Recepción"
+              title="Crear Nuevo Inventario"
               description="Inspección visual de daños físicos, fotos de ingreso y registro de pertenencias."
               href="/os/inventario"
               icon={ClipboardList}
@@ -198,29 +161,66 @@ export default function ControlCenter() {
               icon={Calendar}
             />
             <DashboardCard
-              title="Logística de Recepciones"
-              description="Control técnico del flujo de entrada de vehículos en tiempo real."
+              title="Ver Inventarios"
+              description="Control técnico e historial del flujo de entrada de vehículos en tiempo real."
               href="/os/admin/receptions"
               icon={Car}
             />
           </div>
         </section>
 
-        {/* ── Section 4: Catálogos ── */}
+        {/* ── Section 3: Herramientas de Alto Uso & Catálogos (Compacto) ── */}
         <section>
-          <div className="flex items-center gap-3 mb-8">
-            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] bg-gray-100 px-3 py-1 rounded-md">
-              Catálogos & Servicios
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-[11px] font-black text-[#f16315] uppercase tracking-[0.3em] bg-orange-50 px-3 py-1 rounded-md">
+              Herramientas de Alto Uso & Bases de Datos
             </h2>
             <div className="h-px bg-gray-100 flex-grow" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <DashboardCard
-              title="Catálogo Refacciones"
-              description="Consulta rápida de números de parte."
-              href="/os/catalog"
-              icon={Search}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Generar Nota */}
+            <Link href="/os" target="_blank" className="flex items-center gap-3 p-3.5 bg-white hover:bg-orange-50/40 border border-gray-100 hover:border-orange-200 rounded-xl shadow-sm transition-all group">
+              <div className="p-2 bg-orange-50 text-[#f16315] group-hover:bg-[#f16315] group-hover:text-white rounded-lg transition-colors flex-shrink-0">
+                <FileText size={16} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-gray-900 group-hover:text-[#f16315] transition-colors truncate">Generar Nota de Servicio</p>
+                <p className="text-[10px] text-gray-400 truncate">Crear orden de trabajo</p>
+              </div>
+            </Link>
+
+            {/* Catálogo Refacciones */}
+            <Link href="/os/catalog" className="flex items-center gap-3 p-3.5 bg-white hover:bg-orange-50/40 border border-gray-100 hover:border-orange-200 rounded-xl shadow-sm transition-all group">
+              <div className="p-2 bg-orange-50 text-[#f16315] group-hover:bg-[#f16315] group-hover:text-white rounded-lg transition-colors flex-shrink-0">
+                <Search size={16} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-gray-900 group-hover:text-[#f16315] transition-colors truncate">Catálogo Refacciones</p>
+                <p className="text-[10px] text-gray-400 truncate">Consultar números de parte</p>
+              </div>
+            </Link>
+
+            {/* BD Maestra */}
+            <a href={masterSheetUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3.5 bg-emerald-50/30 hover:bg-emerald-50 border border-emerald-100/60 hover:border-emerald-200 rounded-xl shadow-sm transition-all group">
+              <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg flex-shrink-0">
+                <Table size={16} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-emerald-950 truncate">B.D. Maestra (Folios)</p>
+                <p className="text-[10px] text-emerald-600/80 truncate">Google Sheets externo</p>
+              </div>
+            </a>
+
+            {/* BD Inventarios */}
+            <a href={inventorySheetUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3.5 bg-emerald-50/30 hover:bg-emerald-50 border border-emerald-100/60 hover:border-emerald-200 rounded-xl shadow-sm transition-all group">
+              <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg flex-shrink-0">
+                <Table size={16} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-emerald-950 truncate">B.D. Inventarios</p>
+                <p className="text-[10px] text-emerald-600/80 truncate">Google Sheets externo</p>
+              </div>
+            </a>
           </div>
         </section>
 

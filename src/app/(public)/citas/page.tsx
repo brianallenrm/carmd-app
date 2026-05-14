@@ -57,6 +57,8 @@ export default function BookingPage() {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isReturningClient, setIsReturningClient] = useState(false);
+  const [previousKm, setPreviousKm] = useState("");
 
   // --- Step 1: Secure Pre-fill Logic ---
   const handleVerifyPlate = async () => {
@@ -105,6 +107,8 @@ export default function BookingPage() {
           vin: userData.vin || "",
           km: userData.km || ""
         });
+        setIsReturningClient(true);
+        setPreviousKm(userData.km || "");
         setStep(3); 
       } else {
         setError("Los últimos 4 dígitos no coinciden. Por favor completa los datos manualmente.");
@@ -531,13 +535,38 @@ export default function BookingPage() {
                    <p className="text-white/40">Cuéntanos qué necesita tu {formData.brand}.</p>
                  </div>
                  <div className="bg-white/5 p-12 rounded-[50px] border border-white/10 space-y-6">
-                    <textarea 
-                      rows={4}
-                      value={formData.problem}
-                      onChange={(e) => setFormData({...formData, problem: e.target.value})}
-                      className="w-full bg-black border border-white/10 p-6 rounded-3xl focus:border-[#f16315] outline-none text-lg"
-                      placeholder="Ej: Hace un ruido al frenar, requiere afinación, etc."
-                    />
+                    {isReturningClient && (
+                      <div className="space-y-2 bg-black/40 p-6 rounded-3xl border border-white/5">
+                        <label className="text-xs font-black uppercase tracking-widest text-[#f16315] block">
+                          Kilometraje actual (Aproximado)
+                        </label>
+                        <p className="text-white/40 text-xs font-medium leading-relaxed">
+                          Tu último registro fue de <strong className="text-white">{previousKm} KM</strong>. Actualízalo si lo conoces para prepararte el mantenimiento ideal.
+                        </p>
+                        <div className="pt-2 relative">
+                          <input 
+                            type="number" 
+                            value={formData.km}
+                            onChange={(e) => setFormData({...formData, km: e.target.value})}
+                            placeholder="Ej: 85000"
+                            className="w-full bg-black border border-white/10 p-4 rounded-2xl focus:border-[#f16315] outline-none font-bold text-white" 
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 font-black text-xs pointer-events-none mt-1">KM</span>
+                        </div>
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-white/40 block ml-2">
+                        ¿Qué servicio o problema necesita tu {formData.brand}?
+                      </label>
+                      <textarea 
+                        rows={4}
+                        value={formData.problem}
+                        onChange={(e) => setFormData({...formData, problem: e.target.value})}
+                        className="w-full bg-black border border-white/10 p-6 rounded-3xl focus:border-[#f16315] outline-none text-lg"
+                        placeholder="Ej: Hace un ruido al frenar, requiere afinación, etc."
+                      />
+                    </div>
                     <div className="p-8 rounded-3xl bg-white/[0.02] border border-white/5 grid grid-cols-2 gap-y-4 text-sm font-black uppercase tracking-[0.2em] text-white/40">
                        <div>Cita:</div>
                        <div className="text-right text-[#f16315]">{formData.date} @ {formData.time}</div>

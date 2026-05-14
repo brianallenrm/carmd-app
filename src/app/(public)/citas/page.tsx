@@ -47,6 +47,8 @@ export default function BookingPage() {
     phone: "",
     brand: "",
     model: "",
+    customBrand: "",
+    customModel: "",
     year: "",
     km: "",
     vin: "",
@@ -152,12 +154,17 @@ export default function BookingPage() {
   const submitBooking = async () => {
     setLoading(true);
     try {
+      const finalBrand = formData.brand === "OTRA" ? formData.customBrand : formData.brand;
+      const finalModel = formData.model === "OTRO" ? formData.customModel : formData.model;
+
       const response = await fetch('/api/citas/reserve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          vehicle: `${formData.brand} ${formData.model}`.trim()
+          brand: finalBrand,
+          model: finalModel,
+          vehicle: `${finalBrand} ${finalModel}`.trim()
         }),
       });
       if (response.ok) setStep(5);
@@ -380,14 +387,26 @@ export default function BookingPage() {
                       <div className="relative">
                         <select 
                           value={formData.brand}
-                          onChange={(e) => setFormData({...formData, brand: e.target.value, model: ""})}
+                          onChange={(e) => setFormData({...formData, brand: e.target.value, model: e.target.value === "OTRA" ? "OTRO" : ""})}
                           className="w-full appearance-none bg-black border border-white/10 p-4 rounded-2xl focus:border-[#f16315] outline-none pr-10 font-bold"
                         >
                           <option value="">Selecciona Marca</option>
                           {Object.keys(VEHICLE_CATALOG).sort().map(b => <option key={b} value={b}>{b}</option>)}
+                          <option value="OTRA">+ Otra marca...</option>
                         </select>
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" size={16} />
                       </div>
+                      {formData.brand === "OTRA" && (
+                        <motion.input 
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          type="text"
+                          placeholder="Escribe tu marca..."
+                          value={formData.customBrand}
+                          onChange={(e) => setFormData({...formData, customBrand: e.target.value})}
+                          className="w-full bg-black border border-[#f16315]/50 p-4 rounded-2xl focus:border-[#f16315] outline-none font-bold mt-2 text-white"
+                        />
+                      )}
                     </div>
 
                     {/* Model Selection */}
@@ -401,11 +420,22 @@ export default function BookingPage() {
                           className="w-full appearance-none bg-black border border-white/10 p-4 rounded-2xl focus:border-[#f16315] outline-none pr-10 font-bold disabled:opacity-20"
                          >
                            <option value="">Selecciona Modelo</option>
-                           {formData.brand && VEHICLE_CATALOG[formData.brand].map(m => <option key={m} value={m}>{m}</option>)}
+                           {formData.brand && VEHICLE_CATALOG[formData.brand]?.map(m => <option key={m} value={m}>{m}</option>)}
                            <option value="OTRO">+ Otro modelo...</option>
                          </select>
                          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" size={16} />
                        </div>
+                       {formData.model === "OTRO" && (
+                         <motion.input 
+                           initial={{ opacity: 0, height: 0 }}
+                           animate={{ opacity: 1, height: "auto" }}
+                           type="text"
+                           placeholder="Escribe tu modelo..."
+                           value={formData.customModel}
+                           onChange={(e) => setFormData({...formData, customModel: e.target.value})}
+                           className="w-full bg-black border border-[#f16315]/50 p-4 rounded-2xl focus:border-[#f16315] outline-none font-bold mt-2 text-white"
+                         />
+                       )}
                     </div>
 
                     {/* Year selection */}
@@ -468,7 +498,7 @@ export default function BookingPage() {
 
                  <button 
                   onClick={() => setStep(3)}
-                  disabled={!formData.brand || !formData.model || !formData.phone || !formData.name}
+                  disabled={!formData.brand || !formData.model || !formData.phone || !formData.name || (formData.brand === 'OTRA' && !formData.customBrand) || (formData.model === 'OTRO' && !formData.customModel)}
                   className="w-full bg-[#f16315] py-6 rounded-3xl font-black uppercase tracking-widest shadow-xl shadow-[#f16315]/20 disabled:opacity-20"
                  >
                    Agenda tu Cita
@@ -571,7 +601,10 @@ export default function BookingPage() {
                        <div>Cita:</div>
                        <div className="text-right text-[#f16315]">{formData.date} @ {formData.time}</div>
                        <div>Vehículo:</div>
-                       <div className="text-right text-white">{formData.brand} {formData.model} ({formData.year})</div>
+                       <div className="text-right text-white">
+                         {formData.brand === "OTRA" ? formData.customBrand || "Otra" : formData.brand}{" "}
+                         {formData.model === "OTRO" ? formData.customModel || "Modelo" : formData.model} ({formData.year})
+                       </div>
                        <div>KM:</div>
                        <div className="text-right text-white">{formData.km} KM</div>
                     </div>
@@ -632,7 +665,7 @@ export default function BookingPage() {
 
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-8">
                     <a 
-                      href={getWhatsAppLink(`Hola, acabo de agendar una cita para mi ${formData.brand} el día ${formData.date} a las ${formData.time}.`)}
+                      href={getWhatsAppLink(`Hola, acabo de agendar una cita para mi ${formData.brand === "OTRA" ? formData.customBrand || "vehículo" : formData.brand} el día ${formData.date} a las ${formData.time}.`)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-3 bg-green-500 hover:bg-green-600 text-white py-5 rounded-[30px] font-black uppercase tracking-widest text-xs transition-all transform hover:scale-105 active:scale-95 shadow-2xl shadow-green-500/20"

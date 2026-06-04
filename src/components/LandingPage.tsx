@@ -297,7 +297,7 @@ export default function LandingPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 text-white/40 hover:text-[#f16315] transition-colors font-bold uppercase tracking-widest text-sm"
             >
-              Ver las más de 200 reseñas en Google Maps <ArrowRight size={16} />
+              Ver las más de 300 reseñas en Google Maps <ArrowRight size={16} />
             </a>
           </div>
         </div>

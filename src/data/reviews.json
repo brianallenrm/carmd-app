@@ -1,25 +1,25 @@
 [
   {
     "id": 1,
-    "name": "Luis Rafael Arreola Hernández",
+    "name": "Gabriel Taboada",
     "stars": 5,
-    "text": "Excelente servicio, el diagnóstico fue muy preciso y el trato muy profesional. Recomendado 100%.",
-    "date": "Hace 2 semanas",
+    "text": "Te mandan fotos, videos e información en todo momento, son bastante profesionales, trabajan rápido y bien, son honestos y no buscan sacarte dinero de más. Mi camioneta hasta el momento se siente bastante diferente, mas suave.",
+    "date": "Hace 1 semana",
     "verified": true
   },
   {
     "id": 2,
-    "name": "Irving Quiroz",
+    "name": "Eduardo Palafox Galicia",
     "stars": 5,
-    "text": "Muy buena atención, explican todo a detalle y con mucha transparencia. Difícil encontrar talleres así en la ciudad.",
+    "text": "Fui por una avería en mi Mustang GT, pensé que sería un dineral; pero desde el inicio el Ing. Rafa te da seguridad de que estás con gente honesta. Resolvieron la avería y siguieron ajustando los detalles. Rápidos, honestos y costos adecuados.",
     "date": "Hace 1 mes",
     "verified": true
   },
   {
     "id": 3,
-    "name": "Ricardo Gomez",
+    "name": "Edgar OT",
     "stars": 5,
-    "text": "Puntualidad y honestidad. Llevaron el mantenimiento de mi unidad y quedó perfecta. Se nota la experiencia.",
+    "text": "Llevé una JAC T8 por cambio de crucetas y la dejaron muy bien. Cabe destacar que la agencia de JAC me la devolvió diciendo que no las tenía y que mejor las consiguiera, resolvieron mucho mejor directamente aquí.",
     "date": "Hace 3 meses",
     "verified": true
   },
@@ -33,17 +33,17 @@
   },
   {
     "id": 5,
-    "name": "Juan Carlos P.",
+    "name": "Angel Trujillo Maria",
     "stars": 5,
-    "text": "Ingeniería de verdad. No son improvisados. Gran servicio y atención al detalle en cada paso.",
+    "text": "Un taller totalmente recomendable. La atención del Ing. Rafael y de su equipo de trabajo fue excelente, muy amables y profesionales. Explicaron claramente qué tenía mi coche. Da mucha confianza encontrar un taller así.",
     "date": "Hace 2 meses",
     "verified": true
   },
   {
     "id": 6,
-    "name": "Arturo V.",
+    "name": "Irving Quiroz",
     "stars": 5,
-    "text": "Servicio de primera. El escaneo fue muy profesional y resolvieron la falla que en otros lados no podían.",
+    "text": "Muy buena atención, explican todo a detalle y con mucha transparencia. Difícil encontrar talleres así en la ciudad.",
     "date": "Hace 1 mes",
     "verified": true
   }

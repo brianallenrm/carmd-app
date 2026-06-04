@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
+import AttentionBanner from "@/components/AttentionBanner";
 import Script from "next/script";
 
 const geistSans = Geist({
@@ -105,6 +106,7 @@ export default function RootLayout({
         />
         {children}
         <CookieBanner />
+        <AttentionBanner />
         
         {/* Google Analytics 4 */}
         {process.env.NEXT_PUBLIC_GA_ID && (

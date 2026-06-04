@@ -265,3 +265,58 @@ export const getCitas = async () => {
         id: r.rowNumber
     }));
 };
+
+/**
+ * Retrieves the current chat state for a phone number.
+ */
+export const getChatState = async (phone: string) => {
+    const doc = await getInventoryDoc();
+    const sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.CHAT_SESSIONS_TAB!];
+    if (!sheet) {
+        console.warn("CHAT_SESSIONS sheet not found. Bot state will not persist.");
+        return null;
+    }
+
+    const rows = await sheet.getRows();
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10); // Last 10 digits
+    const row = rows.find(r => r.get("phone").replace(/\D/g, '').endsWith(cleanPhone));
+    
+    if (!row) return null;
+
+    return {
+        phone: row.get("phone"),
+        state: row.get("state"),
+        lastUpdate: row.get("last_update"),
+        vehicleProblem: row.get("vehicle_problem"),
+        id: row.rowNumber
+    };
+};
+
+/**
+ * Updates or creates a chat session state.
+ */
+export const updateChatState = async (phone: string, state: string, vehicleProblem?: string) => {
+    const doc = await getInventoryDoc();
+    const sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.CHAT_SESSIONS_TAB!];
+    if (!sheet) return;
+
+    const rows = await sheet.getRows();
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
+    const existingRow = rows.find(r => r.get("phone").replace(/\D/g, '').endsWith(cleanPhone));
+
+    const now = new Date().toISOString();
+
+    if (existingRow) {
+        existingRow.set("state", state);
+        existingRow.set("last_update", now);
+        if (vehicleProblem !== undefined) existingRow.set("vehicle_problem", vehicleProblem);
+        await existingRow.save();
+    } else {
+        await sheet.addRow({
+            phone,
+            state,
+            last_update: now,
+            vehicle_problem: vehicleProblem || ""
+        });
+    }
+};

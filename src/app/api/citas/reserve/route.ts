@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getInventoryDoc } from '@/lib/google-sheets';
 import { resend } from '@/lib/resend';
 import { COMPANY_DEFAULTS, getWhatsAppLink } from '@/lib/constants';
+import { sendWhatsAppMessage } from '@/lib/whatsapp';
+import { updateChatState } from '@/lib/google-sheets';
 
 export async function POST(request: NextRequest) {
   try {
@@ -157,6 +159,11 @@ export async function POST(request: NextRequest) {
       if (adminEmailError) {
         console.error("Error sending admin email:", adminEmailError);
       }
+
+      // C. Send WhatsApp Confirmation
+      const confirmationText = `¡Solicitud recibida! ✔️ Revisamos disponibilidad y te confirmamos por aquí mismo en unos momentos. Así no te hacemos perder tiempo 👍.`;
+      await sendWhatsAppMessage(phone, confirmationText);
+      await updateChatState(phone, 'COMPLETED');
     }
 
     return NextResponse.json({ success: true });

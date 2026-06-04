@@ -105,7 +105,7 @@ export default function AttentionBanner() {
                 </a>
               </div>
 
-              <p className="text-[10px] text-white/30 italic border-t border-t-white/5 pt-4 leading-normal text-left">
+              <p className="text-[10px] text-white/30 italic border-t border-t-white/5 pt-4 leading-normal text-justify">
                 * Nota: Atendemos tu primer mensaje de inmediato. Respondemos la mayoría de las solicitudes el mismo día; sin embargo, el tiempo de confirmación técnica o cotización detallada puede prolongarse dependiendo de la ocupación del taller.
               </p>
             </div>

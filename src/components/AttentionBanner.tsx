@@ -89,7 +89,7 @@ export default function AttentionBanner() {
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Link href="/citas" className="flex-1" onClick={dismissBanner}>
                   <button className="w-full flex items-center justify-center gap-2 bg-[#f16315] hover:bg-[#d95300] text-white py-3.5 px-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 shadow-lg shadow-orange-500/10 cursor-pointer">
-                    <Calendar size={14} /> Agendar Cita (Recomendado)
+                    <Calendar size={14} /> Agendar Mi Cita (Recomendado)
                   </button>
                 </Link>
                 <a 
@@ -106,7 +106,7 @@ export default function AttentionBanner() {
               </div>
 
               <p className="text-[10px] text-white/30 italic border-t border-t-white/5 pt-4 leading-normal text-left">
-                * Nota: Atendemos tu primer mensaje de inmediato. El análisis técnico y la confirmación final de tu espacio puede tomar desde unos minutos hasta 24 horas, dependiendo de la ocupación del taller.
+                * Nota: Atendemos tu primer mensaje de inmediato. Respondemos la mayoría de las solicitudes el mismo día; sin embargo, el tiempo de confirmación técnica o cotización detallada puede prolongarse dependiendo de la saturación del taller.
               </p>
             </div>
           </motion.div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   Settings, 
@@ -118,9 +119,6 @@ export default function ServiciosPage() {
             </p>
           </div>
           <div className="flex flex-col items-end gap-20 leading-none">
-            <Link href="/" className="hidden md:block">
-              <BrandLogo size="md" />
-            </Link>
             <div className="hidden lg:block rotate-90 origin-right translate-y-12">
                 <span className="text-[10px] font-black tracking-[1em] uppercase text-white/20 whitespace-nowrap">
                   CARMD PRECISION SYSTEMS (1988-2026)
@@ -130,58 +128,7 @@ export default function ServiciosPage() {
         </div>
 
         {/* --- Services Grid --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {ALL_SERVICES.map((service, index) => (
-            <motion.div
-              key={service.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05, duration: 0.5 }}
-              viewport={{ once: true }}
-              className="group relative h-[450px] rounded-[40px] overflow-hidden bg-white/5 border border-white/10 hover:border-[#f16315]/50 transition-all duration-700"
-            >
-              {/* Background Image */}
-              <div className="absolute inset-0 z-0">
-                <Image 
-                  src={service.image} 
-                  alt={service.title} 
-                  fill 
-                  className="object-cover opacity-40 group-hover:opacity-70 group-hover:scale-110 transition-all duration-1000 ease-out grayscale group-hover:grayscale-0"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-95 group-hover:opacity-80 transition-opacity" />
-              </div>
-
-              {/* Icon Badge */}
-              <div className="absolute top-10 left-10 w-16 h-16 rounded-2xl bg-black/60 backdrop-blur-xl border border-white/10 flex items-center justify-center text-[#f16315] group-hover:bg-[#f16315] group-hover:text-white transition-all duration-500 z-20">
-                <service.icon size={32} />
-              </div>
-
-              {/* Content Overlay */}
-              <div className="absolute inset-x-0 bottom-0 p-10 z-20 transition-transform duration-500">
-                <h3 className="text-3xl font-black uppercase tracking-tight mb-4 leading-none group-hover:text-[#f16315] transition-colors">
-                  {service.title}
-                </h3>
-                
-                {/* Description - Animated reveal */}
-                <div className="h-0 group-hover:h-auto overflow-hidden opacity-0 group-hover:opacity-100 transition-all duration-500">
-                  <p className="text-white/60 text-sm leading-relaxed mb-8 uppercase font-medium">
-                    {service.desc}
-                  </p>
-                  <Link href="/citas">
-                    <button className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs rounded-full hover:bg-[#f16315] hover:text-white transition-all active:scale-95 flex items-center justify-center gap-2 group/btn">
-                      Agendar Cita <Calendar size={14} className="group-hover/btn:translate-x-1 transition-transform" />
-                    </button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Static CTA (visible when NOT hovered) */}
-              <div className="absolute bottom-10 right-10 group-hover:opacity-0 transition-opacity z-10">
-                 <ArrowRight className="text-white/20 group-hover:text-[#f16315]" size={24} />
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        <ServicesGrid />
 
         {/* --- Footer Note --- */}
         <div className="mt-32 text-center pb-20">
@@ -209,6 +156,112 @@ export default function ServiciosPage() {
         </div>
 
       </div>
+    </div>
+  );
+}
+
+function ServicesGrid() {
+  const [activeCardId, setActiveCardId] = useState<string | null>(null);
+
+  // Close active card if clicking outside
+  useEffect(() => {
+    const handleGlobalClick = () => {
+      setActiveCardId(null);
+    };
+    window.addEventListener("click", handleGlobalClick);
+    return () => window.removeEventListener("click", handleGlobalClick);
+  }, []);
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {ALL_SERVICES.map((service, index) => {
+        const isActive = activeCardId === service.id;
+        return (
+          <motion.div
+            key={service.id}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05, duration: 0.5 }}
+            viewport={{ once: true }}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!isActive) {
+                setActiveCardId(service.id);
+              } else {
+                const target = e.target as HTMLElement;
+                if (!target.closest("a") && !target.closest("button")) {
+                  setActiveCardId(null);
+                }
+              }
+            }}
+            className={`group relative h-[450px] rounded-[40px] overflow-hidden bg-white/5 border transition-all duration-700 ${
+              isActive 
+                ? "border-[#f16315]" 
+                : "border-white/10 hover:border-[#f16315]/50"
+            }`}
+          >
+            {/* Background Image */}
+            <div className="absolute inset-0 z-0">
+              <Image 
+                src={service.image} 
+                alt={service.title} 
+                fill 
+                className={`object-cover transition-all duration-1000 ease-out grayscale ${
+                  isActive 
+                    ? "opacity-70 scale-110 grayscale-0" 
+                    : "opacity-40 group-hover:opacity-70 group-hover:scale-110 group-hover:grayscale-0"
+                }`}
+              />
+              <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent transition-opacity ${
+                isActive ? "opacity-80" : "opacity-95 group-hover:opacity-80"
+              }`} />
+            </div>
+
+            {/* Icon Badge */}
+            <div className={`absolute top-10 left-10 w-16 h-16 rounded-2xl backdrop-blur-xl border flex items-center justify-center transition-all duration-500 z-20 ${
+              isActive 
+                ? "bg-[#f16315] text-white border-transparent" 
+                : "bg-black/60 border-white/10 text-[#f16315] group-hover:bg-[#f16315] group-hover:text-white"
+            }`}>
+              <service.icon size={32} />
+            </div>
+
+            {/* Content Overlay */}
+            <div className="absolute inset-x-0 bottom-0 p-10 z-20 transition-transform duration-500">
+              <h3 className={`text-3xl font-black uppercase tracking-tight mb-4 leading-none transition-colors ${
+                isActive ? "text-[#f16315]" : "group-hover:text-[#f16315]"
+              }`}>
+                {service.title}
+              </h3>
+              
+              {/* Description - Animated reveal */}
+              <div className={`overflow-hidden transition-all duration-500 ${
+                isActive 
+                  ? "h-auto opacity-100" 
+                  : "h-0 opacity-0 group-hover:h-auto group-hover:opacity-100"
+              }`}>
+                <p className="text-white/60 text-sm leading-relaxed mb-8 uppercase font-medium">
+                  {service.desc}
+                </p>
+                <Link href="/citas" onClick={(e) => {
+                  e.stopPropagation();
+                }}>
+                  <button className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs rounded-full hover:bg-[#f16315] hover:text-white transition-all active:scale-95 flex items-center justify-center gap-2 group/btn">
+                    Agendar Cita <Calendar size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                  </button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Static CTA (visible when NOT hovered/active) */}
+            <div className={`absolute bottom-10 right-10 transition-opacity z-10 ${
+              isActive ? "opacity-0" : "group-hover:opacity-0"
+            }`}>
+               <ArrowRight className="text-white/20 group-hover:text-[#f16315]" size={24} />
+            </div>
+          </motion.div>
+        );
+      })}
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { motion, useMotionValue, useTransform, animate, useInView } from "framer-motion";
 import { 
   ChevronRight, 
+  ChevronLeft,
   Clock, 
   Settings, 
   ShieldCheck, 
@@ -245,7 +246,8 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Desktop Version: Static 3-Column Grid */}
+          <div className="hidden md:grid grid-cols-3 gap-6">
             {reviewsData.map((review, i) => (
               <motion.div 
                 key={review.id}
@@ -290,6 +292,82 @@ export default function LandingPage() {
             ))}
           </div>
 
+          {/* Mobile Version: Slider 1-by-1 with Swipe and Arrow Navigation */}
+          <div className="block md:hidden relative">
+            <div 
+              id="mobile-reviews-slider"
+              className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-none -mx-6 px-6 pb-6"
+              style={{ scrollBehavior: 'smooth' }}
+            >
+              {reviewsData.map((review) => (
+                <div 
+                  key={review.id}
+                  className="w-full shrink-0 snap-center p-8 rounded-[40px] bg-white/5 border border-white/10 relative flex flex-col justify-between"
+                >
+                  <Quote className="absolute top-6 right-8 text-white/5" size={50} />
+                  
+                  <div>
+                    <div className="flex gap-1 mb-6">
+                      {[...Array(review.stars)].map((_, i) => (
+                        <Star key={i} size={14} fill="#f16315" className="text-[#f16315]" />
+                      ))}
+                    </div>
+                    <p className="text-base text-white/80 leading-relaxed mb-8 italic">
+                      "{review.text}"
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-4 border-t border-white/5 pt-6">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#f16315] to-orange-400 flex items-center justify-center text-black font-bold text-xl">
+                      {review.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="font-bold flex items-center gap-2">
+                        {review.name}
+                        {review.verified && (
+                          <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
+                            <svg viewBox="0 0 24 24" fill="white" className="w-2.5 h-2.5">
+                              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-xs text-white/30 uppercase tracking-tighter">{review.date} • Verificada en Google</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tactile Arrows Control */}
+            <div className="flex justify-center gap-4 mt-4">
+              <button 
+                onClick={() => {
+                  const slider = document.getElementById('mobile-reviews-slider');
+                  if (slider) {
+                    slider.scrollLeft -= slider.offsetWidth - 24;
+                  }
+                }}
+                className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white active:bg-[#f16315] active:text-white transition-all active:scale-95"
+                aria-label="Reseña anterior"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button 
+                onClick={() => {
+                  const slider = document.getElementById('mobile-reviews-slider');
+                  if (slider) {
+                    slider.scrollLeft += slider.offsetWidth - 24;
+                  }
+                }}
+                className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white active:bg-[#f16315] active:text-white transition-all active:scale-95"
+                aria-label="Siguiente reseña"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
+
           <div className="mt-16 text-center">
             <a 
               href="https://maps.app.goo.gl/EHV9HVbhVHRv5Zwm6" 
@@ -317,84 +395,87 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
-            {/* Connecting Line (Desktop Only) - Centered behind icons */}
-            <div className="hidden md:block absolute top-[40px] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#f16315]/30 to-transparent z-0 transition-all duration-700" />
+          {/* Wrapper for Mobile Horizontal Scroll & Desktop Grid */}
+          <div className="relative">
+            {/* Connecting Line (Desktop: static, Mobile: full-width horizontal) */}
+            <div className="absolute top-[40px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#f16315]/30 to-transparent z-0 transition-all duration-700 md:block" />
             
-            {[
-              { 
-                step: "01",
-                title: "Recepción Elite", 
-                desc: "Registro técnico fotográfico, protección de interiores y primer escaneo de ingreso.",
-                icon: () => (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-9 h-9">
-                    <path d="M4 4h16v16H4zM4 8h16M4 12h16M4 16h16M8 4v16M12 4v16M16 4v16" strokeOpacity="0.2" />
-                    <path d="M7 6h10M7 10h10M7 14h5" strokeLinecap="round" />
-                    <rect x="14" y="13" width="4" height="5" rx="1" strokeWidth="2" />
-                  </svg>
-                )
-              },
-              { 
-                step: "02",
-                title: "Diagnóstico Quirúrgico", 
-                desc: "Uso de tecnología computarizada avanzada para detectar fallas invisibles al ojo humano.",
-                icon: () => (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-9 h-9">
-                    <circle cx="12" cy="12" r="9" strokeOpacity="0.2" />
-                    <path d="M12 3v18M3 12h18M7.5 7.5l9 9M16.5 7.5l-9 9" strokeOpacity="0.2" />
-                    <circle cx="12" cy="12" r="4" strokeWidth="2" />
-                    <path d="M12 8v8M8 12h8" strokeLinecap="round" />
-                  </svg>
-                )
-              },
-              { 
-                step: "03",
-                title: "Ejecución Maestra", 
-                desc: "Procesos de ingeniería limpia, refacciones certificadas y herramientas de precisión.",
-                icon: () => (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-9 h-9">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeOpacity="0.3" />
-                    <path d="M12 22V12" strokeDasharray="2 2" />
-                    <circle cx="12" cy="12" r="3" strokeWidth="2" />
-                  </svg>
-                )
-              },
-              { 
-                step: "04",
-                title: "Certificación Total", 
-                desc: "Prueba de ruta final, reporte digital enviado a tu móvil y garantía por escrito.",
-                icon: () => (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-9 h-9">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" strokeOpacity="0.2" />
-                    <circle cx="12" cy="12" r="8" strokeWidth="2" />
-                    <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
-                  </svg>
-                )
-              }
-            ].map((item, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.15, duration: 0.6 }}
-                viewport={{ once: true }}
-                className="relative z-10 group"
-              >
-                <div className="mb-8 relative inline-block">
-                  <div className="w-20 h-20 rounded-[30px] bg-white/5 border border-white/10 flex items-center justify-center text-[#f16315] group-hover:bg-[#f16315] group-hover:text-white transition-all duration-500 transform group-hover:-rotate-6 shadow-xl">
-                    <item.icon />
+            <div className="flex md:grid md:grid-cols-4 gap-8 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scrollbar-none pb-6 md:pb-0 -mx-6 px-6 md:mx-0 md:px-0">
+              {[
+                { 
+                  step: "01",
+                  title: "Recepción Elite", 
+                  desc: "Registro técnico fotográfico, protección de interiores y primer escaneo de ingreso.",
+                  icon: () => (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-9 h-9">
+                      <path d="M4 4h16v16H4zM4 8h16M4 12h16M4 16h16M8 4v16M12 4v16M16 4v16" strokeOpacity="0.2" />
+                      <path d="M7 6h10M7 10h10M7 14h5" strokeLinecap="round" />
+                      <rect x="14" y="13" width="4" height="5" rx="1" strokeWidth="2" />
+                    </svg>
+                  )
+                },
+                { 
+                  step: "02",
+                  title: "Diagnóstico Quirúrgico", 
+                  desc: "Uso de tecnología computarizada avanzada para detectar fallas invisibles al ojo humano.",
+                  icon: () => (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-9 h-9">
+                      <circle cx="12" cy="12" r="9" strokeOpacity="0.2" />
+                      <path d="M12 3v18M3 12h18M7.5 7.5l9 9M16.5 7.5l-9 9" strokeOpacity="0.2" />
+                      <circle cx="12" cy="12" r="4" strokeWidth="2" />
+                      <path d="M12 8v8M8 12h8" strokeLinecap="round" />
+                    </svg>
+                  )
+                },
+                { 
+                  step: "03",
+                  title: "Ejecución Maestra", 
+                  desc: "Procesos de ingeniería limpia, refacciones certificadas y herramientas de precisión.",
+                  icon: () => (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-9 h-9">
+                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeOpacity="0.3" />
+                      <path d="M12 22V12" strokeDasharray="2 2" />
+                      <circle cx="12" cy="12" r="3" strokeWidth="2" />
+                    </svg>
+                  )
+                },
+                { 
+                  step: "04",
+                  title: "Certificación Total", 
+                  desc: "Prueba de ruta final, reporte digital enviado a tu móvil y garantía por escrito.",
+                  icon: () => (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-9 h-9">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" strokeOpacity="0.2" />
+                      <circle cx="12" cy="12" r="8" strokeWidth="2" />
+                      <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
+                    </svg>
+                  )
+                }
+              ].map((item, i) => (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.15, duration: 0.6 }}
+                  viewport={{ once: true }}
+                  className="relative z-10 group min-w-[280px] md:min-w-0 snap-center flex-1 flex flex-col items-center text-center"
+                >
+                  <div className="mb-8 relative inline-block">
+                    <div className="w-20 h-20 rounded-[30px] bg-zinc-900 md:bg-white/5 border border-white/10 flex items-center justify-center text-[#f16315] group-hover:bg-[#f16315] group-hover:text-white transition-all duration-500 transform group-hover:-rotate-6 shadow-xl">
+                      <item.icon />
+                    </div>
+                    <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-black border border-white/10 flex items-center justify-center text-xs font-black text-white/40 group-hover:text-[#f16315] transition-colors">
+                      {item.step}
+                    </div>
                   </div>
-                  <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-black border border-white/10 flex items-center justify-center text-xs font-black text-white/40 group-hover:text-[#f16315] transition-colors">
-                    {item.step}
-                  </div>
-                </div>
-                
-                <h4 className="text-2xl font-black mb-4 group-hover:text-[#f16315] transition-colors">{item.title}</h4>
-                <p className="text-white/40 leading-relaxed group-hover:text-white/60 transition-colors">
-                  {item.desc}
-                </p>
-              </motion.div>
-            ))}
+                  
+                  <h4 className="text-2xl font-black mb-4 group-hover:text-[#f16315] transition-colors">{item.title}</h4>
+                  <p className="text-white/40 leading-relaxed text-sm md:text-base text-justify px-2 md:px-0">
+                    {item.desc}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
           </div>
 
           <div className="mt-24 p-12 rounded-[40px] bg-gradient-to-br from-white/5 to-transparent border border-white/10 flex flex-col md:flex-row items-center justify-between gap-12">

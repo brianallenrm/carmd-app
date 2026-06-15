@@ -134,19 +134,21 @@ export default function BookingPage() {
     // Weekdays: 7:45 - 17:00. Sat: 7:45 - 14:00
     const endHour = isSaturday ? 14 : 17;
 
-    for (let h = 7.75; h <= endHour; h += 0.5) {
+    // First slot: 7:45 AM
+    times.push("7:45 AM");
+
+    // Hourly slots from 8:30 AM onwards
+    for (let h = 8.5; h <= endHour; h += 1.0) {
       if (isSaturday && h > 14) break;
       if (!isSaturday && h > 17) break;
 
       const hour = Math.floor(h);
-      const minutes = (h % 1 === 0) ? "00" : "30";
-      // Special case: 7.75 = 7:45
-      const displayMinutes = (h === 7.75) ? "45" : minutes;
+      const minutes = "30";
       const ampm = hour >= 12 ? 'PM' : 'AM';
       let displayHour = hour > 12 ? hour - 12 : hour;
       if (displayHour === 0) displayHour = 12;
 
-      times.push(`${displayHour}:${displayMinutes} ${ampm}`);
+      times.push(`${displayHour}:${minutes} ${ampm}`);
     }
     return times;
   };

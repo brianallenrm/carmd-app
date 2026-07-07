@@ -279,7 +279,11 @@ export const getChatState = async (phone: string) => {
 
     const rows = await sheet.getRows();
     const cleanPhone = phone.replace(/\D/g, '').slice(-10); // Last 10 digits
-    const row = rows.find(r => r.get("phone").replace(/\D/g, '').endsWith(cleanPhone));
+    const row = rows.find(r => {
+        const val = r.get("phone");
+        if (!val || typeof val !== 'string') return false;
+        return val.replace(/\D/g, '').endsWith(cleanPhone);
+    });
     
     if (!row) return null;
 

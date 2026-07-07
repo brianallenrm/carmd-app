@@ -13,7 +13,7 @@ export const WHATSAPP_CONFIG = {
     TOKEN: process.env.WHATSAPP_TOKEN,
     PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID,
     VERIFY_TOKEN: process.env.WHATSAPP_VERIFY_TOKEN,
-    API_VERSION: "v21.0",
+    API_VERSION: "v25.0",
 };
 
 // --- 2. Legal & Regional Formatting ---
@@ -70,13 +70,18 @@ export const numberToLetters = (amount: number): string => {
     return `(${text.trim()} PESOS ${decimalPart.toString().padStart(2, "0")}/100 M.N.)`;
 };
 
-/**
- * Generates a clean WhatsApp link with the international prefix (52 for Mexico)
- * and optional pre-filled text.
- */
 export function getWhatsAppLink(text?: string, phone?: string) {
-    const cleanPhone = (phone || COMPANY_DEFAULTS.whatsapp).replace(/\D/g, '');
-    const baseUrl = `https://wa.me/52${cleanPhone}`;
+    const rawPhone = phone || COMPANY_DEFAULTS.whatsapp;
+    let cleanPhone = rawPhone.replace(/\D/g, '');
+    
+    // Ensure we do not duplicate the 52 prefix if it's already there
+    if (cleanPhone.startsWith('52') && cleanPhone.length > 10) {
+        // Already has prefix, keep it
+    } else {
+        cleanPhone = `52${cleanPhone}`;
+    }
+    
+    const baseUrl = `https://wa.me/${cleanPhone}`;
     if (text) {
         return `${baseUrl}?text=${encodeURIComponent(text)}`;
     }

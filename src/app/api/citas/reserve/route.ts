@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
       const whatsappClientLink = getWhatsAppLink(whatsappClientText, phone);
       
       const whatsappRafaText = `👤 *NUEVA CITA GENERADA*\n\nSe ha recibido una nueva solicitud de inspección:\n\n- 👤 *Nombre:* ${name}\n- 📞 *Teléfono:* ${phone}\n- 🚗 *Vehículo:* ${vehicle} ${year}\n- 🛞 *Kilometraje:* ${km || 'N/A'} KM\n- 📅 *Fecha:* ${date}\n- 🕐 *Hora:* ${time}\n- 🔧 *Problema:* ${problem}\n\nPor favor confirma con el cliente lo antes posible.`;
-      const whatsappRafaLink = getWhatsAppLink(whatsappRafaText, "5516473084");
+      const whatsappRafaLink = getWhatsAppLink(whatsappRafaText, "525516473084");
 
       const adminMessage = `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; max-width: 650px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
@@ -160,10 +160,31 @@ export async function POST(request: NextRequest) {
         console.error("Error sending admin email:", adminEmailError);
       }
 
-      // C. Send WhatsApp Confirmation
+      // C. Send WhatsApp Confirmation to Client
       const confirmationText = `¡Solicitud recibida! ✔️ Revisamos disponibilidad y te confirmamos por aquí mismo en unos momentos. Así no te hacemos perder tiempo 👍.`;
       await sendWhatsAppMessage(phone, confirmationText);
       await updateChatState(phone, 'COMPLETED');
+
+      // D. Send WhatsApp Alert to Admins AUTOMATICALLY
+      console.log("[API Reserve] Enviando alertas automáticas a los administradores...");
+      const rafaPhone = "525516473084";
+      const momPhone = "525535786087";
+      
+      // Enviar a Rafael
+      try {
+          await sendWhatsAppMessage(rafaPhone, whatsappRafaText);
+          console.log("[API Reserve] Alerta enviada a Rafael con éxito.");
+      } catch (e) {
+          console.error("Error enviando alerta a Rafael:", e);
+      }
+
+      // Enviar a Mamá
+      try {
+          await sendWhatsAppMessage(momPhone, whatsappRafaText);
+          console.log("[API Reserve] Alerta enviada a mamá con éxito.");
+      } catch (e) {
+          console.error("Error enviando alerta a mamá:", e);
+      }
     }
 
     return NextResponse.json({ success: true });

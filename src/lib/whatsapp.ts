@@ -9,10 +9,18 @@ export async function sendWhatsAppMessage(to: string, text: string) {
         return { success: false, error: "Missing credentials" };
     }
 
-    // Ensure phone number has international prefix (52 for Mexico if 10 digits)
+    // Ensure phone number has international prefix and remove the Mexican intercalated '1' (521... -> 52...)
     let formattedPhone = to.replace(/\D/g, '');
+    
+    // Clean up potential double '52' prefix (e.g. 525255...)
+    if (formattedPhone.startsWith('5252') && formattedPhone.length > 12) {
+        formattedPhone = formattedPhone.substring(2);
+    }
+    
     if (formattedPhone.length === 10) {
         formattedPhone = `52${formattedPhone}`;
+    } else if (formattedPhone.startsWith('521') && formattedPhone.length === 13) {
+        formattedPhone = '52' + formattedPhone.substring(3);
     }
 
     const url = `https://graph.facebook.com/${WHATSAPP_CONFIG.API_VERSION}/${WHATSAPP_CONFIG.PHONE_NUMBER_ID}/messages`;

@@ -138,8 +138,31 @@ export async function POST(req: NextRequest) {
         
         // 1. Check current state in Sheets
         console.log(`[Webhook] Buscando estado en Google Sheets para ${from}...`);
-        const chat = await getChatState(from);
+        let chat = await getChatState(from);
         console.log(`[Webhook] Estado recuperado:`, chat);
+
+        // Si es una conversación totalmente nueva (no registrada en CHAT_SESSIONS), alertamos a los administradores
+        if (!chat) {
+            console.log(`[Webhook] Nueva conversación detectada para ${from}. Enviando alertas a los administradores...`);
+            const adminNotifyText = `📢 *NUEVA CONVERSACIÓN INICIADA*\n\nEl número +${from} ha iniciado un chat con Mariana (IA).\n\nPuedes monitorear y gestionar la conversación en tiempo real desde tu Portal:\n👉 carmd.com.mx/os/chats`;
+            
+            const rafaPhone = "525516473084";
+            const momPhone = "525535786087";
+
+            // Enviar alerta a Rafael
+            try {
+                await sendWhatsAppMessage(rafaPhone, adminNotifyText);
+            } catch (e) {
+                console.error("Error al alertar a Rafael sobre inicio de chat:", e);
+            }
+
+            // Enviar alerta a Mamá
+            try {
+                await sendWhatsAppMessage(momPhone, adminNotifyText);
+            } catch (e) {
+                console.error("Error al alertar a Mamá sobre inicio de chat:", e);
+            }
+        }
 
         // If the state is HUMAN_REQUIRED, the bot stays silent and doesn't auto-respond.
         if (chat?.state === 'HUMAN_REQUIRED') {

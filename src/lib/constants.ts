@@ -74,10 +74,13 @@ export function getWhatsAppLink(text?: string, phone?: string) {
     const rawPhone = phone || COMPANY_DEFAULTS.whatsapp;
     let cleanPhone = rawPhone.replace(/\D/g, '');
     
-    // Ensure we do not duplicate the 52 prefix if it's already there
-    if (cleanPhone.startsWith('52') && cleanPhone.length > 10) {
-        // Already has prefix, keep it
-    } else {
+    // Si inicia con '521' y tiene 13 dígitos (lada méxico con 1 extra), removemos el 1 intermedio
+    if (cleanPhone.startsWith('521') && cleanPhone.length === 13) {
+        cleanPhone = '52' + cleanPhone.slice(3);
+    }
+    
+    // Asegurar prefijo de México 52 por defecto
+    if (!cleanPhone.startsWith('52')) {
         cleanPhone = `52${cleanPhone}`;
     }
     

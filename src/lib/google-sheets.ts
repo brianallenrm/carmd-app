@@ -320,7 +320,58 @@ export const updateChatState = async (phone: string, state: string, vehicleProbl
             phone,
             state,
             last_update: now,
-            vehicle_problem: vehicleProblem || ""
+            vehicle_problem: vehicleProblem || ''
         });
     }
+};
+
+/**
+ * Retrieves the message history for a given phone number (limited to last 50).
+ */
+export const getChatMessages = async (phone: string) => {
+    const doc = await getInventoryDoc();
+    const sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.CHAT_MESSAGES_TAB!];
+    if (!sheet) {
+        console.warn("CHAT_MESSAGES sheet not found.");
+        return [];
+    }
+
+    const rows = await sheet.getRows();
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10); // Last 10 digits
+    
+    // Filtramos las filas que pertenecen al cliente
+    const matchedRows = rows.filter(r => {
+        const val = r.get("phone");
+        if (!val || typeof val !== 'string') return false;
+        return val.replace(/\D/g, '').endsWith(cleanPhone);
+    });
+
+    // Mapeamos y tomamos los últimos 50 mensajes para no saturar el panel
+    return matchedRows.slice(-50).map(r => ({
+        phone: r.get("phone"),
+        sender: r.get("sender"), // 'client', 'assistant', 'admin'
+        text: r.get("text"),
+        timestamp: r.get("timestamp")
+    }));
+};
+
+/**
+ * Saves a new chat message into the CHAT_MESSAGES table.
+ */
+export const saveChatMessage = async (phone: string, sender: 'client' | 'assistant' | 'admin', text: string) => {
+    const doc = await getInventoryDoc();
+    const sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.CHAT_MESSAGES_TAB!];
+    if (!sheet) {
+        console.warn("CHAT_MESSAGES sheet not found. Cannot save message.");
+        return;
+    }
+
+    const now = new Date().toISOString();
+    await sheet.addRow({
+        phone: phone,
+        sender: sender,
+        text: text,
+        timestamp: now
+    });
+    console.log(`[Google Sheets] Guardado mensaje en historial para ${phone} de ${sender}: "${text.substring(0, 30)}..."`);
 };

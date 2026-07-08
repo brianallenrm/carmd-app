@@ -11,7 +11,8 @@ import {
   Search,
   LayoutDashboard,
   History,
-  Radio
+  Radio,
+  MessageCircle
 } from 'lucide-react';
 import DashboardCard from '@/components/os/DashboardCard';
 import VehicleHistoryTool from '@/components/os/VehicleHistoryTool';
@@ -165,6 +166,12 @@ export default function ControlCenter() {
               description="Inspección visual de daños físicos, fotos de ingreso y registro de pertenencias."
               href="/os/inventario"
               icon={ClipboardList}
+            />
+            <DashboardCard
+              title="Chats de WhatsApp"
+              description="Monitoreo en tiempo real de conversaciones de la IA e intervención manual de chats."
+              href="/os/chats"
+              icon={MessageCircle}
             />
           </div>
         </section>

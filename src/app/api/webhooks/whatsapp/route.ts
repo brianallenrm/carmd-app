@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { WHATSAPP_CONFIG } from '@/lib/constants';
 import { sendWhatsAppMessage } from '@/lib/whatsapp';
-import { getChatState, updateChatState } from '@/lib/google-sheets';
+import { getChatState, updateChatState, saveChatMessage } from '@/lib/google-sheets';
 import { GoogleGenAI } from '@google/genai';
 
 // Initialize Google Gen AI Client
@@ -133,6 +133,9 @@ export async function POST(req: NextRequest) {
 
         console.log(`[Webhook] Mensaje recibido de ${from}: "${text}"`);
         
+        // Guardar mensaje en el historial CHAT_MESSAGES
+        await saveChatMessage(from, 'client', text);
+        
         // 1. Check current state in Sheets
         console.log(`[Webhook] Buscando estado en Google Sheets para ${from}...`);
         const chat = await getChatState(from);
@@ -159,6 +162,7 @@ export async function POST(req: NextRequest) {
             
             const apologyMessage = `Disculpa los inconvenientes 🙇‍♂️. Tu solicitud ha sido turnada de inmediato con nuestro Gerente de Servicio de forma prioritaria. Detendré mis respuestas automáticas por aquí y en unos minutos se comunicará un miembro de nuestro equipo contigo personalmente.`;
             await sendWhatsAppMessage(from, apologyMessage);
+            await saveChatMessage(from, 'assistant', apologyMessage);
             await updateChatState(from, 'HUMAN_REQUIRED', text);
             return NextResponse.json({ ok: true });
         }
@@ -211,6 +215,7 @@ export async function POST(req: NextRequest) {
                 console.log("[Webhook] Confirmación afirmativa recibida. Registrando cita definitiva...");
                 const confirmationMsg = `¡Excelente! Estoy agendando tu cita y notificando a nuestro equipo. Te esperamos en nuestro Centro de Servicio. 🚗💨`;
                 await sendWhatsAppMessage(from, confirmationMsg);
+                await saveChatMessage(from, 'assistant', confirmationMsg);
 
                 try {
                     const baseUrl = process.env.NODE_ENV === 'production' 
@@ -245,6 +250,7 @@ export async function POST(req: NextRequest) {
                 console.log("[Webhook] El cliente no confirmó o desea cambiar datos. Regresando a recolección.");
                 const retryMsg = `Entendido. ¿Qué dato te gustaría corregir o qué cambio hacemos en tu cita? 🛠️`;
                 await sendWhatsAppMessage(from, retryMsg);
+                await saveChatMessage(from, 'assistant', retryMsg);
                 await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(tempParams));
                 return NextResponse.json({ ok: true });
             }
@@ -364,11 +370,13 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
 ¿Te parece bien si procedo a confirmar tu espacio con estos datos? 👍`;
 
                 await sendInBubbles(from, summaryText);
+                await saveChatMessage(from, 'assistant', summaryText);
                 await updateChatState(from, 'WAITING_CONFIRMATION_IA', JSON.stringify(mergedParams));
                 return NextResponse.json({ ok: true });
             }
 
             await sendInBubbles(from, replyText);
+            await saveChatMessage(from, 'assistant', replyText);
             await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(mergedParams));
             return NextResponse.json({ ok: true });
         }
@@ -482,6 +490,7 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             console.log("[Webhook] Disparador semántico [TRIGGER_APPOINTMENT] detectado. Pasando a estado COLLECTING_APPOINTMENT_IA.");
             replyText = replyText.replace('[TRIGGER_APPOINTMENT]', '').trim();
             await sendInBubblesGeneral(from, replyText);
+            await saveChatMessage(from, 'assistant', replyText);
             
             // Intentar extraer el problema inicial si el usuario lo mencionó en su saludo/pregunta
             let initialProblem = null;
@@ -498,6 +507,7 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
 
         // Send response
         await sendInBubblesGeneral(from, replyText);
+        await saveChatMessage(from, 'assistant', replyText);
 
         // Update state to AI state
         await updateChatState(from, nextState, currentState === 'WAITING_PROBLEM_IA' ? text : chat?.vehicleProblem);

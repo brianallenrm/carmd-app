@@ -31,6 +31,10 @@ Sigue ESTRICTAMENTE las siguientes reglas de redacción y comportamiento (Psicol
 3.1. PREGUNTAS FRECUENTES (FAQs) DE OPERACIÓN Y TALLER:
 - AFINACIÓN OFICIAL: Si te preguntan en qué consiste la afinación, descríbelo textualmente como: "Mantenimiento al sistema de ignición, inyección, enfriamiento y lubricación. Reemplazo de filtros críticos y reset de intervalos de mantenimiento, más la revisión general de puntos de seguridad."
 - POLÍTICA DE REFACCIONES DEL CLIENTE: Si preguntan si pueden traer sus propias refacciones, responde que sí es posible. Aclárales que nuestro equipo de ingenieros debe evaluar la calidad de las piezas a su llegada para determinar si aplica o no nuestra garantía de 1 año y los servicios incluidos.
+- COSTO DE DIAGNÓSTICO: Si preguntan cuánto cuesta el diagnóstico, responde que al igual que otros servicios, depende de la evaluación física. Sin embargo, explícales con entusiasmo que si deciden realizar la reparación con nosotros, el diagnóstico es 100% gratuito (se bonifica del total del trabajo).
+- FACTURACIÓN: Si preguntan si facturamos, responde que sí emitimos factura para todos los servicios si el cliente lo requiere. Regla de oro: No menciones si el precio incluye o no IVA bajo ningún motivo.
+- FORMAS DE PAGO: Aceptamos todos los medios de pago: efectivo, transferencia bancaria y todas las tarjetas de débito o crédito (Visa, Mastercard y American Express). No manejamos meses sin intereses directos, pero sí es posible diferir o dividir el pago en mensualidades con intereses directamente en nuestra terminal física a su llegada.
+- GARANTÍA CARMD: Si preguntan qué garantía ofrecemos, responde que todas nuestras garantías son por escrito: ofrecemos 1 año de garantía en mano de obra e incluye de regalo dos mantenimientos preventivos gratuitos (los cuales se especifican en la nota indicando el kilometraje recomendado para traer de vuelta el carro). Comparte amablemente la dirección oficial: https://www.carmd.com.mx/terminos para detalles.
 - CONCEPTO PRINCIPAL: Recuerda usar siempre el término premium "Centro de Servicio" para referirte a las instalaciones de CarMD.
 
 4. MEMORIA INTELIGENTE Y CORRECCIÓN DE DATOS:
@@ -491,10 +495,25 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                 }
                 return NextResponse.json({ ok: true });
             } else {
+                const textLower = textClean.toLowerCase();
+                const isCancellation = textLower.includes('cancelar') || textLower.includes('cancela') || 
+                                      textLower.includes('ya no') || textLower.includes('olvidalo') || 
+                                      textLower.includes('olvídelo') || textLower.includes('ninguno');
+                
+                if (isCancellation) {
+                    console.log("[Webhook] Solicitud de cancelación recibida. Limpiando estado...");
+                    const cancelMsg = `Entendido. He cancelado el proceso de registro de tu cita. Si en el futuro necesitas ayuda para tu auto, recuerda que aquí estaré listo para apoyarte. ¡Que tengas un excelente día! 😊🚗`;
+                    await sendWhatsAppMessage(from, cancelMsg);
+                    await saveChatMessage(from, 'assistant', cancelMsg);
+                    await updateChatState(from, 'COMPLETED');
+                    return NextResponse.json({ ok: true });
+                }
+
                 // Si dice que no o quiere cambiar algo, regresamos a la recolección
                 console.log("[Webhook] El cliente no confirmó o desea cambiar datos. Regresando a recolección.");
                 const retryMsg = `Entendido. ¿Qué dato te gustaría corregir o qué cambio hacemos en tu cita? 🛠️`;
                 await sendWhatsAppMessage(from, retryMsg);
+                await saveChatMessage(from, 'assistant', retryMsg);
                 await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(tempParams));
                 return NextResponse.json({ ok: true });
             }

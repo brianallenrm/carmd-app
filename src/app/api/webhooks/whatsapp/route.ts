@@ -133,6 +133,74 @@ export async function POST(req: NextRequest) {
 
         if (!text) return NextResponse.json({ ok: true });
 
+        // --- MODO ADMINISTRADOR GLOBAL (carmd admin) ---
+        if (textLower.startsWith('carmd admin')) {
+            console.log(`[Admin Mode] Comando administrativo recibido de ${from}: "${text}"`);
+            
+            // Extraer la placa de la consulta usando Gemini de forma ultra rápida
+            let plate = '';
+            try {
+                const extractPlatePrompt = `Analiza esta consulta del administrador de CarMD: "${text}".
+                Extrae la placa del vehículo mencionada (ej: "PCH2668", "ABCD1234").
+                Responde ÚNICAMENTE con el valor de la placa limpio, sin puntuación ni texto extra. Si no hay placas, responde "NONE".`;
+                
+                const plateRes = await ai.models.generateContent({
+                    model: 'gemini-3.1-flash-lite',
+                    contents: extractPlatePrompt,
+                    config: { temperature: 0.1 }
+                });
+                plate = plateRes.text?.trim().toUpperCase() || 'NONE';
+            } catch (e) {
+                console.error("[Admin Mode] Error al extraer placa:", e);
+            }
+
+            if (!plate || plate === 'NONE') {
+                const errorMsg = `❌ *Error administrativo*:\nNo pude identificar una placa en tu mensaje. Por favor intenta usando el formato:\n👉 *carmd admin última afinación de placas PCH2668*`;
+                await sendWhatsAppMessage(from, errorMsg);
+                await saveChatMessage(from, 'assistant', errorMsg);
+                return NextResponse.json({ ok: true });
+            }
+
+            console.log(`[Admin Mode] Placa extraída: ${plate}. Realizando búsqueda en Sheets...`);
+            
+            try {
+                // Realizar búsqueda en la pestaña principal de Inventarios_app
+                const ModernGoogleSheets = await import('@/lib/google-sheets');
+                const vehicleData = await ModernGoogleSheets.lookupVehicleByPlate(plate);
+                
+                if (!vehicleData) {
+                    const failMsg = `⚠️ *CarMD Admin Info*:\nNo encontré ningún vehículo registrado en el Centro de Servicio con las placas *${plate}*.`;
+                    await sendWhatsAppMessage(from, failMsg);
+                    await saveChatMessage(from, 'assistant', failMsg);
+                    return NextResponse.json({ ok: true });
+                }
+
+                // Generar reporte administrativo inteligente usando Gemini para darle contexto
+                const reportPrompt = `Genera un resumen administrativo sumamente rápido, ejecutivo y amigable para el dueño del taller (Brian/Rafael) con los siguientes datos del vehículo de placas ${plate}:
+                - Cliente: ${vehicleData.client.name} (WhatsApp: ${vehicleData.client.phone})
+                - Auto: ${vehicleData.vehicle.brand} ${vehicleData.vehicle.model} ${vehicleData.vehicle.year}
+                - Kilometraje registrado: ${vehicleData.vehicle.odometer} KM
+                - Dirección del cliente: ${vehicleData.client.address || 'No registrada'}
+                
+                Usa emojis de forma profesional. Mantén el formato claro y estructurado con viñetas.`;
+
+                const reportRes = await ai.models.generateContent({
+                    model: 'gemini-3.1-flash-lite',
+                    contents: reportPrompt,
+                    config: { temperature: 0.2 }
+                });
+
+                const finalReport = `📊 *REPORTE DE BÚSQUEDA ADMINISTRATIVA*\n\n${reportRes.text?.trim()}`;
+                await sendWhatsAppMessage(from, finalReport);
+                await saveChatMessage(from, 'assistant', finalReport);
+            } catch (err) {
+                console.error("[Admin Mode] Error en consulta de base de datos:", err);
+                const errNotify = `❌ *Error administrativo*:\nOcurrió un error al consultar las bases de datos en Sheets para la placa *${plate}*. Por favor inténtalo de nuevo más tarde.`;
+                await sendWhatsAppMessage(from, errNotify);
+            }
+            return NextResponse.json({ ok: true });
+        }
+
         // Get current Mexico City Date, Day of week and Time to inject into prompt dynamically
         const nowObj = new Date();
         const daysOfWeek = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];

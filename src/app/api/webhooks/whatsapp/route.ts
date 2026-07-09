@@ -448,8 +448,22 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
 
             if (isAffirmative) {
                 console.log("[Webhook] Confirmación afirmativa recibida. Registrando cita definitiva...");
-                const confirmationMsg = `¡Excelente! Estoy agendando tu cita y notificando a nuestro equipo. Te esperamos en el taller. 🚗💨`;
+                
+                // Evaluar si es tarde (después de las 8:00 PM o antes de las 7:30 AM en CDMX)
+                const mxDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+                const mxHour = mxDate.getHours();
+                const mxMinutes = mxDate.getMinutes();
+                const totalMinutes = mxHour * 60 + mxMinutes;
+                
+                const isLateNight = totalMinutes >= 20 * 60 || totalMinutes < 7.5 * 60; // 8:00 PM (1200 mins) o 7:30 AM (450 mins)
+                
+                let confirmationMsg = `¡Excelente! Estoy agendando tu cita y notificando a nuestro equipo. Te esperamos en nuestro Centro de Servicio. 🚗💨`;
+                if (isLateNight) {
+                    confirmationMsg += `\n\n⚠️ *Nota*: Por el horario actual, el seguimiento personalizado y la confirmación final por parte de nuestro equipo humano se realizarán a primera hora del día de mañana a partir de las 8:00 AM. ¡Excelente noche! 🌙`;
+                }
+
                 await sendWhatsAppMessage(from, confirmationMsg);
+                await saveChatMessage(from, 'assistant', confirmationMsg);
 
                 try {
                     const baseUrl = process.env.NODE_ENV === 'production' 

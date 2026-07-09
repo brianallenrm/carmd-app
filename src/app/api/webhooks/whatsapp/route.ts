@@ -161,28 +161,59 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({ ok: true });
             }
 
-            console.log(`[Admin Mode] Placa extraída: ${plate}. Realizando búsqueda en Sheets...`);
+            console.log(`[Admin Mode] Placa extraída: ${plate}. Realizando búsqueda en Sheets (Master & Inventario)...`);
             
             try {
-                // Realizar búsqueda en la pestaña principal de Inventarios_app
-                const ModernGoogleSheets = await import('@/lib/google-sheets');
-                const vehicleData = await ModernGoogleSheets.lookupVehicleByPlate(plate);
+                const baseUrl = process.env.NODE_ENV === 'production' 
+                    ? `https://${req.headers.get('host')}` 
+                    : 'http://localhost:3000';
+
+                // Realizar búsqueda usando el endpoint de búsqueda oficial para obtener la ficha completa y las notas
+                const searchRes = await fetch(`${baseUrl}/api/os/history/search?q=${plate}`);
                 
-                if (!vehicleData) {
-                    const failMsg = `⚠️ *CarMD Admin Info*:\nNo encontré ningún vehículo registrado en el Centro de Servicio con las placas *${plate}*.`;
+                if (!searchRes.ok) {
+                    throw new Error("Failed to query history search API");
+                }
+
+                const searchData = await searchRes.json();
+                
+                if (!searchData.found || searchData.entries.length === 0) {
+                    const failMsg = `⚠️ *CarMD Admin Info*:\nNo encontré ningún registro en el Centro de Servicio (ni Notas de Servicio ni Inventario) con las placas *${plate}*.`;
                     await sendWhatsAppMessage(from, failMsg);
                     await saveChatMessage(from, 'assistant', failMsg);
                     return NextResponse.json({ ok: true });
                 }
 
-                // Generar reporte administrativo inteligente usando Gemini para darle contexto
-                const reportPrompt = `Genera un resumen administrativo sumamente rápido, ejecutivo y amigable para el dueño del taller (Brian/Rafael) con los siguientes datos del vehículo de placas ${plate}:
-                - Cliente: ${vehicleData.client.name} (WhatsApp: ${vehicleData.client.phone})
-                - Auto: ${vehicleData.vehicle.brand} ${vehicleData.vehicle.model} ${vehicleData.vehicle.year}
-                - Kilometraje registrado: ${vehicleData.vehicle.odometer} KM
-                - Dirección del cliente: ${vehicleData.client.address || 'No registrada'}
+                // Filtrar entradas por tipo nota y/o inventario
+                const notesList = searchData.entries
+                    .filter((e: any) => e.type === 'note')
+                    .map((e: any) => ({
+                        folio: e.folio,
+                        date: e.dateDisplay,
+                        km: e.vehicle?.km || '—',
+                        total: e.pricing?.total || 0,
+                        services: e.services?.join(', ') || 'Servicio de mantenimiento'
+                    }));
+
+                const inventoryList = searchData.entries
+                    .filter((e: any) => e.type === 'inventory')
+                    .map((e: any) => ({
+                        date: e.dateDisplay,
+                        km: e.vehicle?.km || '—',
+                        motivo: e.motivoIngreso || 'Diagnóstico general'
+                    }));
+
+                // Generar reporte administrativo inteligente usando Gemini para darle contexto técnico completo
+                const reportPrompt = `Genera un resumen administrativo sumamente ejecutivo y estructurado para el dueño del taller (Brian/Rafael) con la siguiente información de placas ${plate}:
+                - Cliente: ${searchData.client.name} (WhatsApp: ${searchData.client.phone})
+                - Auto: ${searchData.vehicle.brand} ${searchData.vehicle.model} (${searchData.vehicle.year})
+                - Kilometraje actual/estimado: ${searchData.vehicle.km} KM
+                - Historial de Notas de Servicio (Total encontradas: ${notesList.length}):
+                  ${JSON.stringify(notesList)}
+                - Historial de Inventarios/Entradas (Total encontradas: ${inventoryList.length}):
+                  ${JSON.stringify(inventoryList)}
                 
-                Usa emojis de forma profesional. Mantén el formato claro y estructurado con viñetas.`;
+                Describe con precisión cuál fue el último servicio mecánico realizado, cuándo fue, y a qué kilometraje. Usa emojis y viñetas ejecutivas para su rápida lectura en el celular.`;
 
                 const reportRes = await ai.models.generateContent({
                     model: 'gemini-3.1-flash-lite',
@@ -190,12 +221,12 @@ export async function POST(req: NextRequest) {
                     config: { temperature: 0.2 }
                 });
 
-                const finalReport = `📊 *REPORTE DE BÚSQUEDA ADMINISTRATIVA*\n\n${reportRes.text?.trim()}`;
+                const finalReport = `📊 *EXPEDIENTE DEL VEHÍCULO (${plate})*\n\n${reportRes.text?.trim()}`;
                 await sendWhatsAppMessage(from, finalReport);
                 await saveChatMessage(from, 'assistant', finalReport);
             } catch (err) {
-                console.error("[Admin Mode] Error en consulta de base de datos:", err);
-                const errNotify = `❌ *Error administrativo*:\nOcurrió un error al consultar las bases de datos en Sheets para la placa *${plate}*. Por favor inténtalo de nuevo más tarde.`;
+                console.error("[Admin Mode] Error en consulta de base de datos completa:", err);
+                const errNotify = `❌ *Error administrativo*:\nOcurrió un error al consultar las notas e inventario para la placa *${plate}*. Por favor inténtalo de nuevo.`;
                 await sendWhatsAppMessage(from, errNotify);
             }
             return NextResponse.json({ ok: true });

@@ -18,7 +18,8 @@ import {
     Type,
     Bold,
     Italic,
-    Sparkles
+    Sparkles,
+    ArrowDown
 } from 'lucide-react';
 
 interface ChatSession {
@@ -47,11 +48,16 @@ export default function ChatsPage() {
     const [viewMode, setViewMode] = useState<'list' | 'chat'>('list'); // Responsivo
     const [completedBooking, setCompletedBooking] = useState<any | null>(null);
     
-    // Configuración de tamaño de letra (accesibilidad): text-xs (12px), text-sm (14px), text-base (16px), text-lg (18px)
+    // Control de Notificación de Mensajes Nuevos y Scroll
+    const [hasNewMessages, setHasNewMessages] = useState(false);
+    const [isAtBottom, setIsAtBottom] = useState(true);
+
+    // Configuración de tamaño de letra (accesibilidad)
     const fontSizeClasses = ['text-[11px]', 'text-xs', 'text-sm', 'text-base', 'text-lg'];
-    const [fontSizeIndex, setFontSizeIndex] = useState(2); // Inicia en text-sm (14px) por defecto
+    const [fontSizeIndex, setFontSizeIndex] = useState(2); // Inicia en text-sm (14px)
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     // Cargar todas las sesiones de chat
@@ -68,16 +74,28 @@ export default function ChatsPage() {
     };
 
     // Cargar historial de mensajes de un chat específico
-    const fetchHistory = async (phone: string) => {
-        setLoadingMessages(true);
+    const fetchHistory = async (phone: string, isSilentUpdate = false) => {
+        if (!isSilentUpdate) setLoadingMessages(true);
         try {
             const res = await fetch(`/api/chats/${phone}/history`);
             const data = await res.json();
-            setMessages(data.messages || []);
+            const newMessages: ChatMessage[] = data.messages || [];
+
+            setMessages(prev => {
+                // Si la longitud cambió o hay mensajes nuevos
+                if (newMessages.length > prev.length) {
+                    // Si el usuario no está al final del scroll, activamos el aviso de mensajes nuevos
+                    if (!isAtBottom && isSilentUpdate) {
+                        setHasNewMessages(true);
+                    }
+                    return newMessages;
+                }
+                return prev;
+            });
         } catch (error) {
             console.error("Error loading messages:", error);
         } finally {
-            setLoadingMessages(false);
+            if (!isSilentUpdate) setLoadingMessages(false);
         }
     };
 
@@ -99,29 +117,52 @@ export default function ChatsPage() {
         return () => clearInterval(interval);
     }, []);
 
+    // Polling inteligente de mensajes
     useEffect(() => {
         if (selectedSession) {
             setCompletedBooking(null);
-            fetchHistory(selectedSession.phone);
+            setHasNewMessages(false);
+            
+            // Primera carga: sí queremos loading spinner
+            fetchHistory(selectedSession.phone, false).then(() => {
+                // Hacer scroll al fondo en la primera carga del chat
+                setTimeout(scrollToBottomDirect, 100);
+            });
             
             if (selectedSession.state === 'COMPLETED') {
                 fetchCompletedBooking(selectedSession.phone);
             }
 
             const interval = setInterval(() => {
-                fetchHistory(selectedSession.phone);
+                // Cargas en segundo plano: silenciosas (isSilentUpdate = true)
+                fetchHistory(selectedSession.phone, true);
                 if (selectedSession.state === 'COMPLETED') {
                     fetchCompletedBooking(selectedSession.phone);
                 }
             }, 5000);
             return () => clearInterval(interval);
         }
-    }, [selectedSession]);
+    }, [selectedSession, isAtBottom]);
 
-    // Scroll al final del chat cada que cargan mensajes
-    useEffect(() => {
+    // Escuchar scroll del contenedor para saber si el usuario está leyendo arriba
+    const handleScroll = () => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        // Tolerancia de 50px del fondo
+        const threshold = 50;
+        const currentIsAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+        
+        setIsAtBottom(currentIsAtBottom);
+        if (currentIsAtBottom) {
+            setHasNewMessages(false); // Si ya bajó, quitamos el aviso
+        }
+    };
+
+    const scrollToBottomDirect = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        setHasNewMessages(false);
+    };
 
     const handleSelectSession = (session: ChatSession) => {
         setSelectedSession(session);
@@ -154,6 +195,9 @@ export default function ChatsPage() {
                 setMessages(prev => [...prev, newMsg]);
                 setSelectedSession(prev => prev ? { ...prev, state: 'HUMAN_REQUIRED' } : null);
                 setSessions(prev => prev.map(s => s.phone === selectedSession.phone ? { ...s, state: 'HUMAN_REQUIRED' } : s));
+                
+                // Forzar scroll al final porque el administrador mandó el mensaje
+                setTimeout(scrollToBottomDirect, 50);
             }
         } catch (error) {
             console.error("Error sending message:", error);
@@ -188,7 +232,7 @@ export default function ChatsPage() {
         }
     };
 
-    // Parsear el JSON temporal de la cita para mostrar su progreso
+    // Parsear el JSON temporal de la cita
     const getAccumulatedData = (vehicleProblem: string) => {
         try {
             if (vehicleProblem && vehicleProblem.startsWith('{')) {
@@ -216,7 +260,6 @@ export default function ChatsPage() {
         const replacement = `${wrapper}${selected}${wrapper}`;
         setInputText(text.substring(0, start) + replacement + text.substring(end));
         
-        // Devolver focus
         setTimeout(() => {
             textarea.focus();
             textarea.setSelectionRange(start + wrapper.length, start + wrapper.length + selected.length);
@@ -331,7 +374,7 @@ export default function ChatsPage() {
                     {selectedSession ? (
                         <>
                             {/* Cabecera del Chat */}
-                            <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-100">
+                            <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-100 z-10 shadow-sm">
                                 <div className="flex items-center gap-3">
                                     <button 
                                         onClick={() => setViewMode('list')}
@@ -345,7 +388,6 @@ export default function ChatsPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    {/* Alternancia de Estado */}
                                     <button
                                         onClick={handleToggleState}
                                         disabled={togglingState}
@@ -371,7 +413,11 @@ export default function ChatsPage() {
                             </div>
 
                             {/* Contenedor de Burbujas */}
-                            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                            <div 
+                                ref={scrollContainerRef}
+                                onScroll={handleScroll}
+                                className="flex-1 overflow-y-auto p-6 space-y-4 relative"
+                            >
                                 {loadingMessages && messages.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-2">
                                         <Loader2 className="animate-spin text-[#f16315]" size={24} />
@@ -388,11 +434,9 @@ export default function ChatsPage() {
                                                     isMe ? 'ml-auto items-end' : isAI ? 'mr-auto items-start' : 'mr-auto items-start'
                                                 }`}
                                             >
-                                                {/* Etiqueta del remitente */}
                                                 <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 px-1">
                                                     {isMe ? 'Tú (Admin)' : isAI ? 'Mariana (IA)' : 'Cliente'}
                                                 </span>
-                                                {/* Burbuja física */}
                                                 <div 
                                                     className={`px-4 py-3 rounded-2xl ${fontSizeClasses[fontSizeIndex]} font-bold leading-relaxed whitespace-pre-wrap ${
                                                         isMe 
@@ -411,8 +455,20 @@ export default function ChatsPage() {
                                 <div ref={messagesEndRef} />
                             </div>
 
+                            {/* Alerta flotante de mensajes nuevos arriba del campo de texto */}
+                            {hasNewMessages && (
+                                <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 z-20">
+                                    <button 
+                                        onClick={scrollToBottomDirect}
+                                        className="flex items-center gap-2 px-4 py-2 bg-[#f16315] hover:bg-orange-600 text-white text-[10px] font-black tracking-widest uppercase rounded-full shadow-lg transition-all animate-bounce border border-white/20"
+                                    >
+                                        <ArrowDown size={12} /> Mensajes nuevos ↓
+                                    </button>
+                                </div>
+                            )}
+
                             {/* Área de Entrada enriquecida de Texto */}
-                            <div className="p-4 bg-white border-t border-slate-100 flex flex-col gap-2 flex-shrink-0 shadow-lg">
+                            <div className="p-4 bg-white border-t border-slate-100 flex flex-col gap-2 flex-shrink-0 shadow-lg z-10">
                                 {/* Toolbar de formato WhatsApp */}
                                 <div className="flex items-center gap-1.5 pb-2 border-b border-slate-50">
                                     <button 

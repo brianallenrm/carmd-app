@@ -133,16 +133,61 @@ export async function POST(req: NextRequest) {
 
         if (!text) return NextResponse.json({ ok: true });
 
-        // --- MODO ADMINISTRADOR GLOBAL (carmd admin) ---
-        if (textLower.startsWith('carmd admin')) {
-            console.log(`[Admin Mode] Comando administrativo recibido de ${from}: "${text}"`);
+        // Get current Mexico City Date, Day of week and Time to inject into prompt dynamically
+        const nowObj = new Date();
+        const daysOfWeek = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+        const dayName = daysOfWeek[new Date(nowObj.toLocaleString('en-US', { timeZone: 'America/Mexico_City' })).getDay()];
+        const cdmxTimeStr = nowObj.toLocaleString('es-MX', { timeZone: 'America/Mexico_City' });
+
+        // Deduplication Logic: Ignore requests received in the last 4 seconds for the same number
+        const now = Date.now();
+        const lastProcessed = processedMessagesCache.get(from);
+        if (lastProcessed && (now - lastProcessed) < 4000) {
+            console.log(`[Webhook] Duplicado concurrente detectado para ${from}. Ignorando.`);
+            return NextResponse.json({ ok: true });
+        }
+        processedMessagesCache.set(from, now);
+
+        console.log(`[Webhook] Mensaje recibido de ${from}: "${text}"`);
+        
+        // Guardar mensaje en el historial CHAT_MESSAGES
+        await saveChatMessage(from, 'client', text);
+        
+        // 1. Check current state in Sheets
+        console.log(`[Webhook] Buscando estado en Google Sheets para ${from}...`);
+        let chat = await getChatState(from);
+        console.log(`[Webhook] Estado recuperado:`, chat);
+
+        // --- COMMAND: ENTER ADMIN MODE ---
+        if (textLower === 'carmd admin' || textLower === 'carmd-admin') {
+            console.log(`[Admin Mode] Activando canal administrativo persistente para ${from}...`);
+            const adminWelcome = `🔑 *MODO ADMINISTRADOR ACTIVADO*\n\n¡Hola, Brian/Rafael! Has entrado al canal de consulta interna de CarMD.\n\nA partir de este momento me comunicaré contigo de forma ejecutiva. Puedes preguntarme cosas casuales sobre el expediente o historial de cualquier vehículo usando sus placas.\n\n👉 *Ejemplo*: "oye búscame qué le hicieron al coche placas PCH2668"\n\n*(Escribe "salir" o "modo cliente" para volver al chat estándar de clientes)*`;
+            await sendWhatsAppMessage(from, adminWelcome);
+            await saveChatMessage(from, 'assistant', adminWelcome);
+            await updateChatState(from, 'ADMIN_MODE_IA');
+            return NextResponse.json({ ok: true });
+        }
+
+        // --- COMMAND: EXIT ADMIN MODE ---
+        if (chat?.state === 'ADMIN_MODE_IA' && (textLower === 'salir' || textLower === 'modo cliente')) {
+            console.log(`[Admin Mode] Desactivando canal administrativo para ${from}...`);
+            const exitMsg = `👋 *MODO ADMINISTRADOR DESACTIVADO*\n\nCanal restaurado al flujo estándar de atención al cliente. ¡Bonito día!`;
+            await sendWhatsAppMessage(from, exitMsg);
+            await saveChatMessage(from, 'assistant', exitMsg);
+            await updateChatState(from, 'COMPLETED');
+            return NextResponse.json({ ok: true });
+        }
+
+        // --- HANDLE ADMIN MODE QUERIES ---
+        if (chat?.state === 'ADMIN_MODE_IA') {
+            console.log(`[Admin Mode] Procesando consulta casual en canal administrativo: "${text}"`);
             
-            // Extraer la placa de la consulta usando Gemini de forma ultra rápida
-            let plate = '';
+            // Extraer placa semánticamente de la plática
+            let plate = 'NONE';
             try {
                 const extractPlatePrompt = `Analiza esta consulta del administrador de CarMD: "${text}".
                 Extrae la placa del vehículo mencionada (ej: "PCH2668", "ABCD1234").
-                Responde ÚNICAMENTE con el valor de la placa limpio, sin puntuación ni texto extra. Si no hay placas, responde "NONE".`;
+                Responde ÚNICAMENTE con la placa limpia y en mayúsculas, sin texto extra. Si no hay placas en el mensaje, responde "NONE".`;
                 
                 const plateRes = await ai.models.generateContent({
                     model: 'gemini-3.1-flash-lite',
@@ -151,40 +196,43 @@ export async function POST(req: NextRequest) {
                 });
                 plate = plateRes.text?.trim().toUpperCase() || 'NONE';
             } catch (e) {
-                console.error("[Admin Mode] Error al extraer placa:", e);
+                console.error("[Admin Mode] Error al extraer placa de consulta casual:", e);
             }
 
-            if (!plate || plate === 'NONE') {
-                const errorMsg = `❌ *Error administrativo*:\nNo pude identificar una placa en tu mensaje. Por favor intenta usando el formato:\n👉 *carmd admin última afinación de placas PCH2668*`;
-                await sendWhatsAppMessage(from, errorMsg);
-                await saveChatMessage(from, 'assistant', errorMsg);
+            if (plate === 'NONE') {
+                // Si el administrador pregunta algo general sin placa, responder amablemente con la IA
+                const generalAdminPrompt = `Eres Mariana, asistente de CarMD, y estás hablando directamente con tu jefe (Brian/Rafael, administradores del taller) en el modo administrador.
+                El jefe te escribió: "${text}". 
+                Respóndele de forma muy atenta, ejecutiva y amigable, recordándole que puedes buscar cualquier expediente de auto si te proporciona su placa.`;
+                
+                const genRes = await ai.models.generateContent({
+                    model: 'gemini-3.1-flash-lite',
+                    contents: generalAdminPrompt,
+                    config: { temperature: 0.3 }
+                });
+                const reply = genRes.text?.trim() || "Dime las placas del vehículo para buscar su expediente.";
+                await sendWhatsAppMessage(from, reply);
+                await saveChatMessage(from, 'assistant', reply);
                 return NextResponse.json({ ok: true });
             }
 
-            console.log(`[Admin Mode] Placa extraída: ${plate}. Realizando búsqueda en Sheets (Master & Inventario)...`);
-            
+            console.log(`[Admin Mode] Placa identificada: ${plate}. Consultando expediente...`);
             try {
                 const baseUrl = process.env.NODE_ENV === 'production' 
                     ? `https://${req.headers.get('host')}` 
                     : 'http://localhost:3000';
 
-                // Realizar búsqueda usando el endpoint de búsqueda oficial para obtener la ficha completa y las notas
                 const searchRes = await fetch(`${baseUrl}/api/os/history/search?q=${plate}`);
-                
-                if (!searchRes.ok) {
-                    throw new Error("Failed to query history search API");
-                }
+                if (!searchRes.ok) throw new Error("Failed to query history search API");
 
                 const searchData = await searchRes.json();
-                
                 if (!searchData.found || searchData.entries.length === 0) {
-                    const failMsg = `⚠️ *CarMD Admin Info*:\nNo encontré ningún registro en el Centro de Servicio (ni Notas de Servicio ni Inventario) con las placas *${plate}*.`;
+                    const failMsg = `⚠️ *CarMD Admin Info*:\nNo encontré ningún registro en el Centro de Servicio (ni Notas ni Inventario) con las placas *${plate}*.`;
                     await sendWhatsAppMessage(from, failMsg);
                     await saveChatMessage(from, 'assistant', failMsg);
                     return NextResponse.json({ ok: true });
                 }
 
-                // Filtrar entradas por tipo nota y/o inventario
                 const notesList = searchData.entries
                     .filter((e: any) => e.type === 'note')
                     .map((e: any) => ({
@@ -203,7 +251,6 @@ export async function POST(req: NextRequest) {
                         motivo: e.motivoIngreso || 'Diagnóstico general'
                     }));
 
-                // Generar reporte administrativo inteligente usando Gemini para darle contexto técnico completo
                 const reportPrompt = `Genera un resumen administrativo sumamente ejecutivo y estructurado para el dueño del taller (Brian/Rafael) con la siguiente información de placas ${plate}:
                 - Cliente: ${searchData.client.name} (WhatsApp: ${searchData.client.phone})
                 - Auto: ${searchData.vehicle.brand} ${searchData.vehicle.model} (${searchData.vehicle.year})
@@ -231,31 +278,6 @@ export async function POST(req: NextRequest) {
             }
             return NextResponse.json({ ok: true });
         }
-
-        // Get current Mexico City Date, Day of week and Time to inject into prompt dynamically
-        const nowObj = new Date();
-        const daysOfWeek = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-        const dayName = daysOfWeek[new Date(nowObj.toLocaleString('en-US', { timeZone: 'America/Mexico_City' })).getDay()];
-        const cdmxTimeStr = nowObj.toLocaleString('es-MX', { timeZone: 'America/Mexico_City' });
-
-        // Deduplication Logic: Ignore requests received in the last 4 seconds for the same number
-        const now = Date.now();
-        const lastProcessed = processedMessagesCache.get(from);
-        if (lastProcessed && (now - lastProcessed) < 4000) {
-            console.log(`[Webhook] Duplicado concurrente detectado para ${from}. Ignorando.`);
-            return NextResponse.json({ ok: true });
-        }
-        processedMessagesCache.set(from, now);
-
-        console.log(`[Webhook] Mensaje recibido de ${from}: "${text}"`);
-        
-        // Guardar mensaje en el historial CHAT_MESSAGES
-        await saveChatMessage(from, 'client', text);
-        
-        // 1. Check current state in Sheets
-        console.log(`[Webhook] Buscando estado en Google Sheets para ${from}...`);
-        let chat = await getChatState(from);
-        console.log(`[Webhook] Estado recuperado:`, chat);
 
         // Si es una conversación totalmente nueva (no registrada en CHAT_SESSIONS), alertamos a los administradores
         if (!chat) {

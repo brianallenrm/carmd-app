@@ -175,7 +175,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ ok: true });
         }
 
-        // Detect if the user wants human intervention, is complaining, or has a critical issue
+        // Detect if the user wants human intervention, is complaining, has a critical issue, or asks for offsite services
         const isUrgentOrComplaint = 
             textLower.includes('reclamacion') || 
             textLower.includes('queja') || 
@@ -183,12 +183,20 @@ export async function POST(req: NextRequest) {
             textLower.includes('sigue fallando') || 
             textLower.includes('hablar con el dueño') || 
             textLower.includes('gerente') ||
-            textLower.includes('humano');
+            textLower.includes('humano') ||
+            textLower.includes('auxilio vial') ||
+            textLower.includes('me quede tirado') ||
+            textLower.includes('tirado') ||
+            textLower.includes('grúa') ||
+            textLower.includes('inspeccion a domicilio') ||
+            textLower.includes('inspeccion fuera') ||
+            textLower.includes('revisar un coche que quiero comprar') ||
+            textLower.includes('inspeccion de compra');
 
         if (isUrgentOrComplaint) {
-            console.log(`[Webhook] Queja o solicitud humana detectada. Cambiando estado a HUMAN_REQUIRED.`);
+            console.log(`[Webhook] Solicitud de servicio especial, auxilio o queja detectada. Cambiando estado a HUMAN_REQUIRED.`);
             
-            const apologyMessage = `Disculpa los inconvenientes 🙇‍♂️. Tu solicitud ha sido turnada de inmediato con nuestro Gerente de Servicio de forma prioritaria. Detendré mis respuestas automáticas por aquí y en unos minutos se comunicará un miembro de nuestro equipo contigo personalmente.`;
+            const apologyMessage = `Entendido. 📞 Para este tipo de servicios especiales o de auxilio, por favor espera un momento; un miembro de nuestro equipo en CarMD se comunicará contigo personalmente a la brevedad para brindarte más información y seguimiento. Detendré mis respuestas automáticas por aquí.`;
             await sendWhatsAppMessage(from, apologyMessage);
             await saveChatMessage(from, 'assistant', apologyMessage);
             await updateChatState(from, 'HUMAN_REQUIRED', text);

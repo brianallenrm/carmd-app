@@ -27,6 +27,10 @@ Sigue ESTRICTAMENTE las siguientes reglas de redacción y comportamiento (Psicol
 3. EVITA RECHAZAR CON UN "NO" (PRECIOS Y PRESUPUESTOS):
 - NUNCA digas "no damos precios" o "no proporcionamos presupuestos por aquí". Explica el "por qué":
   "Con gusto te ayudamos. El costo exacto depende mucho del tipo de motor, versión y lo que realmente necesite tu auto tras una evaluación. Para darte un presupuesto 100% real, justo y sin sorpresas, primero necesitamos evaluar tu auto físicamente en el Centro de Servicio. ¿Te gustaría que agendemos tu espacio?"
+- DERIVACIÓN HUMANA INTELIGENTE (LA REGLA DE LOS 2 INTENTOS): Si el cliente insiste por segunda vez consecutiva en querer una cotización o costo aproximado sin querer agendar una cita de diagnóstico, NO vuelvas a repetir el mismo argumento robótico de evaluación física. En su lugar, realiza lo siguiente:
+  1. Haz un puente amable indicando que para evitar cualquier error y darle el costo exacto con las refacciones de su auto, le pedirás a un asesor humano de CarMD que le cotice personalmente en este mismo chat.
+  2. Pídele al cliente que te proporcione su Nombre Completo, Correo Electrónico y el Kilometraje aproximado de su auto para tener su ficha lista antes de transferir.
+  3. Una vez que el cliente responda con esos datos, agradécelos, dile que un asesor se comunicará a la brevedad y detendrás tus respuestas automáticas. (El webhook se encargará de pasarlo a humano y silenciarte de forma interna).
 
 3.1. PREGUNTAS FRECUENTES (FAQs) DE OPERACIÓN Y TALLER:
 - AFINACIÓN OFICIAL: Si te preguntan en qué consiste la afinación, descríbelo textualmente como: "Mantenimiento al sistema de ignición, inyección, enfriamiento y lubricación. Reemplazo de filtros críticos y reset de intervalos de mantenimiento, más la revisión general de puntos de seguridad."
@@ -407,10 +411,35 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                 mergedParams.time = '...';
             }
 
+            // DETECTOR DE DERIVACIÓN HUMANA INTELIGENTE (COTIZACIÓN):
+            // Si la IA decide derivar por insistencia del costo, verificamos si tenemos los datos necesarios
+            const isDerivationReply = replyText.includes('cotizar personalmente') || 
+                                       replyText.includes('comunicará un miembro') ||
+                                       replyText.includes('revisar directamente un asesor') ||
+                                       replyText.includes('detendré mis respuestas');
+            
+            if (isDerivationReply) {
+                const hasContactInfo = mergedParams.name && mergedParams.name !== '...' &&
+                                       mergedParams.email && mergedParams.email !== '...' &&
+                                       mergedParams.km && mergedParams.km !== '...';
+                                       
+                if (!hasContactInfo) {
+                    // Sobreescribimos la respuesta para obligar a pedir los datos restantes antes de derivar
+                    replyText = `Entiendo perfectamente. Para darte el costo aproximado y evitar cualquier error con las piezas específicas de tu auto, le pediré a un asesor de nuestro equipo que te cotice personalmente por aquí. \n\nPara tener tu cotización lista, ¿me podrías compartir tu *nombre completo*, un *correo electrónico* y el *kilometraje* aproximado de tu vehículo? 📋`;
+                } else {
+                    // Si ya los tenemos completos, enviamos el mensaje de derivación final y silenciamos
+                    const finalDerivationMsg = `Muchas gracias, ${mergedParams.name}. Ya registré tu información y se la he pasado a nuestro asesor. Por favor danos unos minutos; a la brevedad se comunicarán de CarMD contigo por este mismo chat para darte el costo aproximado. Detendré mis respuestas automáticas. ¡Bonito día! 👋`;
+                    await sendWhatsAppMessage(from, finalDerivationMsg);
+                    await saveChatMessage(from, 'assistant', finalDerivationMsg);
+                    await updateChatState(from, 'HUMAN_REQUIRED', JSON.stringify(mergedParams));
+                    return NextResponse.json({ ok: true });
+                }
+            }
+
             if (hasRequiredFieldsForSummary) {
                 // Si ya tenemos todo, pasamos al estado de confirmación y le presentamos el resumen
                 const summaryText = `¡Listo! Ya tengo toda la información. Por favor confírmame si los datos de tu cita son correctos:
-
+ 
 👤 *Nombre*: ${mergedParams.name}
 📧 *Correo*: ${mergedParams.email || 'N/A'}
 🚗 *Vehículo*: ${mergedParams.vehicle} ${mergedParams.year || ''}
@@ -419,15 +448,15 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
 📅 *Fecha*: ${mergedParams.date}
 ⏰ *Hora*: ${mergedParams.time}
 🔧 *Problema*: ${mergedParams.problem || 'Diagnóstico general'}
-
+ 
 ¿Te parece bien si procedo a confirmar tu espacio con estos datos? 👍`;
-
+ 
                 await sendInBubbles(from, summaryText);
                 await saveChatMessage(from, 'assistant', summaryText);
                 await updateChatState(from, 'WAITING_CONFIRMATION_IA', JSON.stringify(mergedParams));
                 return NextResponse.json({ ok: true });
             }
-
+ 
             await sendInBubbles(from, replyText);
             await saveChatMessage(from, 'assistant', replyText);
             await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(mergedParams));

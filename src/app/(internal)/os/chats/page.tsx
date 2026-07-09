@@ -41,6 +41,8 @@ export default function ChatsPage() {
     const [togglingState, setTogglingState] = useState(false);
     const [viewMode, setViewMode] = useState<'list' | 'chat'>('list'); // Para responsivo
 
+    const [completedBooking, setCompletedBooking] = useState<any | null>(null);
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Cargar todas las sesiones de chat
@@ -70,6 +72,18 @@ export default function ChatsPage() {
         }
     };
 
+    // Cargar reserva definitiva en caso de estado COMPLETED
+    const fetchCompletedBooking = async (phone: string) => {
+        try {
+            const res = await fetch(`/api/chats/${phone}/booking`);
+            const data = await res.json();
+            setCompletedBooking(data.cita || null);
+        } catch (e) {
+            console.error("Error fetching completed booking:", e);
+            setCompletedBooking(null);
+        }
+    };
+
     useEffect(() => {
         fetchSessions();
         const interval = setInterval(fetchSessions, 15000); // Auto-update list
@@ -78,8 +92,20 @@ export default function ChatsPage() {
 
     useEffect(() => {
         if (selectedSession) {
+            setCompletedBooking(null);
             fetchHistory(selectedSession.phone);
-            const interval = setInterval(() => fetchHistory(selectedSession.phone), 5000); // Polling chat de 5s
+            
+            // Si la cita ya está completada, jalamos la ficha definitiva de CITAS_2025
+            if (selectedSession.state === 'COMPLETED') {
+                fetchCompletedBooking(selectedSession.phone);
+            }
+
+            const interval = setInterval(() => {
+                fetchHistory(selectedSession.phone);
+                if (selectedSession.state === 'COMPLETED') {
+                    fetchCompletedBooking(selectedSession.phone);
+                }
+            }, 5000); // Polling chat de 5s
             return () => clearInterval(interval);
         }
     }, [selectedSession]);
@@ -369,7 +395,9 @@ export default function ChatsPage() {
                         </h3>
                         
                         {(() => {
-                            const data = getAccumulatedData(selectedSession.vehicleProblem);
+                            const isCompleted = selectedSession.state === 'COMPLETED';
+                            const data = isCompleted ? completedBooking : getAccumulatedData(selectedSession.vehicleProblem);
+                            
                             if (!data) {
                                 return (
                                     <div className="flex flex-col items-center justify-center py-10 text-slate-600 text-center gap-2">
@@ -381,6 +409,11 @@ export default function ChatsPage() {
                             }
                             return (
                                 <div className="space-y-4">
+                                    {isCompleted && (
+                                        <div className="px-3 py-1.5 bg-[#25D366]/10 text-[#25D366] text-[8px] font-black tracking-widest uppercase rounded border border-[#25D366]/20 text-center mb-2">
+                                            Cita Agendada Exitosamente
+                                        </div>
+                                    )}
                                     <div>
                                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Nombre Completo</span>
                                         <span className="text-xs font-bold text-slate-200 mt-1 block">{data.name || 'Falta dato...'}</span>
@@ -391,7 +424,7 @@ export default function ChatsPage() {
                                     </div>
                                     <div>
                                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Vehículo</span>
-                                        <span className="text-xs font-bold text-slate-200 mt-1 block">{data.vehicle ? `${data.vehicle} ${data.year || ''}` : 'Falta dato...'}</span>
+                                        <span className="text-xs font-bold text-slate-200 mt-1 block">{data.vehicle ? `${data.vehicle} ${data.year && data.year !== 'N/A' ? data.year : ''}` : 'Falta dato...'}</span>
                                     </div>
                                     <div>
                                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Kilometraje</span>

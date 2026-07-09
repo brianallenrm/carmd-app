@@ -305,6 +305,8 @@ REGLAS DE RECOLECCIÓN DE CITA (MODO INTERACTIVO):
   2. Si el cliente te hace alguna pregunta intermedia (como horarios, dirección, por qué pedimos datos, precios, etc.), respóndela amablemente siguiendo las reglas del manual de CarMD.
   3. Si falta algún dato importante por recolectar, pídeselo de forma muy amigable. No le pidas todo junto de golpe; ve solicitándolo de forma natural en la conversación. Los datos necesarios son: *Nombre completo*, *Correo electrónico*, *Marca/Modelo del auto*, *Año*, *Kilometraje*, *Placas*, *Fecha/Hora preferida* y *Problema del auto*.
   4. VERIFICACIÓN DE CALENDARIO REAL: Si el cliente propone una fecha y día de la semana que no coinciden en el calendario real (ej: decir miércoles 14 cuando el miércoles es 15 de julio de 2026), corrígelo con amabilidad diciendo el día correcto antes de agendar (ej: "Veo que el miércoles es 15 de julio, ¿te agendamos para ese día?").
+  5. REGLA DE DOMINGOS: El Centro de Servicio está estrictamente CERRADO los domingos. Si el cliente solicita explícitamente venir en domingo, debes aclararle amablemente que no abrimos y pedirle proactivamente que te sugiera otra fecha de lunes a sábado.
+  6. TOLERANCIA AL KILOMETRAJE DESCONOCIDO: Si al pedirle el kilometraje el cliente te responde que no sabe o no está seguro, puedes insistir amistosamente UNA SÓLA VEZ pidiéndole un aproximado. Si insiste en que no sabe o no responde, guarda el campo 'km' como "Pendiente" y avanza inmediatamente a pedirle el siguiente dato (ej: las placas) sin volver a preguntar por los kilómetros.
 
 Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas cortas.`;
 
@@ -347,7 +349,9 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             1. REGLA DE LIMPIEZA DE MARCAS: Si detectas un error de dedo obvio en la marca o modelo (ej: "btw" en lugar de "BMW", "toyot" por "Toyota", "va" por "VW"), corrígelo en el campo 'vehicle' para que se guarde de forma profesional en el JSON.
             2. SEPARACIÓN DE PREGUNTAS Y MOTIVOS: Si el cliente hace una pregunta como "¿para qué quieres las placas?", "¿cuánto cuesta?", etc., esto NUNCA debe ser guardado en el campo 'problem'. El campo 'problem' se llena únicamente con síntomas reales del coche (frenos, afinación, ruido, etc.) o solicitudes de servicio.
             3. SI EL USUARIO INDICA CORREGIR UN DATO (ej: "el problema no es afinación, es frenos"): Borra o reemplaza el dato anterior con el valor que indica el usuario ahora.
-            4. CORRECCIÓN DE FECHA EN EL JSON: Si el usuario dice una fecha numérica y un día de la semana que son incompatibles o erróneos (como decir "miércoles 14" cuando el miércoles es 15 de julio de 2026), debes guardar en el campo 'date' la fecha REAL corregida del calendario (miércoles 15 de julio).`;
+            4. CORRECCIÓN DE FECHA EN EL JSON: Si el usuario dice una fecha numérica y un día de la semana que son incompatibles o erróneos (como decir "miércoles 14" cuando el miércoles es 15 de julio de 2026), debes guardar en el campo 'date' la fecha REAL corregida del calendario (miércoles 15 de julio).
+            5. MANEJO DE DATOS FALTANTES O DESCONOCIDOS: Si el usuario dice "no sé", "no estoy seguro" o "luego te digo" para el kilometraje ('km'), guarda el valor "Pendiente" en el campo 'km'. No dejes el campo vacío ni vuelvas a forzar la pregunta si el usuario ya declaró desconocerlo.
+            6. PERSISTENCIA DE PLACAS: Asegúrate de extraer las placas si el cliente las proporciona (ej: "Abcd1234"). NUNCA limpies o dejes el campo 'plate' como nulo o vacío una vez que ya fue capturado.`;
 
             let extracted: any = {};
             try {
@@ -370,12 +374,21 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
 
             // Responder al cliente en burbujas y guardar progreso temporal
             // Validación: ¿Ya tenemos todos los datos clave completos para presentar el resumen?
-            const hasRequiredFieldsForSummary = mergedParams.name && mergedParams.name !== '...' &&
-                                                mergedParams.vehicle && mergedParams.vehicle !== '...' &&
-                                                mergedParams.km && mergedParams.km !== '...' &&
-                                                mergedParams.plate && mergedParams.plate !== '...' &&
-                                                mergedParams.date && mergedParams.date !== '...' && mergedParams.date !== 'lo más temprano posible' &&
-                                                mergedParams.time && mergedParams.time !== '...' && mergedParams.time !== 'lo más temprano posible';
+            let hasRequiredFieldsForSummary = mergedParams.name && mergedParams.name !== '...' &&
+                                              mergedParams.vehicle && mergedParams.vehicle !== '...' &&
+                                              mergedParams.km && mergedParams.km !== '...' &&
+                                              mergedParams.plate && mergedParams.plate !== '...' &&
+                                              mergedParams.date && mergedParams.date !== '...' && mergedParams.date !== 'lo más temprano posible' &&
+                                              mergedParams.time && mergedParams.time !== '...' && mergedParams.time !== 'lo más temprano posible';
+
+            // VALIDACIÓN CRÍTICA DE DOMINGO: Si la fecha contiene la palabra "domingo", bloqueamos el resumen
+            if (hasRequiredFieldsForSummary && mergedParams.date.toLowerCase().includes('domingo')) {
+                hasRequiredFieldsForSummary = false;
+                replyText = `Disculpa la confusión, Pamela. 🗓️ Los domingos nuestro Centro de Servicio está cerrado para descansar. \n\nEstamos listos para recibir tu auto de lunes a viernes de 8:00 AM a 5:00 PM y sábados de 8:00 AM a 2:00 PM. ¿Qué otro día y hora te vendría bien? 😊`;
+                // Removemos la fecha inválida de los parámetros acumulados
+                mergedParams.date = '...';
+                mergedParams.time = '...';
+            }
 
             if (hasRequiredFieldsForSummary) {
                 // Si ya tenemos todo, pasamos al estado de confirmación y le presentamos el resumen

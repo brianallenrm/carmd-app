@@ -10,10 +10,15 @@ import {
     Send, 
     Loader2, 
     AlertCircle, 
-    Check, 
     Smartphone,
     UserCheck,
-    RefreshCw
+    RefreshCw,
+    Plus,
+    Minus,
+    Type,
+    Bold,
+    Italic,
+    Sparkles
 } from 'lucide-react';
 
 interface ChatSession {
@@ -39,11 +44,15 @@ export default function ChatsPage() {
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [sending, setSending] = useState(false);
     const [togglingState, setTogglingState] = useState(false);
-    const [viewMode, setViewMode] = useState<'list' | 'chat'>('list'); // Para responsivo
-
+    const [viewMode, setViewMode] = useState<'list' | 'chat'>('list'); // Responsivo
     const [completedBooking, setCompletedBooking] = useState<any | null>(null);
+    
+    // Configuración de tamaño de letra (accesibilidad): text-xs (12px), text-sm (14px), text-base (16px), text-lg (18px)
+    const fontSizeClasses = ['text-[11px]', 'text-xs', 'text-sm', 'text-base', 'text-lg'];
+    const [fontSizeIndex, setFontSizeIndex] = useState(2); // Inicia en text-sm (14px) por defecto
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     // Cargar todas las sesiones de chat
     const fetchSessions = async () => {
@@ -95,7 +104,6 @@ export default function ChatsPage() {
             setCompletedBooking(null);
             fetchHistory(selectedSession.phone);
             
-            // Si la cita ya está completada, jalamos la ficha definitiva de CITAS_2025
             if (selectedSession.state === 'COMPLETED') {
                 fetchCompletedBooking(selectedSession.phone);
             }
@@ -105,7 +113,7 @@ export default function ChatsPage() {
                 if (selectedSession.state === 'COMPLETED') {
                     fetchCompletedBooking(selectedSession.phone);
                 }
-            }, 5000); // Polling chat de 5s
+            }, 5000);
             return () => clearInterval(interval);
         }
     }, [selectedSession]);
@@ -121,8 +129,8 @@ export default function ChatsPage() {
     };
 
     // Enviar un mensaje manual
-    const handleSendMessage = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSendMessage = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         if (!selectedSession || !inputText.trim() || sending) return;
 
         const textToSend = inputText.trim();
@@ -137,7 +145,6 @@ export default function ChatsPage() {
             });
 
             if (res.ok) {
-                // Agregar localmente para feedback inmediato
                 const newMsg: ChatMessage = {
                     phone: selectedSession.phone,
                     sender: 'admin',
@@ -145,8 +152,6 @@ export default function ChatsPage() {
                     timestamp: new Date().toISOString()
                 };
                 setMessages(prev => [...prev, newMsg]);
-                
-                // Actualizar localmente el estado a HUMAN_REQUIRED
                 setSelectedSession(prev => prev ? { ...prev, state: 'HUMAN_REQUIRED' } : null);
                 setSessions(prev => prev.map(s => s.phone === selectedSession.phone ? { ...s, state: 'HUMAN_REQUIRED' } : s));
             }
@@ -198,28 +203,74 @@ export default function ChatsPage() {
         return acc?.name || `Cliente (${session.phone.slice(-10)})`;
     };
 
+    // Formateadores rápidos de WhatsApp
+    const insertFormatting = (wrapper: string) => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        const selected = text.substring(start, end);
+        
+        const replacement = `${wrapper}${selected}${wrapper}`;
+        setInputText(text.substring(0, start) + replacement + text.substring(end));
+        
+        // Devolver focus
+        setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(start + wrapper.length, start + wrapper.length + selected.length);
+        }, 50);
+    };
+
+    // Controles de accesibilidad (tamaño de fuente)
+    const zoomIn = () => {
+        if (fontSizeIndex < fontSizeClasses.length - 1) {
+            setFontSizeIndex(prev => prev + 1);
+        }
+    };
+
+    const zoomOut = () => {
+        if (fontSizeIndex > 0) {
+            setFontSizeIndex(prev => prev - 1);
+        }
+    };
+
     return (
-        <div className="flex flex-col h-screen bg-slate-900 text-slate-100 font-sans overflow-hidden">
+        <div className="flex flex-col h-screen bg-slate-50 text-slate-800 font-sans overflow-hidden">
             {/* Header General */}
-            <header className="flex items-center justify-between px-6 py-4 bg-slate-950 border-b border-slate-800 flex-shrink-0">
+            <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-100 flex-shrink-0 shadow-sm z-10">
                 <div className="flex items-center gap-3">
-                    <Link href="/os/centrodecontrol" className="p-2 text-slate-400 hover:text-slate-200 bg-slate-900 rounded-xl transition-all border border-slate-800">
+                    <Link href="/os/centrodecontrol" className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-xl transition-all border border-slate-100">
                         <ArrowLeft size={16} />
                     </Link>
                     <div>
-                        <h1 className="text-sm font-black tracking-widest uppercase text-orange-500">Chats de WhatsApp</h1>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Monitoreo del Asistente Virtual</p>
+                        <h1 className="text-sm font-black tracking-widest uppercase text-[#f16315]">Chats de WhatsApp</h1>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mt-1">Monitoreo de Asistente Virtual</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    {/* Botones de tamaño de letra */}
+                    <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1 gap-1">
+                        <button onClick={zoomOut} className="p-1.5 hover:bg-white hover:text-slate-800 text-slate-400 rounded-lg transition-all" title="Reducir letra">
+                            <Minus size={13} />
+                        </button>
+                        <span className="text-[9px] font-black text-slate-400 px-1 select-none flex items-center gap-1 uppercase">
+                            <Type size={11} /> Letra
+                        </span>
+                        <button onClick={zoomIn} className="p-1.5 hover:bg-white hover:text-slate-800 text-slate-400 rounded-lg transition-all" title="Aumentar letra">
+                            <Plus size={13} />
+                        </button>
+                    </div>
+
                     <button 
                         onClick={fetchSessions}
-                        className="p-2 text-slate-400 hover:text-slate-200 bg-slate-900 rounded-xl border border-slate-800 transition-all"
+                        className="p-2 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-all"
                     >
                         <RefreshCw size={14} className={loadingSessions ? "animate-spin" : ""} />
                     </button>
-                    <span className="hidden md:inline-flex px-3 py-1 bg-[#25D366]/10 text-[#25D366] text-[10px] font-black tracking-widest uppercase rounded-full border border-[#25D366]/20">
-                        Conectado a Meta
+                    <span className="hidden md:inline-flex px-3 py-1.5 bg-[#25D366]/10 text-[#25d366] text-[10px] font-black tracking-widest uppercase rounded-full border border-[#25D366]/20">
+                        Conectado
                     </span>
                 </div>
             </header>
@@ -227,21 +278,21 @@ export default function ChatsPage() {
             {/* Panel Principal */}
             <div className="flex flex-1 overflow-hidden relative">
                 {/* 1. Lista de Chats (Sidebar Izquierdo) */}
-                <div className={`w-full md:w-80 bg-slate-950/40 border-r border-slate-800 flex flex-col flex-shrink-0 ${viewMode === 'chat' ? 'hidden md:flex' : 'flex'}`}>
-                    <div className="p-4 border-b border-slate-800">
-                        <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider">Conversaciones Activas</h3>
+                <div className={`w-full md:w-80 bg-white border-r border-slate-100 flex flex-col flex-shrink-0 ${viewMode === 'chat' ? 'hidden md:flex' : 'flex'}`}>
+                    <div className="p-4 border-b border-slate-100/80 bg-slate-50/50">
+                        <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Conversaciones Activas</h3>
                     </div>
-                    <div className="flex-1 overflow-y-auto divide-y divide-slate-800/40">
+                    <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
                         {loadingSessions && sessions.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-20 text-slate-500 gap-2">
-                                <Loader2 className="animate-spin" size={24} />
+                            <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-2">
+                                <Loader2 className="animate-spin text-[#f16315]" size={24} />
                                 <span className="text-[10px] font-black uppercase tracking-wider">Cargando Chats...</span>
                             </div>
                         ) : sessions.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-2 text-center px-4">
-                                <MessageSquare size={32} />
-                                <span className="text-xs font-bold uppercase">No hay chats registrados</span>
-                                <span className="text-[10px] text-slate-500 uppercase">Las pláticas de WhatsApp aparecerán aquí</span>
+                            <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-2 text-center px-4">
+                                <MessageSquare size={32} className="stroke-slate-300" />
+                                <span className="text-xs font-bold uppercase text-slate-500">No hay chats registrados</span>
+                                <span className="text-[10px] text-slate-400 uppercase">Las pláticas de WhatsApp aparecerán aquí</span>
                             </div>
                         ) : (
                             sessions.map(s => {
@@ -251,19 +302,19 @@ export default function ChatsPage() {
                                     <button
                                         key={s.phone}
                                         onClick={() => handleSelectSession(s)}
-                                        className={`w-full text-left p-4 hover:bg-slate-900/60 transition-all flex items-center justify-between gap-3 ${isSelected ? 'bg-slate-900 border-l-4 border-orange-500' : ''}`}
+                                        className={`w-full text-left p-4 hover:bg-slate-50/50 transition-all flex items-center justify-between gap-3 ${isSelected ? 'bg-orange-50/40 border-l-4 border-[#f16315]' : ''}`}
                                     >
                                         <div className="min-w-0">
-                                            <p className="font-bold text-xs text-slate-200 truncate">{getChatName(s)}</p>
-                                            <p className="text-[10px] font-bold text-slate-500 tracking-widest mt-1">{s.phone}</p>
+                                            <p className="font-bold text-xs text-slate-800 truncate">{getChatName(s)}</p>
+                                            <p className="text-[9px] font-black text-slate-400 tracking-wider mt-1">{s.phone}</p>
                                         </div>
                                         <div>
                                             {isIA ? (
-                                                <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[8px] font-black tracking-widest uppercase rounded border border-blue-500/20 flex items-center gap-1">
+                                                <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[8px] font-black tracking-widest uppercase rounded border border-blue-150 flex items-center gap-1">
                                                     <Bot size={8} /> IA
                                                 </span>
                                             ) : (
-                                                <span className="px-2 py-0.5 bg-orange-500/10 text-orange-400 text-[8px] font-black tracking-widest uppercase rounded border border-orange-500/20 flex items-center gap-1">
+                                                <span className="px-2 py-0.5 bg-orange-50 text-[#f16315] text-[8px] font-black tracking-widest uppercase rounded border border-orange-100 flex items-center gap-1">
                                                     <User size={8} /> Humano
                                                 </span>
                                             )}
@@ -276,21 +327,21 @@ export default function ChatsPage() {
                 </div>
 
                 {/* 2. Ventana de Conversación Central */}
-                <div className={`flex-1 flex flex-col bg-slate-900/40 relative ${viewMode === 'list' ? 'hidden md:flex' : 'flex'}`}>
+                <div className={`flex-1 flex flex-col bg-slate-50/30 relative ${viewMode === 'list' ? 'hidden md:flex' : 'flex'}`}>
                     {selectedSession ? (
                         <>
                             {/* Cabecera del Chat */}
-                            <div className="flex items-center justify-between px-6 py-4 bg-slate-950/60 border-b border-slate-800">
+                            <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-100">
                                 <div className="flex items-center gap-3">
                                     <button 
                                         onClick={() => setViewMode('list')}
-                                        className="p-1.5 md:hidden text-slate-400 hover:text-slate-200 bg-slate-900 rounded-lg border border-slate-800"
+                                        className="p-1.5 md:hidden text-slate-500 hover:text-slate-800 bg-slate-50 border border-slate-200 rounded-lg"
                                     >
                                         <ArrowLeft size={14} />
                                     </button>
                                     <div>
-                                        <h4 className="font-bold text-xs text-slate-100">{getChatName(selectedSession)}</h4>
-                                        <p className="text-[9px] font-bold text-slate-500 tracking-widest mt-0.5 uppercase">{selectedSession.phone}</p>
+                                        <h4 className="font-bold text-xs text-slate-800">{getChatName(selectedSession)}</h4>
+                                        <p className="text-[9px] font-black text-slate-400 tracking-wider mt-0.5 uppercase">{selectedSession.phone}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -300,8 +351,8 @@ export default function ChatsPage() {
                                         disabled={togglingState}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[9px] font-black tracking-widest uppercase transition-all ${
                                             selectedSession.state.endsWith('_IA') || selectedSession.state === 'START'
-                                                ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
-                                                : "bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20"
+                                                ? "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-250"
+                                                : "bg-orange-50 hover:bg-orange-100 text-[#f16315] border border-orange-150"
                                         }`}
                                     >
                                         {togglingState ? (
@@ -322,8 +373,8 @@ export default function ChatsPage() {
                             {/* Contenedor de Burbujas */}
                             <div className="flex-1 overflow-y-auto p-6 space-y-4">
                                 {loadingMessages && messages.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-20 text-slate-500 gap-2">
-                                        <Loader2 className="animate-spin" size={24} />
+                                    <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-2">
+                                        <Loader2 className="animate-spin text-[#f16315]" size={24} />
                                         <span className="text-[10px] font-black uppercase tracking-wider">Cargando historial...</span>
                                     </div>
                                 ) : (
@@ -338,17 +389,17 @@ export default function ChatsPage() {
                                                 }`}
                                             >
                                                 {/* Etiqueta del remitente */}
-                                                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1 px-1">
+                                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 px-1">
                                                     {isMe ? 'Tú (Admin)' : isAI ? 'Mariana (IA)' : 'Cliente'}
                                                 </span>
                                                 {/* Burbuja física */}
                                                 <div 
-                                                    className={`px-4 py-3 rounded-2xl text-xs font-medium leading-relaxed whitespace-pre-wrap ${
+                                                    className={`px-4 py-3 rounded-2xl ${fontSizeClasses[fontSizeIndex]} font-bold leading-relaxed whitespace-pre-wrap ${
                                                         isMe 
-                                                            ? 'bg-orange-500 text-white rounded-tr-none' 
+                                                            ? 'bg-[#f16315] text-white rounded-tr-none shadow-md shadow-orange-500/10' 
                                                             : isAI 
-                                                                ? 'bg-slate-800 text-slate-100 rounded-tl-none border border-slate-700/60' 
-                                                                : 'bg-[#25D366]/10 text-emerald-300 rounded-tl-none border border-[#25D366]/20'
+                                                                ? 'bg-white text-slate-700 rounded-tl-none border border-slate-200/80 shadow-sm' 
+                                                                : 'bg-emerald-50 text-emerald-800 rounded-tl-none border border-emerald-100 shadow-sm'
                                                     }`}
                                                 >
                                                     {m.text}
@@ -360,38 +411,82 @@ export default function ChatsPage() {
                                 <div ref={messagesEndRef} />
                             </div>
 
-                            {/* Entrada de Texto */}
-                            <form onSubmit={handleSendMessage} className="p-4 bg-slate-950 border-t border-slate-800 flex gap-2 items-center flex-shrink-0">
-                                <input
-                                    type="text"
-                                    value={inputText}
-                                    onChange={e => setInputText(e.target.value)}
-                                    placeholder="Escribe un mensaje manual (Silenciará a la IA)..."
-                                    className="flex-1 px-4 py-3 bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-orange-500 focus:outline-none rounded-xl text-xs font-semibold placeholder-slate-500 transition-all"
-                                />
-                                <button
-                                    type="submit"
-                                    disabled={!inputText.trim() || sending}
-                                    className="p-3 bg-orange-500 hover:bg-orange-600 disabled:bg-slate-800 text-white disabled:text-slate-600 rounded-xl transition-all flex items-center justify-center flex-shrink-0"
-                                >
-                                    {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                                </button>
-                            </form>
+                            {/* Área de Entrada enriquecida de Texto */}
+                            <div className="p-4 bg-white border-t border-slate-100 flex flex-col gap-2 flex-shrink-0 shadow-lg">
+                                {/* Toolbar de formato WhatsApp */}
+                                <div className="flex items-center gap-1.5 pb-2 border-b border-slate-50">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => insertFormatting('*')}
+                                        className="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-slate-800 rounded-lg transition-all"
+                                        title="Negrita (*)"
+                                    >
+                                        <Bold size={13} />
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => insertFormatting('_')}
+                                        className="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-slate-800 rounded-lg transition-all"
+                                        title="Cursiva (_)"
+                                    >
+                                        <Italic size={13} />
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => insertFormatting('~')}
+                                        className="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-slate-800 rounded-lg transition-all"
+                                        title="Tachado (~)"
+                                    >
+                                        <span className="text-[11px] font-black line-through">ab</span>
+                                    </button>
+                                    <div className="h-4 w-px bg-slate-200 mx-1" />
+                                    <span className="text-[8px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1">
+                                        <Sparkles size={9} /> Corrector activo
+                                    </span>
+                                </div>
+
+                                <form onSubmit={e => { e.preventDefault(); handleSendMessage(); }} className="flex gap-2 items-end">
+                                    <textarea
+                                        ref={textareaRef}
+                                        value={inputText}
+                                        onChange={e => setInputText(e.target.value)}
+                                        placeholder="Escribe un mensaje manual (Silenciará a la IA)..."
+                                        rows={1}
+                                        autoCorrect="on"
+                                        spellCheck={true}
+                                        autoCapitalize="sentences"
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                handleSendMessage();
+                                            }
+                                        }}
+                                        className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 focus:border-[#f16315] focus:bg-white focus:outline-none rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 transition-all resize-none max-h-32 min-h-[38px] leading-relaxed"
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={!inputText.trim() || sending}
+                                        className="p-2.5 bg-[#f16315] hover:bg-orange-600 disabled:bg-slate-100 text-white disabled:text-slate-400 rounded-xl transition-all flex items-center justify-center flex-shrink-0 shadow-md shadow-orange-500/10"
+                                    >
+                                        {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                                    </button>
+                                </form>
+                            </div>
                         </>
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center text-slate-500 gap-2">
-                            <Smartphone size={40} className="stroke-slate-700" />
-                            <span className="text-xs font-black uppercase tracking-wider text-slate-600">Ningún chat seleccionado</span>
-                            <span className="text-[10px] text-slate-600 uppercase">Selecciona una conversación del menú para comenzar</span>
+                        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2">
+                            <Smartphone size={40} className="stroke-slate-200" />
+                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Ningún chat seleccionado</span>
+                            <span className="text-[10px] text-slate-400 uppercase">Selecciona una conversación del menú para comenzar</span>
                         </div>
                     )}
                 </div>
 
-                {/* 3. Panel de Progreso de Cita (Sidebar Derecho) - Solo Escritorio */}
+                {/* 3. Panel de Cita (Sidebar Derecho) - Solo Escritorio */}
                 {selectedSession && (
-                    <div className="hidden lg:flex w-72 bg-slate-950/40 border-l border-slate-800 flex-col flex-shrink-0 p-6 overflow-y-auto">
-                        <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-6 pb-2 border-b border-slate-800 flex items-center gap-2">
-                            <UserCheck size={14} /> Ficha de Registro IA
+                    <div className="hidden lg:flex w-72 bg-white border-l border-slate-100 flex-col flex-shrink-0 p-6 overflow-y-auto">
+                        <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-6 pb-2 border-b border-slate-100 flex items-center gap-2">
+                            <UserCheck size={14} className="text-[#f16315]" /> Ficha de Registro IA
                         </h3>
                         
                         {(() => {
@@ -400,47 +495,47 @@ export default function ChatsPage() {
                             
                             if (!data) {
                                 return (
-                                    <div className="flex flex-col items-center justify-center py-10 text-slate-600 text-center gap-2">
-                                        <AlertCircle size={24} />
-                                        <p className="text-[10px] font-black uppercase">Sin registro de cita activo</p>
-                                        <p className="text-[8px] text-slate-500 uppercase leading-relaxed">El cliente aún no inicia el flujo de citas interactivo.</p>
+                                    <div className="flex flex-col items-center justify-center py-10 text-slate-400 text-center gap-2 bg-slate-50/50 rounded-2xl border border-slate-100">
+                                        <AlertCircle size={24} className="stroke-slate-350" />
+                                        <p className="text-[10px] font-black uppercase text-slate-500">Sin registro activo</p>
+                                        <p className="text-[8px] text-slate-450 uppercase leading-relaxed px-4">El cliente aún no inicia el flujo de citas interactivo.</p>
                                     </div>
                                 );
                             }
                             return (
                                 <div className="space-y-4">
                                     {isCompleted && (
-                                        <div className="px-3 py-1.5 bg-[#25D366]/10 text-[#25D366] text-[8px] font-black tracking-widest uppercase rounded border border-[#25D366]/20 text-center mb-2">
+                                        <div className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-[8px] font-black tracking-widest uppercase rounded border border-emerald-150 text-center mb-2">
                                             Cita Agendada Exitosamente
                                         </div>
                                     )}
                                     <div>
-                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Nombre Completo</span>
-                                        <span className="text-xs font-bold text-slate-200 mt-1 block">{data.name || 'Falta dato...'}</span>
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Nombre Completo</span>
+                                        <span className="text-xs font-bold text-slate-800 mt-1 block">{data.name || 'Falta dato...'}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Correo</span>
-                                        <span className="text-xs font-bold text-slate-200 mt-1 block truncate">{data.email || 'Falta dato...'}</span>
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Correo</span>
+                                        <span className="text-xs font-bold text-slate-800 mt-1 block truncate">{data.email || 'Falta dato...'}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Vehículo</span>
-                                        <span className="text-xs font-bold text-slate-200 mt-1 block">{data.vehicle ? `${data.vehicle} ${data.year && data.year !== 'N/A' ? data.year : ''}` : 'Falta dato...'}</span>
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Vehículo</span>
+                                        <span className="text-xs font-bold text-slate-800 mt-1 block">{data.vehicle ? `${data.vehicle} ${data.year && data.year !== 'N/A' ? data.year : ''}` : 'Falta dato...'}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Kilometraje</span>
-                                        <span className="text-xs font-bold text-slate-200 mt-1 block">{data.km ? `${data.km} KM` : 'Falta dato...'}</span>
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Kilometraje</span>
+                                        <span className="text-xs font-bold text-slate-800 mt-1 block">{data.km ? `${data.km} KM` : 'Falta dato...'}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Placas</span>
-                                        <span className="text-xs font-bold text-slate-200 mt-1 block">{data.plate || 'Falta dato...'}</span>
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Placas</span>
+                                        <span className="text-xs font-bold text-slate-800 mt-1 block">{data.plate || 'Falta dato...'}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Fecha y Hora</span>
-                                        <span className="text-xs font-bold text-slate-200 mt-1 block">{data.date ? `${data.date} a las ${data.time || ''}` : 'Falta dato...'}</span>
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Fecha y Hora</span>
+                                        <span className="text-xs font-bold text-slate-800 mt-1 block">{data.date ? `${data.date} a las ${data.time || ''}` : 'Falta dato...'}</span>
                                     </div>
-                                    <div className="pt-2 border-t border-slate-800">
-                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Falla Reportada</span>
-                                        <span className="text-xs font-bold italic text-orange-400 mt-1 block leading-relaxed">"{data.problem || 'Falta registrar...'}"</span>
+                                    <div className="pt-3 border-t border-slate-100">
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Falla Reportada</span>
+                                        <span className="text-xs font-bold italic text-[#f16315] mt-1.5 block leading-relaxed bg-orange-50/50 p-3 rounded-xl border border-orange-100/50">"{data.problem || 'Falta registrar...'}"</span>
                                     </div>
                                 </div>
                             );

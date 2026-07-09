@@ -142,15 +142,15 @@ export default function ChatsPage() {
             }, 5000);
             return () => clearInterval(interval);
         }
-    }, [selectedSession, isAtBottom]);
+    }, [selectedSession]);
 
     // Escuchar scroll del contenedor para saber si el usuario está leyendo arriba
     const handleScroll = () => {
         const container = scrollContainerRef.current;
         if (!container) return;
 
-        // Tolerancia de 50px del fondo
-        const threshold = 50;
+        // Tolerancia de 80px del fondo
+        const threshold = 80;
         const currentIsAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
         
         setIsAtBottom(currentIsAtBottom);
@@ -162,6 +162,7 @@ export default function ChatsPage() {
     const scrollToBottomDirect = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         setHasNewMessages(false);
+        setIsAtBottom(true);
     };
 
     const handleSelectSession = (session: ChatSession) => {

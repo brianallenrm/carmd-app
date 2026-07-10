@@ -38,9 +38,10 @@ Sigue ESTRICTAMENTE las siguientes reglas de redacción y comportamiento (Psicol
 - COSTO DE DIAGNÓSTICO: Si preguntan cuánto cuesta el diagnóstico, responde que al igual que otros servicios, depende de la evaluación física. Sin embargo, explícales con entusiasmo que si deciden realizar la reparación con nosotros, el diagnóstico es 100% gratuito (se bonifica del total del trabajo).
 - FACTURACIÓN: Si preguntan si facturamos, responde que sí emitimos factura para todos los servicios si el cliente lo requiere. Regla de oro: No menciones si el precio incluye o no IVA bajo ningún motivo.
 - FORMAS DE PAGO: Aceptamos todos los medios de pago: efectivo, transferencia bancaria y todas las tarjetas de débito o crédito (Visa, Mastercard y American Express). No manejamos meses sin intereses directos, pero sí es posible diferir o dividir el pago en mensualidades con intereses directamente en nuestra terminal física a su llegada.
-- GARANTÍA CARMD: Si preguntan qué garantía ofrecemos, responde que todas nuestras garantías son por escrito: ofrecemos 1 año de garantía en mano de obra e incluye de regalo dos mantenimientos preventivos gratuitos (los cuales se especifican en la nota indicando el kilometraje recomendado para traer de vuelta el carro). Comparte amablemente la dirección oficial: https://www.carmd.com.mx/terminos para detalles.
-- SERVICIO DE GRÚA: Si el cliente solicita grúa o auxilio por quedarse tirado, responde amablemente que no contamos con servicio de grúa propio. Recomiéndale de forma atenta comunicarse con su seguro de auto para hacer uso de su cobertura de grúa o asistencia vial gratuita para trasladar el vehículo de forma segura a nuestras instalaciones.
-- VENTA DE REFACCIONES SUELTAS: Si preguntan si vendemos piezas sueltas (ej: un filtro, balatas), aclara con amabilidad que no somos refaccionaria; somos un Centro de Servicio integral y todas las piezas que proveemos se instalan bajo garantía de mano de obra en el taller.
+- GARANTÍA CARMD: Si preguntan qué garantía ofrecemos, responde que todas nuestras garantías son por escrito: ofrecemos 1 año de garantía en mano de obra e incluye de regalo dos mantenimientos preventivos gratuitos (los cuales se especifican en la nota indicando el kilometraje recomendado para traer de vuel- SERVICIO DE GRÚA / AUXILIO VIAL: Si el cliente solicita grúa o auxilio por quedarse tirado, sé muy empática, tranquiliza al cliente y explícale que daremos total prioridad a su caso. Recomiéndale primero de forma atenta comunicarse con su seguro de auto para hacer uso de su cobertura de grúa o asistencia vial gratuita para trasladar el vehículo de forma segura a nuestras instalaciones. Si no cuenta con seguro o prefiere que nosotros le apoyemos a coordinar una grúa externa para traerlo al Centro de Servicio, pídele amablemente su Nombre completo, qué Vehículo tiene (marca/modelo/año) y su Ubicación exacta. En cuanto te dé esos datos o confirme que requiere la grúa, dile que te comunicarás a la brevedad con él personalmente para coordinar el traslado. Obligatoriamente debes finalizar tu respuesta exacta con la etiqueta: [TRIGGER_HUMAN].
+- REGLA DE INTERRUPCIÓN HORARIA (SITUACIONES CRÍTICAS): Si el cliente reporta quedarse tirado (grúa/auxilio vial) y la hora actual de referencia es posterior a las 8:00 PM o anterior a las 7:30 AM, debes advertirle amablemente en tu respuesta que el equipo de asesores humanos le responderá personalmente a primera hora de la mañana (a partir de las 8:00 AM) para coordinar todo, aunque dejes registrados sus datos de ubicación.
+
+Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un filtro, balatas), aclara con amabilidad que no somos refaccionaria; somos un Centro de Servicio integral y todas las piezas que proveemos se instalan bajo garantía de mano de obra en el taller.
 - VERIFICACIÓN VEHICULAR: Si preguntan si realizamos el trámite de verificación, responde que sí apoyamos a los clientes a llevar su auto a verificar. Aclara que recomendamos traer primero el carro a CarMD para una inspección y revisión de pre-verificación, garantizando que pase el trámite a la primera.
 - ALCANCE DE VEHÍCULOS (MOTOS NO): Atendemos autos particulares, SUVs, pick-ups, vehículos comerciales, camiones pesados y maquinaria de todo tipo. Sin embargo, no atendemos motocicletas de ningún tipo.
 - CONCEPTO PRINCIPAL: Recuerda usar siempre el término premium "Centro de Servicio" para referirte a las instalaciones de CarMD.
@@ -84,7 +85,7 @@ Sigue ESTRICTAMENTE las siguientes reglas de redacción y comportamiento (Psicol
 - SEPARACIÓN DE DUDAS Y PROBLEMAS: Las preguntas del cliente sobre el Centro de Servicio, dirección, placas, etc., NUNCA deben ser extraídas o guardadas como la falla o "problema" del auto. El campo de problema solo debe llenarse con descripciones de fallas mecánicas reales o solicitudes de servicio (ej: "servicio de afinación", "tira aceite", "revisión de frenos", "costo de frenos").
 
 11. SITUACIONES CRÍTICAS O URGENTES:
-- Si reportan fallas graves (humo, sin frenos, etc.): Sé empática, tranquiliza al cliente y explícale que daremos total prioridad a su caso. Sugiérele traerlo directamente y agendar su recepción en este chat. NUNCA des números telefónicos ni sugieras llamadas.
+- Si reportan fallas graves que pongan en riesgo su seguridad (como quedarse sin frenos en el momento, humo denso del motor, etc.), sé muy empática, tranquiliza al cliente y explícale que daremos total prioridad a su caso. Recomiéndale traerlo directamente al taller o detener el carro de forma segura. Ofrécele coordinar una grúa (solicitando nombre, auto y ubicación) o si es fuera de horario adviértele que le responderemos a las 8:00 AM del día siguiente.
 
 12. TONO Y FORMATO DE WHATSAPP:
 - Tono profesional, amable, cercano y muy cálido.
@@ -407,7 +408,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ ok: true });
         }
 
-        // Detect if the user wants human intervention, is complaining, has a critical issue, or asks for offsite services
+        // Detect if the user wants human intervention, is complaining, or explicitly asks for a human
         const isUrgentOrComplaint = 
             textLower.includes('reclamacion') || 
             textLower.includes('queja') || 
@@ -415,20 +416,12 @@ export async function POST(req: NextRequest) {
             textLower.includes('sigue fallando') || 
             textLower.includes('hablar con el dueño') || 
             textLower.includes('gerente') ||
-            textLower.includes('humano') ||
-            textLower.includes('auxilio vial') ||
-            textLower.includes('me quede tirado') ||
-            textLower.includes('tirado') ||
-            textLower.includes('grúa') ||
-            textLower.includes('inspeccion a domicilio') ||
-            textLower.includes('inspeccion fuera') ||
-            textLower.includes('revisar un coche que quiero comprar') ||
-            textLower.includes('inspeccion de compra');
+            textLower.includes('humano');
 
         if (isUrgentOrComplaint) {
-            console.log(`[Webhook] Solicitud de servicio especial, auxilio o queja detectada. Cambiando estado a HUMAN_REQUIRED.`);
+            console.log(`[Webhook] Solicitud de intervención humana o queja detectada. Cambiando estado a HUMAN_REQUIRED.`);
             
-            const apologyMessage = `Entendido. 📞 Para este tipo de servicios especiales o de auxilio, por favor espera un momento; un miembro de nuestro equipo en CarMD se comunicará contigo personalmente a la brevedad para brindarte más información y seguimiento. Detendré mis respuestas automáticas por aquí.`;
+            const apologyMessage = `Entendido. 📞 Por favor espera un momento; un asesor de nuestro equipo en CarMD se comunicará contigo personalmente a la brevedad en este mismo chat para atender tu solicitud. Detendré mis respuestas automáticas por aquí.`;
             await sendWhatsAppMessage(from, apologyMessage);
             await saveChatMessage(from, 'assistant', apologyMessage);
             await updateChatState(from, 'HUMAN_REQUIRED', text);
@@ -873,6 +866,16 @@ ${historyPromptText}`;
                 phone: from,
                 problem: initialProblem
             }));
+            return NextResponse.json({ ok: true });
+        }
+
+        // Intercept human trigger (e.g. roadside assistance crane data collected)
+        if (replyText.includes('[TRIGGER_HUMAN]')) {
+            console.log("[Webhook] Disparador [TRIGGER_HUMAN] detectado. Silenciando bot y cambiando a HUMAN_REQUIRED.");
+            replyText = replyText.replace('[TRIGGER_HUMAN]', '').trim();
+            await sendInBubblesGeneral(from, replyText);
+            await saveChatMessage(from, 'assistant', replyText);
+            await updateChatState(from, 'HUMAN_REQUIRED', chat?.vehicleProblem);
             return NextResponse.json({ ok: true });
         }
 

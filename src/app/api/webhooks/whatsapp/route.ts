@@ -128,9 +128,81 @@ export async function POST(req: NextRequest) {
         if (!message) return NextResponse.json({ ok: true });
 
         const from = message.from; // Sender's phone number
-        const text = message.text?.body?.trim();
-        const textLower = text?.toLowerCase() || '';
+        let text = message.text?.body?.trim() || '';
+        
+        // --- PROCESAMIENTO DE AUDIO / NOTAS DE VOZ (Gemini 3.5 Flash) ---
+        if (message.type === 'audio' || message.audio) {
+            console.log(`[Audio Webhook] Mensaje de audio recibido de ${from}. Iniciando descarga y transcripción...`);
+            const audioId = message.audio.id;
+            
+            try {
+                // 1. Obtener la URL del archivo multimedia de WhatsApp
+                const mediaUrlRes = await fetch(`https://graph.facebook.com/${WHATSAPP_CONFIG.API_VERSION}/${audioId}`, {
+                    headers: { 'Authorization': `Bearer ${WHATSAPP_CONFIG.TOKEN}` }
+                });
+                
+                if (!mediaUrlRes.ok) throw new Error("Failed to fetch audio media metadata from Meta");
+                const mediaData = await mediaUrlRes.json();
+                const downloadUrl = mediaData.url;
+                
+                if (downloadUrl) {
+                    // 2. Descargar el buffer del archivo de audio
+                    const downloadRes = await fetch(downloadUrl, {
+                        headers: { 'Authorization': `Bearer ${WHATSAPP_CONFIG.TOKEN}` }
+                    });
+                    if (!downloadRes.ok) throw new Error("Failed to download audio file from Meta");
+                    const audioBuffer = await downloadRes.arrayBuffer();
+                    const audioBase64 = Buffer.from(audioBuffer).toString('base64');
+                    
+                    // 3. Mandar a transcribir a Gemini 3.5 Flash
+                    console.log(`[Audio Webhook] Transcribiendo con Gemini 3.5 Flash...`);
+                    const audioMime = message.audio.mime_type || 'audio/ogg';
+                    
+                    let genRes;
+                    try {
+                        genRes = await ai.models.generateContent({
+                            model: 'gemini-3.5-flash',
+                            contents: [
+                                {
+                                    inlineData: {
+                                        mimeType: audioMime,
+                                        data: audioBase64
+                                    }
+                                },
+                                "Transcribe de forma sumamente precisa este audio en español de México. Devuelve únicamente el texto de la transcripción literal sin comentarios extras ni aclaraciones."
+                            ]
+                        });
+                    } catch (geminiError) {
+                        console.error("[Audio Webhook] Gemini 3.5 Flash falló o llegó al límite. Usando fallback a Gemini 3.1 Flash Lite...", geminiError);
+                        // Fallback con el modelo 3.1 Flash Lite (enviando el mismo payload de audio)
+                        genRes = await ai.models.generateContent({
+                            model: 'gemini-3.1-flash-lite',
+                            contents: [
+                                {
+                                    inlineData: {
+                                        mimeType: audioMime,
+                                        data: audioBase64
+                                    }
+                                },
+                                "Transcribe de forma precisa este audio en español de México. Devuelve únicamente el texto."
+                            ]
+                        });
+                    }
+                    
+                    const transcription = genRes.text?.trim() || '';
+                    console.log(`[Audio Webhook] Transcripción completada: "${transcription}"`);
+                    text = transcription;
+                }
+            } catch (err) {
+                console.error("[Audio Webhook] Error en flujo de procesamiento de nota de voz:", err);
+                const errorAudioNotify = `Disculpa, tuve un pequeño problema técnico al escuchar tu audio. 🎙️ ¿Podrías escribirme tu mensaje en texto por aquí por favor? 😊`;
+                await sendWhatsAppMessage(from, errorAudioNotify);
+                await saveChatMessage(from, 'assistant', errorAudioNotify);
+                return NextResponse.json({ ok: true });
+            }
+        }
 
+        const textLower = text?.toLowerCase() || '';
         if (!text) return NextResponse.json({ ok: true });
 
         // Get current Mexico City Date, Day of week and Time to inject into prompt dynamically
@@ -647,6 +719,8 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                 } catch (e) {
                     console.error("Error al llamar API reserve:", e);
                 }
+                
+                await updateChatState(from, 'COMPLETED');
                 return NextResponse.json({ ok: true });
             } else {
                 const textLower = textClean.toLowerCase();
@@ -675,6 +749,86 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
 
         // --- Handle General AI Mode ---
         console.log("[Webhook] Modo Gemini AI activado por defecto.");
+
+        // --- SISTEMA DE MEMORIA DE CITAS CONFIRMADAS ---
+        const wantsBookingAction = textLower.includes('cita') || textLower.includes('recordar') || 
+                                   textLower.includes('cuándo') || textLower.includes('hora') || 
+                                   textLower.includes('reprogramar') || textLower.includes('cambiar') || 
+                                   textLower.includes('cancela');
+
+        if (wantsBookingAction && (chat?.state === 'COMPLETED' || chat?.state === 'START' || !chat?.state)) {
+            console.log(`[Booking Memory] Cliente ${from} solicita acción sobre cita. Consultando hoja CITAS_2025...`);
+            try {
+                const baseUrl = process.env.NODE_ENV === 'production' 
+                    ? `https://${req.headers.get('host')}` 
+                    : 'http://localhost:3000';
+
+                const bookingRes = await fetch(`${baseUrl}/api/chats/${from}/booking`);
+                if (bookingRes.ok) {
+                    const { cita } = await bookingRes.json();
+                    if (cita && (cita.estatus === 'Pendiente' || cita.estatus === 'Confirmada')) {
+                        console.log(`[Booking Memory] Cita activa encontrada:`, cita);
+                        
+                        const isQuery = textLower.includes('recordar') || textLower.includes('cuándo') || 
+                                        textLower.includes('cual') || textLower.includes('cuál') || 
+                                        textLower.includes('dónde') || textLower.includes('info') || 
+                                        (!textLower.includes('cambiar') && !textLower.includes('reprogramar') && !textLower.includes('cancela'));
+
+                        if (isQuery) {
+                            // Responder con la confirmación de su cita activa
+                            const reminderMsg = `¡Hola, ${cita.name}! 😊 Claro, con gusto te confirmo los detalles de tu cita agendada en nuestro Centro de Servicio:\n\n📅 *Fecha*: ${cita.date}\n⏰ *Hora*: ${cita.time}\n🚗 *Auto*: ${cita.vehicle} (${cita.year})\n📋 *Placas*: ${cita.plate}\n🔧 *Problema*: ${cita.problem}\n\n¡Te esperamos! Si necesitas hacer algún cambio o tienes dudas, avísame. 👍`;
+                            await sendWhatsAppMessage(from, reminderMsg);
+                            await saveChatMessage(from, 'assistant', reminderMsg);
+                            return NextResponse.json({ ok: true });
+                        }
+
+                        const isReschedule = textLower.includes('cambiar') || textLower.includes('reprogramar') || textLower.includes('mover');
+                        if (isReschedule) {
+                            // Cargar de vuelta los parámetros acumulados para iniciar la reprogramación
+                            const restoreParams = {
+                                name: cita.name,
+                                email: cita.email,
+                                vehicle: cita.vehicle,
+                                year: cita.year,
+                                km: cita.km,
+                                plate: cita.plate,
+                                problem: cita.problem,
+                                date: '...', // Reset para pedir fecha nueva
+                                time: '...'  // Reset para pedir hora nueva
+                            };
+
+                            const rescheduleMsg = `¡Hola, ${cita.name}! Claro que sí, con mucho gusto podemos reprogramar tu espacio en el Centro de Servicio. 🗓️\n\nTu cita actual está agendada para el *${cita.date}* a las *${cita.time}*.\n\n¿Para qué nuevo día y hora de lunes a sábado te gustaría agendar? 😊`;
+                            await sendWhatsAppMessage(from, rescheduleMsg);
+                            await saveChatMessage(from, 'assistant', rescheduleMsg);
+                            await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(restoreParams));
+                            return NextResponse.json({ ok: true });
+                        }
+
+                        const isCancel = textLower.includes('cancelar') || textLower.includes('cancela');
+                        if (isCancel) {
+                            // Actualizar estatus a Cancelada en Sheets
+                            try {
+                                await fetch(`${baseUrl}/api/citas/update-status`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ phone: from, status: 'Cancelada' })
+                                });
+                            } catch (e) {
+                                console.error("Error al cancelar cita en Sheets:", e);
+                            }
+
+                            const cancelConfirmMsg = `Entendido, ${cita.name}. He cancelado tu cita para el ${cita.date} a las ${cita.time} con éxito. Si en el futuro necesitas programar de nuevo o requieres ayuda para tu auto, aquí estaré. ¡Que tengas un excelente día! 😊🚗`;
+                            await sendWhatsAppMessage(from, cancelConfirmMsg);
+                            await saveChatMessage(from, 'assistant', cancelConfirmMsg);
+                            await updateChatState(from, 'COMPLETED');
+                            return NextResponse.json({ ok: true });
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("[Booking Memory] Error al consultar cita activa:", e);
+            }
+        }
 
         let systemInstruction = SYSTEM_PROMPT;
         systemInstruction += `\n\nFECHA Y HORA ACTUAL DE REFERENCIA: ${cdmxTimeStr}. HOY ES DÍA: ${dayName.toUpperCase()}. (Calcula correctamente el día de la semana relativo a hoy: si hoy es ${dayName}, mañana es el siguiente día. Recuerda que los domingos el Centro de Servicio está CERRADO).`;

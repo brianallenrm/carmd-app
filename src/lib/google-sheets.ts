@@ -292,6 +292,7 @@ export const getChatState = async (phone: string) => {
         state: row.get("state"),
         lastUpdate: row.get("last_update"),
         vehicleProblem: row.get("vehicle_problem"),
+        chatHistory: row.get("chat_history") || '[]',
         id: row.rowNumber
     };
 };
@@ -299,7 +300,7 @@ export const getChatState = async (phone: string) => {
 /**
  * Updates or creates a chat session state.
  */
-export const updateChatState = async (phone: string, state: string, vehicleProblem?: string) => {
+export const updateChatState = async (phone: string, state: string, vehicleProblem?: string, chatHistory?: string) => {
     const doc = await getInventoryDoc();
     const sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.CHAT_SESSIONS_TAB!];
     if (!sheet) return;
@@ -314,64 +315,77 @@ export const updateChatState = async (phone: string, state: string, vehicleProbl
         existingRow.set("state", state);
         existingRow.set("last_update", now);
         if (vehicleProblem !== undefined) existingRow.set("vehicle_problem", vehicleProblem);
+        if (chatHistory !== undefined) existingRow.set("chat_history", chatHistory);
         await existingRow.save();
     } else {
         await sheet.addRow({
             phone,
             state,
             last_update: now,
-            vehicle_problem: vehicleProblem || ''
+            vehicle_problem: vehicleProblem || '',
+            chat_history: chatHistory || '[]'
         });
     }
 };
 
 /**
- * Retrieves the message history for a given phone number (limited to last 50).
+ * Retrieves the message history for a given phone number (reads from the chat_history cell).
  */
 export const getChatMessages = async (phone: string) => {
-    const doc = await getInventoryDoc();
-    const sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.CHAT_MESSAGES_TAB!];
-    if (!sheet) {
-        console.warn("CHAT_MESSAGES sheet not found.");
-        return [];
+    try {
+        const chatState = await getChatState(phone);
+        if (!chatState || !chatState.chatHistory) return [];
+        const messages = JSON.parse(chatState.chatHistory);
+        if (Array.isArray(messages)) {
+            return messages.slice(-50); // Keep last 50
+        }
+    } catch (e) {
+        console.error("Error parsing chat history cell:", e);
     }
-
-    const rows = await sheet.getRows();
-    const cleanPhone = phone.replace(/\D/g, '').slice(-10); // Last 10 digits
-    
-    // Filtramos las filas que pertenecen al cliente
-    const matchedRows = rows.filter(r => {
-        const val = r.get("phone");
-        if (!val || typeof val !== 'string') return false;
-        return val.replace(/\D/g, '').endsWith(cleanPhone);
-    });
-
-    // Mapeamos y tomamos los últimos 50 mensajes para no saturar el panel
-    return matchedRows.slice(-50).map(r => ({
-        phone: r.get("phone"),
-        sender: r.get("sender"), // 'client', 'assistant', 'admin'
-        text: r.get("text"),
-        timestamp: r.get("timestamp")
-    }));
+    return [];
 };
 
 /**
- * Saves a new chat message into the CHAT_MESSAGES table.
+ * Saves a new chat message into the chat_history cell of CHAT_SESSIONS.
  */
 export const saveChatMessage = async (phone: string, sender: 'client' | 'assistant' | 'admin', text: string) => {
-    const doc = await getInventoryDoc();
-    const sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.CHAT_MESSAGES_TAB!];
-    if (!sheet) {
-        console.warn("CHAT_MESSAGES sheet not found. Cannot save message.");
-        return;
-    }
+    try {
+        const doc = await getInventoryDoc();
+        const sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.CHAT_SESSIONS_TAB!];
+        if (!sheet) return;
 
-    const now = new Date().toISOString();
-    await sheet.addRow({
-        phone: phone,
-        sender: sender,
-        text: text,
-        timestamp: now
-    });
-    console.log(`[Google Sheets] Guardado mensaje en historial para ${phone} de ${sender}: "${text.substring(0, 30)}..."`);
+        const rows = await sheet.getRows();
+        const cleanPhone = phone.replace(/\D/g, '').slice(-10);
+        const existingRow = rows.find(r => r.get("phone").replace(/\D/g, '').endsWith(cleanPhone));
+
+        const now = new Date().toISOString();
+        const newMsg = { phone, sender, text, timestamp: now };
+
+        if (existingRow) {
+            let historyList: any[] = [];
+            try {
+                const rawHistory = existingRow.get("chat_history");
+                if (rawHistory && rawHistory.startsWith('[')) {
+                    historyList = JSON.parse(rawHistory);
+                }
+            } catch (e) {}
+
+            historyList.push(newMsg);
+            existingRow.set("chat_history", JSON.stringify(historyList));
+            existingRow.set("last_update", now);
+            await existingRow.save();
+        } else {
+            // Si es un número totalmente nuevo, creamos la fila de sesión con el primer mensaje
+            await sheet.addRow({
+                phone,
+                state: 'START',
+                last_update: now,
+                vehicle_problem: '',
+                chat_history: JSON.stringify([newMsg])
+            });
+        }
+        console.log(`[Google Sheets] Guardado mensaje en celda 'chat_history' para ${phone} de ${sender}`);
+    } catch (error) {
+        console.error("Error saving chat message to session cell:", error);
+    }
 };

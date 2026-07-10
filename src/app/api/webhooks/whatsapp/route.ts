@@ -222,13 +222,32 @@ export async function POST(req: NextRequest) {
 
         console.log(`[Webhook] Mensaje recibido de ${from}: "${text}"`);
         
-        // Guardar mensaje en el historial CHAT_MESSAGES
+        // Guardar mensaje del cliente en el historial en Sheets
         await saveChatMessage(from, 'client', text);
         
-        // 1. Check current state in Sheets
+        // 1. Check current state and chat history in Sheets
         console.log(`[Webhook] Buscando estado en Google Sheets para ${from}...`);
         let chat = await getChatState(from);
         console.log(`[Webhook] Estado recuperado:`, chat);
+
+        // Deserializar historial para inyectar como memoria a Gemini
+        let historyPromptText = "";
+        if (chat && chat.chatHistory) {
+            try {
+                const historyList = JSON.parse(chat.chatHistory);
+                if (Array.isArray(historyList) && historyList.length > 0) {
+                    historyPromptText = "\n\nHISTORIAL DE CONVERSACIÓN RECIENTE (ÚSALO COMO MEMORIA DE LO QUE SE HA DICHO):\n";
+                    // Tomamos los últimos 12 mensajes para mantener el prompt eficiente
+                    const recentMsgs = historyList.slice(-12);
+                    for (const msg of recentMsgs) {
+                        const roleName = msg.sender === 'client' ? 'Cliente' : (msg.sender === 'assistant' ? 'Mariana (Tú)' : 'Asesor Humano (CarMD)');
+                        historyPromptText += `[${msg.timestamp || ''}] ${roleName}: "${msg.text}"\n`;
+                    }
+                }
+            } catch (e) {
+                console.error("Error parsing chat history for prompt:", e);
+            }
+        }
 
         // --- COMMAND: ENTER ADMIN MODE ---
         if (textLower === 'carmd admin' || textLower === 'carmd-admin') {
@@ -429,8 +448,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ ok: true });
         }
 
-
-
         // --- Handle Step-by-Step Appointment Data Collection (Semantic & Interactive) ---
         if (chat?.state === 'COLLECTING_APPOINTMENT_IA') {
             console.log("[Webhook] Procesando recolección semántica de cita...");
@@ -459,6 +476,7 @@ REGLAS DE RECOLECCIÓN DE CITA (MODO INTERACTIVO):
   4. VERIFICACIÓN DE CALENDARIO REAL: Si el cliente propone una fecha y día de la semana que no coinciden en el calendario real (ej: decir miércoles 14 cuando el miércoles es 15 de julio de 2026), corrígelo con amabilidad diciendo el día correcto antes de agendar (ej: "Veo que el miércoles es 15 de julio, ¿te agendamos para ese día?").
   5. REGLA DE DOMINGOS: El Centro de Servicio está estrictamente CERRADO los domingos. Si el cliente solicita explícitamente venir en domingo, debes aclararle amablemente que no abrimos y pedirle proactivamente que te sugiera otra fecha de lunes a sábado.
   6. TOLERANCIA AL KILOMETRAJE DESCONOCIDO: Si al pedirle el kilometraje el cliente te responde que no sabe o no está seguro, puedes insistir amistosamente UNA SÓLA VEZ pidiéndole un aproximado. Si insiste en que no sabe o no responde, guarda el campo 'km' como "Pendiente" y avanza inmediatamente a pedirle el siguiente dato (ej: las placas) sin volver a preguntar por los kilómetros.
+${historyPromptText}
 
 Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas cortas.`;
 
@@ -496,12 +514,13 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             
             FECHA Y HORA ACTUAL DE REFERENCIA (SÚPER IMPORTANTE): Hoy es ${dayName.toUpperCase()} y la fecha y hora actual en México es ${cdmxTimeStr}. 
             Calcula cualquier fecha relativa (ej: "próximo martes", "mañana", "el 14") de forma matemática estricta a partir de esta fecha de hoy. El formato de salida para 'date' debe ser un string legible (ej: "martes 15 de julio" o "lunes 13 de julio").
-            
+            ${historyPromptText}
+
             REGLAS DE EXTRACCIÓN DE DATOS:
             1. REGLA DE LIMPIEZA DE MARCAS: Si detectas un error de dedo obvio en la marca o modelo (ej: "btw" en lugar de "BMW", "toyot" por "Toyota", "va" por "VW"), corrígelo en el campo 'vehicle' para que se guarde de forma profesional en el JSON.
             2. SEPARACIÓN DE PREGUNTAS Y MOTIVOS: Si el cliente hace una pregunta como "¿para qué quieres las placas?", "¿cuánto cuesta?", etc., esto NUNCA debe ser guardado en el campo 'problem'. El campo 'problem' se llena únicamente con síntomas reales del coche (frenos, afinación, ruido, etc.) o solicitudes de servicio.
             3. SI EL USUARIO INDICA CORREGIR UN DATO (ej: "el problema no es afinación, es frenos"): Borra o reemplaza el dato anterior con el valor que indica el usuario ahora.
-            4. CORRECCIÓN DE FECHA EN EL JSON: Si el usuario dice una fecha numérica y un día de la semana que son incompatibles o erróneos (como decir "miércoles 14" cuando el miércoles es 15 de julio de 2026), debes guardar en el campo 'date' la fecha REAL corregida del calendario (miércoles 15 de julio).
+            4. CORRECCIÓN DE FECHA EN EL JSON: Si el usuario dice una fecha numérica y un día de la semana que son incompatibles o erróneos (como decir "miércoles 14" cuando el miércoles es 15 de julio de 2026), guardar en el campo 'date' la fecha REAL corregida del calendario (miércoles 15 de julio).
             5. MANEJO DE DATOS FALTANTES O DESCONOCIDOS: Si el usuario dice "no sé", "no estoy seguro" o "luego te digo" para el kilometraje ('km'), guarda el valor "Pendiente" en el campo 'km'. No dejes el campo vacío ni vuelvas a forzar la pregunta si el usuario ya declaró desconocerlo.
             6. PERSISTENCIA DE PLACAS: Asegúrate de extraer las placas si el cliente las proporciona (ej: "Abcd1234"). NUNCA limpies o dejes el campo 'plate' como nulo o vacío una vez que ya fue capturado.`;
 
@@ -579,7 +598,7 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                 const summaryText = `¡Listo! Ya tengo toda la información. Por favor confírmame si los datos de tu cita son correctos:
  
 👤 *Nombre*: ${mergedParams.name}
-📧 *Correo*: ${mergedParams.email || 'N/A'}
+📧 *Corro*: ${mergedParams.email || 'N/A'}
 🚗 *Vehículo*: ${mergedParams.vehicle} ${mergedParams.year || ''}
 🛞 *Kilometraje*: ${kmDisplay}
 📋 *Placas*: ${mergedParams.plate}
@@ -619,7 +638,8 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             try {
                 const evalPrompt = `Analiza si este mensaje es una aceptación, confirmación o aprobación a la propuesta anterior de agendar su cita: "${text}".
                 Acepta respuestas afirmativas directas, informales, modismos mexicanos o positivos (ej: "si", "sí", "va", "chido", "sobres", "perfecto", "confirmo", "adelante", "chévere", "dale", "está bien", "procede", "ok").
-                Responde ÚNICAMENTE con la palabra "YES" si es afirmativo/aprobación, o "NO" si es negativo, duda, pregunta o si desea realizar algún cambio (como preguntar "cuándo confirman", etc.).`;
+                Responde ÚNICAMENTE con la palabra "YES" si es afirmativo/aprobación, o "NO" si es negativo, duda, pregunta o si desea realizar algún cambio (como preguntar "cuándo confirman", etc.).
+${historyPromptText}`;
                 
                 const evalRes = await ai.models.generateContent({
                     model: 'gemini-3.1-flash-lite',
@@ -685,8 +705,8 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             } else {
                 const textLower = textClean.toLowerCase();
                 const isCancellation = textLower.includes('cancelar') || textLower.includes('cancela') || 
-                                      textLower.includes('ya no') || textLower.includes('olvidalo') || 
-                                      textLower.includes('olvídelo') || textLower.includes('ninguno');
+                                       textLower.includes('ya no') || textLower.includes('olvidalo') || 
+                                       textLower.includes('olvídelo') || textLower.includes('ninguno');
                 
                 if (isCancellation) {
                     console.log("[Webhook] Solicitud de cancelación recibida. Limpiando estado...");
@@ -791,7 +811,8 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
         }
 
         let systemInstruction = SYSTEM_PROMPT;
-        systemInstruction += `\n\nFECHA Y HORA ACTUAL DE REFERENCIA: ${cdmxTimeStr}. HOY ES DÍA: ${dayName.toUpperCase()}. (Calcula correctamente el día de la semana relativo a hoy: si hoy es ${dayName}, mañana es el siguiente día. Recuerda que los domingos el Centro de Servicio está CERRADO).`;
+        systemInstruction += `\n\nFECHA Y HORA ACTUAL DE REFERENCIA: ${cdmxTimeStr}. HOY ES DÍA: ${dayName.toUpperCase()}. (Calcula correctamente el día de la semana relativo a hoy: si hoy es ${dayName}, mañana es el siguiente día. Recuerda que los domingos el Centro de Servicio está CERRADO).
+${historyPromptText}`;
         
         let nextState = 'WAITING_PROBLEM_IA';
         const currentState = chat?.state || 'START';

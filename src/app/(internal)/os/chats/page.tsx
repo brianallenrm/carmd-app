@@ -126,10 +126,9 @@ export default function ChatsPage() {
             setCompletedBooking(null);
             setHasNewMessages(false);
             
-            // Primera carga: sí queremos loading spinner
+            // Forzar una recarga limpia
             fetchHistory(selectedSession.phone, false).then(() => {
-                // Hacer scroll al fondo en la primera carga del chat
-                setTimeout(scrollToBottomDirect, 100);
+                setTimeout(scrollToBottomDirect, 150);
             });
             
             if (selectedSession.state === 'COMPLETED') {
@@ -137,12 +136,11 @@ export default function ChatsPage() {
             }
 
             const interval = setInterval(() => {
-                // Cargas en segundo plano: silenciosas (isSilentUpdate = true)
                 fetchHistory(selectedSession.phone, true);
                 if (selectedSession.state === 'COMPLETED') {
                     fetchCompletedBooking(selectedSession.phone);
                 }
-            }, 5000);
+            }, 4000);
             return () => clearInterval(interval);
         }
     }, [selectedSession?.phone]); // Depend on phone directly to trigger rebuild when changing chats
@@ -169,6 +167,7 @@ export default function ChatsPage() {
     };
 
     const handleSelectSession = (session: ChatSession) => {
+        setMessages([]); // Limpiar mensajes viejos inmediatamente para evitar retrasos visuales
         setSelectedSession(session);
         setViewMode('chat');
     };
@@ -311,7 +310,14 @@ export default function ChatsPage() {
                     </div>
 
                     <button 
-                        onClick={fetchSessions}
+                        onClick={() => {
+                            fetchSessions();
+                            if (selectedSession) {
+                                fetchHistory(selectedSession.phone, false).then(() => {
+                                    setTimeout(scrollToBottomDirect, 100);
+                                });
+                            }
+                        }}
                         className="p-2 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-all"
                     >
                         <RefreshCw size={14} className={loadingSessions ? "animate-spin" : ""} />

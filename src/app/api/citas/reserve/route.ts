@@ -160,10 +160,10 @@ export async function POST(request: NextRequest) {
         console.error("Error sending admin email:", adminEmailError);
       }
 
-      // C. Send WhatsApp Confirmation to Client
-      const confirmationText = `¡Solicitud recibida! ✔️ Revisamos disponibilidad y te confirmamos por aquí mismo en unos momentos. Así no te hacemos perder tiempo 👍.`;
-      await sendWhatsAppMessage(phone, confirmationText);
-      await updateChatState(phone, 'COMPLETED');
+      // C. Send WhatsApp Confirmation to Client (DISABLED TEMPORARILY - Mariana is not public yet)
+      // const confirmationText = `¡Solicitud recibida! ✔️ Revisamos disponibilidad y te confirmamos por aquí mismo en unos momentos. Así no te hacemos perder tiempo 👍.`;
+      // await sendWhatsAppMessage(phone, confirmationText);
+      // await updateChatState(phone, 'COMPLETED');
 
       // D. Send WhatsApp Alert to Admins AUTOMATICALLY
       console.log("[API Reserve] Enviando alertas automáticas a los administradores...");

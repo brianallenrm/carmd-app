@@ -429,81 +429,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ ok: true });
         }
 
-        // --- Handle Final Booking Confirmation State (Isolate from Gemini to prevent loop) ---
-        if (chat?.state === 'WAITING_CONFIRMATION_IA') {
-            console.log("[Webhook] Evaluando confirmación final en WAITING_CONFIRMATION_IA con IA...");
-            
-            let tempParams: any = {};
-            try {
-                if (chat.vehicleProblem && chat.vehicleProblem.startsWith('{')) {
-                    tempParams = JSON.parse(chat.vehicleProblem);
-                }
-            } catch (e) {}
 
-            // Usar Gemini de forma ultra rápida para evaluar si el texto es afirmativo
-            let isAffirmative = false;
-            try {
-                const evalPrompt = `Analiza si este mensaje es una aceptación, confirmación o aprobación a la propuesta anterior de agendar su cita: "${text}".
-                Acepta respuestas afirmativas directas, informales, modismos mexicanos o positivos (ej: "si", "va", "chido", "sobres", "perfecto", "confirmo", "adelante", "chévere", "dale", "está bien", "procede", "ok").
-                Responde ÚNICAMENTE con la palabra "YES" si es afirmativo/aprobación, o "NO" si es negativo, duda o si desea realizar algún cambio.`;
-                
-                const evalRes = await ai.models.generateContent({
-                    model: 'gemini-3.1-flash-lite',
-                    contents: evalPrompt,
-                    config: { temperature: 0.1 }
-                });
-                
-                const ans = evalRes.text?.trim().toUpperCase() || 'NO';
-                console.log(`[Webhook] Evaluación semántica de confirmación: "${ans}"`);
-                isAffirmative = ans.includes('YES');
-            } catch (e) {
-                console.error("Error evaluando confirmación con IA:", e);
-            }
-
-            if (isAffirmative) {
-                console.log("[Webhook] Confirmación afirmativa recibida. Registrando cita definitiva...");
-                const confirmationMsg = `¡Excelente! Estoy agendando tu cita y notificando a nuestro equipo. Te esperamos en nuestro Centro de Servicio. 🚗💨`;
-                await sendWhatsAppMessage(from, confirmationMsg);
-                await saveChatMessage(from, 'assistant', confirmationMsg);
-
-                try {
-                    const baseUrl = process.env.NODE_ENV === 'production' 
-                        ? `https://${req.headers.get('host')}` 
-                        : 'http://localhost:3000';
-
-                    await fetch(`${baseUrl}/api/citas/reserve`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            name: tempParams.name,
-                            email: tempParams.email || 'N/A',
-                            phone: from,
-                            vehicle: tempParams.vehicle,
-                            year: tempParams.year || 'N/A',
-                            km: tempParams.km || 'N/A',
-                            plate: tempParams.plate || 'N/A',
-                            date: tempParams.date,
-                            time: tempParams.time,
-                            problem: tempParams.problem || 'Diagnóstico general'
-                        })
-                    });
-                } catch (e) {
-                    console.error("Error al llamar API reserve:", e);
-                }
-                
-                // Limpiar estado a completado
-                await updateChatState(from, 'COMPLETED');
-                return NextResponse.json({ ok: true });
-            } else {
-                // Si dice que no o quiere cambiar algo, regresamos a la recolección
-                console.log("[Webhook] El cliente no confirmó o desea cambiar datos. Regresando a recolección.");
-                const retryMsg = `Entendido. ¿Qué dato te gustaría corregir o qué cambio hacemos en tu cita? 🛠️`;
-                await sendWhatsAppMessage(from, retryMsg);
-                await saveChatMessage(from, 'assistant', retryMsg);
-                await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(tempParams));
-                return NextResponse.json({ ok: true });
-            }
-        }
 
         // --- Handle Step-by-Step Appointment Data Collection (Semantic & Interactive) ---
         if (chat?.state === 'COLLECTING_APPOINTMENT_IA') {
@@ -687,9 +613,28 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             } catch (e) {}
 
             const textClean = text.toLowerCase().trim();
-            const isAffirmative = textClean.includes('si') || textClean.includes('sí') || textClean.includes('confirm') || 
-                                  textClean.includes('acuerdo') || textClean.includes('bien') || textClean.includes('perfecto') ||
-                                  textClean.includes('correcto') || textClean.includes('agrada') || textClean.includes('dale');
+            
+            // Usar Gemini para evaluar de forma robusta y semántica si el cliente confirma o tiene dudas/cambios
+            let isAffirmative = false;
+            try {
+                const evalPrompt = `Analiza si este mensaje es una aceptación, confirmación o aprobación a la propuesta anterior de agendar su cita: "${text}".
+                Acepta respuestas afirmativas directas, informales, modismos mexicanos o positivos (ej: "si", "sí", "va", "chido", "sobres", "perfecto", "confirmo", "adelante", "chévere", "dale", "está bien", "procede", "ok").
+                Responde ÚNICAMENTE con la palabra "YES" si es afirmativo/aprobación, o "NO" si es negativo, duda, pregunta o si desea realizar algún cambio (como preguntar "cuándo confirman", etc.).`;
+                
+                const evalRes = await ai.models.generateContent({
+                    model: 'gemini-3.1-flash-lite',
+                    contents: evalPrompt,
+                    config: { temperature: 0.1 }
+                });
+                
+                const ans = evalRes.text?.trim().toUpperCase() || 'NO';
+                console.log(`[Webhook] Evaluación semántica de confirmación en WAITING_CONFIRMATION_IA: "${ans}"`);
+                isAffirmative = ans.includes('YES');
+            } catch (e) {
+                console.error("Error evaluando confirmación con IA:", e);
+                // Fallback local robusto
+                isAffirmative = textClean === 'si' || textClean === 'sí' || textClean === 'correcto' || textClean === 'perfecto' || textClean === 'confirmar' || textClean === 'confirmo';
+            }
 
             if (isAffirmative) {
                 console.log("[Webhook] Confirmación afirmativa recibida. Registrando cita definitiva...");

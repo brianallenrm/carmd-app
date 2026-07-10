@@ -602,7 +602,8 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             // VALIDACIÓN CRÍTICA DE DOMINGO: Si la fecha contiene la palabra "domingo", bloqueamos el resumen
             if (hasRequiredFieldsForSummary && mergedParams.date.toLowerCase().includes('domingo')) {
                 hasRequiredFieldsForSummary = false;
-                replyText = `Disculpa la confusión, Pamela. 🗓️ Los domingos nuestro Centro de Servicio está cerrado para descansar. \n\nEstamos listos para recibir tu auto de lunes a viernes de 8:00 AM a 5:00 PM y sábados de 8:00 AM a 2:00 PM. ¿Qué otro día y hora te vendría bien? 😊`;
+                const clientName = mergedParams.name && mergedParams.name !== '...' ? mergedParams.name : '';
+                replyText = `Disculpa la confusión${clientName ? `, ${clientName}` : ''}. 🗓️ Los domingos nuestro Centro de Servicio está cerrado para descansar. \n\nEstamos listos para recibir tu auto de lunes a viernes de 8:00 AM a 5:00 PM y sábados de 8:00 AM a 2:00 PM. ¿Qué otro día y hora te vendría bien? 😊`;
                 // Removemos la fecha inválida de los parámetros acumulados
                 mergedParams.date = '...';
                 mergedParams.time = '...';
@@ -633,14 +634,20 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                 }
             }
 
+            // Sanitización de Hora de Apertura
+            if (mergedParams.time && (mergedParams.time.toLowerCase() === 'apertura' || mergedParams.time.toLowerCase() === 'lo más temprano' || mergedParams.time.toLowerCase() === 'lo más temprano posible')) {
+                mergedParams.time = '8:00 AM';
+            }
+
             if (hasRequiredFieldsForSummary) {
                 // Si ya tenemos todo, pasamos al estado de confirmación y le presentamos el resumen
+                const kmDisplay = mergedParams.km === 'Pendiente' ? 'Por confirmar a la llegada 🛞' : `${mergedParams.km} KM`;
                 const summaryText = `¡Listo! Ya tengo toda la información. Por favor confírmame si los datos de tu cita son correctos:
  
 👤 *Nombre*: ${mergedParams.name}
 📧 *Correo*: ${mergedParams.email || 'N/A'}
 🚗 *Vehículo*: ${mergedParams.vehicle} ${mergedParams.year || ''}
-🛞 *Kilometraje*: ${mergedParams.km} KM
+🛞 *Kilometraje*: ${kmDisplay}
 📋 *Placas*: ${mergedParams.plate}
 📅 *Fecha*: ${mergedParams.date}
 ⏰ *Hora*: ${mergedParams.time}
@@ -687,7 +694,7 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                 
                 const isLateNight = totalMinutes >= 20 * 60 || totalMinutes < 7.5 * 60; // 8:00 PM (1200 mins) o 7:30 AM (450 mins)
                 
-                let confirmationMsg = `¡Excelente! Estoy agendando tu cita y notificando a nuestro equipo. Te esperamos en nuestro Centro de Servicio. 🚗💨`;
+                let confirmationMsg = `¡Solicitud recibida! ✔️ En este momento te llegará un correo electrónico con los detalles de tu solicitud de cita. A la brevedad, un asesor de nuestro equipo de CarMD se comunicará contigo por aquí para el seguimiento y confirmación final. ¡Muchas gracias por tu confianza! 🚗💨`;
                 if (isLateNight) {
                     confirmationMsg += `\n\n⚠️ *Nota*: Por el horario actual, el seguimiento personalizado y la confirmación final por parte de nuestro equipo humano se realizarán a primera hora del día de mañana a partir de las 8:00 AM. ¡Excelente noche! 🌙`;
                 }

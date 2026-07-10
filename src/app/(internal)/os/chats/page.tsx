@@ -84,8 +84,11 @@ export default function ChatsPage() {
             setMessages(prev => {
                 // Si la longitud cambió o hay mensajes nuevos
                 if (newMessages.length > prev.length) {
-                    // Si el usuario no está al final del scroll, activamos el aviso de mensajes nuevos
-                    if (!isAtBottom && isSilentUpdate) {
+                    if (isAtBottom) {
+                        // Si el usuario ya está al fondo, bajamos automáticamente
+                        setTimeout(scrollToBottomDirect, 50);
+                    } else if (isSilentUpdate) {
+                        // Si el usuario está leyendo arriba, mostramos el aviso flotante
                         setHasNewMessages(true);
                     }
                     return newMessages;
@@ -142,7 +145,7 @@ export default function ChatsPage() {
             }, 5000);
             return () => clearInterval(interval);
         }
-    }, [selectedSession]);
+    }, [selectedSession?.phone]); // Depend on phone directly to trigger rebuild when changing chats
 
     // Escuchar scroll del contenedor para saber si el usuario está leyendo arriba
     const handleScroll = () => {

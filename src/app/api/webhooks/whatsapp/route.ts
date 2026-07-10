@@ -38,7 +38,8 @@ Sigue ESTRICTAMENTE las siguientes reglas de redacción y comportamiento (Psicol
 - COSTO DE DIAGNÓSTICO: Si preguntan cuánto cuesta el diagnóstico, responde que al igual que otros servicios, depende de la evaluación física. Sin embargo, explícales con entusiasmo que si deciden realizar la reparación con nosotros, el diagnóstico es 100% gratuito (se bonifica del total del trabajo).
 - FACTURACIÓN: Si preguntan si facturamos, responde que sí emitimos factura para todos los servicios si el cliente lo requiere. Regla de oro: No menciones si el precio incluye o no IVA bajo ningún motivo.
 - FORMAS DE PAGO: Aceptamos todos los medios de pago: efectivo, transferencia bancaria y todas las tarjetas de débito o crédito (Visa, Mastercard y American Express). No manejamos meses sin intereses directos, pero sí es posible diferir o dividir el pago en mensualidades con intereses directamente en nuestra terminal física a su llegada.
-- GARANTÍA CARMD: Si preguntan qué garantía ofrecemos, responde que todas nuestras garantías son por escrito: ofrecemos 1 año de garantía en mano de obra e incluye de regalo dos mantenimientos preventivos gratuitos (los cuales se especifican en la nota indicando el kilometraje recomendado para traer de vuel- SERVICIO DE GRÚA / AUXILIO VIAL: Si el cliente solicita grúa o auxilio por quedarse tirado, sé muy empática, tranquiliza al cliente y explícale que daremos total prioridad a su caso. Recomiéndale primero de forma atenta comunicarse con su seguro de auto para hacer uso de su cobertura de grúa o asistencia vial gratuita para trasladar el vehículo de forma segura a nuestras instalaciones. Si no cuenta con seguro o prefiere que nosotros le apoyemos a coordinar una grúa externa para traerlo al Centro de Servicio, pídele amablemente su Nombre completo, qué Vehículo tiene (marca/modelo/año) y su Ubicación exacta. En cuanto te dé esos datos o confirme que requiere la grúa, dile que te comunicarás a la brevedad con él personalmente para coordinar el traslado. Obligatoriamente debes finalizar tu respuesta exacta con la etiqueta: [TRIGGER_HUMAN].
+- GARANTÍA CARMD: Si preguntan qué garantía ofrecemos, responde que todas nuestras garantías son por escrito: ofrecemos 1 año de garantía en mano de obra e incluye de regalo dos mantenimientos preventivos gratuitos (los cuales se especifican en la nota indicando el kilometraje recomendado para traer de vuelta el carro). Comparte amablemente la dirección oficial: https://www.carmd.com.mx/terminos para detalles.
+- SERVICIO DE GRÚA / AUXILIO VIAL: Si el cliente solicita grúa o auxilio por quedarse tirado, sé muy empática, tranquiliza al cliente y explícale que daremos total prioridad a su caso. Recomiéndale primero de forma atenta comunicarse con su seguro de auto para hacer uso de su cobertura de grúa o asistencia vial gratuita para trasladar el vehículo de forma segura a nuestras instalaciones. Si no cuenta con seguro o prefiere que nosotros le apoyemos a coordinar una grúa externa para traerlo al Centro de Servicio, pídele amablemente su Nombre completo, qué Vehículo tiene (marca/modelo/año) y su Ubicación exacta. En cuanto te dé esos datos o confirme que requiere la grúa, dile exactamente: "¡Excelente! Estoy registrando tus datos de auxilio vial y notificando a nuestro equipo. \n\n¡Solicitud recibida! ✔️ Revisamos disponibilidad de la grúa y te confirmamos por aquí mismo en unos momentos. Así no te hacemos perder tiempo 👍."
 - REGLA DE INTERRUPCIÓN HORARIA (SITUACIONES CRÍTICAS): Si el cliente reporta quedarse tirado (grúa/auxilio vial) y la hora actual de referencia es posterior a las 8:00 PM o anterior a las 7:30 AM, debes advertirle amablemente en tu respuesta que el equipo de asesores humanos le responderá personalmente a primera hora de la mañana (a partir de las 8:00 AM) para coordinar todo, aunque dejes registrados sus datos de ubicación.
 
 Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un filtro, balatas), aclara con amabilidad que no somos refaccionaria; somos un Centro de Servicio integral y todas las piezas que proveemos se instalan bajo garantía de mano de obra en el taller.
@@ -371,34 +372,48 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ ok: true });
         }
 
-        // Si es una conversación totalmente nueva (no registrada en CHAT_SESSIONS), alertamos a los administradores
-        if (!chat) {
-            console.log(`[Webhook] Nueva conversación detectada para ${from}. Enviando alertas a los administradores...`);
-            const adminNotifyText = `📢 *NUEVA CONVERSACIÓN INICIADA*\n\nEl número +${from} ha iniciado un chat con Mariana (IA).\n\nPuedes monitorear y gestionar la conversación en tiempo real desde tu Portal:\n👉 carmd.com.mx/os/chats`;
-            
-            const rafaPhone = "525516473084";
-            const momPhone = "525535786087";
-            const brianPhone = "525547015312";
+        // Alerta de actividad para los administradores (sesión nueva o reanudada tras 1 hora de inactividad)
+        let shouldAlertAdmins = false;
+        let adminNotifyText = "";
 
+        const rafaPhone = "525516473084";
+        const momPhone = "525535786087";
+        const brianPhone = "525547015312";
+
+        if (!chat) {
+            shouldAlertAdmins = true;
+            adminNotifyText = `📢 *NUEVA CONVERSACIÓN INICIADA*\n\nEl número +${from} ha iniciado un chat con Mariana (IA).\n\nPuedes monitorear y gestionar la conversación en tiempo real desde tu Portal:\n👉 carmd.com.mx/os/chats`;
+        } else {
+            const lastUpdateMs = new Date(chat.lastUpdate || 0).getTime();
+            const oneHourAgo = Date.now() - (60 * 60 * 1000); // 1 hora en milisegundos
+            if (lastUpdateMs < oneHourAgo) {
+                shouldAlertAdmins = true;
+                adminNotifyText = `🔁 *ACTIVIDAD EN CHAT REANUDADA*\n\nEl cliente +${from} ha vuelto a escribir después de más de 1 hora de inactividad.\n\nPuedes ver la conversación en tiempo real en tu Portal:\n👉 carmd.com.mx/os/chats`;
+            }
+        }
+
+        if (shouldAlertAdmins) {
+            console.log(`[Webhook] Alerta de actividad en chat para administradores. Enviando...`);
+            
             // Enviar alerta a Rafael
             try {
                 await sendWhatsAppMessage(rafaPhone, adminNotifyText);
             } catch (e) {
-                console.error("Error al alertar a Rafael sobre inicio de chat:", e);
+                console.error("Error al alertar a Rafael sobre actividad:", e);
             }
 
             // Enviar alerta a Mamá
             try {
                 await sendWhatsAppMessage(momPhone, adminNotifyText);
             } catch (e) {
-                console.error("Error al alertar a Mamá sobre inicio de chat:", e);
+                console.error("Error al alertar a Mamá sobre actividad:", e);
             }
 
             // Enviar alerta a Brian
             try {
                 await sendWhatsAppMessage(brianPhone, adminNotifyText);
             } catch (e) {
-                console.error("Error al alertar a Brian sobre inicio de chat:", e);
+                console.error("Error al alertar a Brian sobre actividad:", e);
             }
         }
 
@@ -469,6 +484,7 @@ REGLAS DE RECOLECCIÓN DE CITA (MODO INTERACTIVO):
   4. VERIFICACIÓN DE CALENDARIO REAL: Si el cliente propone una fecha y día de la semana que no coinciden en el calendario real (ej: decir miércoles 14 cuando el miércoles es 15 de julio de 2026), corrígelo con amabilidad diciendo el día correcto antes de agendar (ej: "Veo que el miércoles es 15 de julio, ¿te agendamos para ese día?").
   5. REGLA DE DOMINGOS: El Centro de Servicio está estrictamente CERRADO los domingos. Si el cliente solicita explícitamente venir en domingo, debes aclararle amablemente que no abrimos y pedirle proactivamente que te sugiera otra fecha de lunes a sábado.
   6. TOLERANCIA AL KILOMETRAJE DESCONOCIDO: Si al pedirle el kilometraje el cliente te responde que no sabe o no está seguro, puedes insistir amistosamente UNA SÓLA VEZ pidiéndole un aproximado. Si insiste en que no sabe o no responde, guarda el campo 'km' como "Pendiente" y avanza inmediatamente a pedirle el siguiente dato (ej: las placas) sin volver a preguntar por los kilómetros.
+  7. DATO CURIOSO DEL AUTO: Justo después de que el cliente proporcione o confirme por primera vez qué auto tiene (marca/modelo/versión), debes integrar de forma muy breve, natural y conversacional en tu respuesta de WhatsApp un dato curioso, real e interesante sobre esa marca o modelo de auto (máximo un renglón, ej: de dónde viene el nombre, un récord, algún dato histórico divertido) antes de continuar con la conversación o pedirle el siguiente dato. Si el cliente no ha dicho su auto o ya comentaste el dato curioso antes, no lo menciones.
 ${historyPromptText}
 
 Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas cortas.`;
@@ -869,15 +885,6 @@ ${historyPromptText}`;
             return NextResponse.json({ ok: true });
         }
 
-        // Intercept human trigger (e.g. roadside assistance crane data collected)
-        if (replyText.includes('[TRIGGER_HUMAN]')) {
-            console.log("[Webhook] Disparador [TRIGGER_HUMAN] detectado. Silenciando bot y cambiando a HUMAN_REQUIRED.");
-            replyText = replyText.replace('[TRIGGER_HUMAN]', '').trim();
-            await sendInBubblesGeneral(from, replyText);
-            await saveChatMessage(from, 'assistant', replyText);
-            await updateChatState(from, 'HUMAN_REQUIRED', chat?.vehicleProblem);
-            return NextResponse.json({ ok: true });
-        }
 
         // Send response
         await sendInBubblesGeneral(from, replyText);

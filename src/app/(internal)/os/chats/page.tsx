@@ -116,11 +116,11 @@ export default function ChatsPage() {
 
     useEffect(() => {
         fetchSessions();
-        const interval = setInterval(fetchSessions, 15000); // Auto-update list
+        const interval = setInterval(fetchSessions, 4000); // Actualiza la lista de sesiones cada 4s en vivo
         return () => clearInterval(interval);
     }, []);
 
-    // Polling inteligente de mensajes
+    // Polling inteligente de mensajes y actualización de Ficha de Registro en vivo
     useEffect(() => {
         if (selectedSession) {
             setCompletedBooking(null);
@@ -137,13 +137,23 @@ export default function ChatsPage() {
 
             const interval = setInterval(() => {
                 fetchHistory(selectedSession.phone, true);
-                if (selectedSession.state === 'COMPLETED') {
-                    fetchCompletedBooking(selectedSession.phone);
-                }
-            }, 4000);
+                
+                // Buscar la versión más reciente de la sesión seleccionada en la lista de sesiones
+                // para mantener la Ficha de Registro actualizada en tiempo real sin recargar
+                setSessions(currentSessions => {
+                    const updated = currentSessions.find(s => s.phone === selectedSession.phone);
+                    if (updated && (updated.vehicleProblem !== selectedSession.vehicleProblem || updated.state !== selectedSession.state)) {
+                        setSelectedSession(updated);
+                        if (updated.state === 'COMPLETED') {
+                            fetchCompletedBooking(updated.phone);
+                        }
+                    }
+                    return currentSessions;
+                });
+            }, 3000); // Polling más rápido a 3s para máxima fluidez conversacional
             return () => clearInterval(interval);
         }
-    }, [selectedSession?.phone]); // Depend on phone directly to trigger rebuild when changing chats
+    }, [selectedSession?.phone, selectedSession?.vehicleProblem, selectedSession?.state]); // Escucha cambios de estado y problemas de vehículo
 
     // Escuchar scroll del contenedor para saber si el usuario está leyendo arriba
     const handleScroll = () => {

@@ -358,6 +358,7 @@ export async function POST(req: NextRequest) {
             
             const rafaPhone = "525516473084";
             const momPhone = "525535786087";
+            const brianPhone = "525547015312";
 
             // Enviar alerta a Rafael
             try {
@@ -371,6 +372,13 @@ export async function POST(req: NextRequest) {
                 await sendWhatsAppMessage(momPhone, adminNotifyText);
             } catch (e) {
                 console.error("Error al alertar a Mamá sobre inicio de chat:", e);
+            }
+
+            // Enviar alerta a Brian
+            try {
+                await sendWhatsAppMessage(brianPhone, adminNotifyText);
+            } catch (e) {
+                console.error("Error al alertar a Brian sobre inicio de chat:", e);
             }
         }
 

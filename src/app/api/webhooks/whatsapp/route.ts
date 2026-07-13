@@ -257,6 +257,16 @@ export async function POST(req: NextRequest) {
             }
         }
 
+        // --- COMMAND: RESET EVERYTHING ---
+        if (textLower === 'reinicia todo' || textLower === 'reinicia-todo') {
+            console.log(`[Reset Command] Limpiando estado e historial para el número ${from}...`);
+            await updateChatState(from, 'START', '', '[]');
+            const resetMsg = `🧹 *SESIÓN REINICIADA CON ÉXITO*\n\nHe borrado tu historial de conversación y los datos temporales de la Ficha de Registro en Sheets.\n\nTu siguiente mensaje iniciará una conversación completamente limpia desde cero. ¡Listo para tus pruebas! 👍`;
+            await sendWhatsAppMessage(from, resetMsg);
+            await saveChatMessage(from, 'assistant', resetMsg);
+            return NextResponse.json({ ok: true });
+        }
+
         // --- COMMAND: ENTER ADMIN MODE ---
         if (textLower === 'carmd admin' || textLower === 'carmd-admin') {
             console.log(`[Admin Mode] Activando canal administrativo persistente para ${from}...`);

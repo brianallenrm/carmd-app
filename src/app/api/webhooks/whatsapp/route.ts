@@ -43,7 +43,12 @@ Sigue ESTRICTAMENTE las siguientes reglas de redacción y comportamiento (Psicol
 - REGLA DE INTERRUPCIÓN HORARIA (SITUACIONES CRÍTICAS): Si el cliente reporta quedarse tirado (grúa/auxilio vial) y la hora actual de referencia es posterior a las 8:00 PM o anterior a las 7:30 AM, debes advertirle amablemente en tu respuesta que el equipo de asesores humanos le responderá personalmente a primera hora de la mañana (a partir de las 8:00 AM) para coordinar todo, aunque dejes registrados sus datos de ubicación.
 
 Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un filtro, balatas), aclara con amabilidad que no somos refaccionaria; somos un Centro de Servicio integral y todas las piezas que proveemos se instalan bajo garantía de mano de obra en el taller.
+- PROPUESTAS COMERCIALES Y PROVEEDORES: Si un cliente escribe para ofrecer productos, servicios, alianzas de marca o ser proveedor de refacciones/herramientas:
+  1. Agradéceles amablemente el interés en CarMD.
+  2. Pídeles con cortesía sus datos de contacto para hacerlos llegar al área de compras y adquisiciones: *Nombre completo*, *Nombre de la refaccionaria/empresa* y su *Correo electrónico*.
+  3. Menciona que en cuanto tengan esa información, el departamento correspondiente la revisará y se comunicará con ellos si existe interés en la propuesta comercial.
 - INSPECCIÓN DE COMPRA A DOMICILIO (REVISIÓN PARA COMPRA): Si el cliente te pregunta si podemos ir a revisar a domicilio un coche que le están ofreciendo para comprar, dile que sí es posible realizar este servicio de inspección a domicilio. Pídele amablemente que por favor te comparta sus datos: Nombre completo, el Vehículo (marca, modelo, año) y la Ubicación o zona de la visita. Coméntale que en cuanto te proporcione esta información, un asesor de CarMD se comunicará de inmediato para revisar la disponibilidad de la visita y coordinar la cita.
+- ESTÉTICA, HOJALATERÍA Y PINTURA (ESTÉTICA AUTOMOTRIZ): Si preguntan si ofrecemos el servicio de hojalatería y pintura o estética automotriz, responde con entusiasmo que sí contamos con ese servicio. Explícales que realizamos todo tipo de reparaciones estéticas: desde pequeños rayones, golpes y abolladuras, pintura general o por piezas, hasta reemplazo de partes exteriores como faros, parrillas, cajuelas o fascias. Para darles un presupuesto preciso de la reparación, invítalos cordialmente a agendar una cita de evaluación física en nuestro Centro de Servicio.
 - VERIFICACIÓN VEHICULAR: Si preguntan si realizamos el trámite de verificación, responde que sí apoyamos a los clientes a llevar su auto a verificar. Aclara que recomendamos traer primero el carro a CarMD para una inspección y revisión de pre-verificación, garantizando que pase el trámite a la primera.
 - ALCANCE DE VEHÍCULOS (MOTOS NO): Atendemos autos particulares, SUVs, pick-ups, vehículos comerciales, camiones pesados y maquinaria de todo tipo. Sin embargo, no atendemos motocicletas de ningún tipo.
 - CONCEPTO PRINCIPAL: Recuerda usar siempre el término premium "Centro de Servicio" para referirte a las instalaciones de CarMD.
@@ -432,15 +437,50 @@ export async function POST(req: NextRequest) {
             textLower.includes('sigue fallando') || 
             textLower.includes('hablar con el dueño') || 
             textLower.includes('gerente') ||
-            textLower.includes('humano');
+            textLower.includes('humano') ||
+            chat?.state === 'ASKING_NAME_FOR_HUMAN';
 
         if (isUrgentOrComplaint) {
-            console.log(`[Webhook] Solicitud de intervención humana o queja detectada. Cambiando estado a HUMAN_REQUIRED.`);
+            console.log(`[Webhook] Solicitud de intervención humana detectada. Evaluando datos antes de transferir...`);
             
-            const apologyMessage = `Entendido. 📞 Por favor espera un momento; un asesor de nuestro equipo en CarMD se comunicará contigo personalmente a la brevedad en este mismo chat para atender tu solicitud. Detendré mis respuestas automáticas por aquí.`;
+            // Intentar extraer el nombre si estamos en el sub-estado
+            let clientName = '';
+            let vehicleProblemData = chat?.vehicleProblem || '';
+            
+            try {
+                if (vehicleProblemData.startsWith('{')) {
+                    const parsed = JSON.parse(vehicleProblemData);
+                    clientName = parsed.name || '';
+                }
+            } catch(e) {}
+
+            // Si es la primera solicitud y no tenemos su nombre registrado
+            if (!clientName && chat?.state !== 'ASKING_NAME_FOR_HUMAN') {
+                const askNameMessage = `Entiendo perfectamente tu molestia y te pido una disculpa. 📞 Para nada es nuestra intención quitar el trato humano ni la cercanía contigo; de hecho, usamos este asistente virtual solo para agilizar los datos y poder ayudarte mucho más rápido.\n\nPara pasarte de inmediato con uno de nuestros asesores y que sepa con quién se comunicará, ¿me podrías compartir tu *Nombre completo*? 😊`;
+                
+                await sendWhatsAppMessage(from, askNameMessage);
+                await saveChatMessage(from, 'assistant', askNameMessage);
+                
+                // Guardamos el estado temporal para esperar el nombre
+                const tempParams = { name: '', phone: from };
+                await updateChatState(from, 'ASKING_NAME_FOR_HUMAN', JSON.stringify(tempParams));
+                return NextResponse.json({ ok: true });
+            }
+
+            // Si el cliente nos está respondiendo con el nombre en el estado temporal
+            if (chat?.state === 'ASKING_NAME_FOR_HUMAN') {
+                clientName = text.trim();
+                const tempParams = { name: clientName, phone: from };
+                vehicleProblemData = JSON.stringify(tempParams);
+            }
+
+            // Mensaje de despedida personalizado con su nombre
+            const greeting = clientName ? `Muchas gracias, ${clientName}. ` : '';
+            const apologyMessage = `${greeting}📞 Por favor espera un momento; un asesor de nuestro equipo en CarMD se comunicará contigo personalmente a la brevedad en este mismo chat para atender tu solicitud. Detendré mis respuestas automáticas por aquí.`;
+            
             await sendWhatsAppMessage(from, apologyMessage);
             await saveChatMessage(from, 'assistant', apologyMessage);
-            await updateChatState(from, 'HUMAN_REQUIRED', text);
+            await updateChatState(from, 'HUMAN_REQUIRED', vehicleProblemData);
             return NextResponse.json({ ok: true });
         }
 

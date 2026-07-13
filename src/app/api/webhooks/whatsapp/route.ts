@@ -257,16 +257,6 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // --- COMMAND: RESET EVERYTHING ---
-        if (textLower === 'reinicia todo' || textLower === 'reinicia-todo') {
-            console.log(`[Reset Command] Limpiando estado e historial para el número ${from}...`);
-            await updateChatState(from, 'START', '', '[]');
-            const resetMsg = `🧹 *SESIÓN REINICIADA CON ÉXITO*\n\nHe borrado tu historial de conversación y los datos temporales de la Ficha de Registro en Sheets.\n\nTu siguiente mensaje iniciará una conversación completamente limpia desde cero. ¡Listo para tus pruebas! 👍`;
-            await sendWhatsAppMessage(from, resetMsg);
-            await saveChatMessage(from, 'assistant', resetMsg);
-            return NextResponse.json({ ok: true });
-        }
-
         // --- COMMAND: ENTER ADMIN MODE ---
         if (textLower === 'carmd admin' || textLower === 'carmd-admin') {
             console.log(`[Admin Mode] Activando canal administrativo persistente para ${from}...`);
@@ -644,8 +634,11 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                                               mergedParams.vehicle && mergedParams.vehicle !== '...' &&
                                               mergedParams.km && mergedParams.km !== '...' &&
                                               mergedParams.plate && mergedParams.plate !== '...' &&
-                                              mergedParams.date && mergedParams.date !== '...' && mergedParams.date !== 'lo más temprano posible' &&
-                                              mergedParams.time && mergedParams.time !== '...' && mergedParams.time !== 'lo más temprano posible';
+                                              mergedParams.date && mergedParams.date !== '...' && 
+                                              !mergedParams.date.toLowerCase().includes('temprano') &&
+                                              mergedParams.time && mergedParams.time !== '...' && 
+                                              !mergedParams.time.toLowerCase().includes('temprano') &&
+                                              !mergedParams.time.toLowerCase().includes('disponible');
 
             // VALIDACIÓN CRÍTICA DE DOMINGO: Si la fecha contiene la palabra "domingo", bloqueamos el resumen
             if (hasRequiredFieldsForSummary && mergedParams.date.toLowerCase().includes('domingo')) {

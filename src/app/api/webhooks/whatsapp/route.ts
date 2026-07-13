@@ -466,21 +466,56 @@ export async function POST(req: NextRequest) {
 
             // Si es la primera solicitud y no tenemos su nombre registrado
             if (!clientName && chat?.state !== 'ASKING_NAME_FOR_HUMAN') {
-                const askNameMessage = `Entiendo perfectamente tu molestia y te pido una disculpa. 📞 Para nada es nuestra intención quitar el trato humano ni la cercanía contigo; de hecho, usamos este asistente virtual solo para agilizar los datos y poder ayudarte mucho más rápido.\n\nPara pasarte de inmediato con uno de nuestros asesores y que sepa con quién se comunicará, ¿me podrías compartir tu *Nombre completo*? 😊`;
+                const askNameMessage = `Entiendo perfectamente tu molestia y te pido una disculpa. 📞 Para nada es nuestra intención quitar el trato humano ni la cercanía contigo; de hecho, usamos este asistente virtual solo para agilizar los datos y poder ayudarte mucho más rápido.\n\nPara pasarte de inmediato con uno de nuestros asesores y que sepa con quién se comunicará, ¿me podrías compartir tu *Nombre completo* y qué *coche (Marca, Modelo y Año)* tienes? 😊`;
                 
                 await sendWhatsAppMessage(from, askNameMessage);
                 await saveChatMessage(from, 'assistant', askNameMessage);
                 
                 // Guardamos el estado temporal para esperar el nombre
-                const tempParams = { name: '', phone: from };
+                const tempParams = { name: '', vehicle: '', phone: from };
                 await updateChatState(from, 'ASKING_NAME_FOR_HUMAN', JSON.stringify(tempParams));
                 return NextResponse.json({ ok: true });
             }
 
-            // Si el cliente nos está respondiendo con el nombre en el estado temporal
+            // Si el cliente nos está respondiendo con los datos en el estado temporal
             if (chat?.state === 'ASKING_NAME_FOR_HUMAN') {
-                clientName = text.trim();
-                const tempParams = { name: clientName, phone: from };
+                // Usar Gemini en temperatura baja para extraer nombre y carro de su respuesta molesta
+                let extractedName = '';
+                let extractedCar = '';
+                try {
+                    const extractPrompt = `Analiza la respuesta del usuario: "${text}".
+                    El usuario está molesto y nos está dando su Nombre y/o su coche (Marca/Modelo/Año) para hablar con un humano.
+                    Extrae:
+                    1. Nombre completo (name)
+                    2. Coche (vehicle)
+                    
+                    Devuelve únicamente un JSON con los campos 'name' y 'vehicle'.`;
+                    
+                    const extractRes = await ai.models.generateContent({
+                        model: 'gemini-3.1-flash-lite',
+                        contents: extractPrompt,
+                        config: { temperature: 0.1 }
+                    });
+                    
+                    const cleanJson = extractRes.text?.replace(/```json|```/g, '').trim() || '{}';
+                    const parsed = JSON.parse(cleanJson);
+                    extractedName = parsed.name || text.split(',')[0].trim();
+                    extractedCar = parsed.vehicle || 'No especificado';
+                } catch(e) {
+                    extractedName = text.trim();
+                }
+
+                clientName = extractedName;
+                const tempParams = { 
+                    name: extractedName, 
+                    vehicle: extractedCar,
+                    year: 'N/A',
+                    km: 'N/A',
+                    plate: 'N/A',
+                    date: 'N/A',
+                    time: 'N/A',
+                    problem: 'Solicitud directa de Asesor Humano'
+                };
                 vehicleProblemData = JSON.stringify(tempParams);
             }
 
@@ -631,12 +666,11 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             
             if (isDerivationReply) {
                 const hasContactInfo = mergedParams.name && mergedParams.name !== '...' &&
-                                       mergedParams.email && mergedParams.email !== '...' &&
-                                       mergedParams.km && mergedParams.km !== '...';
+                                       mergedParams.vehicle && mergedParams.vehicle !== '...';
                                        
                 if (!hasContactInfo) {
                     // Sobreescribimos la respuesta para obligar a pedir los datos restantes antes de derivar
-                    replyText = `Entiendo perfectamente. Para darte el costo aproximado y evitar cualquier error con las piezas específicas de tu auto, le pediré a un asesor de nuestro equipo que te cotice personalmente por aquí. \n\nPara tener tu cotización lista, ¿me podrías compartir tu *nombre completo*, un *correo electrónico* y el *kilometraje* aproximado de tu vehículo? 📋`;
+                    replyText = `Entiendo perfectamente. Para darte el costo aproximado y evitar cualquier error con las piezas específicas de tu auto, le pediré a un asesor de nuestro equipo que te cotice personalmente por aquí. \n\nPara tener tu cotización lista, ¿me podrías compartir tu *nombre completo* y qué *coche (Marca, Modelo y Año)* tienes? 📋`;
                 } else {
                     // Si ya los tenemos completos, enviamos el mensaje de derivación final y silenciamos
                     const finalDerivationMsg = `Muchas gracias, ${mergedParams.name}. Ya registré tu información y se la he pasado a nuestro asesor. Por favor danos unos minutos; a la brevedad se comunicarán de CarMD contigo por este mismo chat para darte el costo aproximado. Detendré mis respuestas automáticas. ¡Bonito día! 👋`;

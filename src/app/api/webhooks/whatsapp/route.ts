@@ -48,7 +48,7 @@ Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un fi
   2. Pídeles con cortesía sus datos de contacto para hacerlos llegar al área de compras y adquisiciones: *Nombre completo*, *Nombre de la refaccionaria/empresa* y su *Correo electrónico*.
   3. Menciona que en cuanto tengan esa información, el departamento correspondiente la revisará y se comunicará con ellos si existe interés en la propuesta comercial.
 - INSPECCIÓN DE COMPRA A DOMICILIO (REVISIÓN PARA COMPRA): Si el cliente te pregunta si podemos ir a revisar a domicilio un coche que le están ofreciendo para comprar, dile que sí es posible realizar este servicio de inspección a domicilio. Pídele amablemente que por favor te comparta sus datos: Nombre completo, el Vehículo (marca, modelo, año) y la Ubicación o zona de la visita. Coméntale que en cuanto te proporcione esta información, un asesor de CarMD se comunicará de inmediato para revisar la disponibilidad de la visita y coordinar la cita.
-- ESTÉTICA, HOJALATERÍA Y PINTURA (ESTÉTICA AUTOMOTRIZ): Si preguntan si ofrecemos el servicio de hojalatería y pintura o estética automotriz, responde con entusiasmo que sí contamos con ese servicio. Explícales que realizamos todo tipo de reparaciones estéticas: desde pequeños rayones, golpes y abolladuras, pintura general o por piezas, hasta reemplazo de partes exteriores como faros, parrillas, cajuelas o fascias. Para darles un presupuesto preciso de la reparación, invítalos cordialmente a agendar una cita de evaluación física en nuestro Centro de Servicio.
+- ESTÉTICA AUTOMOTRIZ (PROHIBIDO DECIR HOJALATERÍA Y PINTURA): Si el cliente te pregunta por hojalatería y pintura o estética automotriz, responde con entusiasmo que sí contamos con el servicio oficial de *Estética Automotriz*. Explícales que realizamos todo tipo de reparaciones y mejoras estéticas: desde pequeños rayones, golpes, abolladuras y pintura general o por piezas, hasta reemplazo de partes exteriores como faros, parrillas, cajuelas o fascias. REGLA DE ORO: Aunque el cliente te pregunte usando el término informal "hojalatería y pintura", tú debes responder y referirte al servicio estrictamente usando el término premium *Estética Automotriz* en todas tus burbujas de WhatsApp. Para darles un presupuesto preciso de la reparación estética, invítalos cordialmente a agendar una cita de evaluación física en nuestro Centro de Servicio.
 - VERIFICACIÓN VEHICULAR: Si preguntan si realizamos el trámite de verificación, responde que sí apoyamos a los clientes a llevar su auto a verificar. Aclara que recomendamos traer primero el carro a CarMD para una inspección y revisión de pre-verificación, garantizando que pase el trámite a la primera.
 - ALCANCE DE VEHÍCULOS (MOTOS NO): Atendemos autos particulares, SUVs, pick-ups, vehículos comerciales, camiones pesados y maquinaria de todo tipo. Sin embargo, no atendemos motocicletas de ningún tipo.
 - CONCEPTO PRINCIPAL: Recuerda usar siempre el término premium "Centro de Servicio" para referirte a las instalaciones de CarMD.
@@ -931,8 +931,90 @@ ${historyPromptText}`;
         await sendInBubblesGeneral(from, replyText);
         await saveChatMessage(from, 'assistant', replyText);
 
+        // --- SISTEMA DE CAPTURA COMERCIAL / PROVEEDORES ---
+        // Si el usuario está ofreciendo una alianza comercial o refacciones y ya proporcionó su nombre y correo/datos
+        let finalVehicleProblem = chat?.vehicleProblem || '';
+        const isSupplierQuery = textLower.includes('refaccionaria') || textLower.includes('proveedor') || 
+                                textLower.includes('servicio') || textLower.includes('colaborar') || 
+                                textLower.includes('comercial') || textLower.includes('adquisiciones') ||
+                                (chat && chat.chatHistory && chat.chatHistory.toLowerCase().includes('proveedor'));
+
+        if (isSupplierQuery && (currentState === 'WAITING_PROBLEM_IA' || currentState === 'WAITING_FORM_IA')) {
+            try {
+                // Analizar con Gemini si el texto del historial o el mensaje actual ya contiene los datos completos del proveedor
+                const supplierPrompt = `Analiza este mensaje: "${text}" y el historial reciente de la conversación:
+                ${historyPromptText}
+                
+                Si el usuario está ofreciendo servicios/productos comerciales y ha proporcionado al menos su Nombre y un Correo electrónico (o teléfono), extrae:
+                1. Nombre completo (name)
+                2. Correo electrónico (email)
+                3. Nombre de la empresa o refaccionaria (vehicle)
+                4. Detalles de su propuesta o producto (problem)
+                
+                Devuelve un JSON estrictamente bajo las llaves: name, email, vehicle, problem.
+                Si no ha proporcionado su nombre y correo electrónico todavía en la conversación, devuelve "NONE".`;
+
+                const supplierRes = await ai.models.generateContent({
+                    model: 'gemini-3.1-flash-lite',
+                    contents: supplierPrompt,
+                    config: { temperature: 0.1 }
+                });
+
+                const ansJson = supplierRes.text?.replace(/```json|```/g, '').trim() || '';
+                if (ansJson && ansJson !== 'NONE' && ansJson.startsWith('{')) {
+                    const parsed = JSON.parse(ansJson);
+                    
+                    // Si ya tenemos los datos mínimos, guardamos en la Ficha de Registro IA
+                    if (parsed.name && parsed.email) {
+                        finalVehicleProblem = JSON.stringify({
+                            name: parsed.name,
+                            email: parsed.email,
+                            vehicle: parsed.vehicle || 'Propuesta Comercial',
+                            year: 'N/A',
+                            km: 'N/A',
+                            plate: 'N/A',
+                            date: 'N/A',
+                            time: 'N/A',
+                            problem: parsed.problem || 'Propuesta de Proveedor'
+                        });
+
+                        // Mandar correo de alerta a car.md.mx@hotmail.com por Resend
+                        if (process.env.RESEND_API_KEY) {
+                            const emailSubject = `🏢 Nueva Propuesta de Proveedor: ${parsed.vehicle || parsed.name}`;
+                            const emailHtml = `
+                                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; padding: 20px;">
+                                    <h2 style="color: #f16315; border-bottom: 2px solid #f16315; padding-bottom: 8px;">Contacto de Nuevo Proveedor</h2>
+                                    <p>Se ha recibido una propuesta comercial a través del chatbot de WhatsApp:</p>
+                                    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                                        <tr><td style="padding: 8px; font-weight: bold; width: 30%;">Nombre:</td><td style="padding: 8px;">${parsed.name}</td></tr>
+                                        <tr><td style="padding: 8px; font-weight: bold;">Empresa:</td><td style="padding: 8px;">${parsed.vehicle || 'No especificada'}</td></tr>
+                                        <tr><td style="padding: 8px; font-weight: bold;">Correo:</td><td style="padding: 8px;">${parsed.email}</td></tr>
+                                        <tr><td style="padding: 8px; font-weight: bold;">WhatsApp:</td><td style="padding: 8px;">+${from}</td></tr>
+                                        <tr><td style="padding: 8px; font-weight: bold; vertical-align: top;">Propuesta:</td><td style="padding: 8px; font-style: italic;">"${parsed.problem || 'No especificada'}"</td></tr>
+                                    </table>
+                                    <p style="margin-top: 25px; font-size: 12px; color: #777;">* Este es un correo automático enviado por el Asistente Virtual de CarMD.</p>
+                                </div>
+                            `;
+
+                            // Importamos dinámicamente resend o lo llamamos directo
+                            const { resend } = await import('@/lib/resend');
+                            await resend.emails.send({
+                                from: 'CarMD Asistente <notificaciones@carmd.com.mx>',
+                                to: 'car.md.mx@hotmail.com',
+                                subject: emailSubject,
+                                html: emailHtml
+                            });
+                            console.log("[Supplier Email] Correo enviado exitosamente a car.md.mx@hotmail.com");
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Error al procesar y enviar correo de propuesta comercial:", err);
+            }
+        }
+
         // Update state to AI state
-        await updateChatState(from, nextState, currentState === 'WAITING_PROBLEM_IA' ? text : chat?.vehicleProblem);
+        await updateChatState(from, nextState, currentState === 'WAITING_PROBLEM_IA' ? (finalVehicleProblem || text) : finalVehicleProblem);
         return NextResponse.json({ ok: true });
     } catch (error) {
         console.error("Webhook Processing Error [CRITICAL]:", error);

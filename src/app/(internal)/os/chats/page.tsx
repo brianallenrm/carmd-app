@@ -118,7 +118,7 @@ export default function ChatsPage() {
 
     useEffect(() => {
         fetchSessions();
-        const interval = setInterval(fetchSessions, 4000); // Actualiza la lista de sesiones cada 4s en vivo
+        const interval = setInterval(fetchSessions, 15000); // Polling relajado cada 15s para no agotar la API de Sheets
         return () => clearInterval(interval);
     }, []);
 
@@ -152,7 +152,8 @@ export default function ChatsPage() {
                     }
                     return currentSessions;
                 });
-            }, 3000); // Polling más rápido a 3s para máxima fluidez conversacional
+            }, 15000); // Polling relajado cada 15s para no saturar la API
+
             return () => clearInterval(interval);
         }
     }, [selectedSession?.phone, selectedSession?.vehicleProblem, selectedSession?.state]); // Escucha cambios de estado y problemas de vehículo

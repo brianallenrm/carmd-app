@@ -136,20 +136,20 @@ export async function POST(req: NextRequest) {
         if (!message) return NextResponse.json({ ok: true });
 
         const from = message.from; // Sender's phone number
+        const messageId = message.id; // Unique ID from Meta
         const now = Date.now();
-        const lastProcessed = processedMessagesCache.get(from);
-        if (lastProcessed && (now - lastProcessed) < 3000) {
-            console.log(`[Webhook] Duplicado concurrente detectado para ${from}. Ignorando.`);
-            return NextResponse.json({ ok: true });
-        }
-        processedMessagesCache.set(from, now);
-
-        // Responder inmediatamente a Meta para evitar reintentos concurrentes
-        console.log(`[Webhook] Mensaje recibido de ${from}. Respondiendo 200 OK de inmediato.`);
         
-        // Ejecutar todo el flujo pesado en segundo plano de manera asíncrona
-        (async () => {
-            try {
+        // Deduplicación basada en message.id (Meta reintenta el mismo ID si tardamos más de 5s)
+        if (messageId) {
+            const lastProcessed = processedMessagesCache.get(messageId);
+            if (lastProcessed && (now - lastProcessed) < 120000) { // 2 minutos en caché
+                console.log(`[Webhook] Reintento de Meta duplicado detectado para ID ${messageId}. Ignorando.`);
+                return NextResponse.json({ ok: true });
+            }
+            processedMessagesCache.set(messageId, now);
+        }
+
+        try {
                 let text = message.text?.body?.trim() || '';
                 
                 // --- PROCESAMIENTO DE AUDIO / NOTAS DE VOZ (Gemini 3.5 Flash) ---
@@ -1059,10 +1059,6 @@ ${historyPromptText}`;
 
         // Update state to AI state
         await updateChatState(from, nextState, currentState === 'WAITING_PROBLEM_IA' ? (finalVehicleProblem || text) : finalVehicleProblem);
-            } catch (backgroundError) {
-                console.error("[Webhook Background Error]:", backgroundError);
-            }
-        })();
 
         return NextResponse.json({ ok: true });
     } catch (error) {

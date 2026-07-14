@@ -271,7 +271,7 @@ export async function POST(req: NextRequest) {
             await sendWhatsAppMessage(from, adminWelcome);
             await saveChatMessage(from, 'assistant', adminWelcome);
             await updateChatState(from, 'ADMIN_MODE_IA');
-            return NextResponse.json({ ok: true });
+            return;
         }
 
         // --- COMMAND: EXIT ADMIN MODE ---
@@ -281,7 +281,7 @@ export async function POST(req: NextRequest) {
             await sendWhatsAppMessage(from, exitMsg);
             await saveChatMessage(from, 'assistant', exitMsg);
             await updateChatState(from, 'COMPLETED');
-            return NextResponse.json({ ok: true });
+            return;
         }
 
         // --- HANDLE ADMIN MODE QUERIES ---
@@ -319,7 +319,7 @@ export async function POST(req: NextRequest) {
                 const reply = genRes.text?.trim() || "Dime las placas del vehículo para buscar su expediente.";
                 await sendWhatsAppMessage(from, reply);
                 await saveChatMessage(from, 'assistant', reply);
-                return NextResponse.json({ ok: true });
+                return;
             }
 
             console.log(`[Admin Mode] Placa identificada: ${plate}. Consultando expediente...`);
@@ -336,7 +336,7 @@ export async function POST(req: NextRequest) {
                     const failMsg = `⚠️ *CarMD Admin Info*:\nNo encontré ningún registro en el Centro de Servicio (ni Notas ni Inventario) con las placas *${plate}*.`;
                     await sendWhatsAppMessage(from, failMsg);
                     await saveChatMessage(from, 'assistant', failMsg);
-                    return NextResponse.json({ ok: true });
+                    return;
                 }
 
                 const notesList = searchData.entries
@@ -382,7 +382,7 @@ export async function POST(req: NextRequest) {
                 const errNotify = `❌ *Error administrativo*:\nOcurrió un error al consultar las notas e inventario para la placa *${plate}*. Por favor inténtalo de nuevo.`;
                 await sendWhatsAppMessage(from, errNotify);
             }
-            return NextResponse.json({ ok: true });
+            return;
         }
 
         // Alerta de actividad para los administradores (sesión nueva o reanudada tras 1 hora de inactividad)
@@ -433,7 +433,7 @@ export async function POST(req: NextRequest) {
         // If the state is HUMAN_REQUIRED, the bot stays silent and doesn't auto-respond.
         if (chat?.state === 'HUMAN_REQUIRED') {
             console.log(`[Webhook] Chat en estado HUMAN_REQUIRED para ${from}. Bot silenciado.`);
-            return NextResponse.json({ ok: true });
+            return;
         }
 
         // Detect if the user wants human intervention, is complaining, or explicitly asks for a human
@@ -642,13 +642,13 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                                               mergedParams.km && mergedParams.km !== '...' &&
                                               mergedParams.plate && mergedParams.plate !== '...' &&
                                               mergedParams.date && mergedParams.date !== '...' && 
-                                              !mergedParams.date.toLowerCase().includes('temprano') &&
+                                              !(typeof mergedParams.date === 'string' && mergedParams.date.toLowerCase().includes('temprano')) &&
                                               mergedParams.time && mergedParams.time !== '...' && 
-                                              !mergedParams.time.toLowerCase().includes('temprano') &&
-                                              !mergedParams.time.toLowerCase().includes('disponible');
+                                              !(typeof mergedParams.time === 'string' && mergedParams.time.toLowerCase().includes('temprano')) &&
+                                              !(typeof mergedParams.time === 'string' && mergedParams.time.toLowerCase().includes('disponible'));
 
             // VALIDACIÓN CRÍTICA DE DOMINGO: Si la fecha contiene la palabra "domingo", bloqueamos el resumen
-            if (hasRequiredFieldsForSummary && mergedParams.date.toLowerCase().includes('domingo')) {
+            if (hasRequiredFieldsForSummary && typeof mergedParams.date === 'string' && mergedParams.date.toLowerCase().includes('domingo')) {
                 hasRequiredFieldsForSummary = false;
                 const clientName = mergedParams.name && mergedParams.name !== '...' ? mergedParams.name : '';
                 replyText = `Disculpa la confusión${clientName ? `, ${clientName}` : ''}. 🗓️ Los domingos nuestro Centro de Servicio está cerrado para descansar. \n\nEstamos listos para recibir tu auto de lunes a viernes de 8:00 AM a 5:00 PM y sábados de 8:00 AM a 2:00 PM. ¿Qué otro día y hora te vendría bien? 😊`;
@@ -677,12 +677,12 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                     await sendWhatsAppMessage(from, finalDerivationMsg);
                     await saveChatMessage(from, 'assistant', finalDerivationMsg);
                     await updateChatState(from, 'HUMAN_REQUIRED', JSON.stringify(mergedParams));
-                    return NextResponse.json({ ok: true });
+                    return;
                 }
             }
 
             // Sanitización de Hora de Apertura
-            if (mergedParams.time && (mergedParams.time.toLowerCase() === 'apertura' || mergedParams.time.toLowerCase() === 'lo más temprano' || mergedParams.time.toLowerCase() === 'lo más temprano posible')) {
+            if (mergedParams.time && typeof mergedParams.time === 'string' && (mergedParams.time.toLowerCase() === 'apertura' || mergedParams.time.toLowerCase() === 'lo más temprano' || mergedParams.time.toLowerCase() === 'lo más temprano posible')) {
                 mergedParams.time = '8:00 AM';
             }
 
@@ -705,13 +705,13 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                 await sendInBubbles(from, summaryText);
                 await saveChatMessage(from, 'assistant', summaryText);
                 await updateChatState(from, 'WAITING_CONFIRMATION_IA', JSON.stringify(mergedParams));
-                return NextResponse.json({ ok: true });
+                return;
             }
  
             await sendInBubbles(from, replyText);
             await saveChatMessage(from, 'assistant', replyText);
             await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(mergedParams));
-            return NextResponse.json({ ok: true });
+            return;
         }
 
         // --- Handle Final Booking Confirmation State ---

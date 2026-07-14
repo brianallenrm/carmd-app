@@ -20,16 +20,22 @@ const serviceAccountAuth = new JWT({
     ],
 });
 
+let cachedInventoryDoc: GoogleSpreadsheet | null = null;
 export const getInventoryDoc = async () => {
-    const doc = new GoogleSpreadsheet(GOOGLE_SHEETS_CONFIG.INVENTORY.ID, serviceAccountAuth);
-    await doc.loadInfo();
-    return doc;
+    if (!cachedInventoryDoc) {
+        cachedInventoryDoc = new GoogleSpreadsheet(GOOGLE_SHEETS_CONFIG.INVENTORY.ID, serviceAccountAuth);
+        await cachedInventoryDoc.loadInfo();
+    }
+    return cachedInventoryDoc;
 };
 
+let cachedMasterDoc: GoogleSpreadsheet | null = null;
 export const getMasterDoc = async () => {
-    const doc = new GoogleSpreadsheet(GOOGLE_SHEETS_CONFIG.MASTER.ID, serviceAccountAuth);
-    await doc.loadInfo();
-    return doc;
+    if (!cachedMasterDoc) {
+        cachedMasterDoc = new GoogleSpreadsheet(GOOGLE_SHEETS_CONFIG.MASTER.ID, serviceAccountAuth);
+        await cachedMasterDoc.loadInfo();
+    }
+    return cachedMasterDoc;
 };
 
 // Helper to find ALL row indices by column letter and value

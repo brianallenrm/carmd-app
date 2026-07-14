@@ -65,7 +65,9 @@ export default function ChatsPage() {
         try {
             const res = await fetch('/api/chats');
             const data = await res.json();
-            setSessions(data.sessions || []);
+            if (data.sessions) {
+                setSessions(data.sessions);
+            }
         } catch (error) {
             console.error("Error loading chat sessions:", error);
         } finally {

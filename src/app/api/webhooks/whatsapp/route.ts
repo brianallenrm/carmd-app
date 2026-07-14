@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { after } from 'next/server';
 import { WHATSAPP_CONFIG } from '@/lib/constants';
 import { sendWhatsAppMessage } from '@/lib/whatsapp';
 import { getChatState, updateChatState, saveChatMessage } from '@/lib/google-sheets';
@@ -148,8 +149,10 @@ export async function POST(req: NextRequest) {
             }
             processedMessagesCache.set(messageId, now);
         }
-
-        let text = message.text?.body?.trim() || '';
+        // Ejecutar en segundo plano garantizado por Next.js usando after()
+        after(async () => {
+            try {
+                let text = message.text?.body?.trim() || '';
                 // --- PROCESAMIENTO DE AUDIO / NOTAS DE VOZ (Gemini 3.5 Flash) ---
                 if (message.type === 'audio' || message.audio) {
                     console.log(`[Audio Webhook] Mensaje de audio recibido de ${from}. Iniciando descarga y transcripción...`);
@@ -1057,6 +1060,10 @@ ${historyPromptText}`;
 
         // Update state to AI state
         await updateChatState(from, nextState, currentState === 'WAITING_PROBLEM_IA' ? (finalVehicleProblem || text) : finalVehicleProblem);
+            } catch (backgroundError) {
+                console.error("[Webhook Background Error]:", backgroundError);
+            }
+        });
 
         return NextResponse.json({ ok: true });
     } catch (error) {

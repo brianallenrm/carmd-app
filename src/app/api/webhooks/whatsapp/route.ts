@@ -136,14 +136,28 @@ export async function POST(req: NextRequest) {
         if (!message) return NextResponse.json({ ok: true });
 
         const from = message.from; // Sender's phone number
-        let text = message.text?.body?.trim() || '';
+        const now = Date.now();
+        const lastProcessed = processedMessagesCache.get(from);
+        if (lastProcessed && (now - lastProcessed) < 3000) {
+            console.log(`[Webhook] Duplicado concurrente detectado para ${from}. Ignorando.`);
+            return NextResponse.json({ ok: true });
+        }
+        processedMessagesCache.set(from, now);
+
+        // Responder inmediatamente a Meta para evitar reintentos concurrentes
+        console.log(`[Webhook] Mensaje recibido de ${from}. Respondiendo 200 OK de inmediato.`);
         
-        // --- PROCESAMIENTO DE AUDIO / NOTAS DE VOZ (Gemini 3.5 Flash) ---
-        if (message.type === 'audio' || message.audio) {
-            console.log(`[Audio Webhook] Mensaje de audio recibido de ${from}. Iniciando descarga y transcripción...`);
-            const audioId = message.audio.id;
-            
+        // Ejecutar todo el flujo pesado en segundo plano de manera asíncrona
+        (async () => {
             try {
+                let text = message.text?.body?.trim() || '';
+                
+                // --- PROCESAMIENTO DE AUDIO / NOTAS DE VOZ (Gemini 3.5 Flash) ---
+                if (message.type === 'audio' || message.audio) {
+                    console.log(`[Audio Webhook] Mensaje de audio recibido de ${from}. Iniciando descarga y transcripción...`);
+                    const audioId = message.audio.id;
+                    
+                    try {
                 // 1. Obtener la URL del archivo multimedia de WhatsApp
                 const mediaUrlRes = await fetch(`https://graph.facebook.com/${WHATSAPP_CONFIG.API_VERSION}/${audioId}`, {
                     headers: { 'Authorization': `Bearer ${WHATSAPP_CONFIG.TOKEN}` }
@@ -206,12 +220,12 @@ export async function POST(req: NextRequest) {
                 const errorAudioNotify = `Disculpa, tuve un pequeño problema técnico al escuchar tu audio. 🎙️ ¿Podrías escribirme tu mensaje en texto por aquí por favor? 😊`;
                 await sendWhatsAppMessage(from, errorAudioNotify);
                 await saveChatMessage(from, 'assistant', errorAudioNotify);
-                return NextResponse.json({ ok: true });
+                return;
             }
         }
 
         const textLower = text?.toLowerCase() || '';
-        if (!text) return NextResponse.json({ ok: true });
+        if (!text) return;
 
         // Get current Mexico City Date, Day of week and Time to inject into prompt dynamically
         const nowObj = new Date();
@@ -224,7 +238,7 @@ export async function POST(req: NextRequest) {
         const lastProcessed = processedMessagesCache.get(from);
         if (lastProcessed && (now - lastProcessed) < 4000) {
             console.log(`[Webhook] Duplicado concurrente detectado para ${from}. Ignorando.`);
-            return NextResponse.json({ ok: true });
+            return;
         }
         processedMessagesCache.set(from, now);
 
@@ -464,7 +478,7 @@ export async function POST(req: NextRequest) {
                 // Guardamos el estado temporal para esperar el nombre
                 const tempParams = { name: '', vehicle: '', phone: from };
                 await updateChatState(from, 'ASKING_NAME_FOR_HUMAN', JSON.stringify(tempParams));
-                return NextResponse.json({ ok: true });
+                return;
             }
 
             // Si el cliente nos está respondiendo con los datos en el estado temporal
@@ -516,7 +530,7 @@ export async function POST(req: NextRequest) {
             await sendWhatsAppMessage(from, apologyMessage);
             await saveChatMessage(from, 'assistant', apologyMessage);
             await updateChatState(from, 'HUMAN_REQUIRED', vehicleProblemData);
-            return NextResponse.json({ ok: true });
+            return;
         }
 
         const isAIState = chat?.state?.endsWith('_IA') || false;
@@ -529,7 +543,7 @@ export async function POST(req: NextRequest) {
             const welcomeMsg = `¡Hola! 👋 Soy tu asistente de CarMD. Vamos a agendar tu cita de diagnóstico directamente por aquí. 🚗\n\nPara comenzar, ¿me podrías compartir tu *Nombre completo* y un *Correo electrónico* para enviarte tu confirmación? 📋`;
             await sendWhatsAppMessage(from, welcomeMsg);
             await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify({ phone: from }));
-            return NextResponse.json({ ok: true });
+            return;
         }
 
         // --- Handle Step-by-Step Appointment Data Collection (Semantic & Interactive) ---
@@ -788,7 +802,7 @@ ${historyPromptText}`;
                 }
                 
                 await updateChatState(from, 'COMPLETED');
-                return NextResponse.json({ ok: true });
+                return;
             } else {
                 const textLower = textClean.toLowerCase();
                 const isCancellation = textLower.includes('cancelar') || textLower.includes('cancela') || 
@@ -801,7 +815,7 @@ ${historyPromptText}`;
                     await sendWhatsAppMessage(from, cancelMsg);
                     await saveChatMessage(from, 'assistant', cancelMsg);
                     await updateChatState(from, 'COMPLETED');
-                    return NextResponse.json({ ok: true });
+                    return;
                 }
 
                 // Si dice que no o quiere cambiar algo, regresamos a la recolección
@@ -810,7 +824,7 @@ ${historyPromptText}`;
                 await sendWhatsAppMessage(from, retryMsg);
                 await saveChatMessage(from, 'assistant', retryMsg);
                 await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(tempParams));
-                return NextResponse.json({ ok: true });
+                return;
             }
         }
 
@@ -846,7 +860,7 @@ ${historyPromptText}`;
                             const reminderMsg = `¡Hola, ${cita.name}! 😊 Claro, con gusto te confirmo los detalles de tu cita agendada en nuestro Centro de Servicio:\n\n📅 *Fecha*: ${cita.date}\n⏰ *Hora*: ${cita.time}\n🚗 *Auto*: ${cita.vehicle} (${cita.year})\n📋 *Placas*: ${cita.plate}\n🔧 *Problema*: ${cita.problem}\n\n¡Te esperamos! Si necesitas hacer algún cambio o tienes dudas, avísame. 👍`;
                             await sendWhatsAppMessage(from, reminderMsg);
                             await saveChatMessage(from, 'assistant', reminderMsg);
-                            return NextResponse.json({ ok: true });
+                            return;
                         }
 
                         const isReschedule = textLower.includes('cambiar') || textLower.includes('reprogramar') || textLower.includes('mover');
@@ -868,7 +882,7 @@ ${historyPromptText}`;
                             await sendWhatsAppMessage(from, rescheduleMsg);
                             await saveChatMessage(from, 'assistant', rescheduleMsg);
                             await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(restoreParams));
-                            return NextResponse.json({ ok: true });
+                            return;
                         }
 
                         const isCancel = textLower.includes('cancelar') || textLower.includes('cancela');
@@ -888,7 +902,7 @@ ${historyPromptText}`;
                             await sendWhatsAppMessage(from, cancelConfirmMsg);
                             await saveChatMessage(from, 'assistant', cancelConfirmMsg);
                             await updateChatState(from, 'COMPLETED');
-                            return NextResponse.json({ ok: true });
+                            return;
                         }
                     }
                 }
@@ -960,7 +974,7 @@ ${historyPromptText}`;
                 phone: from,
                 problem: initialProblem
             }));
-            return NextResponse.json({ ok: true });
+            return;
         }
 
 
@@ -1052,6 +1066,11 @@ ${historyPromptText}`;
 
         // Update state to AI state
         await updateChatState(from, nextState, currentState === 'WAITING_PROBLEM_IA' ? (finalVehicleProblem || text) : finalVehicleProblem);
+            } catch (backgroundError) {
+                console.error("[Webhook Background Error]:", backgroundError);
+            }
+        })();
+
         return NextResponse.json({ ok: true });
     } catch (error) {
         console.error("Webhook Processing Error [CRITICAL]:", error);

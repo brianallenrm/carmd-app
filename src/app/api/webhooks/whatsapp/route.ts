@@ -149,9 +149,7 @@ export async function POST(req: NextRequest) {
             processedMessagesCache.set(messageId, now);
         }
 
-        try {
-                let text = message.text?.body?.trim() || '';
-                
+        let text = message.text?.body?.trim() || '';
                 // --- PROCESAMIENTO DE AUDIO / NOTAS DE VOZ (Gemini 3.5 Flash) ---
                 if (message.type === 'audio' || message.audio) {
                     console.log(`[Audio Webhook] Mensaje de audio recibido de ${from}. Iniciando descarga y transcripción...`);

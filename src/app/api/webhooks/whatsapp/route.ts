@@ -233,14 +233,7 @@ export async function POST(req: NextRequest) {
         const dayName = daysOfWeek[new Date(nowObj.toLocaleString('en-US', { timeZone: 'America/Mexico_City' })).getDay()];
         const cdmxTimeStr = nowObj.toLocaleString('es-MX', { timeZone: 'America/Mexico_City' });
 
-        // Deduplication Logic: Ignore requests received in the last 4 seconds for the same number
-        const now = Date.now();
-        const lastProcessed = processedMessagesCache.get(from);
-        if (lastProcessed && (now - lastProcessed) < 4000) {
-            console.log(`[Webhook] Duplicado concurrente detectado para ${from}. Ignorando.`);
-            return;
-        }
-        processedMessagesCache.set(from, now);
+
 
         console.log(`[Webhook] Mensaje recibido de ${from}: "${text}"`);
         

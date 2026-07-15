@@ -681,7 +681,11 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             const isDerivationReply = replyText.includes('cotizar personalmente') || 
                                        replyText.includes('comunicará un miembro') ||
                                        replyText.includes('revisar directamente un asesor') ||
-                                       replyText.includes('detendré mis respuestas');
+                                       replyText.includes('detendré mis respuestas') ||
+                                       replyText.includes('equipo humano recibirá') ||
+                                       replyText.includes('asesores humanos') ||
+                                       replyText.includes('asesor se comunique') ||
+                                       replyText.includes('asesor de nuestro equipo');
             
             if (isDerivationReply) {
                 const hasContactInfo = mergedParams.name && mergedParams.name !== '...' &&
@@ -1011,6 +1015,30 @@ ${historyPromptText}`;
             return;
         }
 
+
+        // Detect if the AI decided to transfer to a human advisor (e.g., in emergencies or supplier proposals)
+        const isDerivationReply = replyText.includes('cotizar personalmente') || 
+                                   replyText.includes('comunicará un miembro') ||
+                                   replyText.includes('revisar directamente un asesor') ||
+                                   replyText.includes('detendré mis respuestas') ||
+                                   replyText.includes('equipo humano recibirá') ||
+                                   replyText.includes('asesores humanos') ||
+                                   replyText.includes('asesor se comunique') ||
+                                   replyText.includes('asesor de nuestro equipo');
+
+        if (isDerivationReply) {
+            console.log(`[Webhook] Derivación humana detectada en flujo general: "${replyText}"`);
+            await sendInBubblesGeneral(from, replyText);
+            await saveChatMessage(from, 'assistant', replyText);
+            
+            // Extraer datos si es posible para tener una ficha limpia
+            let finalParams = { name: 'Interesado', vehicle: 'No especificado', problem: text };
+            if (chat?.vehicleProblem && chat.vehicleProblem.startsWith('{')) {
+                try { finalParams = JSON.parse(chat.vehicleProblem); } catch(e) {}
+            }
+            await updateChatState(from, 'HUMAN_REQUIRED', JSON.stringify(finalParams));
+            return;
+        }
 
         // Send response
         await sendInBubblesGeneral(from, replyText);

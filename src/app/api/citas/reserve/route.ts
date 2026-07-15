@@ -20,21 +20,39 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    await sheet.addRow({
-      Fecha_Registro: new Date().toLocaleString('es-MX'),
-      Placa: plate,
-      Nombre: name,
-      WhatsApp: phone,
-      Email: email || "N/A",
-      Vehiculo: vehicle,
-      Año: year,
-      KM: km,
-      VIN: vin || "N/A",
-      Fecha_Cita: date,
-      Hora_Cita: time,
-      Problema: problem,
-      Estatus: "Pendiente"
-    });
+    const rows = await sheet.getRows();
+    const existingRow = rows.find(r => r.get("WhatsApp") === phone && r.get("Estatus") === "Pendiente");
+
+    if (existingRow) {
+      existingRow.assign({
+        Nombre: name,
+        Email: email || "N/A",
+        Vehiculo: vehicle,
+        Año: year,
+        KM: km,
+        Placa: plate,
+        Fecha_Cita: date,
+        Hora_Cita: time,
+        Problema: problem
+      });
+      await existingRow.save();
+    } else {
+      await sheet.addRow({
+        Fecha_Registro: new Date().toLocaleString('es-MX'),
+        Placa: plate,
+        Nombre: name,
+        WhatsApp: phone,
+        Email: email || "N/A",
+        Vehiculo: vehicle,
+        Año: year,
+        KM: km,
+        VIN: vin || "N/A",
+        Fecha_Cita: date,
+        Hora_Cita: time,
+        Problema: problem,
+        Estatus: "Pendiente"
+      });
+    }
 
     // 2. Send Email Notifications (Resend)
     // -------------------------------------------------------------------------

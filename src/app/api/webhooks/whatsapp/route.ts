@@ -49,7 +49,7 @@ Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un fi
   2. Pídeles con cortesía sus datos de contacto para hacerlos llegar al área de compras y adquisiciones: *Nombre completo*, *Nombre de la refaccionaria/empresa* y su *Correo electrónico*.
   3. Menciona que en cuanto tengan esa información, el departamento correspondiente la revisará y se comunicará con ellos si existe interés en la propuesta comercial.
 - INSPECCIÓN DE COMPRA A DOMICILIO (REVISIÓN PARA COMPRA): Si el cliente te pregunta si podemos ir a revisar a domicilio un coche que le están ofreciendo para comprar, dile que sí es posible realizar este servicio de inspección a domicilio. Pídele amablemente que por favor te comparta sus datos: Nombre completo, el Vehículo (marca, modelo, año) y la Ubicación o zona de la visita. Coméntale que en cuanto te proporcione esta información, un asesor de CarMD se comunicará de inmediato para revisar la disponibilidad de la visita y coordinar la cita.
-- ESTÉTICA AUTOMOTRIZ (PROHIBIDO DECIR HOJALATERÍA Y PINTURA): Si el cliente te pregunta por hojalatería y pintura o estética automotriz, responde con entusiasmo que sí contamos con el servicio oficial de *Estética Automotriz*. Explícales que realizamos todo tipo de reparaciones y mejoras estéticas: desde pequeños rayones, golpes, abolladuras y pintura general o por piezas, hasta reemplazo de partes exteriores como faros, parrillas, cajuelas o fascias. REGLA DE ORO: Aunque el cliente te pregunte usando el término informal "hojalatería y pintura", tú debes responder y referirte al servicio estrictamente usando el término premium *Estética Automotriz* en todas tus burbujas de WhatsApp. Para darles un presupuesto preciso de la reparación estética, invítalos cordialmente a agendar una cita de evaluación física en nuestro Centro de Servicio.
+- ESTÉTICA AUTOMOTRIZ (PROHIBIDO DECIR HOJALATERÍA Y PINTURA): Si el cliente te pregunta por hojalatería y pintura o estética automotriz, responde con entusiasmo que sí contamos con el servicio oficial de *Estética Automotriz*. Explícales que en nuestro servicio de *Estética Automotriz* realizamos pintura y detallado profesional, además de reparaciones y mejoras estéticas generales: desde pequeños rayones, golpes, abolladuras, y pintura general o por piezas, hasta detallado y reemplazo de partes exteriores como fascias, faros o parrillas. REGLA DE ORO: Aunque el cliente te pregunte usando el término informal "hojalatería y pintura", tú debes responder y referirte al servicio estrictamente usando el término premium *Estética Automotriz* en todas tus burbujas de WhatsApp. Para darles un presupuesto preciso de la reparación estética, invítalos cordialmente a agendar una cita de evaluación física en nuestro Centro de Servicio.
 - VERIFICACIÓN VEHICULAR: Si preguntan si realizamos el trámite de verificación, responde que sí apoyamos a los clientes a llevar su auto a verificar. Aclara que recomendamos traer primero el carro a CarMD para una inspección y revisión de pre-verificación, garantizando que pase el trámite a la primera.
 - ALCANCE DE VEHÍCULOS (MOTOS NO): Atendemos autos particulares, SUVs, pick-ups, vehículos comerciales, camiones pesados y maquinaria de todo tipo. Sin embargo, no atendemos motocicletas de ningún tipo.
 - CONCEPTO PRINCIPAL: Refiérete a las instalaciones de CarMD usando de manera preferente el término "centro de servicio" (en minúsculas normales dentro de los textos a menos que inicie oración, para evitar que se vea rígido o robótico). Varíalo de forma natural y espontánea utilizando simplemente "CarMD" en su lugar para evitar redundancias pesadas (ej: en lugar de decir "nuestros servicios en el centro de servicio", di "nuestros servicios en CarMD" o "nuestros servicios").
@@ -98,6 +98,7 @@ Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un fi
 12. TONO Y FORMATO DE WHATSAPP:
 - Tono profesional, amable, cercano y muy cálido.
 - OBLIGATORIO: Usa emojis de forma natural y frecuente en cada burbuja (como 👋, 🚗, ⏰, 📍, 🛠️, 👍) para que los mensajes se sientan vivos y humanos.
+- REGLA DE NEGRITAS EN WHATSAPP: NUNCA uses doble asterisco (`**`) para el texto en negrita. WhatsApp únicamente acepta el asterisco simple (`*`). El uso de `**` provocará que se muestren caracteres extra en la pantalla del usuario. Formatea siempre como `*texto*` para resaltar palabras clave.
 - Separa tus ideas claras usando doble salto de línea (\n\n) para que el backend las envíe en burbujas separadas.
 - Si el cliente te confirma que ya agendó o completó el flujo, felicítalo y deséale un excelente día sin volver a sugerir citas.`;
 
@@ -829,7 +830,10 @@ ${historyPromptText}`;
         const wantsBookingAction = textLower.includes('cita') || textLower.includes('recordar') || 
                                    textLower.includes('cuándo') || textLower.includes('hora') || 
                                    textLower.includes('reprogramar') || textLower.includes('cambiar') || 
-                                   textLower.includes('cancela');
+                                   textLower.includes('cancela') || textLower.includes('fecha') ||
+                                   textLower.includes('equivoc') || textLower.includes('mal ') || 
+                                   textLower.includes('corregir') || textLower.includes('actualizar') || 
+                                   textLower.includes('modificar') || textLower.includes('día');
 
         if (wantsBookingAction && (chat?.state === 'COMPLETED' || chat?.state === 'START' || !chat?.state)) {
             console.log(`[Booking Memory] Cliente ${from} solicita acción sobre cita. Consultando hoja CITAS_2025...`);
@@ -857,7 +861,11 @@ ${historyPromptText}`;
                             return;
                         }
 
-                        const isReschedule = textLower.includes('cambiar') || textLower.includes('reprogramar') || textLower.includes('mover');
+                        const isReschedule = textLower.includes('cambiar') || textLower.includes('reprogramar') || 
+                                             textLower.includes('mover') || textLower.includes('fecha') || 
+                                             textLower.includes('equivoc') || textLower.includes('corregir') || 
+                                             textLower.includes('actualizar') || textLower.includes('modificar') || 
+                                             textLower.includes('mal ') || textLower.includes('día');
                         if (isReschedule) {
                             // Cargar de vuelta los parámetros acumulados para iniciar la reprogramación
                             const restoreParams = {

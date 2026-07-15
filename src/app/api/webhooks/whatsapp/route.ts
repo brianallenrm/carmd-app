@@ -827,13 +827,13 @@ ${historyPromptText}`;
         console.log("[Webhook] Modo Gemini AI activado por defecto.");
 
         // --- SISTEMA DE MEMORIA DE CITAS CONFIRMADAS ---
-        const wantsBookingAction = textLower.includes('cita') || textLower.includes('recordar') || 
-                                   textLower.includes('cuándo') || textLower.includes('hora') || 
-                                   textLower.includes('reprogramar') || textLower.includes('cambiar') || 
-                                   textLower.includes('cancela') || textLower.includes('fecha') ||
-                                   textLower.includes('equivoc') || textLower.includes('mal ') || 
-                                   textLower.includes('corregir') || textLower.includes('actualizar') || 
-                                   textLower.includes('modificar') || textLower.includes('día');
+        const wantsBookingAction = textLower.includes('mi cita') || textLower.includes('la cita') || 
+                                   textLower.includes('reprogramar') || textLower.includes('cancelar cita') || 
+                                   textLower.includes('cambiar cita') || textLower.includes('cambiar fecha') ||
+                                   textLower.includes('cambiar horario') || textLower.includes('cambiar día') ||
+                                   textLower.includes('me equivoqué de fecha') || textLower.includes('mal la fecha') || 
+                                   textLower.includes('corregir cita') || textLower.includes('actualizar cita') || 
+                                   textLower.includes('modificar cita') || textLower.includes('tengo cita');
 
         if (wantsBookingAction) {
             console.log(`[Booking Memory] Cliente ${from} solicita acción sobre cita. Consultando hoja CITAS_2025...`);
@@ -861,11 +861,11 @@ ${historyPromptText}`;
                             return;
                         }
 
-                        const isReschedule = textLower.includes('cambiar') || textLower.includes('reprogramar') || 
-                                             textLower.includes('mover') || textLower.includes('fecha') || 
-                                             textLower.includes('equivoc') || textLower.includes('corregir') || 
-                                             textLower.includes('actualizar') || textLower.includes('modificar') || 
-                                             textLower.includes('mal ') || textLower.includes('día');
+                        const isReschedule = textLower.includes('cambiar cita') || textLower.includes('reprogramar') || 
+                                             textLower.includes('mover cita') || textLower.includes('cambiar fecha') || 
+                                             textLower.includes('me equivoqué de fecha') || textLower.includes('corregir cita') || 
+                                             textLower.includes('actualizar cita') || textLower.includes('modificar cita') || 
+                                             textLower.includes('mal la fecha') || textLower.includes('cambiar día');
                         if (isReschedule) {
                             // Cargar de vuelta los parámetros acumulados para iniciar la reprogramación
                             const restoreParams = {

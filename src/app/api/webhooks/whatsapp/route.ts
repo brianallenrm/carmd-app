@@ -411,19 +411,23 @@ export async function POST(req: NextRequest) {
         if (shouldAlertAdmins) {
             console.log(`[Webhook] Alerta de actividad en chat para administradores. Enviando...`);
             
-            // Enviar alerta a Rafael
+            // Enviar alerta a Rafael (COMENTADO TEMPORALMENTE PARA PRUEBAS)
+            /*
             try {
                 await sendWhatsAppMessage(rafaPhone, adminNotifyText);
             } catch (e) {
                 console.error("Error al alertar a Rafael sobre actividad:", e);
             }
+            */
 
-            // Enviar alerta a Mamá
+            // Enviar alerta a Mamá (COMENTADO TEMPORALMENTE PARA PRUEBAS)
+            /*
             try {
                 await sendWhatsAppMessage(momPhone, adminNotifyText);
             } catch (e) {
                 console.error("Error al alertar a Mamá sobre actividad:", e);
             }
+            */
 
             // Enviar alerta a Brian
             try {

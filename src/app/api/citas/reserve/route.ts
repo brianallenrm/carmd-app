@@ -191,24 +191,37 @@ export async function POST(request: NextRequest) {
 
       // D. Send WhatsApp Alert to Admins AUTOMATICALLY
       console.log("[API Reserve] Enviando alertas automáticas a los administradores...");
+      const brianPhone = "525547015312";
       const rafaPhone = "525516473084";
       const momPhone = "525535786087";
+
+      // Enviar a Brian (Solo activo para pruebas)
+      try {
+          await sendWhatsAppMessage(brianPhone, whatsappRafaText);
+          console.log("[API Reserve] Alerta enviada a Brian con éxito.");
+      } catch (e) {
+          console.error("Error enviando alerta a Brian:", e);
+      }
       
-      // Enviar a Rafael
+      // Enviar a Rafael (COMENTADO TEMPORALMENTE)
+      /*
       try {
           await sendWhatsAppMessage(rafaPhone, whatsappRafaText);
           console.log("[API Reserve] Alerta enviada a Rafael con éxito.");
       } catch (e) {
           console.error("Error enviando alerta a Rafael:", e);
       }
+      */
 
-      // Enviar a Mamá
+      // Enviar a Mamá (COMENTADO TEMPORALMENTE)
+      /*
       try {
           await sendWhatsAppMessage(momPhone, whatsappRafaText);
           console.log("[API Reserve] Alerta enviada a mamá con éxito.");
       } catch (e) {
           console.error("Error enviando alerta a mamá:", e);
       }
+      */
     }
 
     return NextResponse.json({ success: true });

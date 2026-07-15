@@ -30,13 +30,14 @@ Sigue ESTRICTAMENTE las siguientes reglas de redacción y comportamiento (Psicol
   "Con gusto te ayudamos. El costo exacto depende mucho del tipo de motor, versión y lo que realmente necesite tu auto tras una evaluación. Para darte un presupuesto 100% real, justo y sin sorpresas, primero necesitamos evaluar tu auto físicamente en el Centro de Servicio. ¿Te gustaría que agendemos tu espacio?"
 - DERIVACIÓN HUMANA INTELIGENTE (LA REGLA DE LOS 2 INTENTOS): Si el cliente insiste por segunda vez consecutiva en querer una cotización o costo aproximado sin querer agendar una cita de diagnóstico, NO vuelvas a repetir el mismo argumento robótico de evaluación física. En su lugar, realiza lo siguiente:
   1. Haz un puente amable indicando que para evitar cualquier error y darle el costo exacto con las refacciones de su auto, le pedirás a un asesor humano de CarMD que le cotice personalmente en este mismo chat.
-  2. Pídele al cliente que te proporcione su Nombre Completo, Correo Electrónico y el Kilometraje aproximado de su auto para tener su ficha lista antes de transferir.
+  2. Pídele al cliente que te proporcione únicamente su Nombre completo y los detalles de su Vehículo (marca, modelo y año) si es que aún no los ha mencionado, para tener su ficha lista antes de transferir.
   3. Una vez que el cliente responda con esos datos, agradécelos, dile que un asesor se comunicará a la brevedad y detendrás tus respuestas automáticas. (El webhook se encargará de pasarlo a humano y silenciarte de forma interna).
 
 3.1. PREGUNTAS FRECUENTES (FAQs) DE OPERACIÓN Y TALLER:
 - AFINACIÓN OFICIAL: Si te preguntan en qué consiste la afinación, descríbelo textualmente como: "Mantenimiento al sistema de ignición, inyección, enfriamiento y lubricación. Reemplazo de filtros críticos y reset de intervalos de mantenimiento, más la revisión general de puntos de seguridad."
 - POLÍTICA DE REFACCIONES DEL CLIENTE: Si preguntan si pueden traer sus propias refacciones, responde que sí es posible. Aclárales que nuestro equipo de ingenieros debe evaluar la calidad de las piezas a su llegada para determinar si aplica o no nuestra garantía de 1 año y los servicios incluidos.
 - COSTO DE DIAGNÓSTICO: Si preguntan cuánto cuesta el diagnóstico, responde que al igual que otros servicios, depende de la evaluación física. Sin embargo, explícales con entusiasmo que si deciden realizar la reparación con nosotros, el diagnóstico es 100% gratuito (se bonifica del total del trabajo).
+- TIEMPOS DE REPARACIÓN: Si el cliente pregunta cuánto tardan en realizar un servicio (ej: cambio de aceite, afinación, revisión), NUNCA proporciones ni asegures tiempos exactos o estimados en horas o minutos (es muy peligroso prometer tiempos sin ver el auto y la carga del taller). Responde amablemente que el tiempo estimado dependerá estrictamente de la carga de trabajo en el Centro de Servicio al momento de su llegada, y que el asesor físico le dará el tiempo exacto tras la recepción de su auto.
 - FACTURACIÓN: Si preguntan si facturamos, responde que sí emitimos factura para todos los servicios si el cliente lo requiere. Regla de oro: No menciones si el precio incluye o no IVA bajo ningún motivo.
 - FORMAS DE PAGO: Aceptamos todos los medios de pago: efectivo, transferencia bancaria y todas las tarjetas de débito o crédito (Visa, Mastercard y American Express). No manejamos meses sin intereses directos, pero sí es posible diferir o dividir el pago en mensualidades con intereses directamente en nuestra terminal física a su llegada.
 - GARANTÍA CARMD: Si preguntan qué garantía ofrecemos, responde que todas nuestras garantías son por escrito: ofrecemos 1 año de garantía en mano de obra e incluye de regalo dos mantenimientos preventivos gratuitos (los cuales se especifican en la nota indicando el kilometraje recomendado para traer de vuelta el carro). Comparte amablemente la dirección oficial: https://www.carmd.com.mx/terminos para detalles.
@@ -616,7 +617,9 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             3. SI EL USUARIO INDICA CORREGIR UN DATO (ej: "el problema no es afinación, es frenos"): Borra o reemplaza el dato anterior con el valor que indica el usuario ahora.
             4. CORRECCIÓN DE FECHA EN EL JSON: Si el usuario dice una fecha numérica y un día de la semana que son incompatibles o erróneos, guardar en el campo 'date' la fecha REAL corregida del calendario (formato YYYY-MM-DD).
             5. MANEJO DE KILOMETRAJE: El campo 'km' debe ser estrictamente numérico (ej: 20000). Si el usuario dice "20 mil", guarda 20000. Si el usuario dice "no sé", "no estoy seguro" o "luego te digo" para el kilometraje ('km'), guarda el valor "Pendiente". No dejes el campo vacío ni vuelvas a forzar la pregunta si el usuario ya declaró desconocerlo.
-            6. PERSISTENCIA DE PLACAS: Asegúrate de extraer las placas si el cliente las proporciona (ej: "Abcd1234"). NUNCA limpies o dejes el campo 'plate' como nulo o vacío una vez que ya fue capturado.`;
+            6. PERSISTENCIA DE PLACAS: Asegúrate de extraer las placas si el cliente las proporciona (ej: "Abcd1234"). NUNCA limpies o dejes el campo 'plate' como nulo o vacío una vez que ya fue capturado.
+            7. FORMATO DE HORA: El campo 'time' debe incluir obligatoriamente el formato AM o PM (ej: "11:00 AM", "04:30 PM").
+            8. LIMPIEZA INICIAL DEL PROBLEMA: Si el campo 'problem' del JSON histórico contiene saludos, peticiones de cita o frases completas (ej: 'hola quiero cita me fallan los frenos'), resúmelo y límpialo para que solo quede la falla o servicio real (ej: 'fallan los frenos'). Si el texto no menciona ningún problema ni falla, cámbialo estrictamente a '...'.`;
 
             let extracted: any = {};
             try {
@@ -643,6 +646,7 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                                               mergedParams.vehicle && mergedParams.vehicle !== '...' &&
                                               mergedParams.km && mergedParams.km !== '...' &&
                                               mergedParams.plate && mergedParams.plate !== '...' &&
+                                              mergedParams.problem && mergedParams.problem !== '...' &&
                                               mergedParams.date && mergedParams.date !== '...' && 
                                               !(typeof mergedParams.date === 'string' && mergedParams.date.toLowerCase().includes('temprano')) &&
                                               mergedParams.time && mergedParams.time !== '...' && 
@@ -983,6 +987,8 @@ ${historyPromptText}`;
             let initialProblem = null;
             if (currentState === 'WAITING_PROBLEM_IA' && chat?.vehicleProblem) {
                 initialProblem = chat.vehicleProblem; // Guardar el problema que describió al inicio
+            } else {
+                initialProblem = text; // Si activó el disparador en el primer mensaje, le pasamos todo el texto para que Gemini lo limpie en la siguiente iteración
             }
 
             await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify({ 

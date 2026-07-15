@@ -835,7 +835,7 @@ ${historyPromptText}`;
                                    textLower.includes('corregir') || textLower.includes('actualizar') || 
                                    textLower.includes('modificar') || textLower.includes('día');
 
-        if (wantsBookingAction && (chat?.state === 'COMPLETED' || chat?.state === 'START' || !chat?.state)) {
+        if (wantsBookingAction) {
             console.log(`[Booking Memory] Cliente ${from} solicita acción sobre cita. Consultando hoja CITAS_2025...`);
             try {
                 const baseUrl = process.env.NODE_ENV === 'production' 

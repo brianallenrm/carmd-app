@@ -20,8 +20,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const cleanPhone = phone.replace(/\\D/g, '').slice(-10);
     const rows = await sheet.getRows();
-    const existingRow = rows.find(r => r.get("WhatsApp") === phone && r.get("Estatus") === "Pendiente");
+    const existingRow = rows.find(r => {
+        const val = r.get("WhatsApp");
+        if (!val || typeof val !== 'string') return false;
+        return val.replace(/\\D/g, '').endsWith(cleanPhone) && r.get("Estatus") === "Pendiente";
+    });
 
     if (existingRow) {
       existingRow.assign({
@@ -33,7 +38,8 @@ export async function POST(request: NextRequest) {
         Placa: plate,
         Fecha_Cita: date,
         Hora_Cita: time,
-        Problema: problem
+        Problema: problem,
+        WhatsApp: cleanPhone // ensure it's updated to 10 digits
       });
       await existingRow.save();
     } else {
@@ -41,7 +47,7 @@ export async function POST(request: NextRequest) {
         Fecha_Registro: new Date().toLocaleString('es-MX'),
         Placa: plate,
         Nombre: name,
-        WhatsApp: phone,
+        WhatsApp: cleanPhone,
         Email: email || "N/A",
         Vehiculo: vehicle,
         Año: year,

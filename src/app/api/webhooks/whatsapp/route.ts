@@ -607,15 +607,15 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             Ejemplo de salida: {"name": "...", "vehicle": "..."}
             
             FECHA Y HORA ACTUAL DE REFERENCIA (SÚPER IMPORTANTE): Hoy es ${dayName.toUpperCase()} y la fecha y hora actual en México es ${cdmxTimeStr}. 
-            Calcula cualquier fecha relativa (ej: "próximo martes", "mañana", "el 14") de forma matemática estricta a partir de esta fecha de hoy. El formato de salida para 'date' debe ser un string legible (ej: "martes 15 de julio" o "lunes 13 de julio").
+            Calcula cualquier fecha relativa (ej: "próximo martes", "mañana", "el 14") de forma matemática estricta a partir de esta fecha de hoy. El formato de salida para 'date' debe ser estrictamente numérico en formato YYYY-MM-DD (ej: "2026-07-15").
             ${historyPromptText}
 
             REGLAS DE EXTRACCIÓN DE DATOS:
             1. REGLA DE LIMPIEZA DE MARCAS: Si detectas un error de dedo obvio en la marca o modelo (ej: "btw" en lugar de "BMW", "toyot" por "Toyota", "va" por "VW"), corrígelo en el campo 'vehicle' para que se guarde de forma profesional en el JSON.
             2. SEPARACIÓN DE PREGUNTAS Y MOTIVOS: Si el cliente hace una pregunta como "¿para qué quieres las placas?", "¿cuánto cuesta?", etc., esto NUNCA debe ser guardado en el campo 'problem'. El campo 'problem' se llena únicamente con síntomas reales del coche (frenos, afinación, ruido, etc.) o solicitudes de servicio.
             3. SI EL USUARIO INDICA CORREGIR UN DATO (ej: "el problema no es afinación, es frenos"): Borra o reemplaza el dato anterior con el valor que indica el usuario ahora.
-            4. CORRECCIÓN DE FECHA EN EL JSON: Si el usuario dice una fecha numérica y un día de la semana que son incompatibles o erróneos (como decir "miércoles 14" cuando el miércoles es 15 de julio de 2026), guardar en el campo 'date' la fecha REAL corregida del calendario (miércoles 15 de julio).
-            5. MANEJO DE DATOS FALTANTES O DESCONOCIDOS: Si el usuario dice "no sé", "no estoy seguro" o "luego te digo" para el kilometraje ('km'), guarda el valor "Pendiente" en el campo 'km'. No dejes el campo vacío ni vuelvas a forzar la pregunta si el usuario ya declaró desconocerlo.
+            4. CORRECCIÓN DE FECHA EN EL JSON: Si el usuario dice una fecha numérica y un día de la semana que son incompatibles o erróneos, guardar en el campo 'date' la fecha REAL corregida del calendario (formato YYYY-MM-DD).
+            5. MANEJO DE KILOMETRAJE: El campo 'km' debe ser estrictamente numérico (ej: 20000). Si el usuario dice "20 mil", guarda 20000. Si el usuario dice "no sé", "no estoy seguro" o "luego te digo" para el kilometraje ('km'), guarda el valor "Pendiente". No dejes el campo vacío ni vuelvas a forzar la pregunta si el usuario ya declaró desconocerlo.
             6. PERSISTENCIA DE PLACAS: Asegúrate de extraer las placas si el cliente las proporciona (ej: "Abcd1234"). NUNCA limpies o dejes el campo 'plate' como nulo o vacío una vez que ya fue capturado.`;
 
             let extracted: any = {};

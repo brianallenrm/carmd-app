@@ -17,7 +17,7 @@ export async function GET(
         }
 
         const rows = await sheet.getRows();
-        const row = rows.find(r => {
+        const row = rows.reverse().find(r => {
             const val = r.get("WhatsApp");
             if (!val || typeof val !== 'string') return false;
             return val.replace(/\D/g, '').endsWith(cleanPhone);

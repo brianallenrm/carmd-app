@@ -711,7 +711,7 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                 const summaryText = `¡Listo! Ya tengo toda la información. Por favor confírmame si los datos de tu cita son correctos:
  
 👤 *Nombre*: ${mergedParams.name}
-📧 *Corro*: ${mergedParams.email || 'N/A'}
+📧 *Correo*: ${mergedParams.email || 'N/A'}
 🚗 *Vehículo*: ${mergedParams.vehicle} ${mergedParams.year || ''}
 🛞 *Kilometraje*: ${kmDisplay}
 📋 *Placas*: ${mergedParams.plate}

@@ -92,14 +92,14 @@ Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un fi
   * SOLICITUD DE KILOMETRAJE: Justifica únicamente diciendo que es para tener una referencia clara del desgaste del motor, evaluar la vida útil de los componentes y saber qué tipo de mantenimientos preventivos le corresponden por rango de uso.
 - SEPARACIÓN DE DUDAS Y PROBLEMAS: Las preguntas del cliente sobre el Centro de Servicio, dirección, placas, etc., NUNCA deben ser extraídas o guardadas como la falla o "problema" del auto. El campo de problema solo debe llenarse con descripciones de fallas mecánicas reales o solicitudes de servicio (ej: "servicio de afinación", "tira aceite", "revisión de frenos", "costo de frenos").
 
-11. MANEJO DE SÍNTOMAS GRAVES Y EMERGENCIAS:
+11. MANEJO DE SÍNTOMAS GRAVES Y EMERGENCIAS (FLUJO ESTRICTO PASO A PASO):
 - Si el cliente describe un problema que parece grave o urgente (ej: "se me calentó el coche", "tira humo", "siento raros los frenos"), NO asumas automáticamente que está tirado en el camino en este instante. Trátalo inicialmente como un síntoma para agendar una cita estándar y sigue el flujo normal de recopilación de datos (Nombre, Vehículo, Placas, etc.), preguntando qué día y hora prefiere venir.
 - Únicamente si el cliente menciona explícitamente estar varado, tirado en la autopista, solicitar auxilio vial urgente o pedir grúa:
-  1. Ofrécele empatía inmediata y recomiéndale contactar a su seguro de auto.
-  2. Pregúntale con amabilidad si de todos modos quiere agendar una cita normal para cuando traslade su coche, o si prefiere que canalicemos sus datos de inmediato con un asesor humano de CarMD para orientarlo.
-  3. Si prefiere el asesor humano, pídele su Nombre completo y qué auto tiene, y realiza la derivación de inmediato (cambiando el estado a HUMAN_REQUIRED). Si es fuera de horario (después de las 8:00 PM o antes de las 7:30 AM), adviértele amablemente en el mensaje que los asesores humanos le responderán a primera hora del día siguiente (a partir de las 8:00 AM).
-
-12. TONO Y FORMATO DE WHATSAPP:cale que daremos total prioridad a su caso. Recomiéndale traerlo directamente al taller o detener el carro de forma segura. Ofrécele coordinar una grúa (solicitando nombre, auto y ubicación) o si es fuera de horario adviértele que le responderemos a las 8:00 AM del día siguiente.
+  * PASO 1 (Primer mensaje): Ofrécele empatía inmediata, recomiéndale contactar a su seguro de auto, aclara de forma honesta que no tenemos servicio de grúa propio y pídele su Nombre completo y qué auto maneja (marca/modelo/año) para poder registrar su caso y asistirle.
+  * PASO 2 (Segundo mensaje, tras recibir su Nombre y Auto): Pregúntale de forma clara y directa: "¿Te gustaría que agendemos una cita normal en el taller para revisar tu coche, o prefieres que canalice tu información de inmediato con un asesor de CarMD para recibir orientación?". NO des respuestas finales ni de despedida en este paso.
+  * PASO 3 (Tercer mensaje, dependiendo de lo que elija en el Paso 2):
+    - Si el cliente responde que SÍ quiere la cita normal: continúa con la recolección de los datos restantes (Fecha, Hora, Placas, etc.) normalmente para agendarla.
+    - Si el cliente responde que prefiere hablar con el asesor (o no responde que quiere cita): entonces proporciona el mensaje final de contacto (ej: "un asesor de nuestro equipo se comunicará contigo a la brevedad", o si es fuera de horario, "mañana a primera hora a partir de las 8:00 AM para apoyarte"). NOTA: Nunca desactives el bot (no cambies el estado a HUMAN_REQUIRED) tú misma, solo proporciona el mensaje informativo.
 
 12. TONO Y FORMATO DE WHATSAPP:
 - Tono profesional, amable, cercano y muy cálido.
@@ -1014,32 +1014,6 @@ ${historyPromptText}`;
             }));
             return;
         }
-
-
-        // Detect if the AI decided to transfer to a human advisor (e.g., in emergencies or supplier proposals)
-        const isDerivationReply = replyText.includes('cotizar personalmente') || 
-                                   replyText.includes('comunicará un miembro') ||
-                                   replyText.includes('revisar directamente un asesor') ||
-                                   replyText.includes('detendré mis respuestas') ||
-                                   replyText.includes('equipo humano recibirá') ||
-                                   replyText.includes('asesores humanos') ||
-                                   replyText.includes('asesor se comunique') ||
-                                   replyText.includes('asesor de nuestro equipo');
-
-        if (isDerivationReply) {
-            console.log(`[Webhook] Derivación humana detectada en flujo general: "${replyText}"`);
-            await sendInBubblesGeneral(from, replyText);
-            await saveChatMessage(from, 'assistant', replyText);
-            
-            // Extraer datos si es posible para tener una ficha limpia
-            let finalParams = { name: 'Interesado', vehicle: 'No especificado', problem: text };
-            if (chat?.vehicleProblem && chat.vehicleProblem.startsWith('{')) {
-                try { finalParams = JSON.parse(chat.vehicleProblem); } catch(e) {}
-            }
-            await updateChatState(from, 'HUMAN_REQUIRED', JSON.stringify(finalParams));
-            return;
-        }
-
         // Send response
         await sendInBubblesGeneral(from, replyText);
         await saveChatMessage(from, 'assistant', replyText);

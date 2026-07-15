@@ -826,13 +826,37 @@ ${historyPromptText}`;
         // --- Handle General AI Mode ---
         console.log("[Webhook] Modo Gemini AI activado por defecto.");
 
-        // --- SISTEMA DE MEMORIA DE CITAS CONFIRMADAS ---
-        const wantsBookingAction = /(mi|la|una|tengo)\s+cita/i.test(textLower) || 
-                                   /(cambiar|reprogramar|cancelar|corregir|actualizar|modificar|mover)\s+(la\s+|mi\s+|una\s+)?(cita|fecha|horario|día|turno)/i.test(textLower) ||
-                                   /(me equivoqu|mal la fecha)/i.test(textLower);
+        // --- SISTEMA DE MEMORIA DE CITAS CONFIRMADAS (LLM INTENT ROUTING) ---
+        console.log("[Webhook] Clasificando intención del mensaje con Gemini...");
+        
+        const intentPrompt = `Analiza el siguiente mensaje de un cliente que se comunica por WhatsApp a un Centro de Servicio Automotriz.
+Mensaje: "${text}"
+
+Tu tarea es clasificar la intención PRINCIPAL del cliente en una de estas 4 categorías exactas (responde SOLO con la palabra en mayúsculas):
+1. REPROGRAMAR: Si el cliente quiere explícitamente cambiar, mover, o corregir la fecha/hora de una cita que ya tiene.
+2. CANCELAR: Si el cliente quiere cancelar su cita.
+3. RECORDATORIO: Si el cliente pregunta cuándo es su cita, a qué hora, o pide información sobre la cita que ya tiene agendada.
+4. GENERAL: Cualquier otra cosa (saludos, preguntas sobre servicios, fallas, cotizaciones, querer agendar una cita nueva desde cero, etc.).
+
+Respuesta (una sola palabra):`;
+
+        let intent = 'GENERAL';
+        try {
+            const intentRes = await ai.models.generateContent({
+                model: 'gemini-3.1-flash-lite',
+                contents: intentPrompt,
+                config: { temperature: 0.1 }
+            });
+            intent = intentRes.text?.trim().toUpperCase() || 'GENERAL';
+        } catch (e) {
+            console.error("[Webhook] Error en clasificador de intención:", e);
+        }
+        console.log(`[Webhook] Intención clasificada por Gemini: ${intent}`);
+
+        const wantsBookingAction = intent === 'REPROGRAMAR' || intent === 'CANCELAR' || intent === 'RECORDATORIO';
 
         if (wantsBookingAction) {
-            console.log(`[Booking Memory] Cliente ${from} solicita acción sobre cita. Consultando hoja CITAS_2025...`);
+            console.log(`[Webhook] Cliente ${from} solicita acción sobre cita (${intent}). Consultando hoja CITAS_2025...`);
             try {
                 const baseUrl = process.env.NODE_ENV === 'production' 
                     ? `https://${req.headers.get('host')}` 
@@ -844,12 +868,9 @@ ${historyPromptText}`;
                     if (cita && (cita.estatus === 'Pendiente' || cita.estatus === 'Confirmada')) {
                         console.log(`[Booking Memory] Cita activa encontrada:`, cita);
                         
-                        const isReschedule = /(cambiar|reprogramar|mover|corregir|actualizar|modificar)\s+(la\s+|mi\s+|una\s+)?(cita|fecha|horario|día|turno)/i.test(textLower) ||
-                                             /(me equivoqu|mal la fecha)/i.test(textLower);
-
-                        const isCancel = /(cancelar|cancela)\s+(la\s+|mi\s+|una\s+)?(cita|turno)/i.test(textLower) || textLower.includes('cancelar cita');
-
-                        const isQuery = !isReschedule && !isCancel;
+                        const isReschedule = intent === 'REPROGRAMAR';
+                        const isCancel = intent === 'CANCELAR';
+                        const isQuery = intent === 'RECORDATORIO';
 
                         if (isQuery) {
                             // Responder con la confirmación de su cita activa

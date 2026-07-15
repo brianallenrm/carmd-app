@@ -37,7 +37,8 @@ export async function GET(
                 plate: row.get("Placa"),
                 date: row.get("Fecha_Cita"),
                 time: row.get("Hora_Cita"),
-                problem: row.get("Problema")
+                problem: row.get("Problema"),
+                estatus: row.get("Estatus")
             }
         });
     } catch (error) {

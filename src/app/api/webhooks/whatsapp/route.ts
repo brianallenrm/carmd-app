@@ -827,13 +827,9 @@ ${historyPromptText}`;
         console.log("[Webhook] Modo Gemini AI activado por defecto.");
 
         // --- SISTEMA DE MEMORIA DE CITAS CONFIRMADAS ---
-        const wantsBookingAction = textLower.includes('mi cita') || textLower.includes('la cita') || 
-                                   textLower.includes('reprogramar') || textLower.includes('cancelar cita') || 
-                                   textLower.includes('cambiar cita') || textLower.includes('cambiar fecha') ||
-                                   textLower.includes('cambiar horario') || textLower.includes('cambiar día') ||
-                                   textLower.includes('me equivoqué de fecha') || textLower.includes('mal la fecha') || 
-                                   textLower.includes('corregir cita') || textLower.includes('actualizar cita') || 
-                                   textLower.includes('modificar cita') || textLower.includes('tengo cita');
+        const wantsBookingAction = /(mi|la|una|tengo)\s+cita/i.test(textLower) || 
+                                   /(cambiar|reprogramar|cancelar|corregir|actualizar|modificar|mover)\s+(la\s+|mi\s+|una\s+)?(cita|fecha|horario|día|turno)/i.test(textLower) ||
+                                   /(me equivoqu|mal la fecha)/i.test(textLower);
 
         if (wantsBookingAction) {
             console.log(`[Booking Memory] Cliente ${from} solicita acción sobre cita. Consultando hoja CITAS_2025...`);
@@ -848,10 +844,12 @@ ${historyPromptText}`;
                     if (cita && (cita.estatus === 'Pendiente' || cita.estatus === 'Confirmada')) {
                         console.log(`[Booking Memory] Cita activa encontrada:`, cita);
                         
-                        const isQuery = textLower.includes('recordar') || textLower.includes('cuándo') || 
-                                        textLower.includes('cual') || textLower.includes('cuál') || 
-                                        textLower.includes('dónde') || textLower.includes('info') || 
-                                        (!textLower.includes('cambiar') && !textLower.includes('reprogramar') && !textLower.includes('cancela'));
+                        const isReschedule = /(cambiar|reprogramar|mover|corregir|actualizar|modificar)\s+(la\s+|mi\s+|una\s+)?(cita|fecha|horario|día|turno)/i.test(textLower) ||
+                                             /(me equivoqu|mal la fecha)/i.test(textLower);
+
+                        const isCancel = /(cancelar|cancela)\s+(la\s+|mi\s+|una\s+)?(cita|turno)/i.test(textLower) || textLower.includes('cancelar cita');
+
+                        const isQuery = !isReschedule && !isCancel;
 
                         if (isQuery) {
                             // Responder con la confirmación de su cita activa
@@ -861,11 +859,6 @@ ${historyPromptText}`;
                             return;
                         }
 
-                        const isReschedule = textLower.includes('cambiar cita') || textLower.includes('reprogramar') || 
-                                             textLower.includes('mover cita') || textLower.includes('cambiar fecha') || 
-                                             textLower.includes('me equivoqué de fecha') || textLower.includes('corregir cita') || 
-                                             textLower.includes('actualizar cita') || textLower.includes('modificar cita') || 
-                                             textLower.includes('mal la fecha') || textLower.includes('cambiar día');
                         if (isReschedule) {
                             // Cargar de vuelta los parámetros acumulados para iniciar la reprogramación
                             const restoreParams = {
@@ -887,7 +880,6 @@ ${historyPromptText}`;
                             return;
                         }
 
-                        const isCancel = textLower.includes('cancelar') || textLower.includes('cancela');
                         if (isCancel) {
                             // Actualizar estatus a Cancelada en Sheets
                             try {

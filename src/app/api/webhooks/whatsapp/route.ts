@@ -240,6 +240,9 @@ export async function POST(req: NextRequest) {
 
         console.log(`[Webhook] Mensaje recibido de ${from}: "${text}"`);
         
+        // Recuperar el estado ANTES de guardar el nuevo mensaje para poder evaluar correctamente si es una conversación nueva o inactiva
+        const previousChatState = await getChatState(from);
+        
         // Guardar mensaje del cliente en el historial en Sheets
         await saveChatMessage(from, 'client', text);
         
@@ -396,11 +399,11 @@ export async function POST(req: NextRequest) {
         const momPhone = "525535786087";
         const brianPhone = "525547015312";
 
-        if (!chat) {
+        if (!previousChatState) {
             shouldAlertAdmins = true;
             adminNotifyText = `📢 *NUEVA CONVERSACIÓN INICIADA*\n\nEl número +${from} ha iniciado un chat con Mariana (IA).\n\nPuedes monitorear y gestionar la conversación en tiempo real desde tu Portal:\n👉 carmd.com.mx/os/chats`;
         } else {
-            const lastUpdateMs = new Date(chat.lastUpdate || 0).getTime();
+            const lastUpdateMs = new Date(previousChatState.lastUpdate || 0).getTime();
             const oneHourAgo = Date.now() - (60 * 60 * 1000); // 1 hora en milisegundos
             if (lastUpdateMs < oneHourAgo) {
                 shouldAlertAdmins = true;

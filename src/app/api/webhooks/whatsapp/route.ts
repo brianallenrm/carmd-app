@@ -1087,11 +1087,25 @@ ${historyPromptText}`;
             await saveChatMessage(from, 'assistant', replyText);
             
             // Intentar extraer el problema inicial si el usuario lo mencionó en su saludo/pregunta
-            let initialProblem = null;
+            let initialProblem = '...';
             if (currentState === 'WAITING_PROBLEM_IA' && chat?.vehicleProblem) {
                 initialProblem = chat.vehicleProblem; // Guardar el problema que describió al inicio
             } else {
-                initialProblem = text; // Si activó el disparador en el primer mensaje, le pasamos todo el texto para que Gemini lo limpie en la siguiente iteración
+                try {
+                    const probPrompt = `Analiza este primer mensaje del cliente: "${text}".
+                    Extrae SOLAMENTE la falla mecánica o servicio que solicita (ej: "afinar", "ruido en frenos", "tira aceite").
+                    Si el mensaje son puros saludos, halagos o preguntas generales sin mencionar un problema en el auto, responde exactamente con 3 puntos: ...`;
+                    
+                    const probRes = await ai.models.generateContent({
+                        model: 'gemini-3.1-flash-lite',
+                        contents: probPrompt,
+                        config: { temperature: 0.1 }
+                    });
+                    initialProblem = probRes.text?.trim() || '...';
+                    if (initialProblem.length > 60) initialProblem = '...'; // Fallback de seguridad
+                } catch(e) {
+                    initialProblem = '...';
+                }
             }
 
             await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify({ 

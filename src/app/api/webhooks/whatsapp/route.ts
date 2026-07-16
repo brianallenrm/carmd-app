@@ -619,7 +619,14 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             });
 
             let replyText = response.text || "Perfecto. Por favor compárteme tu marca y modelo de auto para continuar.";
-            console.log(`[Webhook] Respuesta IA generada: "${replyText}"`);
+            
+            // GLOBAL SANITIZATION: Always strip the [SUMMARY_READY] tag from the raw replyText.
+            // If the AI decides to use it but the backend logic (hasRequiredFieldsForSummary) evaluates to false,
+            // we don't want the raw tag leaking to the user. We track its presence in a boolean instead.
+            const aiSentSummaryReadyTag = replyText.includes('[SUMMARY_READY]');
+            replyText = replyText.replace(/\[SUMMARY_READY\]/g, '').trim();
+            
+            console.log(`[Webhook] Respuesta IA generada: "${replyText}" (Envió tag: ${aiSentSummaryReadyTag})`);
 
             // Helper function to send messages sequentially in bubbles
             const sendInBubbles = async (recipient: string, rawText: string) => {
@@ -751,8 +758,8 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                 // Parse the secret tag [SUMMARY_READY]
                 let introText = '¡Listo! Ya tengo toda la información. Por favor confírmame si los datos de tu cita son correctos:\n';
                 
-                if (replyText.includes('[SUMMARY_READY]')) {
-                    const cleanReply = replyText.replace('[SUMMARY_READY]', '').trim();
+                if (aiSentSummaryReadyTag) {
+                    const cleanReply = replyText;
                     if (cleanReply.length > 0) {
                         // The AI answered a question before appending the tag
                         introText = `${cleanReply}\n\n*Por favor, confírmame si los datos de tu cita son correctos para proceder:*`;

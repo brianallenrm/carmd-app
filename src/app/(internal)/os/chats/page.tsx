@@ -598,7 +598,11 @@ export default function ChatsPage() {
                                     </div>
                                     <div>
                                         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Vehículo</span>
-                                        <span className="text-xs font-bold text-slate-800 mt-1 block">{data.vehicle ? `${data.vehicle} ${data.year && data.year !== 'N/A' ? data.year : ''}` : 'Falta dato...'}</span>
+                                        <span className="text-xs font-bold text-slate-800 mt-1 block">
+                                            {data.vehicle 
+                                                ? `${data.vehicle}${data.year && data.year !== 'N/A' && !data.vehicle.includes(data.year.toString()) ? ` ${data.year}` : ''}` 
+                                                : 'Falta dato...'}
+                                        </span>
                                     </div>
                                     <div>
                                         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Kilometraje</span>

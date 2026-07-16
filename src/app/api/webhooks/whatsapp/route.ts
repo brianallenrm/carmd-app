@@ -140,6 +140,10 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
 
+        const rafaPhone = "525516473084";
+        const momPhone = "525535786087";
+        const brianPhone = "525547015312";
+
         // Check if it's a message event
         const entry = body.entry?.[0];
         const changes = entry?.changes?.[0];
@@ -405,9 +409,7 @@ export async function POST(req: NextRequest) {
         let shouldAlertAdmins = false;
         let adminNotifyText = "";
 
-        const rafaPhone = "525516473084";
-        const momPhone = "525535786087";
-        const brianPhone = "525547015312";
+
 
         if (!previousChatState) {
             shouldAlertAdmins = true;
@@ -543,6 +545,15 @@ export async function POST(req: NextRequest) {
             await sendWhatsAppMessage(from, apologyMessage);
             await saveChatMessage(from, 'assistant', apologyMessage);
             await updateChatState(from, 'HUMAN_REQUIRED', vehicleProblemData);
+
+            // Enviar alerta de intervención humana requerida al administrador (Brian)
+            try {
+                const adminAlertMsg = `⚠️ *INTERVENCIÓN HUMANA REQUERIDA*\n\nEl cliente +${from} (*${clientName || 'Sin Nombre'}*) requiere atención humana directa en el chat por solicitud/molestia.\n\nPor favor atiende el chat en tu Portal:\n👉 carmd.com.mx/os/chats`;
+                await sendWhatsAppMessage(brianPhone, adminAlertMsg);
+                console.log("[Webhook] Alerta de intervención humana enviada al administrador.");
+            } catch (e) {
+                console.error("Error al alertar a Brian sobre intervención humana:", e);
+            }
             return;
         }
 
@@ -705,6 +716,15 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                     await sendWhatsAppMessage(from, finalDerivationMsg);
                     await saveChatMessage(from, 'assistant', finalDerivationMsg);
                     await updateChatState(from, 'HUMAN_REQUIRED', JSON.stringify(mergedParams));
+
+                    // Enviar alerta de cotización requerida al administrador (Brian)
+                    try {
+                        const adminAlertMsg = `⚠️ *INTERVENCIÓN HUMANA REQUERIDA*\n\nEl cliente +${from} (*${mergedParams.name}*) solicita una cotización humana para su vehículo *${mergedParams.vehicle}*.\n\nPor favor atiende el chat en tu Portal:\n👉 carmd.com.mx/os/chats`;
+                        await sendWhatsAppMessage(brianPhone, adminAlertMsg);
+                        console.log("[Webhook] Alerta de cotización enviada al administrador.");
+                    } catch (e) {
+                        console.error("Error al alertar a Brian sobre cotización humana:", e);
+                    }
                     return;
                 }
             }

@@ -781,12 +781,18 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             // Alerta de spam en flujo de cita
             if (replyText.includes('dejaré la conversación hasta aquí') || replyText.includes('dejaré las respuestas automáticas hasta aquí')) {
                 try {
-                    const adminSpamAlert = `⚠️ *ALERTA DE SPAM / JUEGO DETECTADA*\n\nEl cliente +${from} parece estar jugando o spameando en el chat.\n\nMariana ha procedido a pausar las respuestas complejas. Puedes monitorearlo en tu Portal:\n👉 carmd.com.mx/os/chats`;
+                    const adminSpamAlert = `⚠️ *ALERTA DE SPAM / JUEGO DETECTADA*\n\nEl cliente +${from} parece estar jugando o spameando en el chat.\n\nMariana ha procedido a silenciarse automáticamente. Puedes monitorearlo en tu Portal:\n👉 carmd.com.mx/os/chats`;
                     await sendWhatsAppMessage(brianPhone, adminSpamAlert);
-                    console.log("[Webhook] Alerta de spam enviada al administrador.");
+                    console.log("[Webhook] Alerta de spam enviada al administrador y bot silenciado.");
                 } catch (e) {
                     console.error("Error al alertar a Brian sobre spam:", e);
                 }
+                
+                // Enviar la respuesta de advertencia y silenciar a Mariana cambiándola a HUMAN_REQUIRED
+                await sendInBubbles(from, replyText);
+                await saveChatMessage(from, 'assistant', replyText);
+                await updateChatState(from, 'HUMAN_REQUIRED', JSON.stringify(mergedParams));
+                return;
             }
 
             await sendInBubbles(from, replyText);
@@ -1077,12 +1083,18 @@ ${historyPromptText}`;
         // Alerta de spam en flujo general
         if (replyText.includes('dejaré la conversación hasta aquí') || replyText.includes('dejaré las respuestas automáticas hasta aquí')) {
             try {
-                const adminSpamAlert = `⚠️ *ALERTA DE SPAM / JUEGO DETECTADA*\n\nEl cliente +${from} parece estar jugando o spameando en el chat.\n\nMariana ha procedido a pausar las respuestas complejas. Puedes monitorearlo en tu Portal:\n👉 carmd.com.mx/os/chats`;
+                const adminSpamAlert = `⚠️ *ALERTA DE SPAM / JUEGO DETECTADA*\n\nEl cliente +${from} parece estar jugando o spameando en el chat.\n\nMariana ha procedido a silenciarse automáticamente. Puedes monitorearlo en tu Portal:\n👉 carmd.com.mx/os/chats`;
                 await sendWhatsAppMessage(brianPhone, adminSpamAlert);
-                console.log("[Webhook] Alerta de spam enviada al administrador.");
+                console.log("[Webhook] Alerta de spam enviada al administrador y bot silenciado.");
             } catch (e) {
                 console.error("Error al alertar a Brian sobre spam:", e);
             }
+            
+            // Enviar la respuesta de advertencia y silenciar a Mariana cambiándola a HUMAN_REQUIRED
+            await sendInBubblesGeneral(from, replyText);
+            await saveChatMessage(from, 'assistant', replyText);
+            await updateChatState(from, 'HUMAN_REQUIRED', chat?.vehicleProblem || '');
+            return;
         }
 
         // Send response

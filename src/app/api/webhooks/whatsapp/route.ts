@@ -874,9 +874,11 @@ Mensaje: "${text}"
 
 Tu tarea es clasificar la intención PRINCIPAL del cliente en una de estas 4 categorías exactas (responde SOLO con la palabra en mayúsculas):
 1. REPROGRAMAR: Si el cliente quiere explícitamente cambiar, mover, o corregir la fecha/hora de una cita que ya tiene.
-2. CANCELAR: Si el cliente quiere cancelar su cita.
+2. CANCELAR: Si el cliente quiere cancelar su cita de forma explícita.
 3. RECORDATORIO: Si el cliente pregunta cuándo es su cita, a qué hora, o pide información sobre la cita que ya tiene agendada.
-4. GENERAL: Cualquier otra cosa (saludos, preguntas sobre servicios, fallas, cotizaciones, querer agendar una cita nueva desde cero, etc.).
+4. GENERAL: Cualquier otra cosa (saludos, preguntas sobre servicios, fallas, cotizaciones, querer agendar una cita nueva desde cero, emojis, stickers, risas [jaja, jeje], texto sin sentido, respuestas cortas, etc.).
+
+REGLA DE SEGURIDAD EXTREMA: Si el mensaje contiene únicamente emojis, risas, palabras cortas casuales (ej: "ok", "va", "gracias") o texto sin sentido, clasifícalo obligatoriamente como GENERAL. NO clasifiques como CANCELAR a menos que el cliente use palabras explícitas de cancelación (ej: "cancela mi cita", "quiero cancelar", "ya no voy a ir").
 
 Respuesta (una sola palabra):`;
 

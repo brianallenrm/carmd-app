@@ -582,54 +582,90 @@ export async function POST(req: NextRequest) {
                 }
             } catch (e) {}
 
-            // Prompt especial para que Gemini extraiga datos nuevos y responda al usuario
+            // Prompt unificado para que Gemini piense, extraiga datos y responda en una sola llamada estructurada
             const assistantInstruction = `${SYSTEM_PROMPT}
 
 FECHA Y HORA ACTUAL DE REFERENCIA: ${cdmxTimeStr}. HOY ES DÍA: ${dayName.toUpperCase()}. (Calcula correctamente el día de la semana relativo a hoy: si hoy es ${dayName}, mañana es el siguiente día. Recuerda que los domingos el Centro de Servicio está CERRADO).
 
 REGLAS DE RECOLECCIÓN DE CITA (MODO INTERACTIVO):
 - Estás en un proceso activo de registro de cita para el cliente con teléfono: ${from}.
-- Los datos acumulados hasta el momento son: ${JSON.stringify(tempParams)}.
+- Los datos acumulados hasta el momento en tu memoria son: ${JSON.stringify(tempParams)}.
 - El cliente te acaba de escribir: "${text}".
-- Tu tarea es doble:
-  1. Identificar si el cliente te está proporcionando datos nuevos para su cita (ej: su nombre, marca/modelo, año, kilometraje, placas, fecha/hora preferida o el problema de su auto) y actualizar mentalmente el registro.
-  2. Si el cliente te hace alguna pregunta intermedia (como horarios, dirección, por qué pedimos datos, precios, etc.), respóndela amablemente siguiendo las reglas del manual de CarMD.
-  3. Si falta algún dato importante por recolectar, pídeselo de forma muy amigable. No le pidas todo junto de golpe; ve solicitándolo de forma natural en la conversación. Los datos necesarios son: *Nombre completo*, *Correo electrónico*, *Marca/Modelo del auto*, *Año*, *Kilometraje*, *Placas*, *Fecha/Hora preferida* y *Problema del auto*.
-  4. VERIFICACIÓN DE CALENDARIO REAL: Si el cliente propone una fecha y día de la semana que no coinciden en el calendario real (ej: decir miércoles 14 cuando el miércoles es 15 de julio de 2026), corrígelo con amabilidad diciendo el día correcto antes de agendar (ej: "Veo que el miércoles es 15 de julio, ¿te agendamos para ese día?").
-  5. REGLA DE HORARIOS Y DOMINGOS: El Centro de Servicio opera de lunes a viernes de 8:00 AM a 5:00 PM y sábados de 8:00 AM a 2:00 PM. Está estrictamente CERRADO los domingos. Si el cliente solicita venir en domingo, o en un horario fuera de atención (ej. 6:00 PM), debes aclararle amablemente nuestros horarios y pedirle proactivamente que te sugiera otra fecha/hora válida.
-  6. TOLERANCIA AL KILOMETRAJE DESCONOCIDO: Si al pedirle el kilometraje el cliente te responde que no sabe o no está seguro, puedes insistir amistosamente UNA SÓLA VEZ pidiéndole un aproximado. Si insiste en que no sabe o no responde, guarda el campo 'km' como "Pendiente" y avanza inmediatamente a pedirle el siguiente dato (ej: las placas) sin volver a preguntar por los kilómetros.
-  7. DATO CURIOSO DEL AUTO: Justo después de que el cliente proporcione o confirme por primera vez qué auto tiene (marca/modelo/versión), debes integrar de forma muy breve, natural y conversacional en tu respuesta de WhatsApp un dato curioso, real e interesante sobre esa marca o modelo de auto (máximo un renglón, ej: de dónde viene el nombre, un récord, algún dato histórico divertido) antes de continuar con la conversación o pedirle el siguiente dato. Si el cliente no ha dicho su auto o ya comentaste el dato curioso antes, no lo menciones.
-  8. REGLA CRÍTICA DE DATOS FALTANTES Y VOCABULARIO: Analiza detenidamente el JSON de datos acumulados que se te proporcionó. Si ves que algún campo clave (como time, plate, km, etc.) tiene el valor "..." (tres puntos), significa que ESE DATO AÚN FALTA por recolectar. Estás ESTRICTAMENTE OBLIGADA a formular una pregunta al cliente para obtener ese dato. Mientras falten datos (haya "...") está ESTRICTAMENTE PROHIBIDO usar frases como "ya quedó agendada tu cita", "tu cita está confirmada", "ya tienes todo lo necesario", o "todo está listo". En su lugar, usa frases de progreso como "he registrado la fecha", "he anotado el horario", pero deja claro que aún faltan datos para finalizar. Nunca asumas la hora si no te la han dicho explícitamente.
-  9. CUANDO TODOS LOS DATOS ESTÉN COMPLETOS (ETIQUETA SECRETA): Si analizas el JSON de progreso y YA NO HAY NINGÚN CAMPO con "..." (es decir, ya recolectaste absolutamente todo), has terminado. 
-     - Si el cliente te hizo alguna pregunta en su último mensaje, respóndela brevemente y al final de tu respuesta escribe exactamente la etiqueta secreta '[SUMMARY_READY]'.
-     - Si el cliente NO te hizo ninguna pregunta y solo te dio el último dato (ej: "el miércoles a las 11"), tu ÚNICA respuesta debe ser exclusivamente la etiqueta secreta '[SUMMARY_READY]' sin absolutamente nada de texto extra.
-     - En este estado está ESTRICTAMENTE PROHIBIDO despedirte, decir "te esperamos", "ya tengo todo" o confirmar los datos. El sistema ocultará la etiqueta secreta y se encargará de mostrarle el resumen automático al cliente.
+- Tu tarea es analizar el mensaje del cliente y devolver UN ÚNICO OBJETO JSON con la siguiente estructura exacta:
+{
+  "pensamiento_interno": "Breve razonamiento de qué vas a contestar y por qué, basándote en las reglas.",
+  "respuesta_whatsapp": "Tu respuesta amigable para enviar al cliente por WhatsApp (usa emojis, doble salto de línea para separar párrafos).",
+  "datos_actualizados": {
+    "name": "...",
+    "email": "...",
+    "vehicle": "...",
+    "year": "...",
+    "km": "...",
+    "plate": "...",
+    "date": "...",
+    "time": "...",
+    "problem": "..."
+  },
+  "cita_lista_para_resumen": false
+}
+
+REGLAS PARA EL JSON ESTRICTO:
+1. 'respuesta_whatsapp': 
+   - Debe resolver cualquier duda del cliente basándose en el manual de CarMD.
+   - Si falta algún dato ("..."), pide amablemente un dato a la vez. No pidas todo de golpe.
+   - Integra un dato curioso del auto justo después de confirmar el vehículo por primera vez.
+   - Si detectas spam o juego sin fin, incluye aquí tu mensaje final despidiéndote e incluyendo exactamente la frase: "dejaré la conversación hasta aquí".
+2. 'datos_actualizados':
+   - Combina la memoria acumulada con la nueva información dada por el cliente en este turno.
+   - Si un dato no se ha proporcionado, déjalo estrictamente como "..." (tres puntos).
+   - FECHAS Y HORAS: Solo actualiza 'date' (YYYY-MM-DD) y 'time' (ej. 8:00 AM) si el cliente confirma explícitamente su elección. Si el cliente solo pregunta por disponibilidad (ej: "¿qué horarios tienes?", "¿qué es lo más temprano?"), mantén el dato como "...".
+   - KILOMETRAJE: Debe ser puramente numérico (ej: 20000). Si el cliente no sabe, guarda "Pendiente".
+   - HORARIOS VÁLIDOS: L-V de 8:00 AM a 5:00 PM, Sáb de 8:00 AM a 2:00 PM. No agendes fuera de este horario ni en domingo.
+3. 'cita_lista_para_resumen':
+   - Pon esto en \`true\` SOLAMENTE si el objeto 'datos_actualizados' ya NO tiene ningún campo en "..." (es decir, ya recolectaste absolutamente todos los 8 datos necesarios) Y el cliente no hizo ninguna pregunta pendiente de responder.
+   - Si el cliente te dio el último dato pero a la vez hizo una pregunta (ej: "a las 8, ¿aceptan tarjeta?"), responde su pregunta en 'respuesta_whatsapp', actualiza el dato en 'datos_actualizados' y pon 'cita_lista_para_resumen' en \`true\`.
+   - Si esto es \`true\`, NUNCA te despidas, ni digas "tu cita está lista", ni confirmes los datos en 'respuesta_whatsapp'. El sistema automáticamente mostrará el resumen en pantalla usando tu respuesta_whatsapp solo como introducción.
+
 ${historyPromptText}
 
-Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas cortas.`;
+Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicamente el JSON plano y parseable.`;
 
-            console.log("[Webhook] Llamando a Gemini para evaluar respuesta e información...");
-            const response = await ai.models.generateContent({
-                model: 'gemini-3.1-flash-lite',
-                contents: text,
-                config: {
-                    systemInstruction: assistantInstruction,
-                    temperature: 0.3,
-                }
-            });
+            console.log("[Webhook] Llamando a Gemini para procesar respuesta y extracción (Single-Call JSON)...");
+            let structuredOutput: any = {};
+            try {
+                const response = await ai.models.generateContent({
+                    model: 'gemini-3.1-flash-lite',
+                    contents: "Analiza el mensaje del cliente y devuelve el objeto JSON requerido.",
+                    config: {
+                        systemInstruction: assistantInstruction,
+                        temperature: 0.2,
+                        responseMimeType: 'application/json',
+                    }
+                });
 
-            let replyText = response.text || "Perfecto. Por favor compárteme tu marca y modelo de auto para continuar.";
+                const rawJsonText = response.text?.trim() || "{}";
+                structuredOutput = JSON.parse(rawJsonText);
+            } catch (e) {
+                console.error("[Webhook] Error parseando salida estructurada de Gemini:", e);
+                // Fallback de seguridad en caso de error crítico
+                structuredOutput = {
+                    pensamiento_interno: "Error parseando.",
+                    respuesta_whatsapp: "Una disculpa, tuve un pequeño contratiempo técnico. ¿Podrías repetirme tu último mensaje?",
+                    datos_actualizados: tempParams,
+                    cita_lista_para_resumen: false
+                };
+            }
+
+            console.log(`[Webhook] Pensamiento Interno de IA: "${structuredOutput.pensamiento_interno}"`);
             
-            // GLOBAL SANITIZATION: Always strip the [SUMMARY_READY] tag from the raw replyText.
-            // If the AI decides to use it but the backend logic (hasRequiredFieldsForSummary) evaluates to false,
-            // we don't want the raw tag leaking to the user. We track its presence in a boolean instead.
-            const aiSentSummaryReadyTag = replyText.includes('[SUMMARY_READY]');
-            replyText = replyText.replace(/\[SUMMARY_READY\]/g, '').trim();
+            let replyText = structuredOutput.respuesta_whatsapp || "";
+            const aiSentSummaryReadyTag = structuredOutput.cita_lista_para_resumen === true;
             
-            console.log(`[Webhook] Respuesta IA generada: "${replyText}" (Envió tag: ${aiSentSummaryReadyTag})`);
+            console.log(`[Webhook] Respuesta IA generada: "${replyText}" (Cita lista para resumen: ${aiSentSummaryReadyTag})`);
 
             // Helper function to send messages sequentially in bubbles
             const sendInBubbles = async (recipient: string, rawText: string) => {
+                if (!rawText) return;
                 // Split by double line breaks (paragraphs)
                 const bubbles = rawText.split('\n\n').map(b => b.trim()).filter(b => b.length > 0);
                 for (let i = 0; i < bubbles.length; i++) {
@@ -641,41 +677,8 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                 }
             };
 
-            // Si aún no se completa la cita, extraemos los parámetros que el cliente dio en este mensaje
-            // de forma silenciosa para ir acumulándolos en el Sheets (para no perderlos en el historial de reintentos)
-            const parsePrompt = `Analiza este mensaje: "${text}". Basándote en el JSON histórico: ${JSON.stringify(tempParams)}, actualiza los campos si el usuario los proporcionó ahora.
-            Devuelve un JSON limpio únicamente con las llaves: name, email, vehicle, year, km, plate, date, time, problem.
-            Ejemplo de salida: {"name": "...", "vehicle": "..."}
-            
-            FECHA Y HORA ACTUAL DE REFERENCIA (SÚPER IMPORTANTE): Hoy es ${dayName.toUpperCase()} y la fecha y hora actual en México es ${cdmxTimeStr}. 
-            Calcula cualquier fecha relativa (ej: "próximo martes", "mañana", "el 14") de forma matemática estricta a partir de esta fecha de hoy. El formato de salida para 'date' debe ser estrictamente numérico en formato YYYY-MM-DD (ej: "2026-07-15").
-            ${historyPromptText}
-
-            REGLAS DE EXTRACCIÓN DE DATOS:
-            1. REGLA DE LIMPIEZA DE MARCAS: Si detectas un error de dedo obvio en la marca o modelo (ej: "btw" en lugar de "BMW", "toyot" por "Toyota", "va" por "VW"), corrígelo en el campo 'vehicle' para que se guarde de forma profesional en el JSON.
-            2. SEPARACIÓN DE PREGUNTAS Y MOTIVOS: Si el cliente hace una pregunta como "¿para qué quieres las placas?", "¿cuánto cuesta?", etc., esto NUNCA debe ser guardado en el campo 'problem'. El campo 'problem' se llena únicamente con síntomas reales del coche (frenos, afinación, ruido, etc.) o solicitudes de servicio.
-            3. SI EL USUARIO INDICA CORREGIR UN DATO (ej: "el problema no es afinación, es frenos"): Borra o reemplaza el dato anterior con el valor que indica el usuario ahora.
-            4. CORRECCIÓN DE FECHA EN EL JSON: Si el usuario dice una fecha numérica y un día de la semana que son incompatibles o erróneos, guardar en el campo 'date' la fecha REAL corregida del calendario (formato YYYY-MM-DD).
-            5. MANEJO DE KILOMETRAJE: El campo 'km' debe ser estrictamente numérico (ej: 20000). Si el usuario dice "20 mil", guarda 20000. Si el usuario dice "no sé", "no estoy seguro" o "luego te digo" para el kilometraje ('km'), guarda el valor "Pendiente". No dejes el campo vacío ni vuelvas a forzar la pregunta si el usuario ya declaró desconocerlo.
-            6. PERSISTENCIA DE PLACAS: Asegúrate de extraer las placas si el cliente las proporciona (ej: "Abcd1234"). NUNCA limpies o dejes el campo 'plate' como nulo o vacío una vez que ya fue capturado.
-            7. FORMATO DE HORA: El campo 'time' debe incluir obligatoriamente el formato AM o PM (ej: "11:00 AM", "04:30 PM").
-            8. LIMPIEZA INICIAL DEL PROBLEMA: Si el campo 'problem' del JSON histórico contiene saludos, peticiones de cita o frases completas (ej: 'hola quiero cita me fallan los frenos'), resúmelo y límpialo para que solo quede la falla o servicio real (ej: 'fallan los frenos'). Si el texto no menciona ningún problema ni falla, cámbialo estrictamente a '...'.
-            9. NO ASUMIR FECHA NI HORA: Si el cliente NO ha especificado explícitamente qué día o a qué hora quiere su cita, es ESTRICTAMENTE OBLIGATORIO que los campos 'date' y 'time' los devuelvas como '...' (tres puntos). JAMÁS asumas ni llenes estos campos con la fecha u hora actual de la conversación.
-            10. VALIDACIÓN ESTRICTA DE HORARIOS DE ATENCIÓN: El horario de servicio es de Lunes a Viernes de 8:00 AM a 5:00 PM, y Sábados de 8:00 AM a 2:00 PM. Si el cliente solicita una hora que está FUERA de este horario de operación (ej: 6:00 PM, 7:00 AM), esa hora es INVÁLIDA. Si la hora solicitada es inválida, DEBES OBLIGATORIAMENTE dejar el campo 'time' como '...' (tres puntos) en el JSON. No extraigas ni guardes horarios fuera del horario de atención.
-            11. PREGUNTAS VS DECISIONES: Si el cliente hace una pregunta sobre disponibilidad, qué es lo más temprano/tarde, o qué horarios hay (ej: "¿qué es lo más temprano que puedo?", "¿qué horarios tienen libres?"), esto es una consulta de información, NO una confirmación de cita. En estos casos, DEBES dejar el campo 'time' (y 'date' si aplica) como '...' (tres puntos). Sólo extrae la fecha y hora cuando el cliente tome la decisión y confirme que quiere venir a esa hora.`;
-
-            let extracted: any = {};
-            try {
-                const parseRes = await ai.models.generateContent({
-                    model: 'gemini-3.1-flash-lite',
-                    contents: parsePrompt,
-                    config: { temperature: 0.1 }
-                });
-                const cleanJson = parseRes.text?.replace(/```json|```/g, '').trim() || '{}';
-                extracted = JSON.parse(cleanJson);
-            } catch (e) {}
-
             // Combinar parámetros inteligentemente (sin sobreescribir con valores nulos o vacíos del extractor silencioso)
+            const extracted = structuredOutput.datos_actualizados || {};
             const mergedParams = { ...tempParams };
             for (const key of Object.keys(extracted)) {
                 if (extracted[key] && extracted[key] !== '...' && extracted[key] !== '') {

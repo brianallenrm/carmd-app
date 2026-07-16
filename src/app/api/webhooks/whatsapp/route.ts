@@ -600,7 +600,10 @@ REGLAS DE RECOLECCIÓN DE CITA (MODO INTERACTIVO):
   6. TOLERANCIA AL KILOMETRAJE DESCONOCIDO: Si al pedirle el kilometraje el cliente te responde que no sabe o no está seguro, puedes insistir amistosamente UNA SÓLA VEZ pidiéndole un aproximado. Si insiste en que no sabe o no responde, guarda el campo 'km' como "Pendiente" y avanza inmediatamente a pedirle el siguiente dato (ej: las placas) sin volver a preguntar por los kilómetros.
   7. DATO CURIOSO DEL AUTO: Justo después de que el cliente proporcione o confirme por primera vez qué auto tiene (marca/modelo/versión), debes integrar de forma muy breve, natural y conversacional en tu respuesta de WhatsApp un dato curioso, real e interesante sobre esa marca o modelo de auto (máximo un renglón, ej: de dónde viene el nombre, un récord, algún dato histórico divertido) antes de continuar con la conversación o pedirle el siguiente dato. Si el cliente no ha dicho su auto o ya comentaste el dato curioso antes, no lo menciones.
   8. REGLA CRÍTICA DE DATOS FALTANTES Y VOCABULARIO: Analiza detenidamente el JSON de datos acumulados que se te proporcionó. Si ves que algún campo clave (como time, plate, km, etc.) tiene el valor "..." (tres puntos), significa que ESE DATO AÚN FALTA por recolectar. Estás ESTRICTAMENTE OBLIGADA a formular una pregunta al cliente para obtener ese dato. Mientras falten datos (haya "...") está ESTRICTAMENTE PROHIBIDO usar frases como "ya quedó agendada tu cita", "tu cita está confirmada", "ya tienes todo lo necesario", o "todo está listo". En su lugar, usa frases de progreso como "he registrado la fecha", "he anotado el horario", pero deja claro que aún faltan datos para finalizar. Nunca asumas la hora si no te la han dicho explícitamente.
-  9. CUANDO TODOS LOS DATOS ESTÉN COMPLETOS: Si analizas el JSON de progreso y YA NO HAY NINGÚN CAMPO con "..." (es decir, ya recolectaste absolutamente todo, incluyendo placas, hora, etc.), tu única tarea es confirmar de forma MUY BREVE el último dato que te acaban de dar (ej: "¡Listo! He anotado tus placas.") y detenerte ahí. ESTÁ ESTRICTAMENTE PROHIBIDO despedirte, decir "te esperamos", "nos vemos pronto", ofrecer un resumen o preguntar "¿hay algo más en lo que te pueda ayudar?". Nuestro sistema automatizado se encargará de mostrarle el resumen de la cita para que el cliente lo confirme.
+  9. CUANDO TODOS LOS DATOS ESTÉN COMPLETOS (ETIQUETA SECRETA): Si analizas el JSON de progreso y YA NO HAY NINGÚN CAMPO con "..." (es decir, ya recolectaste absolutamente todo), has terminado. 
+     - Si el cliente te hizo alguna pregunta en su último mensaje, respóndela brevemente y al final de tu respuesta escribe exactamente la etiqueta secreta `[SUMMARY_READY]`.
+     - Si el cliente NO te hizo ninguna pregunta y solo te dio el último dato (ej: "el miércoles a las 11"), tu ÚNICA respuesta debe ser exclusivamente la etiqueta secreta `[SUMMARY_READY]` sin absolutamente nada de texto extra.
+     - En este estado está ESTRICTAMENTE PROHIBIDO despedirte, decir "te esperamos", "ya tengo todo" o confirmar los datos. El sistema ocultará la etiqueta secreta y se encargará de mostrarle el resumen automático al cliente.
 ${historyPromptText}
 
 Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas cortas.`;
@@ -744,17 +747,26 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
                 const yearSuffix = yearClean && !vehicleStr.includes(yearClean) ? ` ${yearClean}` : '';
                 const vehicleDisplay = `${vehicleStr}${yearSuffix}`;
 
-                // Si la IA generó una respuesta conversacional respondiendo una duda, la conservamos como introducción
+                // Parse the secret tag [SUMMARY_READY]
                 let introText = '¡Listo! Ya tengo toda la información. Por favor confírmame si los datos de tu cita son correctos:\n';
-                const replyLower = replyText.toLowerCase();
                 
-                // Si la respuesta de la IA no parece ser el resumen genérico por defecto, la usamos para no tragar respuestas a dudas
-                if (replyText && 
-                    !replyLower.includes('resumen') && 
-                    !replyLower.includes('confirmar') && 
-                    !replyLower.includes('correcto') &&
-                    replyText.trim().length > 10) {
-                    introText = `${replyText.trim()}\n\n*Por favor, confírmame si los datos de tu cita son correctos para proceder:*`;
+                if (replyText.includes('[SUMMARY_READY]')) {
+                    const cleanReply = replyText.replace('[SUMMARY_READY]', '').trim();
+                    if (cleanReply.length > 0) {
+                        // The AI answered a question before appending the tag
+                        introText = `${cleanReply}\n\n*Por favor, confírmame si los datos de tu cita son correctos para proceder:*`;
+                    }
+                    // If cleanReply is empty, introText remains the hardcoded clean string
+                } else {
+                    // Fallback just in case the AI hallucinates and forgets the tag, use the whole text
+                    const replyLower = replyText.toLowerCase();
+                    if (replyText && 
+                        !replyLower.includes('resumen') && 
+                        !replyLower.includes('confirmar') && 
+                        !replyLower.includes('correcto') &&
+                        replyText.trim().length > 10) {
+                        introText = `${replyText.trim()}\n\n*Por favor, confírmame si los datos de tu cita son correctos para proceder:*`;
+                    }
                 }
 
                 // Si ya tenemos todo, pasamos al estado de confirmación y le presentamos el resumen

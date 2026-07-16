@@ -710,13 +710,32 @@ Recuerda: Escribe de forma natural y amigable con emojis. Mantén tus respuestas
             }
 
             if (hasRequiredFieldsForSummary) {
+                // Evitar duplicar el año si el campo vehicle ya lo contiene
+                const yearClean = mergedParams.year && mergedParams.year !== '...' ? String(mergedParams.year).trim() : '';
+                const vehicleStr = String(mergedParams.vehicle).trim();
+                const yearSuffix = yearClean && !vehicleStr.includes(yearClean) ? ` ${yearClean}` : '';
+                const vehicleDisplay = `${vehicleStr}${yearSuffix}`;
+
+                // Si la IA generó una respuesta conversacional respondiendo una duda, la conservamos como introducción
+                let introText = '¡Listo! Ya tengo toda la información. Por favor confírmame si los datos de tu cita son correctos:\n';
+                const replyLower = replyText.toLowerCase();
+                
+                // Si la respuesta de la IA no parece ser el resumen genérico por defecto, la usamos para no tragar respuestas a dudas
+                if (replyText && 
+                    !replyLower.includes('resumen') && 
+                    !replyLower.includes('confirmar') && 
+                    !replyLower.includes('correcto') &&
+                    replyText.trim().length > 10) {
+                    introText = `${replyText.trim()}\n\n*Por favor, confírmame si los datos de tu cita son correctos para proceder:*`;
+                }
+
                 // Si ya tenemos todo, pasamos al estado de confirmación y le presentamos el resumen
                 const kmDisplay = mergedParams.km === 'Pendiente' ? 'Por confirmar a la llegada 🛞' : `${mergedParams.km} KM`;
-                const summaryText = `¡Listo! Ya tengo toda la información. Por favor confírmame si los datos de tu cita son correctos:
+                const summaryText = `${introText}
  
 👤 *Nombre*: ${mergedParams.name}
 📧 *Correo*: ${mergedParams.email || 'N/A'}
-🚗 *Vehículo*: ${mergedParams.vehicle} ${mergedParams.year || ''}
+🚗 *Vehículo*: ${vehicleDisplay}
 🛞 *Kilometraje*: ${kmDisplay}
 📋 *Placas*: ${mergedParams.plate}
 📅 *Fecha*: ${mergedParams.date}

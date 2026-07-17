@@ -571,6 +571,17 @@ export async function POST(req: NextRequest) {
         }
 
         // --- Handle Step-by-Step Appointment Data Collection (Semantic & Interactive) ---
+
+        // --- Handle Final Booking Confirmation State ---
+        if (chat?.state === 'WAITING_CONFIRMATION_IA') {
+            console.log("[Webhook] Evaluando confirmación final en WAITING_CONFIRMATION_IA...");
+            
+            let tempParams: any = {};
+            try {
+                if (chat.vehicleProblem && chat.vehicleProblem.startsWith('{')) {
+                    tempParams = JSON.parse(chat.vehicleProblem);
+                }
+
         if (chat?.state === 'COLLECTING_APPOINTMENT_IA') {
             console.log("[Webhook] Procesando recolección semántica de cita...");
 
@@ -620,7 +631,7 @@ REGLAS PARA EL JSON ESTRICTO:
    - Si un dato no se ha proporcionado, déjalo estrictamente como "..." (tres puntos).
    - FECHAS Y HORAS: Solo actualiza 'date' (YYYY-MM-DD) y 'time' (ej. 8:00 AM) si el cliente confirma explícitamente su elección. Si el cliente solo pregunta por disponibilidad (ej: "¿qué horarios tienes?", "¿qué es lo más temprano?"), mantén el dato como "...".
    - KILOMETRAJE: Debe ser puramente numérico (ej: 20000). Si el cliente no sabe, guarda "Pendiente".
-   - HORARIOS VÁLIDOS: L-V de 8:00 AM a 5:00 PM, Sáb de 8:00 AM a 2:00 PM. No agendes fuera de este horario ni en domingo.
+   - HORARIOS VÁLIDOS: L-V de 8:00 AM a 4:30 PM, Sáb de 8:00 AM a 1:30 PM. No agendes fuera de este horario ni en domingo. Excepción: si el cliente pregunta explícitamente por la hora "más temprana" posible, ofrécele las 7:45 AM.
 3. 'cita_lista_para_resumen':
    - Pon esto en \`true\` SOLAMENTE si el objeto 'datos_actualizados' ya NO tiene ningún campo en "..." (es decir, ya recolectaste absolutamente todos los 8 datos necesarios) Y el cliente no hizo ninguna pregunta pendiente de responder.
    - Si el cliente te dio el último dato pero a la vez hizo una pregunta (ej: "a las 8, ¿aceptan tarjeta?"), responde su pregunta en 'respuesta_whatsapp', actualiza el dato en 'datos_actualizados' y pon 'cita_lista_para_resumen' en \`true\`.
@@ -823,16 +834,6 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
             await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(mergedParams));
             return;
         }
-
-        // --- Handle Final Booking Confirmation State ---
-        if (chat?.state === 'WAITING_CONFIRMATION_IA') {
-            console.log("[Webhook] Evaluando confirmación final en WAITING_CONFIRMATION_IA...");
-            
-            let tempParams: any = {};
-            try {
-                if (chat.vehicleProblem && chat.vehicleProblem.startsWith('{')) {
-                    tempParams = JSON.parse(chat.vehicleProblem);
-                }
             } catch (e) {}
 
             const textClean = text.toLowerCase().trim();
@@ -921,13 +922,37 @@ ${historyPromptText}`;
                     return;
                 }
 
-                // Si dice que no o quiere cambiar algo, regresamos a la recolección
-                console.log("[Webhook] El cliente no confirmó o desea cambiar datos. Regresando a recolección.");
-                const retryMsg = `Entendido. ¿Qué dato te gustaría corregir o qué cambio hacemos en tu cita? 🛠️`;
-                await sendWhatsAppMessage(from, retryMsg);
-                await saveChatMessage(from, 'assistant', retryMsg);
-                await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(tempParams));
-                return;
+                console.log("[Webhook] El cliente no confirmó el resumen. Evaluando si proporcionó la corrección...");
+                let providedCorrection = false;
+                try {
+                    const isCorrectionPrompt = `El usuario rechazó o comentó sobre el resumen de confirmación de su cita con este mensaje: "${text}".
+¿El usuario proporcionó en ese mismo mensaje algún dato nuevo o corrección específica que quiere hacer (ej: "mejor el martes", "es un mazda 3", "cámbialo a las 10", "no, mi placa es ABC", "mejor a las 5")?
+Responde ÚNICAMENTE con la palabra "YES" si proporcionó un dato nuevo o corrección directa en ese mensaje, o "NO" si solo dijo "no", "espera", "está mal" sin dar el dato específico.`;
+                    
+                    const isCorrRes = await ai.models.generateContent({
+                        model: 'gemini-3.1-flash-lite',
+                        contents: isCorrectionPrompt,
+                        config: { temperature: 0.1 }
+                    });
+                    
+                    const ans = isCorrRes.text?.trim().toUpperCase() || 'NO';
+                    providedCorrection = ans.includes('YES');
+                } catch(e) {
+                    providedCorrection = false;
+                }
+
+                if (providedCorrection) {
+                    console.log("[Webhook] Corrección detectada en el mensaje. Pasando control a COLLECTING_APPOINTMENT_IA sin preguntar de nuevo.");
+                    chat.state = 'COLLECTING_APPOINTMENT_IA'; // Override local var to fall through
+                    await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(tempParams));
+                } else {
+                    console.log("[Webhook] El cliente no confirmó y no dio el dato a corregir. Preguntando...");
+                    const retryMsg = `Entendido. ¿Qué dato te gustaría corregir o qué cambio hacemos en tu cita? 🛠️`;
+                    await sendWhatsAppMessage(from, retryMsg);
+                    await saveChatMessage(from, 'assistant', retryMsg);
+                    await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(tempParams));
+                    return;
+                }
             }
         }
 
@@ -965,78 +990,88 @@ Respuesta (una sola palabra):`;
 
         const wantsBookingAction = intent === 'REPROGRAMAR' || intent === 'CANCELAR' || intent === 'RECORDATORIO';
 
-        if (wantsBookingAction) {
-            console.log(`[Webhook] Cliente ${from} solicita acción sobre cita (${intent}). Consultando hoja CITAS_2025...`);
-            try {
-                const baseUrl = process.env.NODE_ENV === 'production' 
-                    ? `https://${req.headers.get('host')}` 
-                    : 'http://localhost:3000';
+        // Consultar siempre si el cliente tiene una cita activa para inyectar contexto
+        let activeCita = null;
+        try {
+            const baseUrl = process.env.NODE_ENV === 'production' 
+                ? `https://${req.headers.get('host')}` 
+                : 'http://localhost:3000';
 
-                const bookingRes = await fetch(`${baseUrl}/api/chats/${from}/booking`);
-                if (bookingRes.ok) {
-                    const { cita } = await bookingRes.json();
-                    if (cita && (cita.estatus === 'Pendiente' || cita.estatus === 'Confirmada')) {
-                        console.log(`[Booking Memory] Cita activa encontrada:`, cita);
-                        
-                        const isReschedule = intent === 'REPROGRAMAR';
-                        const isCancel = intent === 'CANCELAR';
-                        const isQuery = intent === 'RECORDATORIO';
-
-                        if (isQuery) {
-                            // Responder con la confirmación de su cita activa
-                            const reminderMsg = `¡Hola, ${cita.name}! 😊 Claro, con gusto te confirmo los detalles de tu cita agendada en nuestro Centro de Servicio:\n\n📅 *Fecha*: ${cita.date}\n⏰ *Hora*: ${cita.time}\n🚗 *Auto*: ${cita.vehicle} (${cita.year})\n📋 *Placas*: ${cita.plate}\n🔧 *Problema*: ${cita.problem}\n\n¡Te esperamos! Si necesitas hacer algún cambio o tienes dudas, avísame. 👍`;
-                            await sendWhatsAppMessage(from, reminderMsg);
-                            await saveChatMessage(from, 'assistant', reminderMsg);
-                            return;
-                        }
-
-                        if (isReschedule) {
-                            // Cargar de vuelta los parámetros acumulados para iniciar la reprogramación
-                            const restoreParams = {
-                                name: cita.name,
-                                email: cita.email,
-                                vehicle: cita.vehicle,
-                                year: cita.year,
-                                km: cita.km,
-                                plate: cita.plate,
-                                problem: cita.problem,
-                                date: '...', // Reset para pedir fecha nueva
-                                time: '...'  // Reset para pedir hora nueva
-                            };
-
-                            const rescheduleMsg = `¡Hola, ${cita.name}! Claro que sí, con mucho gusto podemos reprogramar tu espacio en el Centro de Servicio. 🗓️\n\nTu cita actual está agendada para el *${cita.date}* a las *${cita.time}*.\n\n¿Para qué nuevo día y hora de lunes a sábado te gustaría agendar? 😊`;
-                            await sendWhatsAppMessage(from, rescheduleMsg);
-                            await saveChatMessage(from, 'assistant', rescheduleMsg);
-                            await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(restoreParams));
-                            return;
-                        }
-
-                        if (isCancel) {
-                            // Actualizar estatus a Cancelada en Sheets
-                            try {
-                                await fetch(`${baseUrl}/api/citas/update-status`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ phone: from, status: 'Cancelada' })
-                                });
-                            } catch (e) {
-                                console.error("Error al cancelar cita en Sheets:", e);
-                            }
-
-                            const cancelConfirmMsg = `Entendido, ${cita.name}. He cancelado tu cita para el ${cita.date} a las ${cita.time} con éxito. Si en el futuro necesitas programar de nuevo o requieres ayuda para tu auto, aquí estaré. ¡Que tengas un excelente día! 😊🚗`;
-                            await sendWhatsAppMessage(from, cancelConfirmMsg);
-                            await saveChatMessage(from, 'assistant', cancelConfirmMsg);
-                            await updateChatState(from, 'COMPLETED');
-                            return;
-                        }
-                    }
+            const bookingRes = await fetch(`${baseUrl}/api/chats/${from}/booking`);
+            if (bookingRes.ok) {
+                const { cita } = await bookingRes.json();
+                if (cita && (cita.estatus === 'Pendiente' || cita.estatus === 'Confirmada')) {
+                    activeCita = cita;
                 }
-            } catch (e) {
-                console.error("[Booking Memory] Error al consultar cita activa:", e);
+            }
+        } catch (e) {
+            console.error("[Booking Memory] Error al consultar cita activa:", e);
+        }
+
+        if (wantsBookingAction && activeCita) {
+            console.log(`[Webhook] Cliente ${from} solicita acción sobre cita (${intent}). Cita activa encontrada:`, activeCita);
+            
+            const isReschedule = intent === 'REPROGRAMAR';
+            const isCancel = intent === 'CANCELAR';
+            const isQuery = intent === 'RECORDATORIO';
+
+            if (isQuery) {
+                // Responder con la confirmación de su cita activa
+                const reminderMsg = `¡Hola, ${activeCita.name}! 😊 Claro, con gusto te confirmo los detalles de tu cita agendada en nuestro Centro de Servicio:\n\n📅 *Fecha*: ${activeCita.date}\n⏰ *Hora*: ${activeCita.time}\n🚗 *Auto*: ${activeCita.vehicle} (${activeCita.year})\n📋 *Placas*: ${activeCita.plate}\n🔧 *Problema*: ${activeCita.problem}\n\n¡Te esperamos! Si necesitas hacer algún cambio o tienes dudas, avísame. 👍`;
+                await sendWhatsAppMessage(from, reminderMsg);
+                await saveChatMessage(from, 'assistant', reminderMsg);
+                return;
+            }
+
+            if (isReschedule) {
+                // Cargar de vuelta los parámetros acumulados para iniciar la reprogramación
+                const restoreParams = {
+                    name: activeCita.name,
+                    email: activeCita.email,
+                    vehicle: activeCita.vehicle,
+                    year: activeCita.year,
+                    km: activeCita.km,
+                    plate: activeCita.plate,
+                    problem: activeCita.problem,
+                    date: '...', // Reset para pedir fecha nueva
+                    time: '...'  // Reset para pedir hora nueva
+                };
+
+                const rescheduleMsg = `¡Hola, ${activeCita.name}! Claro que sí, con mucho gusto podemos reprogramar tu espacio en el Centro de Servicio. 🗓️\n\nTu cita actual está agendada para el *${activeCita.date}* a las *${activeCita.time}*.\n\n¿Para qué nuevo día y hora de lunes a sábado te gustaría agendar? 😊`;
+                await sendWhatsAppMessage(from, rescheduleMsg);
+                await saveChatMessage(from, 'assistant', rescheduleMsg);
+                await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(restoreParams));
+                return;
+            }
+
+            if (isCancel) {
+                // Actualizar estatus a Cancelada en Sheets
+                try {
+                    const baseUrl = process.env.NODE_ENV === 'production' 
+                        ? `https://${req.headers.get('host')}` 
+                        : 'http://localhost:3000';
+                    await fetch(`${baseUrl}/api/citas/update-status`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone: from, status: 'Cancelada' })
+                    });
+                } catch (e) {
+                    console.error("Error al cancelar cita en Sheets:", e);
+                }
+
+                const cancelConfirmMsg = `Entendido, ${activeCita.name}. He cancelado tu cita para el ${activeCita.date} a las ${activeCita.time} con éxito. Si en el futuro necesitas programar de nuevo o requieres ayuda para tu auto, aquí estaré. ¡Que tengas un excelente día! 😊🚗`;
+                await sendWhatsAppMessage(from, cancelConfirmMsg);
+                await saveChatMessage(from, 'assistant', cancelConfirmMsg);
+                await updateChatState(from, 'COMPLETED');
+                return;
             }
         }
 
         let systemInstruction = SYSTEM_PROMPT;
+        if (activeCita) {
+            systemInstruction += `\n\nCONTEXTO IMPORTANTE: El cliente YA TIENE una cita agendada en el sistema (Nombre: ${activeCita.name}, Auto: ${activeCita.vehicle} ${activeCita.year}, Placas: ${activeCita.plate}, Fecha: ${activeCita.date} a las ${activeCita.time}).
+Si el cliente hace preguntas generales, solicita costos o tiene dudas sobre cómo llegar, NO le vuelvas a pedir su nombre ni los datos de su vehículo porque ya los tienes en tu memoria. Simplemente responde su duda basándote en el manual de CarMD, o si no sabes la respuesta o es una cotización de costos específica, indícale amablemente que el asesor humano de CarMD que se comunicará con él para confirmar la cita le podrá resolver esa duda sin problema.`;
+        }
         systemInstruction += `\n\nFECHA Y HORA ACTUAL DE REFERENCIA: ${cdmxTimeStr}. HOY ES DÍA: ${dayName.toUpperCase()}. (Calcula correctamente el día de la semana relativo a hoy: si hoy es ${dayName}, mañana es el siguiente día. Recuerda que los domingos el Centro de Servicio está CERRADO).
 ${historyPromptText}`;
         

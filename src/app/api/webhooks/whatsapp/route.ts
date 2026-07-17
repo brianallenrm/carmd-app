@@ -571,17 +571,6 @@ export async function POST(req: NextRequest) {
         }
 
         // --- Handle Step-by-Step Appointment Data Collection (Semantic & Interactive) ---
-
-        // --- Handle Final Booking Confirmation State ---
-        if (chat?.state === 'WAITING_CONFIRMATION_IA') {
-            console.log("[Webhook] Evaluando confirmación final en WAITING_CONFIRMATION_IA...");
-            
-            let tempParams: any = {};
-            try {
-                if (chat.vehicleProblem && chat.vehicleProblem.startsWith('{')) {
-                    tempParams = JSON.parse(chat.vehicleProblem);
-                }
-
         if (chat?.state === 'COLLECTING_APPOINTMENT_IA') {
             console.log("[Webhook] Procesando recolección semántica de cita...");
 
@@ -834,6 +823,16 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
             await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(mergedParams));
             return;
         }
+
+        // --- Handle Final Booking Confirmation State ---
+        if (chat?.state === 'WAITING_CONFIRMATION_IA') {
+            console.log("[Webhook] Evaluando confirmación final en WAITING_CONFIRMATION_IA...");
+            
+            let tempParams: any = {};
+            try {
+                if (chat.vehicleProblem && chat.vehicleProblem.startsWith('{')) {
+                    tempParams = JSON.parse(chat.vehicleProblem);
+                }
             } catch (e) {}
 
             const textClean = text.toLowerCase().trim();
@@ -922,37 +921,13 @@ ${historyPromptText}`;
                     return;
                 }
 
-                console.log("[Webhook] El cliente no confirmó el resumen. Evaluando si proporcionó la corrección...");
-                let providedCorrection = false;
-                try {
-                    const isCorrectionPrompt = `El usuario rechazó o comentó sobre el resumen de confirmación de su cita con este mensaje: "${text}".
-¿El usuario proporcionó en ese mismo mensaje algún dato nuevo o corrección específica que quiere hacer (ej: "mejor el martes", "es un mazda 3", "cámbialo a las 10", "no, mi placa es ABC", "mejor a las 5")?
-Responde ÚNICAMENTE con la palabra "YES" si proporcionó un dato nuevo o corrección directa en ese mensaje, o "NO" si solo dijo "no", "espera", "está mal" sin dar el dato específico.`;
-                    
-                    const isCorrRes = await ai.models.generateContent({
-                        model: 'gemini-3.1-flash-lite',
-                        contents: isCorrectionPrompt,
-                        config: { temperature: 0.1 }
-                    });
-                    
-                    const ans = isCorrRes.text?.trim().toUpperCase() || 'NO';
-                    providedCorrection = ans.includes('YES');
-                } catch(e) {
-                    providedCorrection = false;
-                }
-
-                if (providedCorrection) {
-                    console.log("[Webhook] Corrección detectada en el mensaje. Pasando control a COLLECTING_APPOINTMENT_IA sin preguntar de nuevo.");
-                    chat.state = 'COLLECTING_APPOINTMENT_IA'; // Override local var to fall through
-                    await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(tempParams));
-                } else {
-                    console.log("[Webhook] El cliente no confirmó y no dio el dato a corregir. Preguntando...");
-                    const retryMsg = `Entendido. ¿Qué dato te gustaría corregir o qué cambio hacemos en tu cita? 🛠️`;
-                    await sendWhatsAppMessage(from, retryMsg);
-                    await saveChatMessage(from, 'assistant', retryMsg);
-                    await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(tempParams));
-                    return;
-                }
+                // Si dice que no o quiere cambiar algo, regresamos a la recolección
+                console.log("[Webhook] El cliente no confirmó o desea cambiar datos. Regresando a recolección.");
+                const retryMsg = `Entendido. ¿Qué dato te gustaría corregir o qué cambio hacemos en tu cita? 🛠️`;
+                await sendWhatsAppMessage(from, retryMsg);
+                await saveChatMessage(from, 'assistant', retryMsg);
+                await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(tempParams));
+                return;
             }
         }
 

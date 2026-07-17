@@ -606,7 +606,8 @@ REGLAS DE RECOLECCIÓN DE CITA (MODO INTERACTIVO):
     "time": "...",
     "problem": "..."
   },
-  "cita_lista_para_resumen": false
+  "cita_lista_para_resumen": false,
+  "cliente_confirmo_resumen": false
 }
 
 REGLAS PARA EL JSON ESTRICTO:
@@ -751,36 +752,49 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
                 mergedParams.time = '8:00 AM';
             }
 
-            if (hasRequiredFieldsForSummary) {
-                // Evitar duplicar el año si el campo vehicle ya lo contiene
+            if (structuredOutput.cliente_confirmo_resumen === true) {
+                console.log(`[Webhook] Cliente confirmó el resumen final. Ejecutando reserva y cerrando chat para ${from}`);
+                await updateChatState(from, 'COMPLETED');
+                
+                try {
+                    const baseUrl = process.env.NODE_ENV === 'production' 
+                        ? `https://${req.headers.get('host')}` 
+                        : 'http://localhost:3000';
+                        
+                    const reservaPayload = {
+                        date: mergedParams.date,
+                        time: mergedParams.time,
+                        name: mergedParams.name,
+                        email: mergedParams.email && mergedParams.email !== '...' ? mergedParams.email : 'N/A',
+                        vehicle: mergedParams.vehicle + (mergedParams.year && mergedParams.year !== '...' ? ' ' + mergedParams.year : ''),
+                        km: mergedParams.km,
+                        plate: mergedParams.plate,
+                        problem: mergedParams.problem && mergedParams.problem !== '...' ? mergedParams.problem : 'Diagnóstico general',
+                        phone: from
+                    };
+                    
+                    const r = await fetch(`${baseUrl}/api/citas/reserve`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(reservaPayload)
+                    });
+                    if (r.ok) console.log("[Webhook] Cita reservada en API");
+                } catch (e) {
+                    console.error("[Webhook] Excepción /api/citas/reserve:", e);
+                }
+                
+                const finalMsg = `¡Solicitud recibida! ✔️ En este momento te llegará un correo electrónico con los detalles de tu solicitud de cita. A la brevedad, un asesor de nuestro equipo se pondrá en contacto contigo para terminar de afinar los detalles y confirmarte oficialmente tu espacio.\n\n¡Estaremos muy atentos a tu llegada! Que tengas un excelente día. 🚗✨`;
+                await sendWhatsAppMessage(from, finalMsg);
+                await saveChatMessage(from, 'assistant', finalMsg);
+                return;
+            } else if (hasRequiredFieldsForSummary) {
                 const yearClean = mergedParams.year && mergedParams.year !== '...' ? String(mergedParams.year).trim() : '';
                 const vehicleStr = String(mergedParams.vehicle).trim();
                 const yearSuffix = yearClean && !vehicleStr.includes(yearClean) ? ` ${yearClean}` : '';
                 const vehicleDisplay = `${vehicleStr}${yearSuffix}`;
 
-                // Parse the secret tag [SUMMARY_READY]
-                let introText = '¡Listo! Ya tengo toda la información. Por favor confírmame si los datos de tu cita son correctos:\n';
+                let introText = replyText.length > 0 ? `${replyText}\n\n*Por favor, confírmame si los datos de tu cita son correctos para proceder:*` : '¡Listo! Ya tengo toda la información. Por favor confírmame si los datos de tu cita son correctos:\n';
                 
-                if (aiSentSummaryReadyTag) {
-                    const cleanReply = replyText;
-                    if (cleanReply.length > 0) {
-                        // The AI answered a question before appending the tag
-                        introText = `${cleanReply}\n\n*Por favor, confírmame si los datos de tu cita son correctos para proceder:*`;
-                    }
-                    // If cleanReply is empty, introText remains the hardcoded clean string
-                } else {
-                    // Fallback just in case the AI hallucinates and forgets the tag, use the whole text
-                    const replyLower = replyText.toLowerCase();
-                    if (replyText && 
-                        !replyLower.includes('resumen') && 
-                        !replyLower.includes('confirmar') && 
-                        !replyLower.includes('correcto') &&
-                        replyText.trim().length > 10) {
-                        introText = `${replyText.trim()}\n\n*Por favor, confírmame si los datos de tu cita son correctos para proceder:*`;
-                    }
-                }
-
-                // Si ya tenemos todo, pasamos al estado de confirmación y le presentamos el resumen
                 const kmDisplay = mergedParams.km === 'Pendiente' ? 'Por confirmar a la llegada 🛞' : `${mergedParams.km} KM`;
                 const summaryText = `${introText}
  
@@ -797,7 +811,19 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
  
                 await sendInBubbles(from, summaryText);
                 await saveChatMessage(from, 'assistant', summaryText);
-                await updateChatState(from, 'WAITING_CONFIRMATION_IA', JSON.stringify(mergedParams));
+                
+                try {
+                    const baseUrl = process.env.NODE_ENV === 'production' 
+                        ? `https://${req.headers.get('host')}` 
+                        : 'http://localhost:3000';
+                    await fetch(`${baseUrl}/api/citas/update-status`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone: from, status: 'Esperando Confirmación' })
+                    });
+                } catch (e) {}
+
+                await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(mergedParams));
                 return;
             }
  
@@ -823,114 +849,6 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
             await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(mergedParams));
             return;
         }
-
-        // --- Handle Final Booking Confirmation State ---
-        if (chat?.state === 'WAITING_CONFIRMATION_IA') {
-            console.log("[Webhook] Evaluando confirmación final en WAITING_CONFIRMATION_IA...");
-            
-            let tempParams: any = {};
-            try {
-                if (chat.vehicleProblem && chat.vehicleProblem.startsWith('{')) {
-                    tempParams = JSON.parse(chat.vehicleProblem);
-                }
-            } catch (e) {}
-
-            const textClean = text.toLowerCase().trim();
-            
-            // Usar Gemini para evaluar de forma robusta y semántica si el cliente confirma o tiene dudas/cambios
-            let isAffirmative = false;
-            try {
-                const evalPrompt = `Analiza si este mensaje es una aceptación, confirmación o aprobación a la propuesta anterior de agendar su cita: "${text}".
-                Acepta respuestas afirmativas directas, informales, modismos mexicanos o positivos (ej: "si", "sí", "va", "chido", "sobres", "perfecto", "confirmo", "adelante", "chévere", "dale", "está bien", "procede", "ok").
-                Responde ÚNICAMENTE con la palabra "YES" si es afirmativo/aprobación, o "NO" si es negativo, duda, pregunta o si desea realizar algún cambio (como preguntar "cuándo confirman", etc.).
-${historyPromptText}`;
-                
-                const evalRes = await ai.models.generateContent({
-                    model: 'gemini-3.1-flash-lite',
-                    contents: evalPrompt,
-                    config: { temperature: 0.1 }
-                });
-                
-                const ans = evalRes.text?.trim().toUpperCase() || 'NO';
-                console.log(`[Webhook] Evaluación semántica de confirmación en WAITING_CONFIRMATION_IA: "${ans}"`);
-                isAffirmative = ans.includes('YES');
-            } catch (e) {
-                console.error("Error evaluando confirmación con IA:", e);
-                // Fallback local robusto
-                isAffirmative = textClean === 'si' || textClean === 'sí' || textClean === 'correcto' || textClean === 'perfecto' || textClean === 'confirmar' || textClean === 'confirmo';
-            }
-
-            if (isAffirmative) {
-                console.log("[Webhook] Confirmación afirmativa recibida. Registrando cita definitiva...");
-                
-                // Evaluar si es tarde (después de las 8:00 PM o antes de las 7:30 AM en CDMX)
-                const mxDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
-                const mxHour = mxDate.getHours();
-                const mxMinutes = mxDate.getMinutes();
-                const totalMinutes = mxHour * 60 + mxMinutes;
-                
-                const isLateNight = totalMinutes >= 20 * 60 || totalMinutes < 7.5 * 60; // 8:00 PM (1200 mins) o 7:30 AM (450 mins)
-                
-                let confirmationMsg = `¡Solicitud recibida! ✔️ En este momento te llegará un correo electrónico con los detalles de tu solicitud de cita. A la brevedad, un asesor de nuestro equipo de CarMD se comunicará contigo por aquí para el seguimiento y confirmación final. ¡Muchas gracias por tu confianza! 🚗💨`;
-                if (isLateNight) {
-                    confirmationMsg += `\n\n⚠️ *Nota*: Por el horario actual, el seguimiento personalizado y la confirmación final por parte de nuestro equipo humano se realizarán a primera hora del día de mañana a partir de las 8:00 AM. ¡Excelente noche! 🌙`;
-                }
-
-                await sendWhatsAppMessage(from, confirmationMsg);
-                await saveChatMessage(from, 'assistant', confirmationMsg);
-
-                try {
-                    const baseUrl = process.env.NODE_ENV === 'production' 
-                        ? `https://${req.headers.get('host')}` 
-                        : 'http://localhost:3000';
-
-                    await fetch(`${baseUrl}/api/citas/reserve`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            name: tempParams.name,
-                            email: tempParams.email || 'N/A',
-                            phone: from,
-                            vehicle: tempParams.vehicle,
-                            year: tempParams.year || 'N/A',
-                            km: tempParams.km || 'N/A',
-                            plate: tempParams.plate || 'N/A',
-                            date: tempParams.date,
-                            time: tempParams.time,
-                            problem: tempParams.problem || 'Servicio de afinación'
-                        })
-                    });
-                } catch (e) {
-                    console.error("Error al llamar API reserve:", e);
-                }
-                
-                await updateChatState(from, 'COMPLETED');
-                return;
-            } else {
-                const textLower = textClean.toLowerCase();
-                const isCancellation = textLower.includes('cancelar') || textLower.includes('cancela') || 
-                                       textLower.includes('ya no') || textLower.includes('olvidalo') || 
-                                       textLower.includes('olvídelo') || textLower.includes('ninguno');
-                
-                if (isCancellation) {
-                    console.log("[Webhook] Solicitud de cancelación recibida. Limpiando estado...");
-                    const cancelMsg = `Entendido. He cancelado el proceso de registro de tu cita. Si en el futuro necesitas ayuda para tu auto, recuerda que aquí estaré listo para apoyarte. ¡Que tengas un excelente día! 😊🚗`;
-                    await sendWhatsAppMessage(from, cancelMsg);
-                    await saveChatMessage(from, 'assistant', cancelMsg);
-                    await updateChatState(from, 'COMPLETED');
-                    return;
-                }
-
-                // Si dice que no o quiere cambiar algo, regresamos a la recolección
-                console.log("[Webhook] El cliente no confirmó o desea cambiar datos. Regresando a recolección.");
-                const retryMsg = `Entendido. ¿Qué dato te gustaría corregir o qué cambio hacemos en tu cita? 🛠️`;
-                await sendWhatsAppMessage(from, retryMsg);
-                await saveChatMessage(from, 'assistant', retryMsg);
-                await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(tempParams));
-                return;
-            }
-        }
-
         // --- Handle General AI Mode ---
         console.log("[Webhook] Modo Gemini AI activado por defecto.");
 

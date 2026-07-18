@@ -692,8 +692,6 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
             // Validación: ¿Ya tenemos todos los datos clave completos para presentar el resumen?
             let hasRequiredFieldsForSummary = mergedParams.name && mergedParams.name !== '...' &&
                                               mergedParams.vehicle && mergedParams.vehicle !== '...' &&
-                                              mergedParams.km && mergedParams.km !== '...' &&
-                                              mergedParams.plate && mergedParams.plate !== '...' &&
                                               mergedParams.problem && mergedParams.problem !== '...' &&
                                               mergedParams.date && mergedParams.date !== '...' && 
                                               !(typeof mergedParams.date === 'string' && mergedParams.date.toLowerCase().includes('temprano')) &&
@@ -797,14 +795,19 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
 
                 let introText = replyText.length > 0 ? `${replyText}\n\n*Por favor, confírmame si los datos de tu cita son correctos para proceder:*` : '¡Listo! Ya tengo toda la información. Por favor confírmame si los datos de tu cita son correctos:\n';
                 
-                const kmDisplay = mergedParams.km === 'Pendiente' ? 'Por confirmar a la llegada 🛞' : `${mergedParams.km} KM`;
+                const kmClean = mergedParams.km && mergedParams.km !== '...' ? String(mergedParams.km).trim() : 'Pendiente';
+                const kmDisplay = kmClean === 'Pendiente' ? 'Por confirmar a la llegada 🛞' : `${kmClean} KM`;
+
+                const plateClean = mergedParams.plate && mergedParams.plate !== '...' ? String(mergedParams.plate).trim() : 'Pendiente';
+                const plateDisplay = plateClean === 'Pendiente' ? 'Por confirmar a la llegada 📋' : plateClean;
+
                 const summaryText = `${introText}
  
 👤 *Nombre*: ${mergedParams.name}
-📧 *Correo*: ${mergedParams.email || 'N/A'}
+📧 *Correo*: ${mergedParams.email && mergedParams.email !== '...' ? mergedParams.email : 'N/A'}
 🚗 *Vehículo*: ${vehicleDisplay}
 🛞 *Kilometraje*: ${kmDisplay}
-📋 *Placas*: ${mergedParams.plate}
+📋 *Placas*: ${plateDisplay}
 📅 *Fecha*: ${mergedParams.date}
 ⏰ *Hora*: ${mergedParams.time}
 🔧 *Problema*: ${mergedParams.problem || 'Diagnóstico general'}

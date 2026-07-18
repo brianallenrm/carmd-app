@@ -1143,6 +1143,15 @@ ${historyPromptText}`;
                             });
                             console.log("[Supplier Email] Correo enviado exitosamente a car.md.mx@hotmail.com");
                         }
+                        
+                        // Mandar alerta de propuesta de proveedor a Brian por WhatsApp
+                        try {
+                            const supplierAlertMsg = `🏢 *NUEVA PROPUESTA DE PROVEEDOR*\n\nEl proveedor *${parsed.name}* de la empresa *${parsed.vehicle || 'No especificada'}* ha dejado una propuesta comercial:\n\n📧 *Correo*: ${parsed.email}\n📞 *WhatsApp*: +${from}\n📋 *Propuesta*: "${parsed.problem || 'No especificada'}"\n\nPuedes revisar el catálogo o datos del chat en tu Portal.`;
+                            await sendWhatsAppMessage(brianPhone, supplierAlertMsg);
+                            console.log("[Webhook] Alerta de propuesta comercial enviada al administrador.");
+                        } catch (e) {
+                            console.error("Error al alertar a Brian sobre propuesta comercial:", e);
+                        }
                     }
                 }
             } catch (err) {

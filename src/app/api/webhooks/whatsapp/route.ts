@@ -623,12 +623,12 @@ REGLAS PARA EL JSON ESTRICTO:
    - KILOMETRAJE: Debe ser puramente numérico (ej: 20000). Si el cliente no sabe, guarda "Pendiente".
    - HORARIOS VÁLIDOS: L-V de 8:00 AM a 4:30 PM, Sáb de 8:00 AM a 1:30 PM. No agendes fuera de este horario ni en domingo. Excepción: si el cliente pregunta explícitamente por la hora "más temprana" posible, ofrécele las 7:45 AM.
 3. 'cita_lista_para_resumen':
-   - Pon esto en `true` SOLAMENTE si el objeto 'datos_actualizados' ya NO tiene ningún campo en "..." (es decir, ya recolectaste absolutamente todos los 8 datos necesarios) Y el cliente no hizo ninguna pregunta pendiente de responder.
-   - Si el cliente te corrigió un dato después de haberle dado el resumen (ej: "mejor cámbialo al jueves a las 3"), actualiza ese dato en 'datos_actualizados', MANTÉN 'cita_lista_para_resumen' en `true` y pon 'cliente_confirmo_resumen' en `false`. En tu respuesta redacta algo natural como "¡Claro! He actualizado la fecha."
-   - Si esto es `true` y el cliente NO ha confirmado explícitamente, tu 'respuesta_whatsapp' debe ser SOLO algo introductorio (ej: "¡Perfecto!" o "¡Claro, he actualizado los datos!"). El sistema automáticamente anexará el resumen al final de tu mensaje.
+   - Pon esto en \`true\` SOLAMENTE si el objeto 'datos_actualizados' ya NO tiene ningún campo en "..." (es decir, ya recolectaste absolutamente todos los 8 datos necesarios) Y el cliente no hizo ninguna pregunta pendiente de responder.
+   - Si el cliente te corrigió un dato después de haberle dado el resumen (ej: "mejor cámbialo al jueves a las 3"), actualiza ese dato en 'datos_actualizados', MANTÉN 'cita_lista_para_resumen' en \`true\` y pon 'cliente_confirmo_resumen' en \`false\`. En tu respuesta redacta algo natural como "¡Claro! He actualizado la fecha."
+   - Si esto es \`true\` y el cliente NO ha confirmado explícitamente, tu 'respuesta_whatsapp' debe ser SOLO algo introductorio (ej: "¡Perfecto!" o "¡Claro, he actualizado los datos!"). El sistema automáticamente anexará el resumen al final de tu mensaje.
 4. 'cliente_confirmo_resumen':
-   - Pon esto en `true` ÚNICAMENTE si 'cita_lista_para_resumen' es true Y el cliente ha confirmado o aceptado de forma CLARA y EXPLÍCITA que el resumen es correcto y desea proceder (ej: "sí", "sí perfecto", "está bien", "adelante").
-   - Si el cliente da una corrección o responde con algo que no es una confirmación afirmativa para proceder, pon esto en `false`.
+   - Pon esto en \`true\` ÚNICAMENTE si 'cita_lista_para_resumen' es \`true\` Y el cliente ha confirmado o aceptado de forma CLARA y EXPLÍCITA que el resumen es correcto y desea proceder (ej: "sí", "sí perfecto", "está bien", "adelante").
+   - Si el cliente da una corrección o responde con algo que no es una confirmación afirmativa para proceder, pon esto en \`false\`.
 
 ${historyPromptText}
 
@@ -769,7 +769,8 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
                         time: mergedParams.time,
                         name: mergedParams.name,
                         email: mergedParams.email && mergedParams.email !== '...' ? mergedParams.email : 'N/A',
-                        vehicle: mergedParams.vehicle + (mergedParams.year && mergedParams.year !== '...' ? ' ' + mergedParams.year : ''),
+                        vehicle: mergedParams.vehicle,
+                        year: mergedParams.year && mergedParams.year !== '...' ? mergedParams.year : 'N/A',
                         km: mergedParams.km,
                         plate: mergedParams.plate,
                         problem: mergedParams.problem && mergedParams.problem !== '...' ? mergedParams.problem : 'Diagnóstico general',

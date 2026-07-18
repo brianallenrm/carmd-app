@@ -1071,10 +1071,22 @@ ${historyPromptText}`;
         // --- SISTEMA DE CAPTURA COMERCIAL / PROVEEDORES ---
         // Si el usuario está ofreciendo una alianza comercial o refacciones y ya proporcionó su nombre y correo/datos
         let finalVehicleProblem = chat?.vehicleProblem || '';
-        const isSupplierQuery = textLower.includes('refaccionaria') || textLower.includes('proveedor') || 
-                                textLower.includes('servicio') || textLower.includes('colaborar') || 
-                                textLower.includes('comercial') || textLower.includes('adquisiciones') ||
-                                (chat && chat.chatHistory && chat.chatHistory.toLowerCase().includes('proveedor'));
+        let isSupplierQuery = false;
+        try {
+            const supplierCheck = await ai.models.generateContent({
+                model: 'gemini-3.1-flash-lite',
+                contents: `Analiza si en esta conversación el cliente es un proveedor, está ofreciendo una alianza comercial, vendiendo productos/servicios, queriendo ser proveedor o haciendo una propuesta comercial de cualquier tipo. Responde estrictamente con la palabra YES o NO.\n\nHistorial:\n${historyPromptText}\nÚltimo mensaje: "${text}"`,
+                config: { temperature: 0.1 }
+            });
+            const checkText = supplierCheck.text?.trim().toUpperCase() || 'NO';
+            isSupplierQuery = checkText.includes('YES');
+            console.log(`[Supplier Check] Evaluación semántica de propuesta comercial: ${isSupplierQuery ? 'YES' : 'NO'}`);
+        } catch (e) {
+            isSupplierQuery = textLower.includes('refaccionaria') || textLower.includes('proveedor') || 
+                              textLower.includes('servicio') || textLower.includes('colaborar') || 
+                              textLower.includes('comercial') || textLower.includes('adquisiciones') ||
+                              (chat && chat.chatHistory && chat.chatHistory.toLowerCase().includes('proveedor'));
+        }
 
         if (isSupplierQuery && (currentState === 'WAITING_PROBLEM_IA' || currentState === 'WAITING_FORM_IA')) {
             try {

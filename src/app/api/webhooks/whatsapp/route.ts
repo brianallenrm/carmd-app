@@ -469,7 +469,7 @@ export async function POST(req: NextRequest) {
         if (isUrgentOrComplaint) {
             console.log(`[Webhook] Solicitud de intervención humana detectada. Evaluando datos antes de transferir...`);
             
-            // Intentar extraer el nombre si estamos en el sub-estado
+            // Intentar extraer el nombre si estamos en el sub-estado o si ya se presentó en el historial
             let clientName = '';
             let vehicleProblemData = chat?.vehicleProblem || '';
             
@@ -480,7 +480,46 @@ export async function POST(req: NextRequest) {
                 }
             } catch(e) {}
 
-            // Si es la primera solicitud y no tenemos su nombre registrado
+            // Si no tenemos el nombre en el estado estructurado, intentamos extraerlo semánticamente del historial reciente
+            if (!clientName && chat?.state !== 'ASKING_NAME_FOR_HUMAN') {
+                try {
+                    const quickExtractPrompt = `Analiza el historial de conversación reciente:
+                    ${historyPromptText}
+                    
+                    Si el usuario ya se presentó o mencionó su nombre y/o su coche (Marca/Modelo/Año), extrae:
+                    1. Nombre completo (name)
+                    2. Coche (vehicle)
+                    
+                    Devuelve únicamente un JSON con los campos 'name' y 'vehicle'. Si no los ha proporcionado todavía o falta el nombre, deja los campos como "".`;
+                    
+                    const quickExtractRes = await ai.models.generateContent({
+                        model: 'gemini-3.1-flash-lite',
+                        contents: quickExtractPrompt,
+                        config: { temperature: 0.1, responseMimeType: 'application/json' }
+                    });
+                    
+                    const parsedExtract = JSON.parse(quickExtractRes.text?.trim() || '{}');
+                    if (parsedExtract.name) {
+                        clientName = parsedExtract.name;
+                        const tempParams = {
+                            name: parsedExtract.name,
+                            vehicle: parsedExtract.vehicle || 'No especificado',
+                            year: 'N/A',
+                            km: 'N/A',
+                            plate: 'N/A',
+                            date: 'N/A',
+                            time: 'N/A',
+                            problem: 'Solicitud directa de Asesor Humano en chat'
+                        };
+                        vehicleProblemData = JSON.stringify(tempParams);
+                        console.log(`[Redirection] Extracción semántica exitosa del historial para humano: ${clientName}`);
+                    }
+                } catch (e) {
+                    console.error("Error en extracción rápida de datos para humano:", e);
+                }
+            }
+ 
+            // Si después de buscar en el historial seguimos sin tener su nombre registrado
             if (!clientName && chat?.state !== 'ASKING_NAME_FOR_HUMAN') {
                 const askNameMessage = `Entiendo perfectamente tu molestia y te pido una disculpa. 📞 Para nada es nuestra intención quitar el trato humano ni la cercanía contigo; de hecho, usamos este asistente virtual solo para agilizar los datos y poder ayudarte mucho más rápido.\n\nPara pasarte de inmediato con uno de nuestros asesores y que sepa con quién se comunicará, ¿me podrías compartir tu *Nombre completo* y qué *coche (Marca, Modelo y Año)* tienes? 😊`;
                 

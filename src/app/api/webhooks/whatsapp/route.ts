@@ -691,7 +691,8 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
 
             // Responder al cliente en burbujas y guardar progreso temporal
             // Validación: ¿Ya tenemos todos los datos clave completos para presentar el resumen?
-            let hasRequiredFieldsForSummary = mergedParams.name && mergedParams.name !== '...' &&
+            let hasRequiredFieldsForSummary = structuredOutput.cita_lista_para_resumen === true &&
+                                              mergedParams.name && mergedParams.name !== '...' &&
                                               mergedParams.vehicle && mergedParams.vehicle !== '...' &&
                                               mergedParams.problem && mergedParams.problem !== '...' &&
                                               mergedParams.date && mergedParams.date !== '...' && 

@@ -111,13 +111,11 @@ Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un fi
   * Si el usuario continúa enviando mensajes de juego o spam después de esta advertencia en el historial, limítate a responder estrictamente con un único emoji (ej: 👍 o 👋) en tu mensaje para no seguir consumiendo recursos ni alimentar el bucle de juego.
 
 14. CLIENTES RECURRENTES / EXPEDIENTES O HISTORIAL DE VEHÍCULO:
-- Si el usuario menciona que ya es cliente, pregunta por su historial de servicios, expediente de mantenimiento, afinaciones anteriores o cuándo le toca su servicio basándose en visitas pasadas:
-  * NUNCA asumas que puedes ver su historial clínico o expediente técnico.
-  * Explica amablemente que por seguridad y confidencialidad de datos, tú como asistente virtual de IA no tienes acceso directo al historial de servicios de su vehículo en este chat.
-  * Dile que el equipo en el Centro de Servicio sí tiene su expediente de mantenimiento a la mano y dale dos opciones claras:
-    1) Dejarle un recado al equipo de asesores para que busquen su expediente en el sistema y le escriban por WhatsApp a la brevedad con la fecha recomendada de su afinación/servicio.
-    2) O bien, si ya intuye que le toca y quiere agendar, ayudarle a registrar su cita directamente por aquí.
-  * Si el cliente responde que prefiere que un asesor lo contacte o elige la primera opción, debes despedirte de forma amable indicándole que a la brevedad un asesor se comunicará con él, e incluir obligatoriamente y al pie de la letra la frase: "Detendré mis respuestas automáticas."`;
+- Si el usuario menciona que ya es cliente o pregunta por su historial de servicios, expediente de mantenimiento o afinaciones pasadas:
+  * PASO 1 (Primer mensaje): Explica amablemente que por seguridad no tienes acceso al historial de servicios de su auto en este chat. Dile que el equipo en el Centro de Servicio sí tiene su expediente a la mano y dale dos opciones claras: 1) Dejarle un recado al equipo de asesores para que busquen su expediente en el sistema y le escriban por WhatsApp con la fecha recomendada, o 2) Agendar de una vez su cita de revisión. CRÍTICO: En este primer mensaje NO te despidas ni incluyas la frase de detener respuestas, ya que estás esperando a que el cliente elija una opción.
+  * PASO 2 (Segundo mensaje, tras la respuesta del cliente):
+    - Si el cliente elige la Opción 1 (que un asesor lo busque/revise su expediente): despídete amablemente indicándole que ya le pasaste el recado a un asesor y que se comunicará con él a la brevedad por aquí. En este segundo mensaje debes incluir obligatoriamente y al pie de la letra la frase: "Detendré mis respuestas automáticas."
+    - Si el cliente elige la Opción 2 (agendar cita): procede normalmente ayudándole a agendar su cita.`;
 
 /**
  * GET: Webhook verification for Meta
@@ -664,7 +662,7 @@ REGLAS PARA EL JSON ESTRICTO:
     - Integra un dato curioso del auto justo después de confirmar el vehículo por primera vez.
     - Si detectas spam o juego sin fin, incluye aquí tu mensaje final despidiéndote e incluyendo exactamente la frase: "dejaré la conversación hasta aquí".
     - NUNCA escribas o dibujes la ficha/caja de resumen de la cita en tu 'respuesta_whatsapp'. El sistema la anexará automáticamente. Tu 'respuesta_whatsapp' debe ser únicamente de texto conversacional y de bienvenida, aclarar dudas o dar respuestas, pero JAMÁS debe tener la lista de datos estructurados de la cita (como Nombre:, Correo:, Vehículo:, etc.), de lo contrario se duplicará.
-    - Si el cliente menciona que ya es cliente de CarMD o pregunta por su historial/expediente de mantenimiento o servicios pasados, dile amablemente que por seguridad no tienes acceso al historial de su vehículo por chat, y ofrécele de forma clara las 2 opciones (dejar recado para llamada/contacto de asesor, o agendar cita de una vez). Si el cliente elige al asesor, despídete amablemente diciendo que se comunicarán con él e incluye estrictamente la frase: "Detendré mis respuestas automáticas."
+    - Si el cliente menciona que ya es cliente de CarMD o pregunta por su historial/expediente de mantenimiento o servicios pasados: En el PRIMER mensaje, dile amablemente que por seguridad no tienes acceso a su historial por chat y dale de forma clara las 2 opciones (asesor o agendar), SIN agregar ninguna frase de despedida o detención. ÚNICAMENTE en el SEGUNDO mensaje (si el cliente elige al asesor), despídete amablemente diciendo que un asesor se comunicará con él e incluye estrictamente la frase: "Detendré mis respuestas automáticas."
  2. 'datos_actualizados':
     - Combina la memoria acumulada con la nueva información dada por el cliente en este turno.
     - Si un dato no se ha proporcionado, déjalo estrictamente como "..." (tres puntos).

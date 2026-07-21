@@ -112,9 +112,11 @@ Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un fi
 
 14. CLIENTES RECURRENTES / EXPEDIENTES O HISTORIAL DE VEHÍCULO:
 - Si el usuario menciona que ya es cliente o pregunta por su historial de servicios, expediente de mantenimiento o afinaciones pasadas:
-  * PASO 1 (Primer mensaje): Explica amablemente que por seguridad no tienes acceso al historial de servicios de su auto en este chat. Dile que el equipo en el Centro de Servicio sí tiene su expediente a la mano y dale dos opciones claras: 1) Dejarle un recado al equipo de asesores para que busquen su expediente en el sistema y le escriban por WhatsApp con la fecha recomendada, o 2) Agendar de una vez su cita de revisión. CRÍTICO: En este primer mensaje NO te despidas ni incluyas la frase de detener respuestas, ya que estás esperando a que el cliente elija una opción.
+  * PASO 1 (Primer mensaje): Explica amablemente que por seguridad no tienes acceso al historial de servicios de su auto en este chat. Dile que el equipo en el Centro de Servicio sí tiene su expediente a la mano y dale dos opciones claras: 1) Dejarle un recado al equipo de asesores para que busquen su expediente en el sistema y le escriban por WhatsApp con la fecha recomendada, o 2) Agendar de una vez su cita de revisión. CRÍTICO: En este primer mensaje NO te despidas ni incluyas la frase de detener respuestas.
   * PASO 2 (Segundo mensaje, tras la respuesta del cliente):
-    - Si el cliente elige la Opción 1 (que un asesor lo busque/revise su expediente): despídete amablemente indicándole que ya le pasaste el recado a un asesor y que se comunicará con él a la brevedad por aquí. En este segundo mensaje debes incluir obligatoriamente y al pie de la letra la frase: "Detendré mis respuestas automáticas."
+    - Si el cliente elige la Opción 1 (que un asesor lo busque/revise su expediente):
+      * Si en el historial de la conversación el cliente AÚN NO ha mencionado su *Nombre completo* ni qué *vehículo* (Marca/Modelo/Año) tiene, pídeselos amablemente diciendo que son indispensables para que el asesor pueda localizar su expediente en el sistema (ej: "Con gusto. Para que puedan buscar tu expediente, ¿me compartes tu *nombre completo* y qué *auto (Marca, Modelo y Año)* tienes?"). NO te despidas ni incluyas la frase de detener respuestas hasta obtener estos dos datos.
+      * Si el cliente ya dio su Nombre y Vehículo (o en cuanto te los proporcione tras solicitárselos), despídete de forma amable indicándole que ya pasaste la información al asesor y que se comunicará con él a la brevedad por aquí. En este mensaje final debes incluir obligatoriamente la frase exacta: "Detendré mis respuestas automáticas."
     - Si el cliente elige la Opción 2 (agendar cita): procede normalmente ayudándole a agendar su cita.`;
 
 /**
@@ -136,6 +138,64 @@ export async function GET(req: NextRequest) {
 
 // Temporary memory cache for message deduplication (key: phone_number, value: timestamp)
 const processedMessagesCache = new Map<string, number>();
+
+// Helper function to handle text generation with model fallback cascada
+async function generateTextWithFallback(contents: any, config?: any) {
+    const models = [
+        'gemini-3.5-flash-lite',
+        'gemini-3.1-flash-lite',
+        'gemini-3.6-flash',
+        'gemini-3.5-flash',
+        'gemini-3-flash',
+        'gemini-2.5-flash',
+        'gemini-2.5-flash-lite'
+    ];
+    let lastError: any = null;
+    for (const model of models) {
+        try {
+            console.log(`[AI Text Fallback] Intentando con modelo: ${model}`);
+            const result = await ai.models.generateContent({
+                model,
+                contents,
+                config
+            });
+            return result;
+        } catch (err) {
+            console.warn(`[AI Text Fallback] Falló modelo ${model}. Probando siguiente...`, err);
+            lastError = err;
+        }
+    }
+    throw lastError;
+}
+
+// Helper function to handle audio transcription with model fallback cascada
+async function transcribeAudioWithFallback(inlineData: any, prompt: string) {
+    const models = [
+        'gemini-3.6-flash',
+        'gemini-3.5-flash',
+        'gemini-3-flash',
+        'gemini-3.5-flash-lite',
+        'gemini-3.1-flash-lite'
+    ];
+    let lastError: any = null;
+    for (const model of models) {
+        try {
+            console.log(`[AI Audio Fallback] Intentando con modelo: ${model}`);
+            const result = await ai.models.generateContent({
+                model,
+                contents: [
+                    { inlineData },
+                    prompt
+                ]
+            });
+            return result;
+        } catch (err) {
+            console.warn(`[AI Audio Fallback] Falló modelo ${model}. Probando siguiente...`, err);
+            lastError = err;
+        }
+    }
+    throw lastError;
+}
 
 /**
  * POST: Handle incoming WhatsApp messages
@@ -197,40 +257,17 @@ export async function POST(req: NextRequest) {
                     const audioBuffer = await downloadRes.arrayBuffer();
                     const audioBase64 = Buffer.from(audioBuffer).toString('base64');
                     
-                    // 3. Mandar a transcribir a Gemini 3.5 Flash
-                    console.log(`[Audio Webhook] Transcribiendo con Gemini 3.5 Flash...`);
+                    // 3. Mandar a transcribir usando cascada de modelos
+                    console.log(`[Audio Webhook] Transcribiendo usando cascada de modelos...`);
                     const audioMime = message.audio.mime_type || 'audio/ogg';
                     
-                    let genRes;
-                    try {
-                        genRes = await ai.models.generateContent({
-                            model: 'gemini-3.5-flash',
-                            contents: [
-                                {
-                                    inlineData: {
-                                        mimeType: audioMime,
-                                        data: audioBase64
-                                    }
-                                },
-                                "Transcribe de forma sumamente precisa este audio en español de México. Devuelve únicamente el texto de la transcripción literal sin comentarios extras ni aclaraciones."
-                            ]
-                        });
-                    } catch (geminiError) {
-                        console.error("[Audio Webhook] Gemini 3.5 Flash falló o llegó al límite. Usando fallback a Gemini 3.1 Flash Lite...", geminiError);
-                        // Fallback con el modelo 3.1 Flash Lite (enviando el mismo payload de audio)
-                        genRes = await ai.models.generateContent({
-                            model: 'gemini-3.1-flash-lite',
-                            contents: [
-                                {
-                                    inlineData: {
-                                        mimeType: audioMime,
-                                        data: audioBase64
-                                    }
-                                },
-                                "Transcribe de forma precisa este audio en español de México. Devuelve únicamente el texto."
-                            ]
-                        });
-                    }
+                    const genRes = await transcribeAudioWithFallback(
+                        {
+                            mimeType: audioMime,
+                            data: audioBase64
+                        },
+                        "Transcribe de forma sumamente precisa este audio en español de México. Devuelve únicamente el texto de la transcripción literal sin comentarios extras ni aclaraciones."
+                    );
                     
                     const transcription = genRes.text?.trim() || '';
                     console.log(`[Audio Webhook] Transcripción completada: "${transcription}"`);
@@ -321,11 +358,10 @@ export async function POST(req: NextRequest) {
                 Extrae la placa del vehículo mencionada (ej: "PCH2668", "ABCD1234").
                 Responde ÚNICAMENTE con la placa limpia y en mayúsculas, sin texto extra. Si no hay placas en el mensaje, responde "NONE".`;
                 
-                const plateRes = await ai.models.generateContent({
-                    model: 'gemini-3.1-flash-lite',
-                    contents: extractPlatePrompt,
-                    config: { temperature: 0.1 }
-                });
+                const plateRes = await generateTextWithFallback(
+                    extractPlatePrompt,
+                    { temperature: 0.1 }
+                );
                 plate = plateRes.text?.trim().toUpperCase() || 'NONE';
             } catch (e) {
                 console.error("[Admin Mode] Error al extraer placa de consulta casual:", e);
@@ -337,11 +373,10 @@ export async function POST(req: NextRequest) {
                 El jefe te escribió: "${text}". 
                 Respóndele de forma muy atenta, ejecutiva y amigable, recordándole que puedes buscar cualquier expediente de auto si te proporciona su placa.`;
                 
-                const genRes = await ai.models.generateContent({
-                    model: 'gemini-3.1-flash-lite',
-                    contents: generalAdminPrompt,
-                    config: { temperature: 0.3 }
-                });
+                const genRes = await generateTextWithFallback(
+                    generalAdminPrompt,
+                    { temperature: 0.3 }
+                );
                 const reply = genRes.text?.trim() || "Dime las placas del vehículo para buscar su expediente.";
                 await sendWhatsAppMessage(from, reply);
                 await saveChatMessage(from, 'assistant', reply);
@@ -394,11 +429,10 @@ export async function POST(req: NextRequest) {
                 
                 Describe con precisión cuál fue el último servicio mecánico realizado, cuándo fue, y a qué kilometraje. Usa emojis y viñetas ejecutivas para su rápida lectura en el celular.`;
 
-                const reportRes = await ai.models.generateContent({
-                    model: 'gemini-3.1-flash-lite',
-                    contents: reportPrompt,
-                    config: { temperature: 0.2 }
-                });
+                const reportRes = await generateTextWithFallback(
+                    reportPrompt,
+                    { temperature: 0.2 }
+                );
 
                 const finalReport = `📊 *EXPEDIENTE DEL VEHÍCULO (${plate})*\n\n${reportRes.text?.trim()}`;
                 await sendWhatsAppMessage(from, finalReport);
@@ -501,11 +535,10 @@ export async function POST(req: NextRequest) {
                     
                     Devuelve únicamente un JSON con los campos 'name' y 'vehicle'. Si no los ha proporcionado todavía o falta el nombre, deja los campos como "".`;
                     
-                    const quickExtractRes = await ai.models.generateContent({
-                        model: 'gemini-3.1-flash-lite',
-                        contents: quickExtractPrompt,
-                        config: { temperature: 0.1, responseMimeType: 'application/json' }
-                    });
+                    const quickExtractRes = await generateTextWithFallback(
+                        quickExtractPrompt,
+                        { temperature: 0.1, responseMimeType: 'application/json' }
+                    );
                     
                     const parsedExtract = JSON.parse(quickExtractRes.text?.trim() || '{}');
                     if (parsedExtract.name) {
@@ -555,11 +588,10 @@ export async function POST(req: NextRequest) {
                     
                     Devuelve únicamente un JSON con los campos 'name' y 'vehicle'.`;
                     
-                    const extractRes = await ai.models.generateContent({
-                        model: 'gemini-3.1-flash-lite',
-                        contents: extractPrompt,
-                        config: { temperature: 0.1 }
-                    });
+                    const extractRes = await generateTextWithFallback(
+                        extractPrompt,
+                        { temperature: 0.1 }
+                    );
                     
                     const cleanJson = extractRes.text?.replace(/```json|```/g, '').trim() || '{}';
                     const parsed = JSON.parse(cleanJson);
@@ -662,7 +694,7 @@ REGLAS PARA EL JSON ESTRICTO:
     - Integra un dato curioso del auto justo después de confirmar el vehículo por primera vez.
     - Si detectas spam o juego sin fin, incluye aquí tu mensaje final despidiéndote e incluyendo exactamente la frase: "dejaré la conversación hasta aquí".
     - NUNCA escribas o dibujes la ficha/caja de resumen de la cita en tu 'respuesta_whatsapp'. El sistema la anexará automáticamente. Tu 'respuesta_whatsapp' debe ser únicamente de texto conversacional y de bienvenida, aclarar dudas o dar respuestas, pero JAMÁS debe tener la lista de datos estructurados de la cita (como Nombre:, Correo:, Vehículo:, etc.), de lo contrario se duplicará.
-    - Si el cliente menciona que ya es cliente de CarMD o pregunta por su historial/expediente de mantenimiento o servicios pasados: En el PRIMER mensaje, dile amablemente que por seguridad no tienes acceso a su historial por chat y dale de forma clara las 2 opciones (asesor o agendar), SIN agregar ninguna frase de despedida o detención. ÚNICAMENTE en el SEGUNDO mensaje (si el cliente elige al asesor), despídete amablemente diciendo que un asesor se comunicará con él e incluye estrictamente la frase: "Detendré mis respuestas automáticas."
+    - Si el cliente menciona que ya es cliente de CarMD o pregunta por su historial/expediente de mantenimiento o servicios pasados: En el PRIMER mensaje, dile amablemente que por seguridad no tienes acceso a su historial por chat y dale de forma clara las 2 opciones (asesor o agendar), SIN agregar ninguna frase de despedida o detención. Si el cliente elige la opción del asesor, primero verifica si ya proporcionó su Nombre completo y Vehículo (Marca/Modelo/Año) en la conversación; si falta alguno, pídeselos de forma muy atenta antes de despedirte. ÚNICAMENTE cuando ya tengas ambos datos (Nombre y Vehículo), despídete de forma amable confirmando que pasaste los datos al asesor e incluye de forma obligatoria la frase exacta: "Detendré mis respuestas automáticas."
  2. 'datos_actualizados':
     - Combina la memoria acumulada con la nueva información dada por el cliente en este turno.
     - Si un dato no se ha proporcionado, déjalo estrictamente como "..." (tres puntos).
@@ -688,15 +720,14 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
             console.log("[Webhook] Llamando a Gemini para procesar respuesta y extracción (Single-Call JSON)...");
             let structuredOutput: any = {};
             try {
-                const response = await ai.models.generateContent({
-                    model: 'gemini-3.1-flash-lite',
-                    contents: "Analiza el mensaje del cliente y devuelve el objeto JSON requerido.",
-                    config: {
+                const response = await generateTextWithFallback(
+                    "Analiza el mensaje del cliente y devuelve el objeto JSON requerido.",
+                    {
                         systemInstruction: assistantInstruction,
                         temperature: 0.2,
                         responseMimeType: 'application/json',
                     }
-                });
+                );
 
                 const rawJsonText = response.text?.trim() || "{}";
                 structuredOutput = JSON.parse(rawJsonText);
@@ -956,11 +987,10 @@ Respuesta (una sola palabra):`;
 
         let intent = 'GENERAL';
         try {
-            const intentRes = await ai.models.generateContent({
-                model: 'gemini-3.1-flash-lite',
-                contents: intentPrompt,
-                config: { temperature: 0.1 }
-            });
+            const intentRes = await generateTextWithFallback(
+                intentPrompt,
+                { temperature: 0.1 }
+            );
             intent = intentRes.text?.trim().toUpperCase() || 'GENERAL';
         } catch (e) {
             console.error("[Webhook] Error en clasificador de intención:", e);
@@ -1073,14 +1103,13 @@ ${historyPromptText}`;
 
         // Generate response with Gemini
         console.log(`[Webhook] Generando respuesta de Gemini...`);
-        const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
-            contents: text,
-            config: {
+        const response = await generateTextWithFallback(
+            text,
+            {
                 systemInstruction: systemInstruction,
                 temperature: 0.3,
             }
-        });
+        );
 
         let replyText = response.text || "Hola. Para poder ayudarte a agendar tu cita, por favor ingresa a carmd.com.mx/citas y completa el registro.";
         console.log(`[Webhook] Respuesta generada por IA: "${replyText}"`);
@@ -1113,11 +1142,10 @@ ${historyPromptText}`;
                     Extrae SOLAMENTE la falla mecánica o servicio que solicita (ej: "afinar", "ruido en frenos", "tira aceite").
                     Si el mensaje son puros saludos, halagos o preguntas generales sin mencionar un problema en el auto, responde exactamente con 3 puntos: ...`;
                     
-                    const probRes = await ai.models.generateContent({
-                        model: 'gemini-3.1-flash-lite',
-                        contents: probPrompt,
-                        config: { temperature: 0.1 }
-                    });
+                    const probRes = await generateTextWithFallback(
+                        probPrompt,
+                        { temperature: 0.1 }
+                    );
                     initialProblem = probRes.text?.trim() || '...';
                     if (initialProblem.length > 60) initialProblem = '...'; // Fallback de seguridad
                 } catch(e) {
@@ -1164,11 +1192,10 @@ ${historyPromptText}`;
         let finalVehicleProblem = chat?.vehicleProblem || '';
         let isSupplierQuery = false;
         try {
-            const supplierCheck = await ai.models.generateContent({
-                model: 'gemini-3.1-flash-lite',
-                contents: `Analiza si en esta conversación el cliente es un proveedor, está ofreciendo una alianza comercial, vendiendo productos/servicios, queriendo ser proveedor o haciendo una propuesta comercial de cualquier tipo. Responde estrictamente con la palabra YES o NO.\n\nHistorial:\n${historyPromptText}\nÚltimo mensaje: "${text}"`,
-                config: { temperature: 0.1 }
-            });
+            const supplierCheck = await generateTextWithFallback(
+                `Analiza si en esta conversación el cliente es un proveedor, está ofreciendo una alianza comercial, vendiendo productos/servicios, queriendo ser proveedor o haciendo una propuesta comercial de cualquier tipo. Responde estrictamente con la palabra YES o NO.\n\nHistorial:\n${historyPromptText}\nÚltimo mensaje: "${text}"`,
+                { temperature: 0.1 }
+            );
             const checkText = supplierCheck.text?.trim().toUpperCase() || 'NO';
             isSupplierQuery = checkText.includes('YES');
             console.log(`[Supplier Check] Evaluación semántica de propuesta comercial: ${isSupplierQuery ? 'YES' : 'NO'}`);
@@ -1194,11 +1221,10 @@ ${historyPromptText}`;
                 Devuelve un JSON estrictamente bajo las llaves: name, email, vehicle, problem.
                 Si no ha proporcionado su nombre y correo electrónico todavía en la conversación, devuelve "NONE".`;
 
-                const supplierRes = await ai.models.generateContent({
-                    model: 'gemini-3.1-flash-lite',
-                    contents: supplierPrompt,
-                    config: { temperature: 0.1 }
-                });
+                const supplierRes = await generateTextWithFallback(
+                    supplierPrompt,
+                    { temperature: 0.1 }
+                );
 
                 const ansJson = supplierRes.text?.replace(/```json|```/g, '').trim() || '';
                 if (ansJson && ansJson !== 'NONE' && ansJson.startsWith('{')) {

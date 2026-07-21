@@ -112,11 +112,11 @@ Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un fi
 
 14. CLIENTES RECURRENTES / EXPEDIENTES O HISTORIAL DE VEHÍCULO:
 - Si el usuario menciona que ya es cliente o pregunta por su historial de servicios, expediente de mantenimiento o afinaciones pasadas:
-  * PASO 1 (Primer mensaje): Explica amablemente que por seguridad no tienes acceso al historial de servicios de su auto en este chat. Dile que el equipo en el Centro de Servicio sí tiene su expediente a la mano y dale dos opciones claras: 1) Dejarle un recado al equipo de asesores para que busquen su expediente en el sistema y le escriban por WhatsApp con la fecha recomendada, o 2) Agendar de una vez su cita de revisión. CRÍTICO: En este primer mensaje NO te despidas ni incluyas la frase de detener respuestas.
+  * PASO 1 (Primer mensaje): Explica amablemente que por seguridad no tienes acceso al historial de servicios de su auto en este chat. Dile que el equipo en el Centro de Servicio sí tiene su expediente a la mano y dale dos opciones claras: 1) Dejarle un recado al equipo de asesores para que busquen su expediente en el sistema y le escriban por WhatsApp con la fecha recomendada, o 2) Agendar de una vez su cita de revisión.
   * PASO 2 (Segundo mensaje, tras la respuesta del cliente):
     - Si el cliente elige la Opción 1 (que un asesor lo busque/revise su expediente):
-      * Si en el historial de la conversación el cliente AÚN NO ha mencionado su *Nombre completo* ni qué *vehículo* (Marca/Modelo/Año) tiene, pídeselos amablemente diciendo que son indispensables para que el asesor pueda localizar su expediente en el sistema (ej: "Con gusto. Para que puedan buscar tu expediente, ¿me compartes tu *nombre completo* y qué *auto (Marca, Modelo y Año)* tienes?"). NO te despidas ni incluyas la frase de detener respuestas hasta obtener estos dos datos.
-      * Si el cliente ya dio su Nombre y Vehículo (o en cuanto te los proporcione tras solicitárselos), despídete de forma amable indicándole que ya pasaste la información al asesor y que se comunicará con él a la brevedad por aquí. En este mensaje final debes incluir obligatoriamente la frase exacta: "Detendré mis respuestas automáticas."
+      * Si en el historial de la conversación el cliente AÚN NO ha mencionado su *Nombre completo* ni qué *vehículo* (Marca/Modelo/Año) tiene, pídeselos amablemente diciendo que son indispensables para que el asesor pueda localizar su expediente en el sistema (ej: "Con gusto. Para que puedan buscar tu expediente, ¿me compartes tu *nombre completo* y qué *auto (Marca, Modelo y Año)* tienes?").
+      * Si el cliente ya dio su Nombre y Vehículo (o en cuanto te los proporcione tras solicitárselos), despídete de forma amable indicándole que ya pasaste la información al equipo de asesores y que se comunicarán con él a la brevedad por este mismo chat. NUNCA uses la frase "Detendré mis respuestas automáticas" ni te desactives, para que el bot pueda seguir respondiendo si el cliente tiene más dudas.
     - Si el cliente elige la Opción 2 (agendar cita): procede normalmente ayudándole a agendar su cita.`;
 
 /**
@@ -694,7 +694,7 @@ REGLAS PARA EL JSON ESTRICTO:
     - Integra un dato curioso del auto justo después de confirmar el vehículo por primera vez.
     - Si detectas spam o juego sin fin, incluye aquí tu mensaje final despidiéndote e incluyendo exactamente la frase: "dejaré la conversación hasta aquí".
     - NUNCA escribas o dibujes la ficha/caja de resumen de la cita en tu 'respuesta_whatsapp'. El sistema la anexará automáticamente. Tu 'respuesta_whatsapp' debe ser únicamente de texto conversacional y de bienvenida, aclarar dudas o dar respuestas, pero JAMÁS debe tener la lista de datos estructurados de la cita (como Nombre:, Correo:, Vehículo:, etc.), de lo contrario se duplicará.
-    - Si el cliente menciona que ya es cliente de CarMD o pregunta por su historial/expediente de mantenimiento o servicios pasados: En el PRIMER mensaje, dile amablemente que por seguridad no tienes acceso a su historial por chat y dale de forma clara las 2 opciones (asesor o agendar), SIN agregar ninguna frase de despedida o detención. Si el cliente elige la opción del asesor, primero verifica si ya proporcionó su Nombre completo y Vehículo (Marca/Modelo/Año) en la conversación; si falta alguno, pídeselos de forma muy atenta antes de despedirte. ÚNICAMENTE cuando ya tengas ambos datos (Nombre y Vehículo), despídete de forma amable confirmando que pasaste los datos al asesor e incluye de forma obligatoria la frase exacta: "Detendré mis respuestas automáticas."
+    - Si el cliente menciona que ya es cliente de CarMD o pregunta por su historial/expediente de mantenimiento o servicios pasados: En el PRIMER mensaje, dile amablemente que por seguridad no tienes acceso a su historial por chat y dale de forma clara las 2 opciones (asesor o agendar), SIN agregar ninguna frase de despedida o detención. Si el cliente elige la opción del asesor, primero verifica si ya proporcionó su Nombre completo y Vehículo (Marca/Modelo/Año) en la conversación; si falta alguno, pídeselos de forma muy atenta. ÚNICAMENTE cuando ya tengas ambos datos (Nombre y Vehículo), despídete de forma amable confirmando que pasaste los datos al equipo de asesores para que lo contacten. NUNCA uses la frase "Detendré mis respuestas automáticas" ni te desactives, para que puedas seguir respondiendo si el cliente tiene más dudas.
  2. 'datos_actualizados':
     - Combina la memoria acumulada con la nueva información dada por el cliente en este turno.
     - Si un dato no se ha proporcionado, déjalo estrictamente como "..." (tres puntos).
@@ -937,28 +937,31 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
                 return;
             }
  
-            // Alerta de spam o derivación humana en flujo de cita
-            if (replyText.includes('dejaré la conversación hasta aquí') || replyText.includes('dejaré las respuestas automáticas hasta aquí') || replyText.includes('Detendré mis respuestas') || replyText.includes('detendré mis respuestas')) {
-                const isSpam = replyText.includes('dejaré la conversación hasta aquí') || replyText.includes('dejaré las respuestas automáticas hasta aquí');
+            // Alerta de spam en flujo de cita (silencia a Mariana)
+            if (replyText.includes('dejaré la conversación hasta aquí') || replyText.includes('dejaré las respuestas automáticas hasta aquí')) {
                 try {
-                    if (isSpam) {
-                        const adminSpamAlert = `⚠️ *ALERTA DE SPAM / JUEGO DETECTADA*\n\nEl cliente +${from} parece estar jugando o spameando en el chat.\n\nMariana ha procedido a silenciarse automáticamente. Puedes monitorearlo en tu Portal:\n👉 carmd.com.mx/os/chats`;
-                        await sendWhatsAppMessage(brianPhone, adminSpamAlert);
-                        console.log("[Webhook] Alerta de spam enviada al administrador y bot silenciado.");
-                    } else {
-                        const adminAlertMsg = `⚠️ *INTERVENCIÓN HUMANA REQUERIDA*\n\nEl cliente +${from} solicita que un asesor revise su historial/expediente de servicios.\n\nPor favor atiende el chat en tu Portal:\n👉 carmd.com.mx/os/chats`;
-                        await sendWhatsAppMessage(brianPhone, adminAlertMsg);
-                        console.log("[Webhook] Alerta de derivación por historial enviada al administrador.");
-                    }
+                    const adminSpamAlert = `⚠️ *ALERTA DE SPAM / JUEGO DETECTADA*\n\nEl cliente +${from} parece estar jugando o spameando en el chat.\n\nMariana ha procedido a silenciarse automáticamente. Puedes monitorearlo en tu Portal:\n👉 carmd.com.mx/os/chats`;
+                    await sendWhatsAppMessage(brianPhone, adminSpamAlert);
+                    console.log("[Webhook] Alerta de spam enviada al administrador y bot silenciado.");
                 } catch (e) {
-                    console.error("Error al alertar a Brian:", e);
+                    console.error("Error al alertar a Brian sobre spam:", e);
                 }
                 
-                // Enviar la respuesta de advertencia y silenciar a Mariana cambiándola a HUMAN_REQUIRED
                 await sendInBubbles(from, replyText);
                 await saveChatMessage(from, 'assistant', replyText);
                 await updateChatState(from, 'HUMAN_REQUIRED', JSON.stringify(mergedParams));
                 return;
+            }
+
+            // Alerta informativa a Brian sobre solicitud de asesor por expediente (Mariana se mantiene activa)
+            if (replyText.toLowerCase().includes('asesor') && (replyText.toLowerCase().includes('expediente') || replyText.toLowerCase().includes('historial') || replyText.toLowerCase().includes('recado') || replyText.toLowerCase().includes('notific') || replyText.toLowerCase().includes('pasé'))) {
+                try {
+                    const adminAlertMsg = `ℹ️ *SOLICITUD DE ASESOR (HISTORIAL DE VEHÍCULO)*\n\nEl cliente +${from} (*${mergedParams.name || 'Por confirmar'}*) solicita que un asesor revise su expediente para el vehículo *${mergedParams.vehicle || 'Por confirmar'}*.\n\nEl bot continuará activo respondiendo al cliente. Puedes ver el chat en tu Portal:\n👉 carmd.com.mx/os/chats`;
+                    await sendWhatsAppMessage(brianPhone, adminAlertMsg);
+                    console.log("[Webhook] Alerta informativa enviada al administrador.");
+                } catch (e) {
+                    console.error("Error al alertar a Brian sobre asesor:", e);
+                }
             }
 
             await sendInBubbles(from, replyText);
@@ -1159,28 +1162,31 @@ ${historyPromptText}`;
             }));
             return;
         }
-        // Alerta de spam o derivación humana en flujo general
-        if (replyText.includes('dejaré la conversación hasta aquí') || replyText.includes('dejaré las respuestas automáticas hasta aquí') || replyText.includes('Detendré mis respuestas') || replyText.includes('detendré mis respuestas')) {
-            const isSpam = replyText.includes('dejaré la conversación hasta aquí') || replyText.includes('dejaré las respuestas automáticas hasta aquí');
+        // Alerta de spam en flujo general (silencia a Mariana)
+        if (replyText.includes('dejaré la conversación hasta aquí') || replyText.includes('dejaré las respuestas automáticas hasta aquí')) {
             try {
-                if (isSpam) {
-                    const adminSpamAlert = `⚠️ *ALERTA DE SPAM / JUEGO DETECTADA*\n\nEl cliente +${from} parece estar jugando o spameando en el chat.\n\nMariana ha procedido a silenciarse automáticamente. Puedes monitorearlo en tu Portal:\n👉 carmd.com.mx/os/chats`;
-                    await sendWhatsAppMessage(brianPhone, adminSpamAlert);
-                    console.log("[Webhook] Alerta de spam enviada al administrador y bot silenciado.");
-                } else {
-                    const adminAlertMsg = `⚠️ *INTERVENCIÓN HUMANA REQUERIDA*\n\nEl cliente +${from} solicita que un asesor revise su historial/expediente de servicios.\n\nPor favor atiende el chat en tu Portal:\n👉 carmd.com.mx/os/chats`;
-                    await sendWhatsAppMessage(brianPhone, adminAlertMsg);
-                    console.log("[Webhook] Alerta de derivación por historial enviada al administrador.");
-                }
+                const adminSpamAlert = `⚠️ *ALERTA DE SPAM / JUEGO DETECTADA*\n\nEl cliente +${from} parece estar jugando o spameando en el chat.\n\nMariana ha procedido a silenciarse automáticamente. Puedes monitorearlo en tu Portal:\n👉 carmd.com.mx/os/chats`;
+                await sendWhatsAppMessage(brianPhone, adminSpamAlert);
+                console.log("[Webhook] Alerta de spam enviada al administrador y bot silenciado.");
             } catch (e) {
-                console.error("Error al alertar a Brian:", e);
+                console.error("Error al alertar a Brian sobre spam:", e);
             }
             
-            // Enviar la respuesta de advertencia y silenciar a Mariana cambiándola a HUMAN_REQUIRED
             await sendInBubblesGeneral(from, replyText);
             await saveChatMessage(from, 'assistant', replyText);
             await updateChatState(from, 'HUMAN_REQUIRED', chat?.vehicleProblem || '');
             return;
+        }
+
+        // Alerta informativa a Brian sobre solicitud de asesor por expediente (Mariana se mantiene activa)
+        if (replyText.toLowerCase().includes('asesor') && (replyText.toLowerCase().includes('expediente') || replyText.toLowerCase().includes('historial') || replyText.toLowerCase().includes('recado') || replyText.toLowerCase().includes('notific') || replyText.toLowerCase().includes('pasé'))) {
+            try {
+                const adminAlertMsg = `ℹ️ *SOLICITUD DE ASESOR (HISTORIAL DE VEHÍCULO)*\n\nEl cliente +${from} solicita que un asesor revise su expediente para su vehículo.\n\nEl bot continuará activo respondiendo al cliente. Puedes ver el chat en tu Portal:\n👉 carmd.com.mx/os/chats`;
+                await sendWhatsAppMessage(brianPhone, adminAlertMsg);
+                console.log("[Webhook] Alerta informativa enviada al administrador.");
+            } catch (e) {
+                console.error("Error al alertar a Brian sobre asesor:", e);
+            }
         }
 
         // Send response

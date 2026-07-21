@@ -590,7 +590,7 @@ REGLAS DE RECOLECCIÓN DE CITA (MODO INTERACTIVO):
 - El cliente te acaba de escribir: "${text}".
 - Tu tarea es analizar el mensaje del cliente y devolver UN ÚNICO OBJETO JSON con la siguiente estructura exacta:
 {
-  "pensamiento_interno": "Breve razonamiento de qué vas a contestar y por qué, basándote en las reglas.",
+  "pensamiento_interno": "Razonamiento detallado paso a paso. Si el cliente menciona una fecha o día, calcula explícitamente en tu mente y escribe aquí qué día de la semana y fecha numérica corresponden (ej: hoy es lunes 20, por lo que el día 22 es miércoles). Compara el día de la semana que dijo el cliente con el real para comprobar si hay discrepancias.",
   "respuesta_whatsapp": "Tu respuesta amigable para enviar al cliente por WhatsApp (usa emojis, doble salto de línea para separar párrafos).",
   "datos_actualizados": {
     "name": "...",

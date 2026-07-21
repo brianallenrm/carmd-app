@@ -1158,7 +1158,10 @@ ${historyPromptText}`;
                     const parsed = JSON.parse(ansJson);
                     
                     // Si ya tenemos los datos mínimos, guardamos en la Ficha de Registro IA
-                    if (parsed.name && parsed.email) {
+                    const cleanName = (parsed.name || '').trim().toUpperCase();
+                    const cleanEmail = (parsed.email || '').trim().toUpperCase();
+                    
+                    if (parsed.name && parsed.email && cleanName !== 'NONE' && cleanEmail !== 'NONE' && cleanName !== '' && cleanEmail !== '') {
                         finalVehicleProblem = JSON.stringify({
                             name: parsed.name,
                             email: parsed.email,

@@ -827,13 +827,25 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
                     console.error("[Webhook] Excepción /api/citas/reserve:", e);
                 }
                 
-                const isNightTime = cdmxHour >= 20 || cdmxHour < 8;
-                let finalMsg = `¡Solicitud recibida! ✔️ En este momento te llegará un correo electrónico con los detalles de tu solicitud de cita. A la brevedad, un asesor de nuestro equipo se pondrá en contacto contigo para terminar de afinar los detalles y confirmarte oficialmente tu espacio.`;
+                const dayOfWeekNum = cdmxDate.getDay();
+                let isNightTime = false;
+                let nightNote = '';
+
+                if (dayOfWeekNum === 0) {
+                    isNightTime = true;
+                    nightNote = `\n\n⚠️ *Nota:* Por el horario actual (domingo), el seguimiento personalizado y la confirmación final por parte de nuestro equipo humano se realizarán a primera hora del día de mañana lunes a partir de las 8:00 AM. ¡Excelente domingo! 🌙`;
+                } else if (dayOfWeekNum === 6 && cdmxHour >= 17) {
+                    isNightTime = true;
+                    nightNote = `\n\n⚠️ *Nota:* Por el horario actual, el seguimiento personalizado y la confirmación final por parte de nuestro equipo humano se realizarán a primera hora del día lunes a partir de las 8:00 AM. ¡Excelente fin de semana! 🌙`;
+                } else if (cdmxHour >= 20 || cdmxHour < 8) {
+                    isNightTime = true;
+                    nightNote = `\n\n⚠️ *Nota:* Por el horario actual, el seguimiento personalizado y la confirmación final por parte de nuestro equipo humano se realizarán a primera hora del día de mañana a partir de las 8:00 AM. ¡Excelente noche! 🌙`;
+                }
+
+                let finalMsg = `¡Solicitud recibida! ✔️ En este momento te llegará un correo electrónico con los detalles de tu solicitud de cita. A la brevedad, un asesor de nuestro equipo de CarMD se comunicará contigo por aquí para el seguimiento y confirmación final. ¡Muchas gracias por tu confianza! 🚗💨`;
                 
                 if (isNightTime) {
-                    finalMsg += `\n\n⚠️ *Nota:* Por el horario actual, el seguimiento personalizado y la confirmación final por parte de nuestro equipo humano se realizarán a primera hora del día de mañana a partir de las 8:00 AM. ¡Excelente noche! 🌙`;
-                } else {
-                    finalMsg += `\n\n¡Estaremos muy atentos a tu llegada! Que tengas un excelente día. 🚗✨`;
+                    finalMsg += nightNote;
                 }
                 
                 await sendWhatsAppMessage(from, finalMsg);

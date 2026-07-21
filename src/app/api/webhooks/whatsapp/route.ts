@@ -662,7 +662,7 @@ export async function POST(req: NextRequest) {
             // Prompt unificado para que Gemini piense, extraiga datos y responda en una sola llamada estructurada
             const assistantInstruction = `${SYSTEM_PROMPT}
 
-FECHA Y HORA ACTUAL DE REFERENCIA: ${cdmxTimeStr}. HOY ES DÍA: ${dayName.toUpperCase()}. (Calcula correctamente el día de la semana relativo a hoy: si hoy es ${dayName}, mañana es el siguiente día. Recuerda que los domingos el Centro de Servicio está CERRADO).
+FECHA Y HORA ACTUAL DE REFERENCIA: ${cdmxTimeStr}. HOY ES DÍA: ${dayName.toUpperCase()}. AÑO ACTUAL: ${nowObj.getFullYear()}. (CALCULO DE CALENDARIO OBLIGATORIO: Verifica siempre qué día de la semana cae numéricamente en el calendario de ${nowObj.getFullYear()}. Recuerda que los domingos el Centro de Servicio está CERRADO).
 
 REGLAS DE RECOLECCIÓN DE CITA (MODO INTERACTIVO):
 - Estás en un proceso activo de registro de cita para el cliente con teléfono: ${from}.
@@ -670,7 +670,7 @@ REGLAS DE RECOLECCIÓN DE CITA (MODO INTERACTIVO):
 - El cliente te acaba de escribir: "${text}".
 - Tu tarea es analizar el mensaje del cliente y devolver UN ÚNICO OBJETO JSON con la siguiente estructura exacta:
 {
-  "pensamiento_interno": "Razonamiento detallado paso a paso. Si el cliente menciona una fecha o día, calcula explícitamente en tu mente y escribe aquí qué día de la semana y fecha numérica corresponden (ej: hoy es lunes 20).",
+  "pensamiento_interno": "Razonamiento detallado paso a paso. Si el cliente menciona un día y fecha (ej: 'Jueves 25 de julio'), CALCULA AQUÍ EN TU MENTE: ¿El 25 de julio de ${nowObj.getFullYear()} cae en Jueves? Si NO cae en jueves, escribe explícitamente: 'DISCREPANCIA DETECTADA: el 25 de julio no es jueves, es sábado (o el jueves es 23)'.",
   "respuesta_whatsapp": "Tu respuesta amigable para enviar al cliente por WhatsApp (usa emojis, doble salto de línea para separar párrafos).",
   "datos_actualizados": {
     "name": "...",
@@ -689,6 +689,7 @@ REGLAS DE RECOLECCIÓN DE CITA (MODO INTERACTIVO):
 
 REGLAS PARA EL JSON ESTRICTO:
 1. 'respuesta_whatsapp': 
+    - SALUDO OBLIGATORIO: Si el mensaje del cliente incluye un saludo ("hola", "ola", "buenos días", "buenas tardes"), o si es el primer mensaje de la conversación, INICIA SIEMPRE saludando amablemente a tu cliente (ej: "¡Hola! Con mucho gusto te ayudo a agendar la afinación para tu Sentra...").
     - Debe resolver cualquier duda del cliente basándose en el manual de CarMD.
     - Si falta algún dato ("..."), pide amablemente un dato a la vez. No pidas todo de golpe.
     - Integra un dato curioso del auto justo después de confirmar el vehículo por primera vez.
@@ -699,7 +700,7 @@ REGLAS PARA EL JSON ESTRICTO:
     - Combina la memoria acumulada con la nueva información dada por el cliente en este turno.
     - Si un dato no se ha proporcionado, déjalo estrictamente como "..." (tres puntos).
     - NOMBRE: Limpia y normaliza el campo 'name'. Elimina espacios en blanco innecesarios o entre letras individuales (ej: si el cliente escribe "J U A N  P E R E Z", límpialo y guárdalo estrictamente como "Juan Perez"). Capitaliza las iniciales correctamente.
-    - FECHAS Y HORAS: Solo actualiza 'date' (YYYY-MM-DD) y 'time' (ej. 8:00 AM) si el cliente confirma explícitamente su elección. Si el cliente solo pregunta por disponibilidad, mantén el dato como "...". CRÍTICO: Siempre verifica matemáticamente que el día de la semana mencionado por el cliente coincida exactamente con el día de la semana real de la fecha YYYY-MM-DD calculada. Si el cliente proporciona una fecha donde el día de la semana y el número de día del mes no coinciden en el calendario (ej: dice "Martes 22 de julio" cuando el martes es 21 y el 22 es miércoles), NO asumas la fecha directamente; mantén el campo 'date' como "...", pon 'cita_lista_para_resumen' en false, y pregúntale amablemente en tu respuesta para aclarar la confusión (ej: "Disculpa, el próximo martes es 21 y el miércoles es 22, ¿qué día prefieres agendar?").
+    - FECHAS Y HORAS: Solo actualiza 'date' (YYYY-MM-DD) y 'time' (ej. 8:00 AM) si el cliente confirma explícitamente su elección y LA FECHA ES VÁLIDA. Si el cliente solo pregunta por disponibilidad, mantén el dato como "...". CRÍTICO / DISCREPANCIA DE CALENDARIO: Si el cliente proporciona una fecha donde el día de la semana y el número de día del mes NO coinciden en el calendario de ${nowObj.getFullYear()} (ej: dice "Jueves 25 de julio" cuando en ${nowObj.getFullYear()} el 25 de julio es SÁBADO y el jueves es 23), NO asumas la fecha directamente ni inventes una; MANTÉN el campo 'date' estrictamente como "...", pon 'cita_lista_para_resumen' en false, y PREGÚNTALE amablemente en tu respuesta para aclarar la confusión (ej: "Disculpa, el próximo jueves cae en 23 de julio y el sábado cae en 25 de julio, ¿cuál de los dos días prefieres agendar tu cita?").
     - KILOMETRAJE: Debe ser puramente numérico (ej: 20000). Si el cliente no sabe, guarda "Pendiente".
     - VEHÍCULO (INTUICIÓN DE MARCA): Si el cliente te da un modelo de auto muy conocido pero no te dice la marca (ej: "Jetta", "Prius", "Sentra", "Civic", "Corolla", "Mustang"), tú debes deducir la marca automáticamente y guardarla en el campo 'vehicle' junto con el modelo (ej: "Volkswagen Jetta", "Toyota Prius", "Nissan Sentra"). No le preguntes al cliente la marca si la puedes deducir con certeza. Sin embargo, si el cliente da la marca pero NO el modelo (ej: "un BMW" o "un Ford"), mantén el campo 'vehicle' como "..." y pregúntale amablemente qué modelo específico es.
     - HORARIOS VÁLIDOS: L-V de 8:00 AM a 4:30 PM, Sáb de 8:00 AM a 1:30 PM. No agendes fuera de este horario ni en domingo. Excepción: si el cliente pregunta explícitamente por la hora "más temprana" posible, ofrécele las 7:45 AM. CRÍTICO: Si el cliente solicita una hora fuera de los límites permitidos (ej: L-V después de las 4:30 PM, o Sábado después de las 1:30 PM como a las "1:45 PM"), NO asumas la hora directamente; mantén el campo 'time' como "...", pon 'cita_lista_para_resumen' en false, y explícale amablemente en tu respuesta para ofrecerle alternativas dentro del horario (ej: "Disculpa, nuestro último horario de recepción los sábados es a la 1:30 PM para asegurar el diagnóstico antes del cierre. ¿Te vendría bien a la 1:30 PM o qué otra hora prefieres?").

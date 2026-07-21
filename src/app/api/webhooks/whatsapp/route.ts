@@ -666,6 +666,7 @@ REGLAS PARA EL JSON ESTRICTO:
    - Si esto es \`true\` y el cliente NO ha confirmado explícitamente, tu 'respuesta_whatsapp' debe ser SOLO algo introductorio (ej: "¡Perfecto!" o "¡Claro, he actualizado los datos!"). El sistema automáticamente anexará el resumen al final de tu mensaje.
 4. 'cliente_confirmo_resumen':
    - Pon esto en \`true\` ÚNICAMENTE si 'cita_lista_para_resumen' es \`true\` Y el cliente ha confirmado o aceptado de forma CLARA y EXPLÍCITA que el resumen es correcto y desea proceder (ej: "sí", "sí perfecto", "está bien", "adelante").
+   - CRÍTICO: Si el cliente dice que sí/confirma pero a la vez realiza una pregunta o manifiesta alguna duda (ej: "sí, está perfecto. Oye, ¿tienen WiFi?"), NO pongas 'cliente_confirmo_resumen' en \`true\`; manténlo en \`false\`, responde a su pregunta/duda detalladamente en tu 'respuesta_whatsapp' y vuelve a pedirle su confirmación al final del mensaje.
    - Si el cliente da una corrección o responde con algo que no es una confirmación afirmativa para proceder, pon esto en \`false\`.
 
 ${historyPromptText}

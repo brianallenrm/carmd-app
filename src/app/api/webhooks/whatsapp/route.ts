@@ -244,8 +244,10 @@ export async function POST(req: NextRequest) {
         // Get current Mexico City Date, Day of week and Time to inject into prompt dynamically
         const nowObj = new Date();
         const daysOfWeek = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-        const dayName = daysOfWeek[new Date(nowObj.toLocaleString('en-US', { timeZone: 'America/Mexico_City' })).getDay()];
+        const cdmxDate = new Date(nowObj.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+        const dayName = daysOfWeek[cdmxDate.getDay()];
         const cdmxTimeStr = nowObj.toLocaleString('es-MX', { timeZone: 'America/Mexico_City' });
+        const cdmxHour = cdmxDate.getHours();
 
 
 
@@ -825,7 +827,15 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
                     console.error("[Webhook] Excepción /api/citas/reserve:", e);
                 }
                 
-                const finalMsg = `¡Solicitud recibida! ✔️ En este momento te llegará un correo electrónico con los detalles de tu solicitud de cita. A la brevedad, un asesor de nuestro equipo se pondrá en contacto contigo para terminar de afinar los detalles y confirmarte oficialmente tu espacio.\n\n¡Estaremos muy atentos a tu llegada! Que tengas un excelente día. 🚗✨`;
+                const isNightTime = cdmxHour >= 20 || cdmxHour < 8;
+                let finalMsg = `¡Solicitud recibida! ✔️ En este momento te llegará un correo electrónico con los detalles de tu solicitud de cita. A la brevedad, un asesor de nuestro equipo se pondrá en contacto contigo para terminar de afinar los detalles y confirmarte oficialmente tu espacio.`;
+                
+                if (isNightTime) {
+                    finalMsg += `\n\n⚠️ *Nota:* Por el horario actual, el seguimiento personalizado y la confirmación final por parte de nuestro equipo humano se realizarán a primera hora del día de mañana a partir de las 8:00 AM. ¡Excelente noche! 🌙`;
+                } else {
+                    finalMsg += `\n\n¡Estaremos muy atentos a tu llegada! Que tengas un excelente día. 🚗✨`;
+                }
+                
                 await sendWhatsAppMessage(from, finalMsg);
                 await saveChatMessage(from, 'assistant', finalMsg);
                 return;

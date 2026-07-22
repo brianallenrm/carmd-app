@@ -112,11 +112,12 @@ Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un fi
 
 14. CLIENTES RECURRENTES / EXPEDIENTES O HISTORIAL DE VEHÍCULO:
 - Si el usuario menciona que ya es cliente o pregunta por su historial de servicios, expediente de mantenimiento o afinaciones pasadas:
-  * PASO 1 (Primer mensaje): Explica amablemente que por seguridad no tienes acceso al historial de servicios de su auto en este chat. Dile que el equipo en el Centro de Servicio sí tiene su expediente a la mano y MENCIONA EXPLÍCITAMENTE LAS DOS OPCIONES DISPONIBLES: "1) Dejarle un recado al equipo de asesores para que busquen tu expediente y te escriban por WhatsApp, o 2) Agendar de una vez tu cita de revisión por aquí". Para cualquiera de las dos opciones, PÍDELE ÚNICAMENTE LAS PLACAS DE SU VEHÍCULO REGISTRADO (ej: "Dime qué opción prefieres y compárteme las *placas de tu vehículo* para buscar tu expediente 🚗📋").
-  * PASO 2 (Segundo mensaje, cuando el cliente proporciona sus placas):
-    - Si el sistema encuentra las placas en la memoria (Nombre y Vehículo cargados automáticamente por la base de datos): responde amablemente llamándolo por su *Nombre*, confirmando que localizaste su expediente para su *[Vehículo]* y que ya notificaste al equipo de asesores para que se comuniquen con él a la brevedad por este chat, o preguntándole si prefiere agendar de una vez por aquí. NUNCA te desactives ni uses la frase "Detendré mis respuestas automáticas".
-    - Si las placas NO se encuentran registradas en la base de datos (Nombre sigue estando en '...'): dile amablemente que no encontraste un expediente registrado con esa placa y pídele de favor su *Nombre completo* y qué *vehículo* (Marca/Modelo/Año) tiene para que el equipo lo busque manualmente.
-    - Si el cliente elige la Opción 2 (agendar cita): procede normalmente ayudándole a agendar su cita.`;
+  * PASO 1 (Primer mensaje): Explica amablemente que por seguridad no tienes acceso al historial de servicios de su auto en este chat, pero dile que el equipo en el Centro de Servicio sí tiene su expediente a la mano. PÍDELE ÚNICAMENTE LAS PLACAS DE SU VEHÍCULO REGISTRADO (ej: "Por seguridad y privacidad, desde este chat no tengo acceso directo al historial detallado de tu auto, pero el equipo en nuestro centro de servicio sí tiene tu expediente físico a la mano. Para buscar tus datos y ayudarte, ¿me compartes las *placas de tu vehículo* por favor? 📋").
+  * PASO 2 (Segundo mensaje, cuando el cliente proporciona sus placas y el sistema las localiza):
+    - Salúdalo amablemente por su *Nombre*, confirma que encontraste su expediente para su *[Vehículo]* con placas *[Placa]* y dale explícitamente a elegir las 2 opciones: "1) Dejarle un recado al equipo de asesores en el Centro de Servicio para que revisen tu historial y te contacten a la brevedad por este medio, o 2) Agendar de una vez tu cita de revisión por aquí. ¿Qué opción prefieres?"
+  * PASO 3 (Tercer mensaje, según la elección del cliente):
+    - Si el cliente elige que lo contacte un asesor (Opción 1): Confirma amablemente diciendo exactamente o parecido a: "¡Listo! Ya le avisé al equipo de asesores en el Centro de Servicio sobre tu consulta para que revisen tu historial y te contacten a la brevedad por este medio. 🚗✨". NUNCA te desactives ni despidas con detención.
+    - Si el cliente elige agendar cita (Opción 2): Procede normalmente solicitándole fecha y hora para agendar su cita de revisión.`;
 
 /**
  * GET: Webhook verification for Meta
@@ -826,7 +827,7 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
 
                             const nameParts = masterMatch.name.split(' ');
                             const firstName = nameParts.length > 1 && nameParts[0].length <= 3 ? `${nameParts[0]} ${nameParts[1]}` : nameParts[0];
-                            replyText = `¡Gracias, ${firstName}! 📋 Encontré tu expediente registrado para tu *${masterMatch.vehicle}*.\n\nYa le avisé al equipo de asesores en el Centro de Servicio sobre tu consulta para que revisen tu historial y te contacten a la brevedad por este medio. 🚗✨\n\nO si lo prefieres, también podemos agendar de una vez tu cita de revisión por aquí. ¿Qué opción te acomoda mejor? 😊`;
+                            replyText = `¡Gracias, ${firstName}! 😊\n\nHe localizado tu expediente registrado para tu *${masterMatch.vehicle}* con placas *${masterMatch.rawPlate}*.\n\n¿Prefieres que le deje un recado a nuestro equipo de asesores en el Centro de Servicio para que revisen tu historial y te contacten a la brevedad por este medio, o prefieres agendar de una vez tu cita de revisión por aquí? 🚗✨`;
                         }
                     } catch (e) {
                         console.error("Error al vincular placa con Máster Sheet:", e);

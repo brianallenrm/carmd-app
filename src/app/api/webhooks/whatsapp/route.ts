@@ -801,16 +801,28 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
                 }
             }
 
+            // Extraer la placa de los parámetros acumulados o directamente del texto del mensaje
+            let plateToLookup = (mergedParams.plate && mergedParams.plate !== '...' && mergedParams.plate !== 'NONE') ? mergedParams.plate : '';
+            if (!plateToLookup) {
+                const cleanCandidate = text.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (cleanCandidate.length >= 5 && cleanCandidate.length <= 10) {
+                    plateToLookup = cleanCandidate;
+                } else {
+                    const plateMatch = text.match(/\b([A-Z]{1,4}[-\s]?[0-9]{2,4}[-\s]?[A-Z0-9]{1,3})\b/i);
+                    if (plateMatch) plateToLookup = plateMatch[1];
+                }
+            }
+
             // BÚSQUEDA AUTOMÁTICA EN MÁSTER (TODOS): Si hay placa pero falta Nombre o Vehículo
-            if (mergedParams.plate && mergedParams.plate !== '...' && mergedParams.plate !== 'NONE') {
+            if (plateToLookup && plateToLookup.length >= 3) {
                 if (!mergedParams.name || mergedParams.name === '...' || !mergedParams.vehicle || mergedParams.vehicle === '...') {
                     try {
-                        const masterMatch = await lookupVehicleInMasterByPlate(mergedParams.plate);
+                        const masterMatch = await lookupVehicleInMasterByPlate(plateToLookup);
                         if (masterMatch && masterMatch.found) {
                             mergedParams.name = masterMatch.name;
                             mergedParams.vehicle = masterMatch.vehicle;
                             mergedParams.plate = masterMatch.plate;
-                            console.log(`[Webhook Master Match] Placa "${mergedParams.plate}" vinculada automáticamente con Nombre="${masterMatch.name}", Vehículo="${masterMatch.vehicle}"`);
+                            console.log(`[Webhook Master Match] Placa "${plateToLookup}" vinculada automáticamente con Nombre="${masterMatch.name}", Vehículo="${masterMatch.vehicle}"`);
 
                             // Respuesta garantizada determinista (evita alucinaciones del LLM)
                             const nameParts = masterMatch.name.split(' ');

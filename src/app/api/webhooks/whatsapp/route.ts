@@ -647,8 +647,8 @@ export async function POST(req: NextRequest) {
         }
 
         // --- Handle Step-by-Step Appointment Data Collection (Semantic & Interactive) ---
-        if (chat?.state === 'COLLECTING_APPOINTMENT_IA') {
-            console.log("[Webhook] Procesando recolección semántica de cita...");
+        if (chat?.state === 'COLLECTING_APPOINTMENT_IA' || chat?.state === 'WAITING_FORM_IA' || chat?.state === 'WAITING_PROBLEM_IA') {
+            console.log(`[Webhook] Procesando recolección semántica de cita en estado ${chat?.state}...`);
 
             // Recuperar datos acumulados del JSON temporal en Sheets
             let tempParams: any = {};

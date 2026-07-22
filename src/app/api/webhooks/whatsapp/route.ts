@@ -658,6 +658,34 @@ export async function POST(req: NextRequest) {
                 }
             } catch (e) {}
 
+            // PRE-CARGA DE PLACA EN MÁSTER SHEET: Si el cliente escribió una placa, buscarla ANTES de llamar a Gemini
+            let candidatePlate = tempParams.plate && tempParams.plate !== '...' ? tempParams.plate : '';
+            if (!candidatePlate) {
+                const cleanCandidate = text.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (cleanCandidate.length >= 5 && cleanCandidate.length <= 10) {
+                    candidatePlate = cleanCandidate;
+                } else {
+                    const plateMatch = text.match(/\b([A-Z]{1,4}[-\s]?[0-9]{2,4}[-\s]?[A-Z0-9]{1,3})\b/i);
+                    if (plateMatch) {
+                        candidatePlate = plateMatch[1];
+                    }
+                }
+            }
+
+            if (candidatePlate && candidatePlate !== '...' && (!tempParams.name || tempParams.name === '...')) {
+                try {
+                    const masterMatch = await lookupVehicleInMasterByPlate(candidatePlate);
+                    if (masterMatch && masterMatch.found) {
+                        tempParams.name = masterMatch.name;
+                        tempParams.vehicle = masterMatch.vehicle;
+                        tempParams.plate = masterMatch.plate;
+                        console.log(`[Webhook Pre-AI Master Match] Placa "${candidatePlate}" precargada exitosamente: Nombre="${masterMatch.name}", Vehículo="${masterMatch.vehicle}"`);
+                    }
+                } catch (e) {
+                    console.error("Error precargando placa en Máster Sheet:", e);
+                }
+            }
+
             // Prompt unificado para que Gemini piense, extraiga datos y responda en una sola llamada estructurada
             const assistantInstruction = `${SYSTEM_PROMPT}
 

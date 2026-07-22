@@ -303,6 +303,24 @@ export async function POST(req: NextRequest) {
         // Guardar mensaje del cliente en el historial en Sheets
         await saveChatMessage(from, 'client', text);
         
+        // DETECCIÓN DE JEFE / ADMINISTRADOR (BRIAN ALLEN: 5547015312)
+        const isBrian = from.replace(/\D/g, '').endsWith('5547015312');
+        if (isBrian) {
+            console.log(`[Webhook Boss] Mensaje recibido de Brian (${from}). Respondiendo en modo asistente personal/administrador.`);
+            const bossAssistantPrompt = `Eres Mariana, la asistente virtual de CarMD. Estás hablando directamente por WhatsApp con tu jefe y creador, Brian, el administrador principal de CarMD.
+Tu tono con Brian debe ser profesional, fresco, cercano, natural, empático, directo y muy servicial (ej: "¡Hola Brian! 👋 ¿Qué tal? ¿En qué te ayudo hoy con la plataforma o las citas del Centro de Servicio?").
+NUNCA lo trates como un cliente de taller, NUNCA le pidas datos de auto, kilometraje o correo, ni intentes agendarle citas de servicio. Responde a sus dudas, preguntas, saludos o indicaciones de forma directa como su asistente virtual colaboradora de confianza.`;
+
+            const aiRes = await generateTextWithFallback({
+                contents: `${bossAssistantPrompt}\n\nBrian te acaba de escribir: "${text}"`
+            });
+
+            const bossReply = aiRes.text || "¡Hola Brian! 👋 ¿En qué te ayudo hoy?";
+            await sendWhatsAppMessage(from, bossReply);
+            await saveChatMessage(from, 'assistant', bossReply);
+            return;
+        }
+
         // 1. Check current state and chat history in Sheets
         console.log(`[Webhook] Buscando estado en Google Sheets para ${from}...`);
         let chat = await getChatState(from);

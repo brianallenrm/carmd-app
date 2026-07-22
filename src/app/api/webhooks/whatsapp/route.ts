@@ -807,13 +807,15 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
                     try {
                         const masterMatch = await lookupVehicleInMasterByPlate(mergedParams.plate);
                         if (masterMatch && masterMatch.found) {
-                            if (!mergedParams.name || mergedParams.name === '...') {
-                                mergedParams.name = masterMatch.name;
-                            }
-                            if (!mergedParams.vehicle || mergedParams.vehicle === '...') {
-                                mergedParams.vehicle = masterMatch.vehicle;
-                            }
+                            mergedParams.name = masterMatch.name;
+                            mergedParams.vehicle = masterMatch.vehicle;
+                            mergedParams.plate = masterMatch.plate;
                             console.log(`[Webhook Master Match] Placa "${mergedParams.plate}" vinculada automáticamente con Nombre="${masterMatch.name}", Vehículo="${masterMatch.vehicle}"`);
+
+                            // Respuesta garantizada determinista (evita alucinaciones del LLM)
+                            const nameParts = masterMatch.name.split(' ');
+                            const firstName = nameParts.length > 1 && nameParts[0].length <= 3 ? `${nameParts[0]} ${nameParts[1]}` : nameParts[0];
+                            replyText = `¡Gracias, ${firstName}! 📋 Encontré tu expediente registrado para tu *${masterMatch.vehicle}*.\n\nYa le avisé al equipo de asesores en el Centro de Servicio sobre tu consulta para que revisen tu historial de mantenimiento y se pongan en contacto contigo a la brevedad por este medio. 🚗✨`;
                         }
                     } catch (e) {
                         console.error("Error al vincular placa con Máster Sheet:", e);

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { after } from 'next/server';
 import { WHATSAPP_CONFIG } from '@/lib/constants';
 import { sendWhatsAppMessage } from '@/lib/whatsapp';
-import { getChatState, updateChatState, saveChatMessage } from '@/lib/google-sheets';
+import { getChatState, updateChatState, saveChatMessage, lookupVehicleInMasterByPlate } from '@/lib/google-sheets';
 import { GoogleGenAI } from '@google/genai';
 
 // Initialize Google Gen AI Client
@@ -112,11 +112,10 @@ Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un fi
 
 14. CLIENTES RECURRENTES / EXPEDIENTES O HISTORIAL DE VEHÍCULO:
 - Si el usuario menciona que ya es cliente o pregunta por su historial de servicios, expediente de mantenimiento o afinaciones pasadas:
-  * PASO 1 (Primer mensaje): Explica amablemente que por seguridad no tienes acceso al historial de servicios de su auto en este chat. Dile que el equipo en el Centro de Servicio sí tiene su expediente a la mano y dale dos opciones claras: 1) Dejarle un recado al equipo de asesores para que busquen su expediente en el sistema y le escriban por WhatsApp con la fecha recomendada, o 2) Agendar de una vez su cita de revisión.
-  * PASO 2 (Segundo mensaje, tras la respuesta del cliente):
-    - Si el cliente elige la Opción 1 (que un asesor lo busque/revise su expediente):
-      * Si en el historial de la conversación el cliente AÚN NO ha mencionado su *Nombre completo* ni qué *vehículo* (Marca/Modelo/Año) tiene, pídeselos amablemente diciendo que son indispensables para que el asesor pueda localizar su expediente en el sistema (ej: "Con gusto. Para que puedan buscar tu expediente, ¿me compartes tu *nombre completo* y qué *auto (Marca, Modelo y Año)* tienes?").
-      * Si el cliente ya dio su Nombre y Vehículo (o en cuanto te los proporcione tras solicitárselos), despídete de forma amable indicándole que ya pasaste la información al equipo de asesores y que se comunicarán con él a la brevedad por este mismo chat. NUNCA uses la frase "Detendré mis respuestas automáticas" ni te desactives, para que el bot pueda seguir respondiendo si el cliente tiene más dudas.
+  * PASO 1 (Primer mensaje): Explica amablemente que por seguridad no tienes acceso al historial de servicios de su auto en este chat. Dile que el equipo en el Centro de Servicio sí tiene su expediente a la mano y dale dos opciones claras: 1) Dejarle un recado al equipo de asesores para que busquen su expediente en el sistema y le escriban por WhatsApp con la fecha recomendada, o 2) Agendar de una vez su cita de revisión. Para cualquiera de las 2 opciones, PÍDELE ÚNICAMENTE LAS PLACAS DE SU VEHÍCULO REGISTRADO (ej: "Para buscar tu expediente y ayudarte, ¿me compartes las *placas de tu vehículo* por favor?").
+  * PASO 2 (Segundo mensaje, cuando el cliente proporciona sus placas):
+    - Si el sistema encuentra las placas en la memoria (Nombre y Vehículo cargados automáticamente por la base de datos): responde amablemente llamándolo por su *Nombre*, confirmando que localizaste su expediente para su *[Vehículo]* y que ya notificaste al equipo de asesores para que se comuniquen con él a la brevedad por este chat. NUNCA te desactives ni uses la frase "Detendré mis respuestas automáticas".
+    - Si las placas NO se encuentran registradas en la base de datos (Nombre sigue estando en '...'): dile amablemente que no encontraste un expediente registrado con esa placa y pídele de favor su *Nombre completo* y qué *vehículo* (Marca/Modelo/Año) tiene para que el equipo lo busque manualmente.
     - Si el cliente elige la Opción 2 (agendar cita): procede normalmente ayudándole a agendar su cita.`;
 
 /**
@@ -695,7 +694,7 @@ REGLAS PARA EL JSON ESTRICTO:
     - Integra un dato curioso del auto justo después de confirmar el vehículo por primera vez.
     - Si detectas spam o juego sin fin, incluye aquí tu mensaje final despidiéndote e incluyendo exactamente la frase: "dejaré la conversación hasta aquí".
     - NUNCA escribas o dibujes la ficha/caja de resumen de la cita en tu 'respuesta_whatsapp'. El sistema la anexará automáticamente. Tu 'respuesta_whatsapp' debe ser únicamente de texto conversacional y de bienvenida, aclarar dudas o dar respuestas, pero JAMÁS debe tener la lista de datos estructurados de la cita (como Nombre:, Correo:, Vehículo:, etc.), de lo contrario se duplicará.
-    - Si el cliente menciona que ya es cliente de CarMD o pregunta por su historial/expediente de mantenimiento o servicios pasados: En el PRIMER mensaje, dile amablemente que por seguridad no tienes acceso a su historial por chat y dale de forma clara las 2 opciones (asesor o agendar), SIN agregar ninguna frase de despedida o detención. Si el cliente elige la opción del asesor, primero verifica si ya proporcionó su Nombre completo y Vehículo (Marca/Modelo/Año) en la conversación; si falta alguno, pídeselos de forma muy atenta. ÚNICAMENTE cuando ya tengas ambos datos (Nombre y Vehículo), despídete de forma amable confirmando que pasaste los datos al equipo de asesores para que lo contacten. NUNCA uses la frase "Detendré mis respuestas automáticas" ni te desactives, para que puedas seguir respondiendo si el cliente tiene más dudas.
+    - Si el cliente menciona que ya es cliente de CarMD o pregunta por su historial/expediente de mantenimiento o servicios pasados: En el PRIMER mensaje, dile amablemente que por seguridad no ves su historial por chat, dale las 2 opciones (asesor o agendar) y PÍDELE ÚNICAMENTE las *placas de su vehículo*. En el SEGUNDO mensaje (cuando da la placa), el backend buscará automáticamente en la base de datos la placa. Si el sistema encuentra los datos del cliente y su auto (campo 'name' distinto de '...'), salúdalo amablemente por su nombre (ej: "¡Gracias, Marco Antonio!"), confirma su vehículo (ej: "Encontré tu expediente registrado para tu Hyundai Elantra 2019...") e indícale que el equipo de asesores ya tiene su recado. Si las placas no se encuentran en la base de datos (campo 'name' en '...'), pídele amablemente su nombre completo y modelo de auto. NUNCA uses la frase "Detendré mis respuestas automáticas" ni intentes desactivarte.
  2. 'datos_actualizados':
     - Combina la memoria acumulada con la nueva información dada por el cliente en este turno.
     - Si un dato no se ha proporcionado, déjalo estrictamente como "..." (tres puntos).
@@ -770,6 +769,26 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
             for (const key of Object.keys(extracted)) {
                 if (extracted[key] && extracted[key] !== '...' && extracted[key] !== '') {
                     mergedParams[key] = extracted[key];
+                }
+            }
+
+            // BÚSQUEDA AUTOMÁTICA EN MÁSTER (TODOS): Si hay placa pero falta Nombre o Vehículo
+            if (mergedParams.plate && mergedParams.plate !== '...' && mergedParams.plate !== 'NONE') {
+                if (!mergedParams.name || mergedParams.name === '...' || !mergedParams.vehicle || mergedParams.vehicle === '...') {
+                    try {
+                        const masterMatch = await lookupVehicleInMasterByPlate(mergedParams.plate);
+                        if (masterMatch && masterMatch.found) {
+                            if (!mergedParams.name || mergedParams.name === '...') {
+                                mergedParams.name = masterMatch.name;
+                            }
+                            if (!mergedParams.vehicle || mergedParams.vehicle === '...') {
+                                mergedParams.vehicle = masterMatch.vehicle;
+                            }
+                            console.log(`[Webhook Master Match] Placa "${mergedParams.plate}" vinculada automáticamente con Nombre="${masterMatch.name}", Vehículo="${masterMatch.vehicle}"`);
+                        }
+                    } catch (e) {
+                        console.error("Error al vincular placa con Máster Sheet:", e);
+                    }
                 }
             }
 

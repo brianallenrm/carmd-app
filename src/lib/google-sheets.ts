@@ -207,6 +207,84 @@ export const lookupVehicleByPlate = async (plate: string) => {
 };
 
 /**
+ * Searches the MASTER spreadsheet ("TODOS" tab) from newest (bottom) to oldest (top)
+ * to find a client's vehicle & name by license plate with fuzzy plate normalization.
+ */
+export const lookupVehicleInMasterByPlate = async (plateInput: string) => {
+    try {
+        const doc = await getMasterDoc();
+        const sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.MASTER.TAB_NAME];
+        if (!sheet) return null;
+
+        const rows = await sheet.getRows();
+        if (!rows || rows.length === 0) return null;
+
+        const normalizePlate = (str: string) => String(str || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const targetPlate = normalizePlate(plateInput);
+        if (!targetPlate || targetPlate.length < 3) return null;
+
+        const toTitleCase = (str: string) => {
+            if (!str) return "";
+            return str.toLowerCase().replace(/(?:^|\s)\w/g, (match) => match.toUpperCase());
+        };
+
+        // Iterate backwards from newest (last row) to oldest (first row)
+        for (let i = rows.length - 1; i >= 0; i--) {
+            const row = rows[i];
+            const rawPlate = String(row.get('Placa') || row.get('Placas') || '');
+            const normalizedRowPlate = normalizePlate(rawPlate);
+
+            let jsonMatch = false;
+            let jsonObj: any = null;
+            const metaStr = row.get('Metadatos');
+            if (metaStr && typeof metaStr === 'string' && metaStr.trim().startsWith('{')) {
+                try {
+                    jsonObj = JSON.parse(metaStr.trim());
+                    if (jsonObj?.vehicle?.plates && normalizePlate(jsonObj.vehicle.plates) === targetPlate) {
+                        jsonMatch = true;
+                    }
+                } catch (e) {}
+            }
+
+            if (normalizedRowPlate === targetPlate || jsonMatch) {
+                let name = String(row.get('Cliente') || '').trim();
+                let vehicle = String(row.get('Vehiculo') || '').trim();
+                let year = String(row.get('Anio') || row.get('Año') || '').trim();
+
+                if (jsonObj?.client?.name) name = jsonObj.client.name;
+                if (jsonObj?.vehicle?.brand) {
+                    vehicle = `${jsonObj.vehicle.brand} ${jsonObj.vehicle.model || ''}`.trim();
+                    if (jsonObj.vehicle.year) year = jsonObj.vehicle.year;
+                }
+
+                // Clean year string (e.g. "Mod. 2023" -> "2023")
+                const cleanYear = year.replace(/mod\.\s*/gi, '').trim();
+                const cleanName = toTitleCase(name);
+                const cleanVehicle = toTitleCase(vehicle);
+                const fullVehicle = cleanYear ? `${cleanVehicle} ${cleanYear}` : cleanVehicle;
+
+                console.log(`[Master Lookup] Placa "${plateInput}" (normalizada: "${targetPlate}") encontrada en la nota folio ${row.get('Folio')}: Cliente="${cleanName}", Vehículo="${fullVehicle}"`);
+
+                return {
+                    name: cleanName,
+                    vehicle: fullVehicle,
+                    brand: cleanVehicle,
+                    model: cleanYear,
+                    plate: targetPlate,
+                    rawPlate: rawPlate,
+                    folio: row.get('Folio'),
+                    date: row.get('Fecha'),
+                    found: true
+                };
+            }
+        }
+    } catch (err) {
+        console.error("Error in lookupVehicleInMasterByPlate:", err);
+    }
+    return null;
+};
+
+/**
  * Securely checks if a plate exists without returning data.
  */
 export const checkVehiclePlate = async (plate: string) => {

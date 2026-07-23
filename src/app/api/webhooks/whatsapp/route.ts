@@ -96,7 +96,7 @@ Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un fi
   * PASO 2 (Segundo mensaje, tras recibir su Nombre y Auto): Pregúntale de forma clara y directa: "¿Te gustaría que agendemos una cita normal en el taller para revisar tu coche, o prefieres que canalice tu información de inmediato con un asesor de CarMD para recibir orientación?". NO des respuestas finales ni de despedida en este paso.
   * PASO 3 (Tercer mensaje, dependiendo de lo que elija en el Paso 2):
     - Si el cliente responde que SÍ quiere la cita normal: continúa con la recolección de los datos restantes (Fecha, Hora, Placas, etc.) normalmente para agendarla.
-    - Si el cliente responde que prefiere hablar con el asesor (o no responde que quiere cita): entonces proporciona el mensaje final de contacto (ej: "un asesor de nuestro equipo se comunicará contigo a la brevedad", o si es fuera de horario, "mañana a primera hora a partir de las 8:00 AM para apoyarte"). NOTA: Nunca desactives el bot (no cambies el estado a HUMAN_REQUIRED) tú misma, solo proporciona el mensaje informativo.
+    - Si el cliente responde que prefiere hablar con el asesor (o no responde que quiere cita): entonces proporciona el mensaje final de contacto. REGLA OBLIGATORIA DE HORARIO DE ASESORES: Si el estado actual es FUERA DE HORARIO (después de las 5:00 PM L-V, después de las 2:00 PM Sábados, o Domingo), DEBES avisarle amablemente que como actualmente estamos fuera del horario de atención de los asesores, el equipo revisará su mensaje y se comunicará con él mañana a primera hora a partir de las 8:00 AM (o el lunes a las 8:00 AM) por este mismo chat. NUNCA digas que se comunicarán "a la brevedad" o "en este momento" si estamos fuera de horario. NOTA: Nunca desactives el bot tú misma, solo proporciona el mensaje informativo.
 
 12. TONO Y FORMATO DE WHATSAPP:
 - Tono profesional, amable, cercano y muy cálido.
@@ -292,6 +292,17 @@ export async function POST(req: NextRequest) {
         const dayName = daysOfWeek[cdmxDate.getDay()];
         const cdmxTimeStr = nowObj.toLocaleString('es-MX', { timeZone: 'America/Mexico_City' });
         const cdmxHour = cdmxDate.getHours();
+        const dayOfWeekNum = cdmxDate.getDay(); // 0 = Sunday, 1 = Mon, ..., 6 = Sat
+
+        const isOutsideBusinessHours = (
+            dayOfWeekNum === 0 || // Sunday
+            (dayOfWeekNum >= 1 && dayOfWeekNum <= 5 && (cdmxHour < 8 || cdmxHour >= 17)) || // M-F before 8am or 5pm or later
+            (dayOfWeekNum === 6 && (cdmxHour < 8 || cdmxHour >= 14)) // Sat before 8am or 2pm or later
+        );
+
+        const businessHoursStatusPrompt = isOutsideBusinessHours
+            ? `\n\nESTADO DE ATENCIÓN DE ASESORES HUMANOS: FUERA DE HORARIO (ACTUALMENTE CERRADO PARA ASESORES HUMANOS).\nREGLA OBLIGATORIA DE ATENCIÓN FUERA DE HORARIO: Como actualmente estamos FUERA DEL HORARIO de atención de los asesores humanos (que es L-V de 8 AM a 5 PM y Sábados de 8 AM a 2 PM), SIEMPRE que canalices al cliente con un asesor o cuando el cliente pida hablar con un asesor o asesoría personalizada, DEBES indicarle explícitamente que por la hora nos encontramos fuera del horario de atención de los asesores, por lo que el equipo revisará su mensaje y se comunicará con él mañana a primera hora a partir de las 8:00 AM (o el lunes a las 8:00 AM) por este mismo chat. NUNCA digas que se comunicarán 'en este momento' ni 'a la brevedad' si estamos fuera de horario.`
+            : `\n\nESTADO DE ATENCIÓN DE ASESORES HUMANOS: DENTRO DE HORARIO DE ATENCIÓN DE ASESORES (8:00 AM a 5:00 PM).`;
 
 
 
@@ -690,7 +701,7 @@ export async function POST(req: NextRequest) {
             // Prompt unificado para que Gemini piense, extraiga datos y responda en una sola llamada estructurada
             const assistantInstruction = `${SYSTEM_PROMPT}
 
-FECHA Y HORA ACTUAL DE REFERENCIA: ${cdmxTimeStr}. HOY ES DÍA: ${dayName.toUpperCase()}. AÑO ACTUAL: ${nowObj.getFullYear()}. (CALCULO DE CALENDARIO OBLIGATORIO: Verifica siempre qué día de la semana cae numéricamente en el calendario de ${nowObj.getFullYear()}. Recuerda que los domingos el Centro de Servicio está CERRADO).
+FECHA Y HORA ACTUAL DE REFERENCIA: ${cdmxTimeStr}. HOY ES DÍA: ${dayName.toUpperCase()}. AÑO ACTUAL: ${nowObj.getFullYear()}. (CALCULO DE CALENDARIO OBLIGATORIO: Verifica siempre qué día de la semana cae numéricamente en el calendario de ${nowObj.getFullYear()}. Recuerda que los domingos el Centro de Servicio está CERRADO).${businessHoursStatusPrompt}
 
 REGLAS DE RECOLECCIÓN DE CITA (MODO INTERACTIVO):
 - Estás en un proceso activo de registro de cita para el cliente con teléfono: ${from}.

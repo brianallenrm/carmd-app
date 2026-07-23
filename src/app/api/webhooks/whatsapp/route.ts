@@ -295,14 +295,14 @@ export async function POST(req: NextRequest) {
         const dayOfWeekNum = cdmxDate.getDay(); // 0 = Sunday, 1 = Mon, ..., 6 = Sat
 
         const isOutsideBusinessHours = (
-            dayOfWeekNum === 0 || // Sunday
-            (dayOfWeekNum >= 1 && dayOfWeekNum <= 5 && (cdmxHour < 8 || cdmxHour >= 17)) || // M-F before 8am or 5pm or later
-            (dayOfWeekNum === 6 && (cdmxHour < 8 || cdmxHour >= 14)) // Sat before 8am or 2pm or later
+            dayOfWeekNum === 0 || // Domingo (Siempre fuera de horario)
+            (dayOfWeekNum >= 1 && dayOfWeekNum <= 5 && (cdmxHour < 8 || cdmxHour >= 20)) || // L-V antes de 8am o 8pm (20:00) o después
+            (dayOfWeekNum === 6 && (cdmxHour < 8 || cdmxHour >= 17)) // Sábado antes de 8am o 5pm (17:00) o después
         );
 
         const businessHoursStatusPrompt = isOutsideBusinessHours
-            ? `\n\nESTADO DE ATENCIÓN DE ASESORES HUMANOS: FUERA DE HORARIO (ACTUALMENTE CERRADO PARA ASESORES HUMANOS).\nREGLA OBLIGATORIA DE ATENCIÓN FUERA DE HORARIO: Como actualmente estamos FUERA DEL HORARIO de atención de los asesores humanos (que es L-V de 8 AM a 5 PM y Sábados de 8 AM a 2 PM), SIEMPRE que canalices al cliente con un asesor o cuando el cliente pida hablar con un asesor o asesoría personalizada, DEBES indicarle explícitamente que por la hora nos encontramos fuera del horario de atención de los asesores, por lo que el equipo revisará su mensaje y se comunicará con él mañana a primera hora a partir de las 8:00 AM (o el lunes a las 8:00 AM) por este mismo chat. NUNCA digas que se comunicarán 'en este momento' ni 'a la brevedad' si estamos fuera de horario.`
-            : `\n\nESTADO DE ATENCIÓN DE ASESORES HUMANOS: DENTRO DE HORARIO DE ATENCIÓN DE ASESORES (8:00 AM a 5:00 PM).`;
+            ? `\n\nESTADO DE ATENCIÓN DE ASESORES HUMANOS: FUERA DE HORARIO (ACTUALMENTE CERRADO PARA ASESORES HUMANOS).\nREGLA OBLIGATORIA DE ATENCIÓN FUERA DE HORARIO: Como actualmente estamos FUERA DEL HORARIO de atención de los asesores humanos (que es L-V de 8 AM a 8 PM, Sábados de 8 AM a 5 PM y Domingos cerrado), SIEMPRE que canalices al cliente con un asesor o cuando el cliente pida hablar con un asesor o asesoría personalizada, DEBES indicarle explícitamente que por la hora nos encontramos fuera del horario de atención de los asesores, por lo que el equipo revisará su mensaje y se comunicará con él mañana a primera hora a partir de las 8:00 AM (o el lunes a las 8:00 AM si es fin de semana) por este mismo chat. NUNCA digas que se comunicarán 'en este momento' ni 'a la brevedad' si estamos fuera de horario.`
+            : `\n\nESTADO DE ATENCIÓN DE ASESORES HUMANOS: DENTRO DE HORARIO DE ATENCIÓN DE ASESORES (L-V 8:00 AM a 8:00 PM, Sáb 8:00 AM a 5:00 PM).`;
 
 
 

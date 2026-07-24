@@ -1042,6 +1042,92 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
                 }
             }
 
+            // --- SISTEMA DE CAPTURA COMERCIAL / PROVEEDORES EN COLLECTING_APPOINTMENT_IA ---
+            let isSupplierQuery = false;
+            try {
+                const supplierCheck = await generateTextWithFallback(
+                    `Analiza si en esta conversación el cliente es un proveedor, está ofreciendo una alianza comercial, vendiendo productos/servicios, queriendo ser proveedor o haciendo una propuesta comercial de cualquier tipo. Responde strictly con la palabra YES o NO.\n\nHistorial:\n${historyPromptText}\nÚltimo mensaje: "${text}"`,
+                    { temperature: 0.1 }
+                );
+                const checkText = supplierCheck.text?.trim().toUpperCase() || 'NO';
+                isSupplierQuery = checkText.includes('YES');
+                console.log(`[Supplier Check] Evaluación semántica de propuesta comercial en Cita IA: ${isSupplierQuery ? 'YES' : 'NO'}`);
+            } catch (e) {
+                isSupplierQuery = textLower.includes('refaccionaria') || textLower.includes('proveedor') || 
+                                  textLower.includes('servicio') || textLower.includes('colaborar') || 
+                                  textLower.includes('comercial') || textLower.includes('adquisiciones') ||
+                                  (chat && chat.chatHistory && chat.chatHistory.toLowerCase().includes('proveedor'));
+            }
+
+            if (isSupplierQuery) {
+                try {
+                    const supplierPrompt = `Analiza este mensaje: "${text}" y el historial reciente de la conversación:
+                    ${historyPromptText}
+                    
+                    Si el usuario está ofreciendo servicios/productos comerciales y ha proporcionado al menos su Nombre y un Correo electrónico (o teléfono), extrae:
+                    1. Nombre completo (name)
+                    2. Correo electrónico (email)
+                    3. Nombre de la empresa o refaccionaria (vehicle)
+                    4. Detalles de su propuesta o producto (problem)
+                    
+                    Devuelve un JSON estrictamente bajo las llaves: name, email, vehicle, problem.
+                    Si no ha proporcionado su nombre y correo electrónico todavía en la conversación, devuelve "NONE".`;
+
+                    const supplierRes = await generateTextWithFallback(
+                        supplierPrompt,
+                        { temperature: 0.1 }
+                    );
+
+                    const ansJson = supplierRes.text?.replace(/```json|```/g, '').trim() || '';
+                    if (ansJson && ansJson !== 'NONE' && ansJson.startsWith('{')) {
+                        const parsed = JSON.parse(ansJson);
+                        const cleanName = (parsed.name || '').trim().toUpperCase();
+                        const cleanEmail = (parsed.email || '').trim().toUpperCase();
+                        
+                        if (parsed.name && parsed.email && cleanName !== 'NONE' && cleanEmail !== 'NONE' && cleanName !== '' && cleanEmail !== '') {
+                            // Mandar correo por Resend
+                            if (process.env.RESEND_API_KEY) {
+                                const emailSubject = `🏢 Nueva Propuesta de Proveedor: ${parsed.vehicle || parsed.name}`;
+                                const emailHtml = `
+                                    <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; padding: 20px;">
+                                        <h2 style="color: #f16315; border-bottom: 2px solid #f16315; padding-bottom: 8px;">Contacto de Nuevo Proveedor</h2>
+                                        <p>Se ha recibido una propuesta comercial a través del chatbot de WhatsApp:</p>
+                                        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                                            <tr><td style="padding: 8px; font-weight: bold; width: 30%;">Nombre:</td><td style="padding: 8px;">${parsed.name}</td></tr>
+                                            <tr><td style="padding: 8px; font-weight: bold;">Empresa:</td><td style="padding: 8px;">${parsed.vehicle || 'No especificada'}</td></tr>
+                                            <tr><td style="padding: 8px; font-weight: bold;">Correo:</td><td style="padding: 8px;">${parsed.email}</td></tr>
+                                            <tr><td style="padding: 8px; font-weight: bold;">WhatsApp:</td><td style="padding: 8px;">+${from}</td></tr>
+                                            <tr><td style="padding: 8px; font-weight: bold; vertical-align: top;">Propuesta:</td><td style="padding: 8px; font-style: italic;">"${parsed.problem || 'No especificada'}"</td></tr>
+                                        </table>
+                                        <p style="margin-top: 25px; font-size: 12px; color: #777;">* Este es un correo automático enviado por el Asistente Virtual de CarMD.</p>
+                                    </div>
+                                `;
+
+                                const { resend } = await import('@/lib/resend');
+                                await resend.emails.send({
+                                    from: 'CarMD Asistente <notificaciones@carmd.com.mx>',
+                                    to: 'car.md.mx@hotmail.com',
+                                    subject: emailSubject,
+                                    html: emailHtml
+                                });
+                                console.log("[Supplier Email] Correo enviado exitosamente a car.md.mx@hotmail.com");
+                            }
+                            
+                            // Mandar WhatsApp alert a Brian
+                            try {
+                                const supplierAlertMsg = `🏢 *NUEVA PROPUESTA DE PROVEEDOR*\n\nEl proveedor *${parsed.name}* de la empresa *${parsed.vehicle || 'No especificada'}* ha dejado una propuesta comercial:\n\n📧 *Correo*: ${parsed.email}\n📞 *WhatsApp*: +${from}\n📋 *Propuesta*: "${parsed.problem || 'No especificada'}"\n\nPuedes revisar el catálogo o datos del chat en tu Portal.`;
+                                await sendWhatsAppMessage(brianPhone, supplierAlertMsg);
+                                console.log("[Webhook] Alerta de propuesta comercial enviada al administrador.");
+                            } catch (e) {
+                                console.error("Error al alertar a Brian sobre propuesta comercial:", e);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error al procesar y enviar correo de propuesta comercial:", err);
+                }
+            }
+
             await sendInBubbles(from, replyText);
             await saveChatMessage(from, 'assistant', replyText);
             await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(mergedParams));

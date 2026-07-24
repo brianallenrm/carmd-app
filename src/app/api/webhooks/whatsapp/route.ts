@@ -997,7 +997,7 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
 ⏰ *Hora*: ${mergedParams.time}
 🔧 *Problema*: ${mergedParams.problem || 'Diagnóstico general'}
  
-¿Te parece bien si procedo a confirmar tu espacio con estos datos? 👍`;
+¿Te parece bien si procedo a confirmar tu solicitud de cita con estos datos? 👍`;
  
                 await sendInBubbles(from, summaryText);
                 await saveChatMessage(from, 'assistant', summaryText);

@@ -1290,7 +1290,7 @@ ${historyPromptText}`;
                               (chat && chat.chatHistory && chat.chatHistory.toLowerCase().includes('proveedor'));
         }
 
-        if (isSupplierQuery && (currentState === 'WAITING_PROBLEM_IA' || currentState === 'WAITING_FORM_IA')) {
+        if (isSupplierQuery && (currentState === 'WAITING_PROBLEM_IA' || currentState === 'WAITING_FORM_IA' || currentState === 'COLLECTING_APPOINTMENT_IA')) {
             try {
                 // Analizar con Gemini si el texto del historial o el mensaje actual ya contiene los datos completos del proveedor
                 const supplierPrompt = `Analiza este mensaje: "${text}" y el historial reciente de la conversación:

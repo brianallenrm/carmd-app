@@ -776,13 +776,13 @@ export async function POST(req: NextRequest) {
         }
 
         // --- Handle Step-by-Step Appointment Data Collection (Semantic & Interactive) ---
-        if (chat?.state === 'COLLECTING_APPOINTMENT_IA' || chat?.state === 'WAITING_FORM_IA' || chat?.state === 'WAITING_PROBLEM_IA') {
-            console.log(`[Webhook] Procesando recolección semántica de cita en estado ${chat?.state}...`);
+        if (chat?.state === 'COLLECTING_APPOINTMENT_IA' || chat?.state === 'WAITING_FORM_IA' || chat?.state === 'WAITING_PROBLEM_IA' || chat?.state === 'START' || !chat?.state) {
+            console.log(`[Webhook] Procesando recolección semántica de cita en estado ${chat?.state || 'START'}...`);
 
             // Recuperar datos acumulados del JSON temporal en Sheets
             let tempParams: any = {};
             try {
-                if (chat.vehicleProblem && chat.vehicleProblem.startsWith('{')) {
+                if (chat?.vehicleProblem && chat.vehicleProblem.startsWith('{')) {
                     tempParams = JSON.parse(chat.vehicleProblem);
                 }
             } catch (e) {}
@@ -1401,6 +1401,18 @@ ${historyPromptText}`;
         );
 
         let replyText = response.text || "Hola. Para poder ayudarte a agendar tu cita, por favor ingresa a carmd.com.mx/citas y completa el registro.";
+        
+        // Sanitización de seguridad contra JSON crudo en modo general
+        try {
+            const cleanText = replyText.replace(/```json|```/g, '').trim();
+            if (cleanText.startsWith('{') && cleanText.includes('"respuesta_whatsapp"')) {
+                const parsed = JSON.parse(cleanText);
+                if (parsed.respuesta_whatsapp) {
+                    replyText = parsed.respuesta_whatsapp;
+                }
+            }
+        } catch (e) {}
+
         console.log(`[Webhook] Respuesta generada por IA: "${replyText}"`);
 
         // Helper segmentador local para el modo general

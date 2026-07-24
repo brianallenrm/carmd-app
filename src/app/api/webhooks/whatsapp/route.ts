@@ -201,6 +201,71 @@ async function transcribeAudioWithFallback(inlineData: any, prompt: string) {
     throw lastError;
 }
 
+function checkDateDayMismatch(userText: string, dateStr: string) {
+    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        return { mismatch: false, mentionedDayName: '', actualDayName: '', correctDateForMentionedDay: '', dateNumber: 0, monthName: '', correctDayNumber: 0 };
+    }
+
+    const textLower = userText.toLowerCase();
+    const daysMap: { [key: string]: number } = {
+        'domingo': 0,
+        'lunes': 1,
+        'martes': 2,
+        'miércoles': 3,
+        'miercoles': 3,
+        'jueves': 4,
+        'viernes': 5,
+        'sábado': 6,
+        'sabado': 6
+    };
+
+    const dayNamesEs = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    const monthNamesEs = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+    let mentionedDay: number | null = null;
+    let mentionedDayStr = '';
+
+    for (const [dayKey, dayNum] of Object.entries(daysMap)) {
+        if (textLower.includes(dayKey)) {
+            mentionedDay = dayNum;
+            mentionedDayStr = dayKey.replace('miercoles', 'miércoles').replace('sabado', 'sábado');
+            break;
+        }
+    }
+
+    if (mentionedDay === null) {
+        return { mismatch: false, mentionedDayName: '', actualDayName: '', correctDateForMentionedDay: '', dateNumber: 0, monthName: '', correctDayNumber: 0 };
+    }
+
+    const [yearStr, monthStr, dayNumStr] = dateStr.split('-');
+    const year = parseInt(yearStr, 10);
+    const month = parseInt(monthStr, 10) - 1;
+    const day = parseInt(dayNumStr, 10);
+
+    const d = new Date(year, month, day);
+    const actualDay = d.getDay();
+
+    if (mentionedDay !== actualDay) {
+        const diff = mentionedDay - actualDay;
+        const correctDateForDay = new Date(year, month, day + diff);
+        const correctDayNumber = correctDateForDay.getDate();
+        const monthName = monthNamesEs[correctDateForDay.getMonth()];
+        const actualDayName = dayNamesEs[actualDay];
+
+        return {
+            mismatch: true,
+            mentionedDayName: mentionedDayStr,
+            actualDayName: actualDayName,
+            correctDateForMentionedDay: `${correctDayNumber} de ${monthName}`,
+            correctDayNumber: correctDayNumber,
+            dateNumber: day,
+            monthName: monthNamesEs[month]
+        };
+    }
+
+    return { mismatch: false, mentionedDayName: '', actualDayName: '', correctDateForMentionedDay: '', dateNumber: 0, monthName: '', correctDayNumber: 0 };
+}
+
 /**
  * POST: Handle incoming WhatsApp messages
  */
@@ -872,6 +937,17 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
                 // Removemos la fecha inválida de los parámetros acumulados
                 mergedParams.date = '...';
                 mergedParams.time = '...';
+            }
+
+            // VALIDACIÓN DETERMINÍSTICA EN CÓDIGO DE DISCREPANCIA DE CALENDARIO (DÍA VS FECHA)
+            if (mergedParams.date && mergedParams.date !== '...') {
+                const dateCheck = checkDateDayMismatch(text, mergedParams.date);
+                if (dateCheck.mismatch) {
+                    hasRequiredFieldsForSummary = false;
+                    const clientName = mergedParams.name && mergedParams.name !== '...' ? mergedParams.name : '';
+                    replyText = `Disculpa${clientName ? `, ${clientName}` : ''}, revisando el calendario, el próximo ${dateCheck.mentionedDayName} cae en ${dateCheck.correctDateForMentionedDay} y el ${dateCheck.dateNumber} es ${dateCheck.actualDayName}. 📅 ¿Prefieres agendar tu visita el ${dateCheck.mentionedDayName} ${dateCheck.correctDayNumber} o el ${dateCheck.actualDayName} ${dateCheck.dateNumber} de ${dateCheck.monthName}${mergedParams.time && mergedParams.time !== '...' ? ` a las ${mergedParams.time}` : ''}? ✨`;
+                    mergedParams.date = '...';
+                }
             }
 
             // DETECTOR DE DERIVACIÓN HUMANA INTELIGENTE (COTIZACIÓN):

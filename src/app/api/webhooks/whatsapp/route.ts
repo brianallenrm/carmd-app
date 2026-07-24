@@ -726,6 +726,55 @@ export async function POST(req: NextRequest) {
             return;
         }
 
+        // --- MANEJO DE CHATS COMPLETADOS / SEGUNDO VEHÍCULO (FLUJO 22) ---
+        if (chat?.state === 'COMPLETED') {
+            console.log(`[Webhook] Mensaje recibido en chat completado para ${from}. Analizando intención...`);
+            
+            const isNewCarOrAppointment = textLower.includes('otro carro') || 
+                                           textLower.includes('otro coche') || 
+                                           textLower.includes('otra cita') || 
+                                           textLower.includes('nuevo servicio') || 
+                                           textLower.includes('otro vehículo') || 
+                                           textLower.includes('otro vehiculo') ||
+                                           textLower.includes('nueva cita') ||
+                                           textLower.includes('nuevo auto');
+
+            if (isNewCarOrAppointment) {
+                console.log(`[Webhook Flujo 22] Cliente solicita agendar un segundo vehículo / nueva cita.`);
+                let prevParams: any = {};
+                try {
+                    if (chat.vehicleProblem && chat.vehicleProblem.startsWith('{')) {
+                        prevParams = JSON.parse(chat.vehicleProblem);
+                    }
+                } catch (e) {}
+
+                const name = prevParams.name || '';
+                const email = prevParams.email || '';
+                const newParams = {
+                    name: name,
+                    email: email,
+                    vehicle: '...',
+                    year: '...',
+                    km: '...',
+                    plate: '...',
+                    date: '...',
+                    time: '...',
+                    problem: '...',
+                    phone: from
+                };
+
+                const firstName = name ? name.split(' ')[0] : '';
+                const newCarMsg = firstName 
+                    ? `¡Con mucho gusto, ${firstName}! 😊 Vamos a agendar tu segundo vehículo. ¿Qué marca, modelo y año manejas para esta nueva cita? 🚗`
+                    : `¡Con mucho gusto! 😊 Vamos a agendar tu nuevo vehículo. ¿Qué marca, modelo y año manejas? 🚗`;
+
+                await sendWhatsAppMessage(from, newCarMsg);
+                await saveChatMessage(from, 'assistant', newCarMsg);
+                await updateChatState(from, 'COLLECTING_APPOINTMENT_IA', JSON.stringify(newParams));
+                return;
+            }
+        }
+
         // --- Handle Step-by-Step Appointment Data Collection (Semantic & Interactive) ---
         if (chat?.state === 'COLLECTING_APPOINTMENT_IA' || chat?.state === 'WAITING_FORM_IA' || chat?.state === 'WAITING_PROBLEM_IA') {
             console.log(`[Webhook] Procesando recolección semántica de cita en estado ${chat?.state}...`);
@@ -989,7 +1038,7 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
 
             if (structuredOutput.cliente_confirmo_resumen === true) {
                 console.log(`[Webhook] Cliente confirmó el resumen final. Ejecutando reserva y cerrando chat para ${from}`);
-                await updateChatState(from, 'COMPLETED');
+                await updateChatState(from, 'COMPLETED', JSON.stringify({ ...mergedParams, cliente_confirmo_resumen: false, cita_lista_para_resumen: false, completed: true }));
                 
                 try {
                     const baseUrl = process.env.NODE_ENV === 'production' 

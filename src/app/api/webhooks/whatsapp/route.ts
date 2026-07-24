@@ -772,7 +772,9 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
                     }
                 );
 
-                const rawJsonText = response.text?.trim() || "{}";
+                let rawJsonText = response.text?.trim() || "{}";
+                // Limpiar etiquetas markdown ```json o ``` que Gemini pueda incluir ocasionalmente
+                rawJsonText = rawJsonText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
                 structuredOutput = JSON.parse(rawJsonText);
             } catch (e) {
                 console.error("[Webhook] Error parseando salida estructurada de Gemini:", e);

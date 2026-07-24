@@ -40,7 +40,7 @@ Sigue ESTRICTAMENTE las siguientes reglas de redacción y comportamiento (Psicol
 - FACTURACIÓN: Si preguntan si facturamos, responde que sí emitimos factura para todos los servicios si el cliente lo requiere. Regla de oro: No menciones si el precio incluye o no IVA bajo ningún motivo.
 - FORMAS DE PAGO: Aceptamos todos los medios de pago: efectivo, transferencia bancaria y todas las tarjetas de débito o crédito (Visa, Mastercard y American Express). No manejamos meses sin intereses directos, pero sí es posible diferir o dividir el pago en mensualidades con intereses directamente en nuestra terminal física a su llegada.
 - GARANTÍA CARMD: Si preguntan qué garantía ofrecemos, responde que todas nuestras garantías son por escrito: ofrecemos 1 año de garantía en mano de obra e incluye de regalo dos mantenimientos preventivos gratuitos (los cuales se especifican en la nota indicando el kilometraje recomendado para traer de vuelta el carro). Comparte amablemente la dirección oficial: https://www.carmd.com.mx/terminos para detalles.
-- SERVICIO DE GRÚA / AUXILIO VIAL: Si el cliente solicita grúa o auxilio por quedarse tirado, sé muy empática y tranquilízalo. Explícale de forma atenta y honesta que nosotros no contamos con servicio de grúa propio ni asistencia vial directa. Recomiéndale encarecidamente comunicarse con su seguro de auto para hacer uso de su cobertura de grúa o asistencia vial gratuita para trasladar el vehículo de forma segura a nuestras instalaciones (Calle Palacio de Iturbide No. 233, Col. Metropolitana 2da. Sección). Si insiste en que no tiene seguro o necesita orientación, pídele su Nombre completo y qué Vehículo tiene, e infórmale que un asesor de nuestro equipo se comunicará personalmente para proporcionarle los números de servicios de grúa externos y de confianza de la zona.
+- SERVICIO DE GRÚA / AUXILIO VIAL: Si el cliente solicita grúa o auxilio por quedarse tirado, sé muy empática y tranquilízalo. Explícale de forma atenta y honesta que nosotros no contamos con servicio de grúa o traslado. Recomiéndale encarecidamente comunicarse de inmediato con su seguro de auto para hacer uso de su cobertura de grúa o asistencia vial gratuita. Si insiste en que no tiene seguro o necesita orientación, pídele su Nombre completo y qué Vehículo tiene, e infórmale que un asesor de nuestro equipo se comunicará personalmente para proporcionarle los números de servicios de grúa externos y de confianza de la zona.
 - SALA DE ESPERA Y COMODIDADES: Si el cliente pregunta si contamos con sala de espera, WiFi o café mientras espera su auto, responde amablemente que sí contamos con una cómoda sala de espera con WiFi gratuito para nuestros clientes. Aclara que no contamos con servicio de café de cortesía, pero que dentro del mismo espacio/instalación contamos con una tienda OXXO donde pueden adquirir cualquier café, bebida o alimento de su preferencia de forma muy práctica.
 - REGLA DE INTERRUPCIÓN HORARIA (SITUACIONES CRÍTICAS): Si el cliente reporta quedarse tirado (grúa/auxilio vial) y la hora actual de referencia es posterior a las 8:00 PM o anterior a las 7:30 AM, debes advertirle amablemente en tu respuesta que el equipo de asesores humanos le responderá personalmente a primera hora de la mañana (a partir de las 8:00 AM) para coordinar o apoyarle, aunque dejes registrados sus datos.
 
@@ -953,13 +953,8 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
             // DETECTOR DE DERIVACIÓN HUMANA INTELIGENTE (COTIZACIÓN):
             // Si la IA decide derivar por insistencia del costo, verificamos si tenemos los datos necesarios
             const isDerivationReply = replyText.includes('cotizar personalmente') || 
-                                       replyText.includes('comunicará un miembro') ||
-                                       replyText.includes('revisar directamente un asesor') ||
-                                       replyText.includes('detendré mis respuestas') ||
-                                       replyText.includes('equipo humano recibirá') ||
-                                       replyText.includes('asesores humanos') ||
-                                       replyText.includes('asesor se comunique') ||
-                                       replyText.includes('asesor de nuestro equipo');
+                                       replyText.includes('cotización humana') ||
+                                       replyText.includes('detendré mis respuestas');
             
             if (isDerivationReply) {
                 const hasContactInfo = mergedParams.name && mergedParams.name !== '...' &&

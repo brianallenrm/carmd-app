@@ -1098,7 +1098,14 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
                 const yearSuffix = yearClean && !vehicleStr.includes(yearClean) ? ` ${yearClean}` : '';
                 const vehicleDisplay = `${vehicleStr}${yearSuffix}`;
 
-                let introText = replyText.length > 0 ? `${replyText}\n\n*Por favor, confírmame si los datos de tu cita son correctos para proceder:*` : '¡Listo! Ya tengo toda la información. Por favor confírmame si los datos de tu cita son correctos:\n';
+                const cleanReplyText = replyText
+                    .replace(/\*Por favor, confírmame si los datos de tu cita son correctos para proceder:\*/gi, '')
+                    .replace(/Por favor, confírmame si los datos de tu cita son correctos para proceder:/gi, '')
+                    .trim();
+
+                let introText = cleanReplyText.length > 0 
+                    ? `${cleanReplyText}\n\n*Por favor, confírmame si los datos de tu cita son correctos para proceder:*` 
+                    : '¡Listo! Ya tengo toda la información. Por favor confírmame si los datos de tu cita son correctos:\n';
                 
                 const kmClean = mergedParams.km && mergedParams.km !== '...' ? String(mergedParams.km).trim() : 'Pendiente';
                 const kmDisplay = kmClean === 'Pendiente' ? 'Por confirmar a la llegada 🛞' : `${kmClean} KM`;

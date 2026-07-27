@@ -916,10 +916,10 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
                 structuredOutput = JSON.parse(rawJsonText);
             } catch (e) {
                 console.error("[Webhook] Error parseando salida estructurada de Gemini:", e);
-                // Fallback elegante e indistinguible en caso de fallo sintáctico
+                // Fallback de seguridad a preferencia explícita del usuario
                 structuredOutput = {
-                    pensamiento_interno: "Fallback de recuperación.",
-                    respuesta_whatsapp: "¡Con mucho gusto te ayudamos! Para darte la mejor atención, ¿qué servicio o revisión necesita tu auto? 🚗✨",
+                    pensamiento_interno: "Error parseando.",
+                    respuesta_whatsapp: "Una disculpa, tuve un pequeño contratiempo técnico. ¿Podrías repetirme tu último mensaje?",
                     datos_actualizados: tempParams,
                     cita_lista_para_resumen: false
                 };

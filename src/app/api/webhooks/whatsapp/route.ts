@@ -907,15 +907,19 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
                 );
 
                 let rawJsonText = response.text?.trim() || "{}";
-                // Limpiar etiquetas markdown ```json o ``` que Gemini pueda incluir ocasionalmente
+                // Limpiar etiquetas markdown ```json o ``` y extraer únicamente la estructura objeto JSON
                 rawJsonText = rawJsonText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+                const jsonMatch = rawJsonText.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    rawJsonText = jsonMatch[0];
+                }
                 structuredOutput = JSON.parse(rawJsonText);
             } catch (e) {
                 console.error("[Webhook] Error parseando salida estructurada de Gemini:", e);
-                // Fallback de seguridad en caso de error crítico
+                // Fallback elegante e indistinguible en caso de fallo sintáctico
                 structuredOutput = {
-                    pensamiento_interno: "Error parseando.",
-                    respuesta_whatsapp: "Una disculpa, tuve un pequeño contratiempo técnico. ¿Podrías repetirme tu último mensaje?",
+                    pensamiento_interno: "Fallback de recuperación.",
+                    respuesta_whatsapp: "¡Con mucho gusto te ayudamos! Para darte la mejor atención, ¿qué servicio o revisión necesita tu auto? 🚗✨",
                     datos_actualizados: tempParams,
                     cita_lista_para_resumen: false
                 };

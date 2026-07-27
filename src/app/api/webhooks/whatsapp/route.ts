@@ -55,7 +55,6 @@ Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un fi
 - ALCANCE DE VEHÍCULOS (MOTOS NO): Atendemos autos particulares, SUVs, pick-ups, vehículos comerciales, camiones pesados y maquinaria de todo tipo. Sin embargo, no atendemos motocicletas de ningún tipo.
 - INCOMPATIBILIDAD DE SERVICIOS EN AUTOS ELÉCTRICOS (EJ: TESLA, BYD, LEAF): Si el cliente menciona un auto 100% eléctrico (ej: Tesla Model 3, Model Y, BYD, Nissan Leaf) y solicita servicios de combustión (como afinación, cambio de aceite de motor, bujías o filtro de aceite), aclárale amablemente y con tacto que al ser un vehículo 100% eléctrico no utiliza aceite de motor ni requiere afinación tradicional. Sugiere amablemente servicios de mantenimiento como revisión de frenos, suspensión, alineación/balanceo o inspección general, y pregúntale cuál de ellos prefiere agendar.
 - CORRECCIÓN DE NOMBRES DE MODELOS (CHEVROLET GROOVE): El modelo de SUV compacta de Chevrolet se escribe "Chevrolet Groove" (con doble 'o'). Si el cliente escribe "Grove" o "Grov", corrígelo amablemente a "Chevrolet Groove" en tus respuestas y tarjetas de resumen.
-- MENSAJES CORTOS DE CORTESÍA O RELLENO (EJ: "POR FAVOR", "GRACIAS", "OK"): Si el último mensaje del cliente es una cortesía o palabra corta (ej: "por favor", "porfa", "gracias", "ok", "va") y ya le respondiste o explicaste el servicio en el mensaje inmediatamente anterior, NUNCA vuelvas a repetir la explicación del servicio ni el texto de evaluación de costos. Limítate únicamente a responder "¡Con gusto! 😊" o pedir directamente el siguiente dato faltante (Nombre completo, Correo, etc.).
 - CONCEPTO PRINCIPAL: Refiérete a las instalaciones de CarMD usando de manera preferente el término "centro de servicio" (en minúsculas normales dentro de los textos a menos que inicie oración, para evitar que se vea rígido o robótico). Varíalo de forma natural y espontánea utilizando simplemente "CarMD" en su lugar para evitar redundancias pesadas (ej: en lugar de decir "nuestros servicios en el centro de servicio", di "nuestros servicios en CarMD" o "nuestros servicios").
 
 4. REGLAS DE CORRECCIÓN DE DATOS (CRÍTICA): Si el cliente te menciona que un dato del resumen está mal o quiere corregirlo:
@@ -407,32 +406,6 @@ export async function POST(req: NextRequest) {
             } catch (e) {
                 console.error("Error parsing chat history for prompt:", e);
             }
-        }
-
-        // --- SUPRESOR INSTANTÁNEO DE DUPLICADOS POR CORTESÍAS CORTAS ---
-        let isShortCourtesyFollowup = false;
-        const textClean = text.trim().toLowerCase().replace(/[^a-z0-9\s]/gi, '');
-        const isCourtesyWord = textClean === 'por favor' || textClean === 'porfavor' || textClean === 'porfa' || textClean === 'ok' || textClean === 'va' || textClean === 'gracias' || textClean === 'muchas gracias';
-        
-        if (isCourtesyWord && chat && chat.chatHistory) {
-            try {
-                const historyList = JSON.parse(chat.chatHistory);
-                if (Array.isArray(historyList) && historyList.length > 0) {
-                    const lastAssistantMsg = [...historyList].reverse().find((m: any) => m.sender === 'assistant');
-                    if (lastAssistantMsg && lastAssistantMsg.timestamp) {
-                        const lastMsgTime = new Date(lastAssistantMsg.timestamp).getTime();
-                        const timeDiffSec = (Date.now() - lastMsgTime) / 1000;
-                        if (timeDiffSec < 8) {
-                            isShortCourtesyFollowup = true;
-                        }
-                    }
-                }
-            } catch (e) {}
-        }
-
-        if (isShortCourtesyFollowup) {
-            console.log(`[Webhook] Omitiendo respuesta duplicada para cortesía en ventana de 8s para +${from}`);
-            return new NextResponse('OK (Courtesy Suppressed)', { status: 200 });
         }
 
         // --- COMMAND: ENTER ADMIN MODE ---

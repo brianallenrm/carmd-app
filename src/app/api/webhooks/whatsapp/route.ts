@@ -8,6 +8,9 @@ import { GoogleGenAI } from '@google/genai';
 // Initialize Google Gen AI Client
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+// Mapa global en memoria para debounce de mensajes enviados en ráfaga rápida
+const pendingRequestsMap = new Map<string, number>();
+
 // System Prompt with Advanced Business Rules (CarMD Business Manual & Best Practices)
 const SYSTEM_PROMPT = `Eres la asistente virtual oficial de CarMD. Tu tono debe ser el de una persona amable, atenta, empática y profesional.
 Tu objetivo es resolver dudas sobre los servicios del Centro de Servicio, horarios, ubicación y guiar al cliente de forma natural para agendar su diagnóstico directamente en este chat. NUNCA digas que resuelves dudas técnicas o mecánicas, ya que eso le corresponde al equipo humano.
@@ -54,6 +57,7 @@ Venta de refacciones sueltas: Si preguntan si vendemos piezas sueltas (ej: un fi
 - VERIFICACIÓN VEHICULAR: Si preguntan si realizamos el trámite de verificación, responde que sí apoyamos a los clientes a llevar su auto a verificar. Aclara que recomendamos traer primero el carro a CarMD para una inspección y revisión de pre-verificación, garantizando que pase el trámite a la primera.
 - ALCANCE DE VEHÍCULOS (MOTOS NO): Atendemos autos particulares, SUVs, pick-ups, vehículos comerciales, camiones pesados y maquinaria de todo tipo. Sin embargo, no atendemos motocicletas de ningún tipo.
 - INCOMPATIBILIDAD DE SERVICIOS EN AUTOS ELÉCTRICOS (EJ: TESLA, BYD, LEAF): Si el cliente menciona un auto 100% eléctrico (ej: Tesla Model 3, Model Y, BYD, Nissan Leaf) y solicita servicios de combustión (como afinación, cambio de aceite de motor, bujías o filtro de aceite), aclárale amablemente y con tacto que al ser un vehículo 100% eléctrico no utiliza aceite de motor ni requiere afinación tradicional. Sugiere amablemente servicios de mantenimiento como revisión de frenos, suspensión, alineación/balanceo o inspección general, y pregúntale cuál de ellos prefiere agendar.
+- CORRECCIÓN DE NOMBRES DE MODELOS (CHEVROLET GROOVE): El modelo de SUV compacta de Chevrolet se escribe "Chevrolet Groove" (con doble 'o'). Si el cliente escribe "Grove" o "Grov", corrígelo amablemente a "Chevrolet Groove" en tus respuestas y tarjetas de resumen.
 - CONCEPTO PRINCIPAL: Refiérete a las instalaciones de CarMD usando de manera preferente el término "centro de servicio" (en minúsculas normales dentro de los textos a menos que inicie oración, para evitar que se vea rígido o robótico). Varíalo de forma natural y espontánea utilizando simplemente "CarMD" en su lugar para evitar redundancias pesadas (ej: en lugar de decir "nuestros servicios en el centro de servicio", di "nuestros servicios en CarMD" o "nuestros servicios").
 
 4. REGLAS DE CORRECCIÓN DE DATOS (CRÍTICA): Si el cliente te menciona que un dato del resumen está mal o quiere corregirlo:
@@ -382,6 +386,20 @@ export async function POST(req: NextRequest) {
         
         // Guardar mensaje del cliente en el historial en Sheets
         await saveChatMessage(from, 'client', text);
+        
+        // --- MECANISMO DE DEBOUNCE PARA RÁFAGAS DE MENSAJES CONCURRENTES ---
+        const requestTimestamp = Date.now();
+        pendingRequestsMap.set(from, requestTimestamp);
+
+        // Esperar 1600ms para permitir que otros mensajes enviados en ráfaga se guarden en el historial
+        await new Promise((resolve) => setTimeout(resolve, 1600));
+
+        // Verificar si durante la espera llegó un mensaje MÁS RECIENTE de este mismo cliente
+        const latestTimestamp = pendingRequestsMap.get(from);
+        if (latestTimestamp && latestTimestamp > requestTimestamp) {
+            console.log(`[Debounce] Omitiendo respuesta intermedia para +${from} porque se recibió un mensaje posterior en la ráfaga.`);
+            return new NextResponse('OK (Debounced)', { status: 200 });
+        }
         
         // 1. Check current state and chat history in Sheets
         console.log(`[Webhook] Buscando estado en Google Sheets para ${from}...`);

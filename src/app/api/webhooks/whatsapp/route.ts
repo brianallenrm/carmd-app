@@ -1050,7 +1050,10 @@ Recuerda: Eres un JSON válido. No uses markdown de código, devuelve únicament
             // Si la IA decide derivar por insistencia del costo, verificamos si tenemos los datos necesarios
             const isDerivationReply = replyText.includes('cotizar personalmente') || 
                                        replyText.includes('cotización humana') ||
-                                       replyText.includes('detendré mis respuestas');
+                                       replyText.includes('detendré mis respuestas') ||
+                                       replyText.includes('asesor humano') ||
+                                       replyText.includes('asesor se pondrá') ||
+                                       replyText.includes('asesor de CarMD');
             
             if (isDerivationReply) {
                 const hasContactInfo = mergedParams.name && mergedParams.name !== '...' &&

@@ -274,68 +274,92 @@ export default function ServiceNoteForm() {
     const [draftId, setDraftId] = useState<string>("");
 
     useEffect(() => {
-        // 0. Check for Direct Prefill (from Centro de Control)
-        const prefillData = localStorage.getItem("carmd:prefill:note");
-        if (prefillData) {
-            try {
-                const parsed = JSON.parse(prefillData);
-                if (parsed.client) setClient(prev => ({ ...prev, ...parsed.client }));
-                if (parsed.vehicle) setVehicle(prev => ({ ...prev, ...parsed.vehicle }));
-                localStorage.removeItem("carmd:prefill:note");
-                // We'll still continue to load the next folio
-            } catch (e) {
-                console.error("Error parsing prefill data", e);
-            }
-        }
-
-        // 1. Check for Smart Duplication (Mismo Cliente)
-        const pendingDuplication = localStorage.getItem("service-note-duplicate-pending");
-        let isDuplication = false;
-
-        if (pendingDuplication) {
-            try {
-                const data = JSON.parse(pendingDuplication);
-                // Only use if it's fresh (less than 10 seconds old)
-                if (Date.now() - data.timestamp < 10000) {
-                    if (data.client) setClient(data.client);
-                    if (data.vehicle) setVehicle(data.vehicle);
-                    if (data.folio) setFolio(data.folio);
-                    isDuplication = true;
-                }
-                localStorage.removeItem("service-note-duplicate-pending");
-            } catch (e) {
-                console.error("Error parsing duplication data", e);
-            }
-        }
-
-        // 2. Resolve Draft ID from URL or Create New
-        const params = new URLSearchParams(window.location.search);
-        let currentId = params.get("draftId");
-        if (!currentId) {
-            currentId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-            const newUrl = `${window.location.pathname}?draftId=${currentId}`;
-            window.history.replaceState({ path: newUrl }, '', newUrl);
-        }
-
-        setDraftId(currentId);
-
-        // 3. Load Specific Draft (skip if this is a fresh duplication or pre-filled)
-        // If we just pre-filled from Centro de Control, we probably want a FRESH note,
-        // so we skip loading any existing draft for this ID.
-        if (!isDuplication && !prefillData) {
-            const savedDraft = localStorage.getItem(`service-note-draft-${currentId}`);
-            if (savedDraft) {
+        const initForm = async () => {
+            // 0. Check for Direct Prefill (from Centro de Control)
+            const prefillData = localStorage.getItem("carmd:prefill:note");
+            if (prefillData) {
                 try {
-                    const parsed = JSON.parse(savedDraft);
-                    setClient(parsed.client || client);
-                    setVehicle(parsed.vehicle || vehicle);
-                    setServices(parsed.services || services);
-                    setParts(parsed.parts || parts);
-                    setNotes(parsed.notes || "");
-                    setIncludeIva(parsed.includeIva || false);
-                    setIncludeIsr(parsed.includeIsr || false);
+                    const parsed = JSON.parse(prefillData);
+                    if (parsed.client) setClient(prev => ({ ...prev, ...parsed.client }));
+                    if (parsed.vehicle) setVehicle(prev => ({ ...prev, ...parsed.vehicle }));
+                    localStorage.removeItem("carmd:prefill:note");
+                    // We'll still continue to load the next folio
+                } catch (e) {
+                    console.error("Error parsing prefill data", e);
+                }
+            }
+
+            // 1. Check for Smart Duplication (Mismo Cliente)
+            const pendingDuplication = localStorage.getItem("service-note-duplicate-pending");
+            let isDuplication = false;
+
+            if (pendingDuplication) {
+                try {
+                    const data = JSON.parse(pendingDuplication);
+                    // Only use if it's fresh (less than 10 seconds old)
+                    if (Date.now() - data.timestamp < 10000) {
+                        if (data.client) setClient(data.client);
+                        if (data.vehicle) setVehicle(data.vehicle);
+                        if (data.folio) setFolio(data.folio);
+                        isDuplication = true;
+                    }
+                    localStorage.removeItem("service-note-duplicate-pending");
+                } catch (e) {
+                    console.error("Error parsing duplication data", e);
+                }
+            }
+
+            // 2. Resolve Draft ID from URL or Create New
+            const params = new URLSearchParams(window.location.search);
+            let currentId = params.get("draftId");
+            if (!currentId) {
+                currentId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+                const newUrl = `${window.location.pathname}?draftId=${currentId}`;
+                window.history.replaceState({ path: newUrl }, '', newUrl);
+            }
+
+            setDraftId(currentId);
+
+            // 3. Load Specific Draft (skip if this is a fresh duplication or pre-filled)
+            if (!isDuplication && !prefillData) {
+                let parsed: any = null;
+                const savedDraft = localStorage.getItem(`service-note-draft-${currentId}`);
+                
+                if (savedDraft) {
+                    try {
+                        parsed = JSON.parse(savedDraft);
+                    } catch (e) {
+                        console.error("Error parsing local draft", e);
+                    }
+                }
+
+                // Cloud Fallback: If not found in localStorage, fetch from Google Sheets cloud drafts
+                if (!parsed && currentId) {
+                    try {
+                        const draftsRes = await fetch("/api/notes/drafts/list");
+                        const draftsData = await draftsRes.json();
+                        if (draftsData.success && Array.isArray(draftsData.drafts)) {
+                            const found = draftsData.drafts.find((d: any) => (d.draftId || d.id) === currentId);
+                            if (found) {
+                                parsed = found;
+                                localStorage.setItem(`service-note-draft-${currentId}`, JSON.stringify(found));
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Error fetching cloud draft fallback", e);
+                    }
+                }
+
+                if (parsed) {
+                    if (parsed.client) setClient(parsed.client);
+                    if (parsed.vehicle) setVehicle(parsed.vehicle);
+                    if (parsed.services) setServices(parsed.services);
+                    if (parsed.parts) setParts(parsed.parts);
+                    if (parsed.notes !== undefined) setNotes(parsed.notes);
+                    if (parsed.includeIva !== undefined) setIncludeIva(parsed.includeIva);
+                    if (parsed.includeIsr !== undefined) setIncludeIsr(parsed.includeIsr);
                     if (parsed.folio) setFolio(parsed.folio);
-                    
+
                     if (parsed.isDiagnostic) {
                         setHideParts(true);
                         setHideWarranty(true);
@@ -344,23 +368,20 @@ export default function ServiceNoteForm() {
                         setHideWarranty(parsed.hideWarranty || false);
                     }
 
-                    // If we loaded a draft with a folio, we don't need to load the "next" global folio
                     if (parsed.folio) {
                         setIsDraftLoaded(true);
                         return;
                     }
-                } catch (e) {
-                    console.error("Error loading draft", e);
                 }
+                loadNextFolio();
+            } else if (prefillData || isDuplication) {
+                loadNextFolio();
             }
-            // Always load next folio on fresh mount or if draft had no folio
-            loadNextFolio();
-        } else if (prefillData || isDuplication) {
-            // Mandatory folio load for prefilled or duplicated notes
-            loadNextFolio();
-        }
 
-        setIsDraftLoaded(true);
+            setIsDraftLoaded(true);
+        };
+
+        initForm();
     }, []);
     // Run once on mount
 

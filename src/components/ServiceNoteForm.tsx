@@ -271,6 +271,40 @@ export default function ServiceNoteForm() {
         setIsHistoryOpen(false);
     };
 
+    const applyDraft = (draft: any) => {
+        const id = draft.draftId || draft.id;
+        if (!id) return;
+
+        setDraftId(id);
+        const newUrl = `${window.location.pathname}?draftId=${id}`;
+        window.history.replaceState({ path: newUrl }, '', newUrl);
+
+        if (draft.client) setClient(draft.client);
+        if (draft.vehicle) setVehicle(draft.vehicle);
+        if (draft.services) {
+            setServices(draft.services.map((s: any) => ({
+                ...s,
+                serviceName: s.serviceName || s.description
+            })));
+        }
+        if (draft.parts) setParts(draft.parts);
+        if (draft.notes !== undefined) setNotes(draft.notes);
+        if (draft.includeIva !== undefined) setIncludeIva(draft.includeIva);
+        if (draft.includeIsr !== undefined) setIncludeIsr(draft.includeIsr);
+        if (draft.folio) setFolio(draft.folio);
+
+        if (draft.isDiagnostic) {
+            setHideParts(true);
+            setHideWarranty(true);
+        } else {
+            setHideParts(draft.hideParts || false);
+            setHideWarranty(draft.hideWarranty || false);
+        }
+
+        localStorage.setItem(`service-note-draft-${id}`, JSON.stringify(draft));
+        setIsHistoryOpen(false);
+    };
+
     const [draftId, setDraftId] = useState<string>("");
 
     useEffect(() => {
@@ -1494,16 +1528,11 @@ export default function ServiceNoteForm() {
                                                 <div className="flex gap-2 border-t pt-3">
                                                     <button
                                                         type="button"
-                                                        disabled={draft.id === draftId}
-                                                        onClick={() => {
-                                                            if (confirm("Se recargará la página para recuperar este borrador. ¿Continuar?")) {
-                                                                window.location.href = `?draftId=${draft.id}`;
-                                                            }
-                                                        }}
-                                                        className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm border transition-colors flex justify-center items-center gap-1 ${draft.id === draftId ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100'}`}
+                                                        onClick={() => applyDraft(draft)}
+                                                        className="flex-1 px-3 py-2 rounded-lg font-medium text-sm border transition-colors flex justify-center items-center gap-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
                                                     >
                                                         <FileText size={14} />
-                                                        {draft.id === draftId ? "Editando..." : "Recuperar"}
+                                                        {draft.id === draftId ? "Cargar en Formulario" : "Recuperar"}
                                                     </button>
 
                                                     <button

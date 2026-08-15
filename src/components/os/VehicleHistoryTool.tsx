@@ -26,6 +26,7 @@ interface HistoryEntry {
     pricing?: { mo: number; refacciones: number; total: number; hasFactura: boolean; estatus: string };
     services?: string[];
     hasAfinacion?: boolean;
+    hasInspeccionAfinacion?: boolean;
     hasPreventivo?: boolean;
     motivoIngreso?: string;
     advisor?: string;
@@ -106,10 +107,15 @@ function NoteCard({ entry, index }: { entry: HistoryEntry; index: number }) {
                                         {isNote ? `Nota #${entry.folio}` : <><span className="hidden md:inline">Inventario de Recepción</span><span className="md:hidden">Inventario</span></>}
                                     </span>
                                     {entry.hasAfinacion && (
-                                        <span className="text-[9px] font-black bg-orange-100 text-[#f16315] px-1.5 py-0.5 rounded-full uppercase">
-                                            Afinación
-                                        </span>
-                                    )}
+                                         <span className="text-[9px] font-black bg-orange-100 text-[#f16315] px-1.5 py-0.5 rounded-full uppercase">
+                                             Afinación
+                                         </span>
+                                     )}
+                                     {entry.hasInspeccionAfinacion && (
+                                         <span className="text-[9px] font-black bg-amber-100 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded-full uppercase">
+                                             Inspección Afinación
+                                         </span>
+                                     )}
                                     {entry.pricing?.hasFactura && (
                                         <span className="text-[9px] font-black bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full uppercase">
                                             Factura

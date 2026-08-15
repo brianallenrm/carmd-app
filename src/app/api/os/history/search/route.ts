@@ -12,14 +12,22 @@ const getAuth = () => new JWT({
 const normalize = (str: string) =>
     String(str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 
-const isAfinacion = (text: string) => {
+const isInspeccionAfinacion = (text: string) => {
     const n = normalize(text);
-    return n.includes('afinacion') || n.includes('tune up') || n.includes('tuneup') || n.includes('afin');
+    const pattern1 = /\b(ins|ins\.|inspecc|inspec|inspeccion|inspecciones)[\s\.\:\/\-]+(de\s+|a\s+|al\s+|en\s+|para\s+)?(af|afi|afin|afina|afinacion|afinaciones)\b/i;
+    const pattern2 = /\b(af|afi|afin|afina|afinacion|afinaciones)[\s\.\:\/\-\(]+(de\s+|a\s+|al\s+|en\s+|para\s+)?(ins|ins\.|inspecc|inspec|inspeccion|inspecciones)\b/i;
+    return pattern1.test(n) || pattern2.test(n) || n.includes('inspecc. afina') || n.includes('inspecc afina') || n.includes('ins. afina') || n.includes('inspeccion de afinacion') || n.includes('inspeccion afinacion');
+};
+
+const isAfinacion = (text: string) => {
+    if (isInspeccionAfinacion(text)) return false;
+    const n = normalize(text);
+    return n.includes('afinacion') || n.includes('tune up') || n.includes('tuneup') || n.includes('afina') || n.includes('afin') || /\b(afi|af)\b/i.test(n);
 };
 
 const isPreventivo = (text: string) => {
     const n = normalize(text);
-    return (n.includes('preventivo') || n.includes('preventiva') || n.includes('mantenimiento')) && !isAfinacion(text);
+    return (n.includes('preventivo') || n.includes('preventiva') || n.includes('mantenimiento')) && !isAfinacion(text) && !isInspeccionAfinacion(text);
 };
 
 const parseDate = (val: any): number => {
@@ -131,7 +139,9 @@ export async function GET(request: NextRequest) {
                     metadatos.parts.forEach((p: any) => { if (p.description) notes.push(`(Ref) ${p.description}`); });
                 }
 
-                const hasAfinacion = isAfinacion(servicio) || notes.some(isAfinacion);
+                const serviceItems = notes.length > 0 ? notes : servicio.split('|').map((s: string) => s.trim()).filter(Boolean);
+                const hasAfinacion = serviceItems.some(isAfinacion) || isAfinacion(servicio);
+                const hasInspeccionAfinacion = !hasAfinacion && (serviceItems.some(isInspeccionAfinacion) || isInspeccionAfinacion(servicio));
                 const hasPreventivo = isPreventivo(servicio) || notes.some(isPreventivo);
 
                 matchedNotes.push({
@@ -153,8 +163,9 @@ export async function GET(request: NextRequest) {
                         km: kmRaw,
                     },
                     pricing: { mo, refacciones, total, hasFactura, estatus },
-                    services: notes.length > 0 ? notes : servicio.split('|').map((s: string) => s.trim()).filter(Boolean),
+                    services: serviceItems,
                     hasAfinacion,
+                    hasInspeccionAfinacion,
                     hasPreventivo,
                 });
             }

@@ -265,7 +265,7 @@ interface RecentVehiclesFeedProps {
 
 export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehiclesFeedProps) {
     const [vehicles, setVehicles] = useState<RecentVehicle[]>([]);
-    const [filterMode, setFilterMode] = useState<'activos' | 'todos'>('activos');
+    const [filterMode, setFilterMode] = useState<'todos' | 'activos'>('todos');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
@@ -366,15 +366,15 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
         }
     };
 
-    // Filtro activo vs todos
+    // Filtro activo vs todos: 'activos' solo incluye autos que NO tienen nota y NO han salido
     const displayVehicles = vehicles.filter(v => {
         if (filterMode === 'activos') {
-            return v.status !== 'salida_sin_nota' && v.status !== 'entregado';
+            return v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota';
         }
         return true;
     });
 
-    const activosCount = vehicles.filter(v => v.status !== 'salida_sin_nota' && v.status !== 'entregado').length;
+    const activosCount = vehicles.filter(v => v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota').length;
     const conNotaCount = vehicles.filter(v => v.status === 'con_nota').length;
     const salidasCount = vehicles.filter(v => v.status === 'salida_sin_nota').length;
 
@@ -383,21 +383,8 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
             {/* Header con estadísticas y selector de filtro */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
                 <div className="flex items-center gap-2 flex-wrap">
-                    {/* Botones de Filtro Activos vs Todos */}
+                    {/* Botones de Filtro: Ver Todos (Principal) y Solo en Taller (Secundaria) */}
                     <div className="flex bg-slate-100 p-1 rounded-xl">
-                        <button
-                            onClick={() => { setFilterMode('activos'); setPage(0); }}
-                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
-                                filterMode === 'activos'
-                                    ? "bg-white text-slate-800 shadow-sm"
-                                    : "text-slate-400 hover:text-slate-600"
-                            }`}
-                        >
-                            <span>Solo en Taller (Activos)</span>
-                            <span className="bg-amber-500 text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">
-                                {activosCount}
-                            </span>
-                        </button>
                         <button
                             onClick={() => { setFilterMode('todos'); setPage(0); }}
                             className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
@@ -409,6 +396,19 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
                             <span>Ver Todos</span>
                             <span className="bg-slate-300 text-slate-700 text-[9px] px-1.5 py-0.2 rounded-full font-bold">
                                 {vehicles.length}
+                            </span>
+                        </button>
+                        <button
+                            onClick={() => { setFilterMode('activos'); setPage(0); }}
+                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                                filterMode === 'activos'
+                                    ? "bg-white text-slate-800 shadow-sm"
+                                    : "text-slate-400 hover:text-slate-600"
+                            }`}
+                        >
+                            <span>Solo en Taller</span>
+                            <span className="bg-amber-500 text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">
+                                {activosCount}
                             </span>
                         </button>
                     </div>

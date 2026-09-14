@@ -114,7 +114,8 @@ export const GOOGLE_SHEETS_CONFIG = {
         TAB_NAME: "Inventarios_app",
         LEGACY_TAB_NAME: "Respuestas de formulario 1",
         CHAT_SESSIONS_TAB: "CHAT_SESSIONS",
-        CHAT_MESSAGES_TAB: "CHAT_MESSAGES"
+        CHAT_MESSAGES_TAB: "CHAT_MESSAGES",
+        PISO_TAB: "CONTROL_PISO"
     },
 
     // [DEVELOPMENT] Client History / View (In testing)

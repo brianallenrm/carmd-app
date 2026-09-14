@@ -150,9 +150,35 @@ export async function GET() {
 
         const inventorySheet = inventoryDoc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME];
         const masterSheet = masterDoc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.MASTER.TAB_NAME];
+        const pisoSheet = inventoryDoc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.PISO_TAB || 'CONTROL_PISO'];
 
         if (!inventorySheet || !masterSheet) {
             return NextResponse.json({ error: 'Sheet not found' }, { status: 404 });
+        }
+
+        // Get floor tracking records from CONTROL_PISO
+        const pisoRows = pisoSheet ? await pisoSheet.getRows() : [];
+        const pisoMap: Record<string, any> = {};
+        for (const r of pisoRows) {
+            const rawPlate = r.get('Placa');
+            if (!rawPlate) continue;
+            const cleanPlate = String(rawPlate).toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (!cleanPlate) continue;
+            let parts: any[] = [];
+            let externalServices: any[] = [];
+            let log: any[] = [];
+            try { const s = r.get('Refacciones_JSON'); if (s && s.startsWith('[')) parts = JSON.parse(s); } catch (e) {}
+            try { const s = r.get('Servicios_Externos_JSON'); if (s && s.startsWith('[')) externalServices = JSON.parse(s); } catch (e) {}
+            try { const s = r.get('Bitacora_JSON'); if (s && s.startsWith('[')) log = JSON.parse(s); } catch (e) {}
+            pisoMap[cleanPlate] = {
+                status: r.get('Estatus') || '',
+                mechanic: r.get('Mecanico') || '',
+                exitReason: r.get('Motivo_Salida') || '',
+                lastUpdate: r.get('Ultima_Actualizacion') || '',
+                parts,
+                externalServices,
+                log
+            };
         }
 
         // Get ALL inventory rows, parse their dates, sort by date DESC, take top LIMIT
@@ -191,13 +217,18 @@ export async function GET() {
             const plates = (row.get('Placas:') || '').toUpperCase();
             const platesAlpha = plates.replace(/[^A-Z0-9]/g, '');
             const latestNote = noteByPlate[platesAlpha] ?? null;
+            const pisoInfo = pisoMap[platesAlpha] ?? null;
 
             // Normalizar a inicio del día para la comparación de estatus (evitar problemas de horas en mismo día)
             const inventoryDayTs = new Date(dateTs).setHours(0, 0, 0, 0);
             const noteDayTs = latestNote ? new Date(latestNote.dateTs).setHours(0, 0, 0, 0) : 0;
 
-            let status: 'con_nota' | 'en_piso_registrado' | 'en_piso_nuevo';
-            if (latestNote && noteDayTs >= inventoryDayTs) {
+            let status: 'con_nota' | 'en_piso_registrado' | 'en_piso_nuevo' | 'salida_sin_nota' | 'entregado';
+            if (pisoInfo && pisoInfo.status === 'SALIDA_SIN_NOTA') {
+                status = 'salida_sin_nota';
+            } else if (pisoInfo && pisoInfo.status === 'ENTREGADO') {
+                status = 'entregado';
+            } else if (latestNote && noteDayTs >= inventoryDayTs) {
                 status = 'con_nota';
             } else if (latestNote) {
                 status = 'en_piso_registrado';
@@ -230,6 +261,18 @@ export async function GET() {
                 motivo: row.get('Motivo de Ingreso') || row.get('Presupuesto Solicitado:') || '',
                 advisor: row.get('¿Quién elaboró el inventario?') || '',
                 status,
+                floorData: pisoInfo ? {
+                    status: pisoInfo.status,
+                    mechanic: pisoInfo.mechanic,
+                    exitReason: pisoInfo.exitReason,
+                    lastUpdate: pisoInfo.lastUpdate,
+                    partsCount: pisoInfo.parts.length,
+                    externalCount: pisoInfo.externalServices.length,
+                    logCount: pisoInfo.log.length,
+                    parts: pisoInfo.parts,
+                    externalServices: pisoInfo.externalServices,
+                    log: pisoInfo.log
+                } : null,
                 note: latestNote
                     ? { folio: latestNote.folio, total: latestNote.total, services: latestNote.services }
                     : null,
@@ -263,3 +306,20 @@ export async function GET() {
         return NextResponse.json({ error: String(error) }, { status: 500 });
     }
 }
+
+export async function POST(req: Request) {
+    try {
+        const body = await req.json();
+        const { plate, status, reason, mechanic } = body;
+        if (!plate || !status) {
+            return NextResponse.json({ error: 'Missing plate or status' }, { status: 400 });
+        }
+        const { updateVehicleFloorStatus } = await import('@/lib/google-sheets');
+        await updateVehicleFloorStatus(plate, status, { exitReason: reason, mechanic });
+        return NextResponse.json({ success: true });
+    } catch (e: any) {
+        console.error('[Recent Vehicles POST Error]', e);
+        return NextResponse.json({ error: String(e) }, { status: 500 });
+    }
+}
+

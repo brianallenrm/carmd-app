@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     Car, User, Clock, FileText, ClipboardList, History,
     Loader2, AlertTriangle, RefreshCw, Gauge, Fuel,
-    CheckCircle, PlusCircle, ChevronRight, ChevronLeft, Wrench, UserCheck, UserPlus
+    CheckCircle, PlusCircle, ChevronRight, ChevronLeft, Wrench, UserCheck, UserPlus,
+    MoreVertical, LogOut, RotateCcw, CheckCircle2, ShieldAlert
 } from "lucide-react";
 import Link from "next/link";
 
@@ -19,14 +20,25 @@ interface RecentVehicle {
     vehicle: { brand: string; model: string; year: string; plates: string; km: number; gas: string };
     motivo: string;
     advisor: string;
-    status: 'con_nota' | 'en_piso_registrado' | 'en_piso_nuevo';
+    status: 'con_nota' | 'en_piso_registrado' | 'en_piso_nuevo' | 'salida_sin_nota' | 'entregado';
+    floorData?: {
+        status: string;
+        mechanic: string;
+        exitReason: string;
+        partsCount: number;
+        externalCount: number;
+        logCount: number;
+        parts: any[];
+        externalServices: any[];
+        log: any[];
+    } | null;
     note: { folio: string; total: number; services: string } | null;
     prefillJson: string;
 }
 
 const fmtKm = (km: number) => km > 0 ? `${km.toLocaleString("es-MX")} km` : "—";
 
-const STATUS_CONFIG = {
+const STATUS_CONFIG: Record<string, { stripe: string; icon: string; iconBg: string }> = {
     con_nota: {
         stripe: "bg-emerald-400",
         icon: "text-emerald-500",
@@ -42,10 +54,32 @@ const STATUS_CONFIG = {
         icon: "text-[#f16315]",
         iconBg: "bg-orange-50",
     },
+    salida_sin_nota: {
+        stripe: "bg-slate-300",
+        icon: "text-slate-400",
+        iconBg: "bg-slate-100",
+    },
+    entregado: {
+        stripe: "bg-blue-400",
+        icon: "text-blue-500",
+        iconBg: "bg-blue-50",
+    },
 };
 
 function StatusBadges({ v }: { v: RecentVehicle }) {
     switch (v.status) {
+        case 'salida_sin_nota':
+            return (
+                <span className="flex items-center gap-1 text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded-full">
+                    <LogOut size={9} /> Salida sin nota
+                </span>
+            );
+        case 'entregado':
+            return (
+                <span className="flex items-center gap-1 text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-200 px-1.5 py-0.5 rounded-full">
+                    <CheckCircle2 size={9} /> Entregado
+                </span>
+            );
         case 'con_nota':
             return (
                 <span className="flex items-center gap-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded-full">
@@ -78,19 +112,28 @@ function StatusBadges({ v }: { v: RecentVehicle }) {
     }
 }
 
-function VehicleRow({ v, index, onExpediente }: {
+
+function VehicleRow({ v, index, onExpediente, onContextMenu }: {
     v: RecentVehicle;
     index: number;
     onExpediente: (plates: string) => void;
+    onContextMenu: (e: React.MouseEvent, v: RecentVehicle) => void;
 }) {
     const cfg = STATUS_CONFIG[v.status] ?? STATUS_CONFIG['en_piso_nuevo'];
+    const isExited = v.status === 'salida_sin_nota' || v.status === 'entregado';
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.04 }}
-            className="bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-orange-100 transition-all duration-200 overflow-hidden"
+            onContextMenu={(e) => {
+                e.preventDefault();
+                onContextMenu(e, v);
+            }}
+            className={`bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-200 overflow-hidden ${
+                isExited ? 'opacity-65 bg-slate-50/70' : ''
+            }`}
         >
             {/* Status stripe */}
             <div className={`h-1 w-full ${cfg.stripe}`} />
@@ -113,6 +156,11 @@ function VehicleRow({ v, index, onExpediente }: {
                                 {v.vehicle.plates}
                             </span>
                             <StatusBadges v={v} />
+                            {v.floorData?.mechanic && (
+                                <span className="text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 px-1.5 py-0.5 rounded-full">
+                                    👨‍🔧 {v.floorData.mechanic}
+                                </span>
+                            )}
                         </div>
 
                         {/* Client */}
@@ -150,12 +198,12 @@ function VehicleRow({ v, index, onExpediente }: {
                 </div>
 
                 {/* Action buttons */}
-                <div className="grid grid-cols-1 xs:grid-cols-2 sm:flex gap-2 flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
+                <div className="grid grid-cols-2 xs:grid-cols-3 sm:flex items-center gap-2 flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
                     {/* Inventario */}
                     <Link
                         href={`/os/admin/receptions`}
                         target="_blank"
-                        className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold transition-colors border border-slate-200"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold transition-colors border border-slate-200"
                     >
                         <ClipboardList size={13} />
                         Inventario
@@ -167,7 +215,7 @@ function VehicleRow({ v, index, onExpediente }: {
                             href={`/os/note-preview?folio=${v.note!.folio}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition-colors border border-emerald-200 col-span-2 xs:col-span-1"
+                            className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition-colors border border-emerald-200"
                         >
                             <FileText size={13} />
                             <span className="hidden md:inline">Ver </span>Nota #{v.note!.folio}
@@ -178,7 +226,7 @@ function VehicleRow({ v, index, onExpediente }: {
                                 localStorage.setItem('carmd:prefill:note', v.prefillJson);
                                 window.open('/os', '_blank');
                             }}
-                            className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[#f16315] hover:bg-orange-600 text-white rounded-lg text-xs font-bold transition-colors shadow-sm shadow-orange-200 col-span-2 xs:col-span-1"
+                            className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#f16315] hover:bg-orange-600 text-white rounded-lg text-xs font-bold transition-colors shadow-sm shadow-orange-200"
                         >
                             <PlusCircle size={13} />
                             Generar Nota
@@ -188,10 +236,22 @@ function VehicleRow({ v, index, onExpediente }: {
                     {/* Expediente */}
                     <button
                         onClick={() => onExpediente(v.vehicle.plates)}
-                        className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition-colors border border-indigo-200"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition-colors border border-indigo-200"
                     >
                         <History size={13} />
                         Expediente
+                    </button>
+
+                    {/* Botón 3 puntos / opciones de piso */}
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onContextMenu(e, v);
+                        }}
+                        className="flex items-center justify-center p-2 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs font-bold transition-colors border border-slate-200"
+                        title="Opciones de piso (o clic derecho)"
+                    >
+                        <MoreVertical size={14} />
                     </button>
                 </div>
             </div>
@@ -205,10 +265,17 @@ interface RecentVehiclesFeedProps {
 
 export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehiclesFeedProps) {
     const [vehicles, setVehicles] = useState<RecentVehicle[]>([]);
+    const [filterMode, setFilterMode] = useState<'activos' | 'todos'>('activos');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
     const [page, setPage] = useState(0);
+    const [contextMenu, setContextMenu] = useState<{
+        visible: boolean;
+        x: number;
+        y: number;
+        vehicle: RecentVehicle | null;
+    }>({ visible: false, x: 0, y: 0, vehicle: null });
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -232,28 +299,140 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
         return () => clearInterval(interval);
     }, [load]);
 
-    const conNota = vehicles.filter(v => v.status === 'con_nota').length;
-    const enPiso = vehicles.filter(v => v.status !== 'con_nota').length;
+    // Cerrar menú contextual al hacer clic fuera
+    useEffect(() => {
+        const handleWindowClick = () => {
+            setContextMenu(prev => ({ ...prev, visible: false }));
+        };
+        window.addEventListener('click', handleWindowClick);
+        return () => window.removeEventListener('click', handleWindowClick);
+    }, []);
+
+    const handleContextMenu = (e: React.MouseEvent, vehicle: RecentVehicle) => {
+        const x = Math.min(e.clientX, window.innerWidth - 270);
+        const y = Math.min(e.clientY, window.innerHeight - 240);
+        setContextMenu({
+            visible: true,
+            x,
+            y,
+            vehicle
+        });
+    };
+
+    const handleSetFloorStatus = async (plate: string, status: string, reason?: string) => {
+        setContextMenu(prev => ({ ...prev, visible: false }));
+        const cleanPlate = plate.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+        // Actualización optimista en memoria
+        setVehicles(prev => prev.map(v => {
+            const vPlate = v.vehicle.plates.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (vPlate === cleanPlate) {
+                let newStatus: any = v.status;
+                if (status === 'SALIDA_SIN_NOTA') newStatus = 'salida_sin_nota';
+                if (status === 'ENTREGADO') newStatus = 'entregado';
+                if (status === 'EN_REPARACION') newStatus = v.note ? 'con_nota' : 'en_piso_registrado';
+
+                return {
+                    ...v,
+                    status: newStatus,
+                    floorData: {
+                        ...(v.floorData || {
+                            mechanic: '',
+                            partsCount: 0,
+                            externalCount: 0,
+                            logCount: 0,
+                            parts: [],
+                            externalServices: [],
+                            log: []
+                        }),
+                        status,
+                        exitReason: reason || '',
+                        lastUpdate: new Date().toISOString()
+                    }
+                };
+            }
+            return v;
+        }));
+
+        // Persistir en servidor
+        try {
+            await fetch('/api/os/recent-vehicles', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ plate: cleanPlate, status, reason })
+            });
+        } catch (e) {
+            console.error("Error al actualizar estatus de piso:", e);
+        }
+    };
+
+    // Filtro activo vs todos
+    const displayVehicles = vehicles.filter(v => {
+        if (filterMode === 'activos') {
+            return v.status !== 'salida_sin_nota' && v.status !== 'entregado';
+        }
+        return true;
+    });
+
+    const activosCount = vehicles.filter(v => v.status !== 'salida_sin_nota' && v.status !== 'entregado').length;
+    const conNotaCount = vehicles.filter(v => v.status === 'con_nota').length;
+    const salidasCount = vehicles.filter(v => v.status === 'salida_sin_nota').length;
 
     return (
-        <div className="w-full">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    {!loading && vehicles.length > 0 && (
-                        <>
-                            <span className="flex items-center gap-1.5">
+        <div className="w-full relative">
+            {/* Header con estadísticas y selector de filtro */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                    {/* Botones de Filtro Activos vs Todos */}
+                    <div className="flex bg-slate-100 p-1 rounded-xl">
+                        <button
+                            onClick={() => { setFilterMode('activos'); setPage(0); }}
+                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                                filterMode === 'activos'
+                                    ? "bg-white text-slate-800 shadow-sm"
+                                    : "text-slate-400 hover:text-slate-600"
+                            }`}
+                        >
+                            <span>Solo en Taller (Activos)</span>
+                            <span className="bg-amber-500 text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">
+                                {activosCount}
+                            </span>
+                        </button>
+                        <button
+                            onClick={() => { setFilterMode('todos'); setPage(0); }}
+                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                                filterMode === 'todos'
+                                    ? "bg-white text-slate-800 shadow-sm"
+                                    : "text-slate-400 hover:text-slate-600"
+                            }`}
+                        >
+                            <span>Ver Todos</span>
+                            <span className="bg-slate-300 text-slate-700 text-[9px] px-1.5 py-0.2 rounded-full font-bold">
+                                {vehicles.length}
+                            </span>
+                        </button>
+                    </div>
+
+                    {!loading && (
+                        <div className="hidden md:flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-2">
+                            <span className="flex items-center gap-1">
                                 <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
-                                {conNota} con nota
+                                {conNotaCount} con nota
                             </span>
-                            <span className="flex items-center gap-1.5">
-                                <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
-                                {enPiso} en piso
-                            </span>
-                        </>
+                            {salidasCount > 0 && (
+                                <span className="flex items-center gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />
+                                    {salidasCount} salidas sin nota
+                                </span>
+                            )}
+                        </div>
                     )}
                 </div>
+
                 <div className="flex items-center gap-3">
+                    <span className="text-[10px] text-slate-400 hidden sm:inline">
+                        💡 Clic derecho en un coche para opciones
+                    </span>
                     {lastRefresh && (
                         <span className="text-[10px] text-slate-400">
                             Actualizado {lastRefresh.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
@@ -282,29 +461,42 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
                     {error}
                     <button onClick={load} className="ml-auto text-xs underline">Reintentar</button>
                 </div>
-            ) : vehicles.length === 0 ? (
-                <div className="text-center py-14 text-slate-400">
+            ) : displayVehicles.length === 0 ? (
+                <div className="text-center py-14 text-slate-400 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
                     <Car size={40} className="mx-auto mb-3 opacity-20" />
-                    <p className="font-bold text-slate-500">Sin ingresos recientes</p>
-                    <p className="text-sm mt-1">Los vehículos aparecerán aquí conforme se registren inventarios.</p>
+                    <p className="font-bold text-slate-600">No hay vehículos activos en piso</p>
+                    <p className="text-xs text-slate-400 mt-1">
+                        {filterMode === 'activos' 
+                            ? "Todos los vehículos registrados tienen nota o fueron dados de salida." 
+                            : "No hay registros recientes."}
+                    </p>
+                    {filterMode === 'activos' && (
+                        <button 
+                            onClick={() => setFilterMode('todos')}
+                            className="mt-3 px-3 py-1 bg-white text-slate-600 border border-slate-200 rounded-lg text-xs font-bold hover:bg-slate-50"
+                        >
+                            Ver histórico completo
+                        </button>
+                    )}
                 </div>
             ) : (
                 <AnimatePresence mode="wait">
                     <div className="space-y-3">
-                        {vehicles.slice(page * 10, (page + 1) * 10).map((v, i) => (
+                        {displayVehicles.slice(page * 10, (page + 1) * 10).map((v, i) => (
                             <VehicleRow
                                 key={`${v.vehicle.plates}-${v.dateTs}-${i}`}
                                 v={v}
                                 index={i}
                                 onExpediente={onExpedienteSearch}
+                                onContextMenu={handleContextMenu}
                             />
                         ))}
 
                         {/* Pagination Controls */}
-                        {vehicles.length > 10 && (
+                        {displayVehicles.length > 10 && (
                             <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-400">
                                 <span className="font-medium">
-                                    Mostrando {page * 10 + 1} - {Math.min((page + 1) * 10, vehicles.length)} de {vehicles.length}
+                                    Mostrando {page * 10 + 1} - {Math.min((page + 1) * 10, displayVehicles.length)} de {displayVehicles.length}
                                 </span>
                                 <div className="flex items-center gap-1.5">
                                     <button
@@ -319,8 +511,8 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
                                         Pág {page + 1}
                                     </span>
                                     <button
-                                        onClick={() => setPage(p => (p + 1) * 10 < vehicles.length ? p + 1 : p)}
-                                        disabled={(page + 1) * 10 >= vehicles.length}
+                                        onClick={() => setPage(p => (p + 1) * 10 < displayVehicles.length ? p + 1 : p)}
+                                        disabled={(page + 1) * 10 >= displayVehicles.length}
                                         className="p-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                         title="Siguientes 10"
                                     >
@@ -332,6 +524,77 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
                     </div>
                 </AnimatePresence>
             )}
+
+            {/* Menú Contextual Flotante (Clic derecho) */}
+            {contextMenu.visible && contextMenu.vehicle && (
+                <div
+                    className="fixed z-50 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 w-64 text-left animate-in fade-in zoom-in-95 duration-100"
+                    style={{
+                        top: contextMenu.y,
+                        left: contextMenu.x,
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="px-4 py-2 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
+                        <p className="text-xs font-black text-slate-800 uppercase truncate">
+                            {contextMenu.vehicle.vehicle.brand} {contextMenu.vehicle.vehicle.model}
+                        </p>
+                        <p className="text-[10px] font-mono font-bold text-slate-400">
+                            Placas: {contextMenu.vehicle.vehicle.plates}
+                        </p>
+                    </div>
+
+                    <div className="py-1">
+                        {contextMenu.vehicle.status !== 'salida_sin_nota' ? (
+                            <button
+                                onClick={() => {
+                                    handleSetFloorStatus(contextMenu.vehicle!.vehicle.plates, 'SALIDA_SIN_NOTA', 'Salida sin reparación/nota');
+                                }}
+                                className="w-full px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 transition-colors text-left"
+                            >
+                                <LogOut size={14} className="text-rose-500 flex-shrink-0" />
+                                <span>Salida sin reparación / nota</span>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    handleSetFloorStatus(contextMenu.vehicle!.vehicle.plates, 'EN_REPARACION', 'Reingreso a piso');
+                                }}
+                                className="w-full px-4 py-2.5 text-xs font-bold text-amber-600 hover:bg-amber-50 flex items-center gap-2.5 transition-colors text-left"
+                            >
+                                <RotateCcw size={14} className="text-amber-500 flex-shrink-0" />
+                                <span>Reincorporar a Piso</span>
+                            </button>
+                        )}
+
+                        {contextMenu.vehicle.status !== 'entregado' && (
+                            <button
+                                onClick={() => {
+                                    handleSetFloorStatus(contextMenu.vehicle!.vehicle.plates, 'ENTREGADO', 'Entregado al cliente');
+                                }}
+                                className="w-full px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition-colors text-left"
+                            >
+                                <CheckCircle2 size={14} className="text-emerald-500 flex-shrink-0" />
+                                <span>Marcar como Entregado</span>
+                            </button>
+                        )}
+
+                        <div className="h-px bg-slate-100 my-1" />
+
+                        <button
+                            onClick={() => {
+                                onExpedienteSearch(contextMenu.vehicle!.vehicle.plates);
+                                setContextMenu(prev => ({ ...prev, visible: false }));
+                            }}
+                            className="w-full px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2.5 transition-colors text-left"
+                        >
+                            <History size={14} className="text-indigo-500 flex-shrink-0" />
+                            <span>Ver Expediente Histórico</span>
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
+

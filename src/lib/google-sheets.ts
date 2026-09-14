@@ -473,3 +473,159 @@ export const saveChatMessage = async (phone: string, sender: 'client' | 'assista
         console.error("Error saving chat message to session cell:", error);
     }
 };
+
+export interface PisoRecord {
+    plate: string;
+    status: string; // 'EN_REPARACION' | 'SALIDA_SIN_NOTA' | 'ENTREGADO' | 'EN_RAMPA' | 'ESPERANDO_PIEZAS' | 'TORNO' | 'LAVADO' | 'LISTO_ENTREGA'
+    mechanic: string;
+    exitReason: string;
+    lastUpdate: string;
+    parts: any[];
+    externalServices: any[];
+    log: any[];
+}
+
+/**
+ * Retrieves a map of all vehicles tracked in CONTROL_PISO indexed by clean plate.
+ */
+export const getPisoStatusMap = async (): Promise<Record<string, PisoRecord>> => {
+    try {
+        const doc = await getInventoryDoc();
+        const sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.PISO_TAB!];
+        if (!sheet) return {};
+
+        const rows = await sheet.getRows();
+        const map: Record<string, PisoRecord> = {};
+
+        for (const r of rows) {
+            const rawPlate = r.get("Placa");
+            if (!rawPlate) continue;
+            const cleanPlate = String(rawPlate).toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (!cleanPlate) continue;
+
+            let parts: any[] = [];
+            let externalServices: any[] = [];
+            let log: any[] = [];
+
+            try {
+                const partsStr = r.get("Refacciones_JSON");
+                if (partsStr && partsStr.startsWith('[')) parts = JSON.parse(partsStr);
+            } catch (e) {}
+
+            try {
+                const extStr = r.get("Servicios_Externos_JSON");
+                if (extStr && extStr.startsWith('[')) externalServices = JSON.parse(extStr);
+            } catch (e) {}
+
+            try {
+                const logStr = r.get("Bitacora_JSON");
+                if (logStr && logStr.startsWith('[')) log = JSON.parse(logStr);
+            } catch (e) {}
+
+            map[cleanPlate] = {
+                plate: cleanPlate,
+                status: r.get("Estatus") || "EN_REPARACION",
+                mechanic: r.get("Mecanico") || "",
+                exitReason: r.get("Motivo_Salida") || "",
+                lastUpdate: r.get("Ultima_Actualizacion") || "",
+                parts,
+                externalServices,
+                log,
+            };
+        }
+        return map;
+    } catch (e) {
+        console.error("Error loading Piso status map:", e);
+        return {};
+    }
+};
+
+/**
+ * Updates or creates floor tracking status for a vehicle in CONTROL_PISO.
+ */
+export const updateVehicleFloorStatus = async (
+    plate: string,
+    status: string,
+    options?: {
+        mechanic?: string;
+        exitReason?: string;
+        newPart?: any;
+        newExternalService?: any;
+        newLogEntry?: any;
+    }
+) => {
+    try {
+        const doc = await getInventoryDoc();
+        const sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.PISO_TAB!];
+        if (!sheet) throw new Error("Sheet CONTROL_PISO not found");
+
+        const cleanPlate = String(plate).toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const rows = await sheet.getRows();
+        const existingRow = rows.find(r => {
+            const p = (r.get("Placa") || "").toUpperCase().replace(/[^A-Z0-9]/g, '');
+            return p === cleanPlate;
+        });
+
+        const now = new Date().toISOString();
+
+        if (existingRow) {
+            existingRow.set("Estatus", status);
+            existingRow.set("Ultima_Actualizacion", now);
+            if (options?.mechanic !== undefined) existingRow.set("Mecanico", options.mechanic);
+            if (options?.exitReason !== undefined) existingRow.set("Motivo_Salida", options.exitReason);
+
+            if (options?.newPart) {
+                let parts: any[] = [];
+                try {
+                    const raw = existingRow.get("Refacciones_JSON");
+                    if (raw && raw.startsWith('[')) parts = JSON.parse(raw);
+                } catch (e) {}
+                parts.push(options.newPart);
+                existingRow.set("Refacciones_JSON", JSON.stringify(parts));
+            }
+
+            if (options?.newExternalService) {
+                let services: any[] = [];
+                try {
+                    const raw = existingRow.get("Servicios_Externos_JSON");
+                    if (raw && raw.startsWith('[')) services = JSON.parse(raw);
+                } catch (e) {}
+                services.push(options.newExternalService);
+                existingRow.set("Servicios_Externos_JSON", JSON.stringify(services));
+            }
+
+            if (options?.newLogEntry) {
+                let log: any[] = [];
+                try {
+                    const raw = existingRow.get("Bitacora_JSON");
+                    if (raw && raw.startsWith('[')) log = JSON.parse(raw);
+                } catch (e) {}
+                log.push(options.newLogEntry);
+                existingRow.set("Bitacora_JSON", JSON.stringify(log));
+            }
+
+            await existingRow.save();
+            return { success: true, updated: true };
+        } else {
+            const parts = options?.newPart ? [options.newPart] : [];
+            const externalServices = options?.newExternalService ? [options.newExternalService] : [];
+            const log = options?.newLogEntry ? [options.newLogEntry] : [];
+
+            await sheet.addRow({
+                Placa: cleanPlate,
+                Estatus: status,
+                Mecanico: options?.mechanic || "",
+                Motivo_Salida: options?.exitReason || "",
+                Ultima_Actualizacion: now,
+                Refacciones_JSON: JSON.stringify(parts),
+                Servicios_Externos_JSON: JSON.stringify(externalServices),
+                Bitacora_JSON: JSON.stringify(log),
+            });
+            return { success: true, created: true };
+        }
+    } catch (e) {
+        console.error("Error updating vehicle floor status:", e);
+        throw e;
+    }
+};
+

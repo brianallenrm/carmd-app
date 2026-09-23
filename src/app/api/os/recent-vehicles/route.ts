@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { JWT } from 'google-auth-library';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { GOOGLE_SHEETS_CONFIG } from '@/lib/constants';
+import { formatMexicanAddress } from '@/lib/utils';
 
 const LIMIT = 30;
 
@@ -283,10 +284,12 @@ export async function GET() {
                         name: row.get('Nombre COMPLETO o Empresa:') || '',
                         phone: row.get('Teléfono (whatsapp):') || row.get('Teléfono casa / oficina:') || '',
                         email: row.get('Dirección de correo electrónico') || '',
-                        address: [
-                            row.get('Domicilio Calle y NUMERO:') || '',
-                            row.get('Colonia:') || '',
-                        ].filter(Boolean).join(', ') || '',
+                        address: formatMexicanAddress({
+                            street: row.get('Domicilio Calle y NUMERO:') || '',
+                            colonia: row.get('Colonia:') || '',
+                            munDel: row.get('Deleg. o Municipio:') || '',
+                            state: row.get('Estado:') || '',
+                        }),
                     },
                     vehicle: {
                         brand: row.get('Marca:') || '',

@@ -6,7 +6,7 @@ import {
     X, Car, User, Phone, Wrench, ShieldCheck, Clock,
     DollarSign, Image as ImageIcon, Plus, Check, ChevronRight,
     ExternalLink, FileText, History, ZoomIn, ZoomOut, AlertCircle,
-    RotateCcw, Sparkles, Fuel, Gauge, Trash2
+    RotateCcw, Sparkles, Fuel, Gauge, Trash2, Pencil
 } from "lucide-react";
 
 export interface PartItem {
@@ -97,6 +97,18 @@ export default function FloorControlDrawer({
     // Bitacora state
     const [logs, setLogs] = useState<LogItem[]>([]);
     const [newLogText, setNewLogText] = useState("");
+
+    // Edit Part state
+    const [editingPartId, setEditingPartId] = useState<string | number | null>(null);
+    const [editPartDesc, setEditPartDesc] = useState("");
+    const [editPartCost, setEditPartCost] = useState("");
+    const [editPartSupplier, setEditPartSupplier] = useState("");
+
+    // Edit External Service state
+    const [editingExtId, setEditingExtId] = useState<string | number | null>(null);
+    const [editExtDesc, setEditExtDesc] = useState("");
+    const [editExtCost, setEditExtCost] = useState("");
+    const [editExtVendor, setEditExtVendor] = useState("");
 
     // Lightbox image viewer
     const [zoomImage, setZoomImage] = useState<string | null>(null);
@@ -284,6 +296,58 @@ export default function FloorControlDrawer({
         }
     };
 
+    // Start / Save Edit Part
+    const startEditPart = (p: PartItem) => {
+        setEditingPartId(p.id);
+        setEditPartDesc(p.description);
+        setEditPartCost(String(p.cost || ""));
+        setEditPartSupplier(p.supplier || "");
+    };
+
+    const handleUpdatePart = async (partId: string | number) => {
+        if (!editPartDesc.trim()) return;
+        const costNum = parseFloat(editPartCost) || 0;
+        const nextParts = parts.map(p =>
+            p.id === partId
+                ? {
+                    ...p,
+                    description: editPartDesc.trim(),
+                    cost: costNum,
+                    supplier: editPartSupplier.trim() || "Taller",
+                }
+                : p
+        );
+
+        setParts(nextParts);
+        setEditingPartId(null);
+
+        try {
+            await fetch("/api/os/recent-vehicles", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    plate: cleanPlate,
+                    status: currentStatus,
+                    mechanic: selectedMechanics.join(", "),
+                    parts: nextParts,
+                }),
+            });
+
+            if (onVehicleUpdated) {
+                onVehicleUpdated({
+                    ...vehicle,
+                    floorData: {
+                        ...(vehicle.floorData || {}),
+                        parts: nextParts,
+                        partsCount: nextParts.length,
+                    },
+                });
+            }
+        } catch (e) {
+            console.error("Error al actualizar refacción:", e);
+        }
+    };
+
     // Add External Service
     const handleSaveExternal = async () => {
         if (!newExtDesc.trim()) return;
@@ -359,6 +423,58 @@ export default function FloorControlDrawer({
             }
         } catch (e) {
             console.error("Error al eliminar servicio externo:", e);
+        }
+    };
+
+    // Start / Save Edit External Service
+    const startEditExternal = (e: ExternalServiceItem) => {
+        setEditingExtId(e.id);
+        setEditExtDesc(e.description);
+        setEditExtCost(String(e.cost || ""));
+        setEditExtVendor(e.vendor || "");
+    };
+
+    const handleUpdateExternal = async (extId: string | number) => {
+        if (!editExtDesc.trim()) return;
+        const costNum = parseFloat(editExtCost) || 0;
+        const nextExts = externals.map(e =>
+            e.id === extId
+                ? {
+                    ...e,
+                    description: editExtDesc.trim(),
+                    cost: costNum,
+                    vendor: editExtVendor.trim() || "Externo",
+                }
+                : e
+        );
+
+        setExternals(nextExts);
+        setEditingExtId(null);
+
+        try {
+            await fetch("/api/os/recent-vehicles", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    plate: cleanPlate,
+                    status: currentStatus,
+                    mechanic: selectedMechanics.join(", "),
+                    externalServices: nextExts,
+                }),
+            });
+
+            if (onVehicleUpdated) {
+                onVehicleUpdated({
+                    ...vehicle,
+                    floorData: {
+                        ...(vehicle.floorData || {}),
+                        externalServices: nextExts,
+                        externalCount: nextExts.length,
+                    },
+                });
+            }
+        } catch (e) {
+            console.error("Error al actualizar servicio externo:", e);
         }
     };
 
@@ -785,65 +901,133 @@ export default function FloorControlDrawer({
                                 ) : (
                                     <div className="space-y-2">
                                         {parts.map((p, idx) => (
-                                            <div
-                                                key={p.id || idx}
-                                                className="p-3 bg-white border border-slate-100 rounded-xl flex items-center justify-between gap-3 shadow-sm hover:border-slate-200 transition-all"
-                                            >
-                                                <div className="flex items-center gap-3 min-w-0">
-                                                    {p.photoUrl ? (
+                                            editingPartId === p.id ? (
+                                                <div key={p.id || idx} className="p-3 bg-amber-50/70 border border-amber-300 rounded-xl space-y-2 animate-in fade-in duration-150">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[11px] font-bold text-amber-900 uppercase">
+                                                            Editar Refacción
+                                                        </span>
+                                                        <span className="text-[10px] text-amber-700 font-medium">Modo edición</span>
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Descripción (ej. Balatas delanteras)"
+                                                        value={editPartDesc}
+                                                        onChange={(e) => setEditPartDesc(e.target.value)}
+                                                        className="w-full text-xs p-2 bg-white border border-amber-200 rounded-lg focus:outline-none focus:border-[#f16315]"
+                                                    />
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <input
+                                                            type="number"
+                                                            placeholder="Costo $ MXN"
+                                                            value={editPartCost}
+                                                            onChange={(e) => setEditPartCost(e.target.value)}
+                                                            className="text-xs p-2 bg-white border border-amber-200 rounded-lg focus:outline-none focus:border-[#f16315]"
+                                                        />
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Proveedor (AutoZone, etc.)"
+                                                            value={editPartSupplier}
+                                                            onChange={(e) => setEditPartSupplier(e.target.value)}
+                                                            className="text-xs p-2 bg-white border border-amber-200 rounded-lg focus:outline-none focus:border-[#f16315]"
+                                                        />
+                                                    </div>
+                                                    <div className="flex justify-end gap-2 pt-1">
                                                         <button
-                                                            onClick={() => setZoomImage(p.photoUrl!)}
-                                                            className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0 group relative"
-                                                            title="Ver foto del ticket"
+                                                            type="button"
+                                                            onClick={() => setEditingPartId(null)}
+                                                            className="px-2.5 py-1 text-xs text-slate-500 hover:bg-slate-200 rounded-lg font-bold"
                                                         >
-                                                            <img
-                                                                src={p.photoUrl}
-                                                                alt="Ticket"
-                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                                                            />
-                                                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                                                <ZoomIn size={14} className="text-white" />
-                                                            </div>
+                                                            Cancelar
                                                         </button>
-                                                    ) : (
-                                                        <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 font-bold text-xs">
-                                                            <Wrench size={16} />
-                                                        </div>
-                                                    )}
-
-                                                    <div className="min-w-0">
-                                                        <p className="text-xs font-bold text-slate-800 truncate">
-                                                            {p.description}
-                                                        </p>
-                                                        <p className="text-[10px] text-slate-400">
-                                                            Proveedor: <span className="font-semibold text-slate-600">{p.supplier || "Taller"}</span>
-                                                        </p>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleUpdatePart(p.id)}
+                                                            className="px-3 py-1 text-xs bg-[#f16315] hover:bg-[#d95510] text-white rounded-lg font-bold shadow-sm"
+                                                        >
+                                                            Guardar Cambios
+                                                        </button>
                                                     </div>
                                                 </div>
-
-                                                <div className="flex items-center gap-1.5 flex-shrink-0">
-                                                    <div className="text-right">
-                                                        <p className="text-xs font-black text-slate-900">
-                                                            ${(Number(p.cost) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-                                                        </p>
-                                                        {p.photoUrl && (
-                                                            <button
-                                                                onClick={() => setZoomImage(p.photoUrl!)}
-                                                                className="text-[10px] text-[#f16315] font-bold hover:underline block"
-                                                            >
-                                                                Ver ticket
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                    <button
-                                                        onClick={() => handleDeletePart(p.id)}
-                                                        className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors ml-1"
-                                                        title="Eliminar refacción"
+                                            ) : (
+                                                <div
+                                                    key={p.id || idx}
+                                                    className="p-3 bg-white border border-slate-100 rounded-xl flex items-center justify-between gap-3 shadow-sm hover:border-slate-200 transition-all"
+                                                >
+                                                    <div
+                                                        onClick={() => startEditPart(p)}
+                                                        className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer group"
+                                                        title="Click para editar refacción"
                                                     >
-                                                        <Trash2 size={13} />
-                                                    </button>
+                                                        {p.photoUrl ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setZoomImage(p.photoUrl!);
+                                                                }}
+                                                                className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0 group/img relative"
+                                                                title="Ver foto del ticket"
+                                                            >
+                                                                <img
+                                                                    src={p.photoUrl}
+                                                                    alt="Ticket"
+                                                                    className="w-full h-full object-cover group-hover/img:scale-105 transition-transform"
+                                                                />
+                                                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
+                                                                    <ZoomIn size={14} className="text-white" />
+                                                                </div>
+                                                            </button>
+                                                        ) : (
+                                                            <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 font-bold text-xs group-hover:bg-amber-100 transition-colors">
+                                                                <Wrench size={16} />
+                                                            </div>
+                                                        )}
+
+                                                        <div className="min-w-0">
+                                                            <p className="text-xs font-bold text-slate-800 truncate group-hover:text-[#f16315] transition-colors">
+                                                                {p.description}
+                                                            </p>
+                                                            <p className="text-[10px] text-slate-400">
+                                                                Proveedor: <span className="font-semibold text-slate-600">{p.supplier || "Taller"}</span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                                                        <div className="text-right">
+                                                            <p className="text-xs font-black text-slate-900">
+                                                                ${(Number(p.cost) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                                                            </p>
+                                                            {p.photoUrl && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setZoomImage(p.photoUrl!)}
+                                                                    className="text-[10px] text-[#f16315] font-bold hover:underline block"
+                                                                >
+                                                                    Ver ticket
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => startEditPart(p)}
+                                                            className="p-1.5 text-slate-300 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors ml-1"
+                                                            title="Editar refacción"
+                                                        >
+                                                            <Pencil size={13} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleDeletePart(p.id)}
+                                                            className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                                                            title="Eliminar refacción"
+                                                        >
+                                                            <Trash2 size={13} />
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )
                                         ))}
 
                                         <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl flex items-center justify-between">
@@ -929,31 +1113,94 @@ export default function FloorControlDrawer({
                                 ) : (
                                     <div className="space-y-2">
                                         {externals.map((e, idx) => (
-                                            <div
-                                                key={e.id || idx}
-                                                className="p-3 bg-white border border-slate-100 rounded-xl flex items-center justify-between gap-3 shadow-sm"
-                                            >
-                                                <div>
-                                                    <p className="text-xs font-bold text-slate-800">
-                                                        {e.description}
-                                                    </p>
-                                                    <p className="text-[10px] text-slate-400">
-                                                        Proveedor: <span className="font-semibold text-slate-600">{e.vendor || "Externo"}</span>
-                                                    </p>
+                                            editingExtId === e.id ? (
+                                                <div key={e.id || idx} className="p-3 bg-indigo-50/70 border border-indigo-300 rounded-xl space-y-2 animate-in fade-in duration-150">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[11px] font-bold text-indigo-900 uppercase">
+                                                            Editar Servicio Externo
+                                                        </span>
+                                                        <span className="text-[10px] text-indigo-700 font-medium">Modo edición</span>
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Descripción (ej. Rectificado de 2 discos)"
+                                                        value={editExtDesc}
+                                                        onChange={(ev) => setEditExtDesc(ev.target.value)}
+                                                        className="w-full text-xs p-2 bg-white border border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-500"
+                                                    />
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <input
+                                                            type="number"
+                                                            placeholder="Costo $ MXN"
+                                                            value={editExtCost}
+                                                            onChange={(ev) => setEditExtCost(ev.target.value)}
+                                                            className="text-xs p-2 bg-white border border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-500"
+                                                        />
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Proveedor (Torno Don Pepe, etc.)"
+                                                            value={editExtVendor}
+                                                            onChange={(ev) => setEditExtVendor(ev.target.value)}
+                                                            className="text-xs p-2 bg-white border border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-500"
+                                                        />
+                                                    </div>
+                                                    <div className="flex justify-end gap-2 pt-1">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setEditingExtId(null)}
+                                                            className="px-2.5 py-1 text-xs text-slate-500 hover:bg-slate-200 rounded-lg font-bold"
+                                                        >
+                                                            Cancelar
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleUpdateExternal(e.id)}
+                                                            className="px-3 py-1 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow-sm"
+                                                        >
+                                                            Guardar Cambios
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-1.5 flex-shrink-0">
-                                                    <p className="text-xs font-black text-slate-900">
-                                                        ${(Number(e.cost) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-                                                    </p>
-                                                    <button
-                                                        onClick={() => handleDeleteExternal(e.id)}
-                                                        className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors ml-1"
-                                                        title="Eliminar servicio"
+                                            ) : (
+                                                <div
+                                                    key={e.id || idx}
+                                                    className="p-3 bg-white border border-slate-100 rounded-xl flex items-center justify-between gap-3 shadow-sm hover:border-slate-200 transition-all"
+                                                >
+                                                    <div
+                                                        onClick={() => startEditExternal(e)}
+                                                        className="flex-1 cursor-pointer group min-w-0"
+                                                        title="Click para editar servicio"
                                                     >
-                                                        <Trash2 size={13} />
-                                                    </button>
+                                                        <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-600 transition-colors truncate">
+                                                            {e.description}
+                                                        </p>
+                                                        <p className="text-[10px] text-slate-400">
+                                                            Proveedor: <span className="font-semibold text-slate-600">{e.vendor || "Externo"}</span>
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                                                        <p className="text-xs font-black text-slate-900">
+                                                            ${(Number(e.cost) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                                                        </p>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => startEditExternal(e)}
+                                                            className="p-1.5 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors ml-1"
+                                                            title="Editar servicio"
+                                                        >
+                                                            <Pencil size={13} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleDeleteExternal(e.id)}
+                                                            className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                                                            title="Eliminar servicio"
+                                                        >
+                                                            <Trash2 size={13} />
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )
                                         ))}
 
                                         <div className="p-3 bg-indigo-50/70 border border-indigo-200 rounded-xl flex items-center justify-between">

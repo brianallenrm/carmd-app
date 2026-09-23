@@ -6,8 +6,10 @@ import {
     X, Car, User, Phone, Wrench, ShieldCheck, Clock,
     DollarSign, Image as ImageIcon, Plus, Check, ChevronRight,
     ExternalLink, FileText, History, ZoomIn, ZoomOut, AlertCircle,
-    RotateCcw, Sparkles, Fuel, Gauge, Trash2, Pencil
+    RotateCcw, Sparkles, Fuel, Gauge, Trash2, Pencil, Camera,
+    Loader2, RotateCw
 } from "lucide-react";
+import { compressImage, blobToBase64 } from "@/lib/image-utils";
 
 export interface PartItem {
     id: string | number;
@@ -24,6 +26,7 @@ export interface ExternalServiceItem {
     description: string;
     cost: number;
     vendor?: string;
+    photoUrl?: string;
     date?: string;
 }
 
@@ -55,7 +58,7 @@ const FLOOR_STATUS_OPTIONS = [
     { value: "EN_RAMPA", label: "En rampa / trabajo", color: "bg-amber-500 text-white border-amber-500", icon: "🔧" },
     { value: "EN_DIAGNOSTICO", label: "En diagnóstico", color: "bg-blue-500 text-white border-blue-500", icon: "🔍" },
     { value: "ESPERANDO_PIEZAS", label: "Esperando refacciones", color: "bg-purple-500 text-white border-purple-500", icon: "📦" },
-    { value: "TORNO", label: "En torno / rectificado", color: "bg-indigo-500 text-white border-indigo-500", icon: "⚙️" },
+    { value: "TORNO", label: "En rectificación / maquinado", color: "bg-indigo-500 text-white border-indigo-500", icon: "⚙️" },
     { value: "LAVADO", label: "En lavado", color: "bg-cyan-500 text-white border-cyan-500", icon: "🧼" },
     { value: "LISTO_ENTREGA", label: "Listo para entrega", color: "bg-emerald-500 text-white border-emerald-500", icon: "🏁" },
     { value: "MANTENIMIENTO_SIN_NOTA", label: "Cortesía / Garantía (Sin nota)", color: "bg-teal-600 text-white border-teal-600", icon: "🛠️" },
@@ -92,6 +95,7 @@ export default function FloorControlDrawer({
     const [newExtDesc, setNewExtDesc] = useState("");
     const [newExtCost, setNewExtCost] = useState("");
     const [newExtVendor, setNewExtVendor] = useState("");
+    const [newExtPhotoUrl, setNewExtPhotoUrl] = useState("");
     const [showAddExt, setShowAddExt] = useState(false);
 
     // Bitacora state
@@ -103,15 +107,22 @@ export default function FloorControlDrawer({
     const [editPartDesc, setEditPartDesc] = useState("");
     const [editPartCost, setEditPartCost] = useState("");
     const [editPartSupplier, setEditPartSupplier] = useState("");
+    const [editPartPhotoUrl, setEditPartPhotoUrl] = useState("");
 
     // Edit External Service state
     const [editingExtId, setEditingExtId] = useState<string | number | null>(null);
     const [editExtDesc, setEditExtDesc] = useState("");
     const [editExtCost, setEditExtCost] = useState("");
     const [editExtVendor, setEditExtVendor] = useState("");
+    const [editExtPhotoUrl, setEditExtPhotoUrl] = useState("");
+
+    // Ticket Photo Upload states
+    const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
 
     // Lightbox image viewer
     const [zoomImage, setZoomImage] = useState<string | null>(null);
+    const [zoomRotation, setZoomRotation] = useState<number>(0);
 
     // Sync from vehicle prop
     useEffect(() => {
@@ -133,6 +144,57 @@ export default function FloorControlDrawer({
 
     const plates = vehicle.vehicle?.plates || "";
     const cleanPlate = plates.toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+    // Helper to upload ticket photos via R2
+    const handleUploadPhotoFile = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+        onSuccess: (url: string) => void,
+        tag: string = "ticket"
+    ) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploadingPhoto(true);
+        setUploadError(null);
+
+        try {
+            const { blob, actualFormat } = await compressImage(file, {
+                maxWidth: 1600,
+                maxHeight: 1600,
+                quality: 0.75,
+                format: "image/webp",
+            });
+
+            const base64 = await blobToBase64(blob);
+            const ext = actualFormat === "image/webp" ? "webp" : "jpg";
+            const platePrefix = cleanPlate || "TICKET";
+            const filename = `${platePrefix}_ticket_${tag}_${Date.now()}.${ext}`;
+
+            const res = await fetch("/api/photos/upload", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ image: base64, filename }),
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || `HTTP ${res.status}`);
+            }
+
+            const data = await res.json();
+            if (data.url) {
+                onSuccess(data.url);
+            } else {
+                throw new Error("No se recibió la URL de la imagen");
+            }
+        } catch (err: any) {
+            console.error("Error al procesar/subir foto de ticket:", err);
+            setUploadError(err.message || "Error al subir la imagen");
+        } finally {
+            setIsUploadingPhoto(false);
+            e.target.value = "";
+        }
+    };
 
     // Toggle mechanic assignment
     const handleToggleMechanic = async (mechName: string) => {
@@ -302,6 +364,7 @@ export default function FloorControlDrawer({
         setEditPartDesc(p.description);
         setEditPartCost(String(p.cost || ""));
         setEditPartSupplier(p.supplier || "");
+        setEditPartPhotoUrl(p.photoUrl || "");
     };
 
     const handleUpdatePart = async (partId: string | number) => {
@@ -314,12 +377,14 @@ export default function FloorControlDrawer({
                     description: editPartDesc.trim(),
                     cost: costNum,
                     supplier: editPartSupplier.trim() || "Taller",
+                    photoUrl: editPartPhotoUrl.trim() || undefined,
                 }
                 : p
         );
 
         setParts(nextParts);
         setEditingPartId(null);
+        setEditPartPhotoUrl("");
 
         try {
             await fetch("/api/os/recent-vehicles", {
@@ -357,6 +422,7 @@ export default function FloorControlDrawer({
             description: newExtDesc.trim(),
             cost: costNum,
             vendor: newExtVendor.trim() || "Externo",
+            photoUrl: newExtPhotoUrl.trim() || undefined,
             date: new Date().toISOString(),
         };
 
@@ -365,6 +431,7 @@ export default function FloorControlDrawer({
         setNewExtDesc("");
         setNewExtCost("");
         setNewExtVendor("");
+        setNewExtPhotoUrl("");
         setShowAddExt(false);
 
         try {
@@ -432,6 +499,7 @@ export default function FloorControlDrawer({
         setEditExtDesc(e.description);
         setEditExtCost(String(e.cost || ""));
         setEditExtVendor(e.vendor || "");
+        setEditExtPhotoUrl(e.photoUrl || "");
     };
 
     const handleUpdateExternal = async (extId: string | number) => {
@@ -444,12 +512,14 @@ export default function FloorControlDrawer({
                     description: editExtDesc.trim(),
                     cost: costNum,
                     vendor: editExtVendor.trim() || "Externo",
+                    photoUrl: editExtPhotoUrl.trim() || undefined,
                 }
                 : e
         );
 
         setExternals(nextExts);
         setEditingExtId(null);
+        setEditExtPhotoUrl("");
 
         try {
             await fetch("/api/os/recent-vehicles", {
@@ -533,7 +603,7 @@ export default function FloorControlDrawer({
 
             // Map external services as services or sublet
             const mappedServices = externals.map(e => ({
-                description: `${e.description} (${e.vendor || 'Servicio externo'})`,
+                description: `${e.description} (${e.vendor || 'Rectificación / Sublet'})`,
                 cost: e.cost,
             }));
 
@@ -555,6 +625,11 @@ export default function FloorControlDrawer({
     const totalPartsCost = parts.reduce((acc, p) => acc + (Number(p.cost) || 0), 0);
     const totalExternalCost = externals.reduce((acc, e) => acc + (Number(e.cost) || 0), 0);
     const grandTotal = totalPartsCost + totalExternalCost;
+
+    const allTickets = [
+        ...parts.filter(p => p.photoUrl).map(p => ({ url: p.photoUrl!, label: p.description, cost: p.cost, type: 'refaccion' })),
+        ...externals.filter(e => e.photoUrl).map(e => ({ url: e.photoUrl!, label: e.description, cost: e.cost, type: 'rectificacion' })),
+    ];
 
     const phoneClean = (vehicle.client?.phone || "").replace(/\D/g, "");
     const waUrl = phoneClean ? `https://wa.me/52${phoneClean}` : null;
@@ -766,7 +841,44 @@ export default function FloorControlDrawer({
                         </div>
                     </div>
 
-                    {/* Tabs: Refacciones / Externos / Bitácora */}
+                    {/* Galería Rápida de Tickets del Vehículo (si tiene fotos subidas) */}
+                    {allTickets.length > 0 && (
+                        <div className="p-3 bg-gradient-to-r from-amber-50/90 via-orange-50/90 to-amber-50/90 border border-amber-200/90 rounded-2xl space-y-2">
+                            <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-black uppercase text-amber-950 tracking-wider flex items-center gap-1.5">
+                                    <Camera size={13} className="text-[#f16315]" />
+                                    Fotos de Tickets del Auto ({allTickets.length})
+                                </span>
+                                <span className="text-[10px] text-amber-800 font-bold">
+                                    Toca para inspeccionar
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-0.5">
+                                {allTickets.map((t, idx) => (
+                                    <button
+                                        key={idx}
+                                        type="button"
+                                        onClick={() => {
+                                            setZoomImage(t.url);
+                                            setZoomRotation(0);
+                                        }}
+                                        className="flex-shrink-0 group relative w-16 h-16 rounded-xl overflow-hidden border-2 border-white shadow-sm hover:scale-105 hover:shadow-md transition-all cursor-pointer"
+                                        title={`${t.label} - $${Number(t.cost || 0).toLocaleString()}`}
+                                    >
+                                        <img src={t.url} alt={t.label} className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                            <ZoomIn size={14} className="text-white" />
+                                        </div>
+                                        <div className="absolute bottom-0 inset-x-0 bg-black/60 text-[9px] text-white font-bold text-center truncate px-0.5">
+                                            ${Number(t.cost || 0).toLocaleString()}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tabs: Refacciones / Rectificación / Bitácora */}
                     <div>
                         <div className="flex bg-slate-100 p-1 rounded-xl mb-4">
                             <button
@@ -793,7 +905,7 @@ export default function FloorControlDrawer({
                                         : "text-slate-400 hover:text-slate-600"
                                 }`}
                             >
-                                <span>Torno / Lavado</span>
+                                <span>Rectificación</span>
                                 {externals.length > 0 && (
                                     <span className="bg-indigo-500 text-white text-[9px] px-1.5 rounded-full">
                                         {externals.length}
@@ -863,13 +975,94 @@ export default function FloorControlDrawer({
                                                 className="text-xs p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#f16315]"
                                             />
                                         </div>
-                                        <input
-                                            type="text"
-                                            placeholder="URL foto ticket (opcional)"
-                                            value={newPartPhotoUrl}
-                                            onChange={(e) => setNewPartPhotoUrl(e.target.value)}
-                                            className="w-full text-xs p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#f16315]"
-                                        />
+                                        {/* Subir foto ticket */}
+                                        <div className="space-y-1.5 pt-1">
+                                            <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
+                                                <span>Foto del Ticket / Factura</span>
+                                                {newPartPhotoUrl && (
+                                                    <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                                                        <Check size={11} /> Ticket adjuntado
+                                                    </span>
+                                                )}
+                                            </label>
+
+                                            {newPartPhotoUrl ? (
+                                                <div className="flex items-center gap-2.5 p-2 bg-white rounded-xl border border-slate-200">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setZoomImage(newPartPhotoUrl);
+                                                            setZoomRotation(0);
+                                                        }}
+                                                        className="w-12 h-12 rounded-lg overflow-hidden border border-slate-200 flex-shrink-0 group relative cursor-pointer"
+                                                        title="Ver ticket"
+                                                    >
+                                                        <img src={newPartPhotoUrl} alt="Ticket" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                                            <ZoomIn size={14} className="text-white" />
+                                                        </div>
+                                                    </button>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-xs font-bold text-slate-800 truncate">Ticket listo</p>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setZoomImage(newPartPhotoUrl);
+                                                                setZoomRotation(0);
+                                                            }}
+                                                            className="text-[11px] text-[#f16315] font-bold hover:underline block text-left"
+                                                        >
+                                                            Ver foto completa
+                                                        </button>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setNewPartPhotoUrl("")}
+                                                        className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                                                        title="Quitar foto"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-1.5">
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <label className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl border-2 border-dashed text-xs font-bold transition-all cursor-pointer ${isUploadingPhoto ? 'opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400' : 'border-amber-300 bg-amber-50/70 text-amber-900 hover:bg-amber-100/70 hover:border-amber-400'}`}>
+                                                            <Camera size={15} className="text-[#f16315]" />
+                                                            <span>Tomar Foto</span>
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                capture="environment"
+                                                                disabled={isUploadingPhoto}
+                                                                className="hidden"
+                                                                onChange={(e) => handleUploadPhotoFile(e, (url) => setNewPartPhotoUrl(url), "refaccion")}
+                                                            />
+                                                        </label>
+                                                        <label className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl border-2 border-dashed text-xs font-bold transition-all cursor-pointer ${isUploadingPhoto ? 'opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400' : 'border-slate-200 bg-white text-slate-700 hover:border-[#f16315] hover:text-[#f16315]'}`}>
+                                                            <ImageIcon size={15} />
+                                                            <span>Subir Foto</span>
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                disabled={isUploadingPhoto}
+                                                                className="hidden"
+                                                                onChange={(e) => handleUploadPhotoFile(e, (url) => setNewPartPhotoUrl(url), "refaccion")}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    {isUploadingPhoto && (
+                                                        <div className="flex items-center justify-center gap-2 p-2 bg-amber-50 rounded-lg text-amber-800 text-xs font-medium animate-pulse">
+                                                            <Loader2 size={13} className="animate-spin text-[#f16315]" />
+                                                            <span>Comprimiendo y subiendo ticket a la nube...</span>
+                                                        </div>
+                                                    )}
+                                                    {uploadError && (
+                                                        <p className="text-[11px] text-rose-500 font-semibold px-1">{uploadError}</p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                         <div className="flex justify-end gap-2 pt-1">
                                             <button
                                                 onClick={() => setShowAddPart(false)}
@@ -895,7 +1088,7 @@ export default function FloorControlDrawer({
                                             No hay refacciones registradas aún.
                                         </p>
                                         <p className="text-[11px] text-slate-400">
-                                            Se agregarán automáticamente cuando Alejandra mande la foto del ticket por WhatsApp.
+                                            Toma foto del ticket arriba o súbela desde tu galería.
                                         </p>
                                     </div>
                                 ) : (
@@ -931,6 +1124,92 @@ export default function FloorControlDrawer({
                                                             onChange={(e) => setEditPartSupplier(e.target.value)}
                                                             className="text-xs p-2 bg-white border border-amber-200 rounded-lg focus:outline-none focus:border-[#f16315]"
                                                         />
+                                                    </div>
+
+                                                    {/* Subir / Editar foto ticket */}
+                                                    <div className="space-y-1.5 pt-1">
+                                                        <label className="text-[10px] font-bold text-amber-900 uppercase flex items-center justify-between">
+                                                            <span>Foto del Ticket / Factura</span>
+                                                            {editPartPhotoUrl && (
+                                                                <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
+                                                                    <Check size={11} /> Ticket adjuntado
+                                                                </span>
+                                                            )}
+                                                        </label>
+
+                                                        {editPartPhotoUrl ? (
+                                                            <div className="flex items-center gap-2.5 p-2 bg-white rounded-xl border border-amber-200">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setZoomImage(editPartPhotoUrl);
+                                                                        setZoomRotation(0);
+                                                                    }}
+                                                                    className="w-12 h-12 rounded-lg overflow-hidden border border-slate-200 flex-shrink-0 group relative cursor-pointer"
+                                                                    title="Ver ticket"
+                                                                >
+                                                                    <img src={editPartPhotoUrl} alt="Ticket" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                                                        <ZoomIn size={14} className="text-white" />
+                                                                    </div>
+                                                                </button>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-xs font-bold text-slate-800 truncate">Ticket actual</p>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setZoomImage(editPartPhotoUrl);
+                                                                            setZoomRotation(0);
+                                                                        }}
+                                                                        className="text-[11px] text-[#f16315] font-bold hover:underline block text-left"
+                                                                    >
+                                                                        Ver foto completa
+                                                                    </button>
+                                                                </div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setEditPartPhotoUrl("")}
+                                                                    className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                                                                    title="Quitar foto"
+                                                                >
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="space-y-1.5">
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                    <label className={`flex items-center justify-center gap-1.5 p-2 rounded-xl border-2 border-dashed text-xs font-bold transition-all cursor-pointer ${isUploadingPhoto ? 'opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400' : 'border-amber-300 bg-white text-amber-900 hover:bg-amber-100/70 hover:border-amber-400'}`}>
+                                                                        <Camera size={14} className="text-[#f16315]" />
+                                                                        <span>Tomar Foto</span>
+                                                                        <input
+                                                                            type="file"
+                                                                            accept="image/*"
+                                                                            capture="environment"
+                                                                            disabled={isUploadingPhoto}
+                                                                            className="hidden"
+                                                                            onChange={(e) => handleUploadPhotoFile(e, (url) => setEditPartPhotoUrl(url), "refaccion")}
+                                                                        />
+                                                                    </label>
+                                                                    <label className={`flex items-center justify-center gap-1.5 p-2 rounded-xl border-2 border-dashed text-xs font-bold transition-all cursor-pointer ${isUploadingPhoto ? 'opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400' : 'border-slate-200 bg-white text-slate-700 hover:border-[#f16315] hover:text-[#f16315]'}`}>
+                                                                        <ImageIcon size={14} />
+                                                                        <span>Subir Foto</span>
+                                                                        <input
+                                                                            type="file"
+                                                                            accept="image/*"
+                                                                            disabled={isUploadingPhoto}
+                                                                            className="hidden"
+                                                                            onChange={(e) => handleUploadPhotoFile(e, (url) => setEditPartPhotoUrl(url), "refaccion")}
+                                                                        />
+                                                                    </label>
+                                                                </div>
+                                                                {isUploadingPhoto && (
+                                                                    <div className="flex items-center justify-center gap-2 p-2 bg-amber-100/70 rounded-lg text-amber-900 text-xs font-medium animate-pulse">
+                                                                        <Loader2 size={13} className="animate-spin text-[#f16315]" />
+                                                                        <span>Subiendo ticket a la nube...</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div className="flex justify-end gap-2 pt-1">
                                                         <button
@@ -1043,30 +1322,30 @@ export default function FloorControlDrawer({
                             </div>
                         )}
 
-                        {/* Contenido Pestaña 2: Servicios Externos */}
+                        {/* Contenido Pestaña 2: Servicios Externos / Rectificación */}
                         {activeTab === "externos" && (
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-bold text-slate-500 uppercase">
-                                        Torno, Lavado, Alineación (Sublet)
+                                        Rectificación, Lavado, Alineación (Sublet)
                                     </span>
                                     <button
                                         onClick={() => setShowAddExt(!showAddExt)}
                                         className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 px-2.5 py-1 rounded-lg transition-colors"
                                     >
                                         <Plus size={13} />
-                                        <span>Agregar servicio</span>
+                                        <span>Agregar rectificación / servicio</span>
                                     </button>
                                 </div>
 
                                 {showAddExt && (
                                     <div className="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2 animate-in fade-in duration-150">
                                         <p className="text-[11px] font-bold text-indigo-900 uppercase">
-                                            Nuevo Servicio Externo
+                                            Nuevo Servicio de Rectificación / Externo
                                         </p>
                                         <input
                                             type="text"
-                                            placeholder="Descripción (ej. Rectificado de 2 discos)"
+                                            placeholder="Descripción (ej. Rectificado de discos, cabeza de motor)"
                                             value={newExtDesc}
                                             onChange={(e) => setNewExtDesc(e.target.value)}
                                             className="w-full text-xs p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
@@ -1081,12 +1360,102 @@ export default function FloorControlDrawer({
                                             />
                                             <input
                                                 type="text"
-                                                placeholder="Proveedor (Torno Don Pepe, etc.)"
+                                                placeholder="Proveedor (Rectificación Don Pepe, etc.)"
                                                 value={newExtVendor}
                                                 onChange={(e) => setNewExtVendor(e.target.value)}
                                                 className="text-xs p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
                                             />
                                         </div>
+
+                                        {/* Subir foto ticket / remisión */}
+                                        <div className="space-y-1.5 pt-1">
+                                            <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
+                                                <span>Ticket / Remisión (Opcional)</span>
+                                                {newExtPhotoUrl && (
+                                                    <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                                                        <Check size={11} /> Ticket adjuntado
+                                                    </span>
+                                                )}
+                                            </label>
+
+                                            {newExtPhotoUrl ? (
+                                                <div className="flex items-center gap-2.5 p-2 bg-white rounded-xl border border-indigo-100">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setZoomImage(newExtPhotoUrl);
+                                                            setZoomRotation(0);
+                                                        }}
+                                                        className="w-12 h-12 rounded-lg overflow-hidden border border-slate-200 flex-shrink-0 group relative cursor-pointer"
+                                                        title="Ver comprobante"
+                                                    >
+                                                        <img src={newExtPhotoUrl} alt="Comprobante" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                                            <ZoomIn size={14} className="text-white" />
+                                                        </div>
+                                                    </button>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-xs font-bold text-slate-800 truncate">Comprobante listo</p>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setZoomImage(newExtPhotoUrl);
+                                                                setZoomRotation(0);
+                                                            }}
+                                                            className="text-[11px] text-indigo-600 font-bold hover:underline block text-left"
+                                                        >
+                                                            Ver foto completa
+                                                        </button>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setNewExtPhotoUrl("")}
+                                                        className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                                                        title="Quitar foto"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-1.5">
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <label className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl border-2 border-dashed text-xs font-bold transition-all cursor-pointer ${isUploadingPhoto ? 'opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400' : 'border-indigo-300 bg-indigo-50/70 text-indigo-900 hover:bg-indigo-100/70 hover:border-indigo-400'}`}>
+                                                            <Camera size={15} className="text-indigo-600" />
+                                                            <span>Tomar Foto</span>
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                capture="environment"
+                                                                disabled={isUploadingPhoto}
+                                                                className="hidden"
+                                                                onChange={(e) => handleUploadPhotoFile(e, (url) => setNewExtPhotoUrl(url), "rectificacion")}
+                                                            />
+                                                        </label>
+                                                        <label className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl border-2 border-dashed text-xs font-bold transition-all cursor-pointer ${isUploadingPhoto ? 'opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400' : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-500 hover:text-indigo-600'}`}>
+                                                            <ImageIcon size={15} />
+                                                            <span>Subir Foto</span>
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                disabled={isUploadingPhoto}
+                                                                className="hidden"
+                                                                onChange={(e) => handleUploadPhotoFile(e, (url) => setNewExtPhotoUrl(url), "rectificacion")}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    {isUploadingPhoto && (
+                                                        <div className="flex items-center justify-center gap-2 p-2 bg-indigo-50 rounded-lg text-indigo-800 text-xs font-medium animate-pulse">
+                                                            <Loader2 size={13} className="animate-spin text-indigo-600" />
+                                                            <span>Subiendo comprobante a la nube...</span>
+                                                        </div>
+                                                    )}
+                                                    {uploadError && (
+                                                        <p className="text-[11px] text-rose-500 font-semibold px-1">{uploadError}</p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
                                         <div className="flex justify-end gap-2 pt-1">
                                             <button
                                                 onClick={() => setShowAddExt(false)}
@@ -1107,7 +1476,10 @@ export default function FloorControlDrawer({
                                 {externals.length === 0 ? (
                                     <div className="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                                         <p className="text-xs text-slate-400 font-medium">
-                                            No hay servicios externos registrados.
+                                            No hay servicios de rectificación o externos registrados.
+                                        </p>
+                                        <p className="text-[11px] text-slate-400">
+                                            Puedes agregar rectificados, lavados o maquinados aquí.
                                         </p>
                                     </div>
                                 ) : (
@@ -1117,13 +1489,13 @@ export default function FloorControlDrawer({
                                                 <div key={e.id || idx} className="p-3 bg-indigo-50/70 border border-indigo-300 rounded-xl space-y-2 animate-in fade-in duration-150">
                                                     <div className="flex items-center justify-between">
                                                         <span className="text-[11px] font-bold text-indigo-900 uppercase">
-                                                            Editar Servicio Externo
+                                                            Editar Rectificación / Externo
                                                         </span>
                                                         <span className="text-[10px] text-indigo-700 font-medium">Modo edición</span>
                                                     </div>
                                                     <input
                                                         type="text"
-                                                        placeholder="Descripción (ej. Rectificado de 2 discos)"
+                                                        placeholder="Descripción (ej. Rectificado de discos)"
                                                         value={editExtDesc}
                                                         onChange={(ev) => setEditExtDesc(ev.target.value)}
                                                         className="w-full text-xs p-2 bg-white border border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-500"
@@ -1138,12 +1510,99 @@ export default function FloorControlDrawer({
                                                         />
                                                         <input
                                                             type="text"
-                                                            placeholder="Proveedor (Torno Don Pepe, etc.)"
+                                                            placeholder="Proveedor (Rectificación Don Pepe, etc.)"
                                                             value={editExtVendor}
                                                             onChange={(ev) => setEditExtVendor(ev.target.value)}
                                                             className="text-xs p-2 bg-white border border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-500"
                                                         />
                                                     </div>
+
+                                                    {/* Subir / Editar foto ticket externo */}
+                                                    <div className="space-y-1.5 pt-1">
+                                                        <label className="text-[10px] font-bold text-indigo-900 uppercase flex items-center justify-between">
+                                                            <span>Foto del Ticket / Remisión</span>
+                                                            {editExtPhotoUrl && (
+                                                                <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
+                                                                    <Check size={11} /> Ticket adjuntado
+                                                                </span>
+                                                            )}
+                                                        </label>
+
+                                                        {editExtPhotoUrl ? (
+                                                            <div className="flex items-center gap-2.5 p-2 bg-white rounded-xl border border-indigo-200">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setZoomImage(editExtPhotoUrl);
+                                                                        setZoomRotation(0);
+                                                                    }}
+                                                                    className="w-12 h-12 rounded-lg overflow-hidden border border-slate-200 flex-shrink-0 group relative cursor-pointer"
+                                                                    title="Ver comprobante"
+                                                                >
+                                                                    <img src={editExtPhotoUrl} alt="Comprobante" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                                                        <ZoomIn size={14} className="text-white" />
+                                                                    </div>
+                                                                </button>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-xs font-bold text-slate-800 truncate">Comprobante actual</p>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setZoomImage(editExtPhotoUrl);
+                                                                            setZoomRotation(0);
+                                                                        }}
+                                                                        className="text-[11px] text-indigo-600 font-bold hover:underline block text-left"
+                                                                    >
+                                                                        Ver foto completa
+                                                                    </button>
+                                                                </div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setEditExtPhotoUrl("")}
+                                                                    className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                                                                    title="Quitar foto"
+                                                                >
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="space-y-1.5">
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                    <label className={`flex items-center justify-center gap-1.5 p-2 rounded-xl border-2 border-dashed text-xs font-bold transition-all cursor-pointer ${isUploadingPhoto ? 'opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400' : 'border-indigo-300 bg-white text-indigo-900 hover:bg-indigo-100/70 hover:border-indigo-400'}`}>
+                                                                        <Camera size={14} className="text-indigo-600" />
+                                                                        <span>Tomar Foto</span>
+                                                                        <input
+                                                                            type="file"
+                                                                            accept="image/*"
+                                                                            capture="environment"
+                                                                            disabled={isUploadingPhoto}
+                                                                            className="hidden"
+                                                                            onChange={(e) => handleUploadPhotoFile(e, (url) => setEditExtPhotoUrl(url), "rectificacion")}
+                                                                        />
+                                                                    </label>
+                                                                    <label className={`flex items-center justify-center gap-1.5 p-2 rounded-xl border-2 border-dashed text-xs font-bold transition-all cursor-pointer ${isUploadingPhoto ? 'opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400' : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-500 hover:text-indigo-600'}`}>
+                                                                        <ImageIcon size={14} />
+                                                                        <span>Subir Foto</span>
+                                                                        <input
+                                                                            type="file"
+                                                                            accept="image/*"
+                                                                            disabled={isUploadingPhoto}
+                                                                            className="hidden"
+                                                                            onChange={(e) => handleUploadPhotoFile(e, (url) => setEditExtPhotoUrl(url), "rectificacion")}
+                                                                        />
+                                                                    </label>
+                                                                </div>
+                                                                {isUploadingPhoto && (
+                                                                    <div className="flex items-center justify-center gap-2 p-2 bg-indigo-100/70 rounded-lg text-indigo-900 text-xs font-medium animate-pulse">
+                                                                        <Loader2 size={13} className="animate-spin text-indigo-600" />
+                                                                        <span>Subiendo comprobante a la nube...</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
                                                     <div className="flex justify-end gap-2 pt-1">
                                                         <button
                                                             type="button"
@@ -1168,20 +1627,62 @@ export default function FloorControlDrawer({
                                                 >
                                                     <div
                                                         onClick={() => startEditExternal(e)}
-                                                        className="flex-1 cursor-pointer group min-w-0"
+                                                        className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer group"
                                                         title="Click para editar servicio"
                                                     >
-                                                        <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-600 transition-colors truncate">
-                                                            {e.description}
-                                                        </p>
-                                                        <p className="text-[10px] text-slate-400">
-                                                            Proveedor: <span className="font-semibold text-slate-600">{e.vendor || "Externo"}</span>
-                                                        </p>
+                                                        {e.photoUrl ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={(ev) => {
+                                                                    ev.stopPropagation();
+                                                                    setZoomImage(e.photoUrl!);
+                                                                    setZoomRotation(0);
+                                                                }}
+                                                                className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0 group/img relative"
+                                                                title="Ver ticket de rectificación"
+                                                            >
+                                                                <img
+                                                                    src={e.photoUrl}
+                                                                    alt="Ticket"
+                                                                    className="w-full h-full object-cover group-hover/img:scale-105 transition-transform"
+                                                                />
+                                                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
+                                                                    <ZoomIn size={14} className="text-white" />
+                                                                </div>
+                                                            </button>
+                                                        ) : (
+                                                            <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 font-bold text-xs group-hover:bg-indigo-100 transition-colors">
+                                                                <Wrench size={16} />
+                                                            </div>
+                                                        )}
+
+                                                        <div className="min-w-0">
+                                                            <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-600 transition-colors truncate">
+                                                                {e.description}
+                                                            </p>
+                                                            <p className="text-[10px] text-slate-400">
+                                                                Proveedor: <span className="font-semibold text-slate-600">{e.vendor || "Externo"}</span>
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                                                        <p className="text-xs font-black text-slate-900">
-                                                            ${(Number(e.cost) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-                                                        </p>
+                                                        <div className="text-right">
+                                                            <p className="text-xs font-black text-slate-900">
+                                                                ${(Number(e.cost) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                                                            </p>
+                                                            {e.photoUrl && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setZoomImage(e.photoUrl!);
+                                                                        setZoomRotation(0);
+                                                                    }}
+                                                                    className="text-[10px] text-indigo-600 font-bold hover:underline block"
+                                                                >
+                                                                    Ver ticket
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                         <button
                                                             type="button"
                                                             onClick={() => startEditExternal(e)}
@@ -1205,7 +1706,7 @@ export default function FloorControlDrawer({
 
                                         <div className="p-3 bg-indigo-50/70 border border-indigo-200 rounded-xl flex items-center justify-between">
                                             <span className="text-xs font-bold text-indigo-900 uppercase">
-                                                Total Externos:
+                                                Total Rectificación / Externos:
                                             </span>
                                             <span className="text-sm font-black text-indigo-900">
                                                 ${totalExternalCost.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
@@ -1266,7 +1767,7 @@ export default function FloorControlDrawer({
                                     Gasto Acumulado en Piso
                                 </p>
                                 <p className="text-xs text-slate-300">
-                                    {parts.length} refacciones • {externals.length} servicios externos
+                                    {parts.length} refacciones • {externals.length} rectificación / externos
                                 </p>
                             </div>
                             <p className="text-xl font-black text-amber-400">
@@ -1304,31 +1805,63 @@ export default function FloorControlDrawer({
             {/* Modal Zoom Lightbox para foto de tickets */}
             {zoomImage && (
                 <div
-                    onClick={() => setZoomImage(null)}
-                    className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-150"
+                    onClick={() => {
+                        setZoomImage(null);
+                        setZoomRotation(0);
+                    }}
+                    className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-3 sm:p-4 backdrop-blur-md animate-in fade-in duration-150"
                 >
                     <div
                         onClick={(e) => e.stopPropagation()}
-                        className="relative max-w-3xl max-h-[90vh] bg-slate-900 rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+                        className="relative w-full max-w-3xl max-h-[92vh] bg-slate-900 rounded-2xl overflow-hidden shadow-2xl flex flex-col border border-slate-800"
                     >
-                        <div className="p-3 bg-slate-800 text-white flex items-center justify-between text-xs font-bold">
-                            <span>Inspección de Ticket de Refacción</span>
-                            <button
-                                onClick={() => setZoomImage(null)}
-                                className="p-1 text-slate-400 hover:text-white"
-                            >
-                                <X size={18} />
-                            </button>
+                        <div className="p-3 bg-slate-800 text-white flex items-center justify-between text-xs font-bold border-b border-slate-700/80">
+                            <span className="flex items-center gap-1.5">
+                                <Camera size={14} className="text-[#f16315]" />
+                                Inspección de Ticket / Comprobante
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setZoomRotation((r) => (r + 90) % 360)}
+                                    className="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-bold text-white transition-colors flex items-center gap-1 shadow-sm"
+                                    title="Girar imagen 90 grados"
+                                >
+                                    <RotateCw size={13} />
+                                    <span>Girar 90°</span>
+                                </button>
+                                <a
+                                    href={zoomImage}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-bold text-white transition-colors flex items-center gap-1 shadow-sm"
+                                    title="Abrir imagen original"
+                                >
+                                    <ExternalLink size={13} />
+                                    <span>Original</span>
+                                </a>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setZoomImage(null);
+                                        setZoomRotation(0);
+                                    }}
+                                    className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors ml-1"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
                         </div>
-                        <div className="overflow-auto p-2 flex items-center justify-center bg-black/40">
+                        <div className="overflow-auto p-4 flex items-center justify-center bg-black/60 flex-1 min-h-[300px]">
                             <img
                                 src={zoomImage}
                                 alt="Ticket en zoom"
-                                className="max-w-full max-h-[80vh] object-contain rounded-lg"
+                                style={{ transform: `rotate(${zoomRotation}deg)` }}
+                                className="max-w-full max-h-[72vh] object-contain rounded-lg transition-transform duration-200 shadow-2xl"
                             />
                         </div>
-                        <div className="p-2 text-center text-[11px] text-slate-400 bg-slate-800">
-                            Usa la rueda del ratón o haz zoom con los dedos para ver a detalle precios y números de parte
+                        <div className="p-2 text-center text-[11px] text-slate-400 bg-slate-800 border-t border-slate-700/80">
+                            Gira la imagen si el ticket fue tomado en horizontal, o haz clic en "Original" para ver a máxima resolución.
                         </div>
                     </div>
                 </div>

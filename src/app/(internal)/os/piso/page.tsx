@@ -95,7 +95,7 @@ export default function PisoTallerPage() {
                                 Autos Activos en Rampa y Taller
                             </h2>
                             <p className="text-xs text-slate-500 mt-0.5">
-                                Da <strong className="text-slate-700">clic en cualquier coche</strong> para ver mecánicos asignados, refacciones cargadas, fotos de tickets y servicios de torno/lavado.
+                                Da <strong className="text-slate-700">clic en cualquier coche</strong> para ver mecánicos asignados, refacciones cargadas, fotos de tickets y servicios de rectificación/lavado.
                             </p>
                         </div>
                     </div>

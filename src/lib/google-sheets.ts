@@ -569,7 +569,7 @@ export const updateVehicleFloorStatus = async (
         const now = new Date().toISOString();
 
         if (existingRow) {
-            existingRow.set("Estatus", status);
+            if (status) existingRow.set("Estatus", status);
             existingRow.set("Ultima_Actualizacion", now);
             if (options?.mechanic !== undefined) existingRow.set("Mecanico", options.mechanic);
             if (options?.exitReason !== undefined) existingRow.set("Motivo_Salida", options.exitReason);

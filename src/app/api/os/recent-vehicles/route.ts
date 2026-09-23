@@ -312,12 +312,18 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { plate, status, reason, mechanic } = body;
-        if (!plate || !status) {
-            return NextResponse.json({ error: 'Missing plate or status' }, { status: 400 });
+        const { plate, status, reason, mechanic, newPart, newExternalService, newLogEntry } = body;
+        if (!plate) {
+            return NextResponse.json({ error: 'Missing plate' }, { status: 400 });
         }
         const { updateVehicleFloorStatus } = await import('@/lib/google-sheets');
-        await updateVehicleFloorStatus(plate, status, { exitReason: reason, mechanic });
+        await updateVehicleFloorStatus(plate, status || '', {
+            exitReason: reason,
+            mechanic,
+            newPart,
+            newExternalService,
+            newLogEntry
+        });
         return NextResponse.json({ success: true });
     } catch (e: any) {
         console.error('[Recent Vehicles POST Error]', e);

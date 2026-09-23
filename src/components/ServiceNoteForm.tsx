@@ -316,6 +316,26 @@ export default function ServiceNoteForm() {
                     const parsed = JSON.parse(prefillData);
                     if (parsed.client) setClient(prev => ({ ...prev, ...parsed.client }));
                     if (parsed.vehicle) setVehicle(prev => ({ ...prev, ...parsed.vehicle }));
+                    if (parsed.parts && Array.isArray(parsed.parts) && parsed.parts.length > 0) {
+                        setParts(parsed.parts.map((p: any, idx: number) => ({
+                            id: String(idx + 1),
+                            description: p.description || p.name || "",
+                            laborCost: 0,
+                            partsCost: Number(p.cost) || Number(p.price) || 0,
+                            quantity: Number(p.quantity) || 1
+                        })));
+                    }
+                    if (parsed.services && Array.isArray(parsed.services) && parsed.services.length > 0) {
+                        setServices(parsed.services.map((s: any, idx: number) => ({
+                            id: String(idx + 1),
+                            description: s.description || s.name || "",
+                            laborCost: Number(s.cost) || Number(s.price) || 0,
+                            partsCost: 0
+                        })));
+                    }
+                    if (parsed.notes) {
+                        setNotes(prev => prev ? `${prev}\n${parsed.notes}` : parsed.notes);
+                    }
                     localStorage.removeItem("carmd:prefill:note");
                     // We'll still continue to load the next folio
                 } catch (e) {

@@ -9,6 +9,7 @@ import {
     MoreVertical, LogOut, RotateCcw, CheckCircle2, ShieldAlert
 } from "lucide-react";
 import Link from "next/link";
+import FloorControlDrawer from "./FloorControlDrawer";
 
 interface RecentVehicle {
     idx: number;
@@ -124,11 +125,12 @@ function StatusBadges({ v }: { v: RecentVehicle }) {
 }
 
 
-function VehicleRow({ v, index, onExpediente, onContextMenu }: {
+function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect }: {
     v: RecentVehicle;
     index: number;
     onExpediente: (plates: string) => void;
     onContextMenu: (e: React.MouseEvent, v: RecentVehicle) => void;
+    onSelect: (v: RecentVehicle) => void;
 }) {
     const cfg = STATUS_CONFIG[v.status] ?? STATUS_CONFIG['en_piso_nuevo'];
     const isExited = v.status === 'salida_sin_nota' || v.status === 'entregado' || v.status === 'mantenimiento_sin_nota';
@@ -138,11 +140,12 @@ function VehicleRow({ v, index, onExpediente, onContextMenu }: {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.04 }}
+            onClick={() => onSelect(v)}
             onContextMenu={(e) => {
                 e.preventDefault();
                 onContextMenu(e, v);
             }}
-            className={`bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-200 overflow-hidden ${
+            className={`bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-orange-300 transition-all duration-200 overflow-hidden cursor-pointer ${
                 isExited ? 'opacity-65 bg-slate-50/70' : ''
             }`}
         >
@@ -170,6 +173,11 @@ function VehicleRow({ v, index, onExpediente, onContextMenu }: {
                             {v.floorData?.mechanic && (
                                 <span className="text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 px-1.5 py-0.5 rounded-full">
                                     👨‍🔧 {v.floorData.mechanic}
+                                </span>
+                            )}
+                            {Boolean(v.floorData?.partsCount && v.floorData.partsCount > 0) && (
+                                <span className="text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded-full">
+                                    📦 {v.floorData?.partsCount} refacc.
                                 </span>
                             )}
                         </div>
@@ -214,6 +222,7 @@ function VehicleRow({ v, index, onExpediente, onContextMenu }: {
                     <Link
                         href={`/os/admin/receptions`}
                         target="_blank"
+                        onClick={(e) => e.stopPropagation()}
                         className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold transition-colors border border-slate-200"
                     >
                         <ClipboardList size={13} />
@@ -226,6 +235,7 @@ function VehicleRow({ v, index, onExpediente, onContextMenu }: {
                             href={`/os/note-preview?folio=${v.note!.folio}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
                             className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition-colors border border-emerald-200"
                         >
                             <FileText size={13} />
@@ -233,7 +243,8 @@ function VehicleRow({ v, index, onExpediente, onContextMenu }: {
                         </a>
                     ) : (
                         <button
-                            onClick={() => {
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 localStorage.setItem('carmd:prefill:note', v.prefillJson);
                                 window.open('/os', '_blank');
                             }}
@@ -246,7 +257,10 @@ function VehicleRow({ v, index, onExpediente, onContextMenu }: {
 
                     {/* Expediente */}
                     <button
-                        onClick={() => onExpediente(v.vehicle.plates)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onExpediente(v.vehicle.plates);
+                        }}
                         className="flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition-colors border border-indigo-200"
                     >
                         <History size={13} />
@@ -272,11 +286,13 @@ function VehicleRow({ v, index, onExpediente, onContextMenu }: {
 
 interface RecentVehiclesFeedProps {
     onExpedienteSearch: (plates: string) => void;
+    initialFilterMode?: 'todos' | 'activos';
 }
 
-export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehiclesFeedProps) {
+export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMode = 'todos' }: RecentVehiclesFeedProps) {
     const [vehicles, setVehicles] = useState<RecentVehicle[]>([]);
-    const [filterMode, setFilterMode] = useState<'todos' | 'activos'>('todos');
+    const [filterMode, setFilterMode] = useState<'todos' | 'activos'>(initialFilterMode);
+    const [selectedDrawerVehicle, setSelectedDrawerVehicle] = useState<RecentVehicle | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
@@ -450,7 +466,7 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
 
                 <div className="flex items-center gap-3">
                     <span className="text-[10px] text-slate-400 hidden sm:inline">
-                        💡 Clic derecho en un coche para opciones
+                        💡 Clic en un coche para detalles de piso • Clic derecho para opciones
                     </span>
                     {lastRefresh && (
                         <span className="text-[10px] text-slate-400">
@@ -508,6 +524,7 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
                                 index={i}
                                 onExpediente={onExpedienteSearch}
                                 onContextMenu={handleContextMenu}
+                                onSelect={(veh) => setSelectedDrawerVehicle(veh)}
                             />
                         ))}
 
@@ -564,6 +581,19 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
                     </div>
 
                     <div className="py-1">
+                        <button
+                            onClick={() => {
+                                setSelectedDrawerVehicle(contextMenu.vehicle);
+                                setContextMenu(prev => ({ ...prev, visible: false }));
+                            }}
+                            className="w-full px-4 py-2.5 text-xs font-bold text-[#f16315] hover:bg-orange-50 flex items-center gap-2.5 transition-colors text-left"
+                        >
+                            <ClipboardList size={14} className="text-[#f16315] flex-shrink-0" />
+                            <span>Abrir Ficha de Piso</span>
+                        </button>
+
+                        <div className="h-px bg-slate-100 my-1" />
+
                         {(contextMenu.vehicle.status === 'salida_sin_nota' || contextMenu.vehicle.status === 'mantenimiento_sin_nota') ? (
                             <button
                                 onClick={() => {
@@ -625,6 +655,26 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
                     </div>
                 </div>
             )}
+
+            {/* Drawer de Control de Piso */}
+            <AnimatePresence>
+                {selectedDrawerVehicle && (
+                    <FloorControlDrawer
+                        isOpen={!!selectedDrawerVehicle}
+                        vehicle={selectedDrawerVehicle}
+                        onClose={() => setSelectedDrawerVehicle(null)}
+                        onVehicleUpdated={(updated) => {
+                            setSelectedDrawerVehicle(updated);
+                            setVehicles(prev => prev.map(v => 
+                                v.vehicle.plates.toUpperCase().replace(/[^A-Z0-9]/g, '') === updated.vehicle.plates.toUpperCase().replace(/[^A-Z0-9]/g, '')
+                                    ? updated
+                                    : v
+                            ));
+                        }}
+                        onExpedienteSearch={onExpedienteSearch}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 }

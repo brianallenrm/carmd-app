@@ -12,7 +12,8 @@ import {
   LayoutDashboard,
   History,
   Radio,
-  MessageCircle
+  MessageCircle,
+  Wrench
 } from 'lucide-react';
 import DashboardCard from '@/components/os/DashboardCard';
 import VehicleHistoryTool from '@/components/os/VehicleHistoryTool';
@@ -52,8 +53,15 @@ export default function ControlCenter() {
               </div>
             </div>
           </div>
-          <div className="hidden md:flex items-center gap-2">
-            <div className="px-3 py-1 bg-gray-100 rounded-full text-[10px] font-bold text-gray-500">
+          <div className="flex items-center gap-2.5">
+            <Link
+              href="/os/piso"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-[#f16315] border border-orange-200 rounded-xl text-xs font-bold transition-all shadow-sm"
+            >
+              <Wrench size={13} />
+              <span>Vista de Piso</span>
+            </Link>
+            <div className="hidden md:block px-3 py-1 bg-gray-100 rounded-full text-[10px] font-bold text-gray-500">
               SISTEMA ACTIVO
             </div>
           </div>

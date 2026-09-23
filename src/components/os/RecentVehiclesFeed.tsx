@@ -20,7 +20,7 @@ interface RecentVehicle {
     vehicle: { brand: string; model: string; year: string; plates: string; km: number; gas: string };
     motivo: string;
     advisor: string;
-    status: 'con_nota' | 'en_piso_registrado' | 'en_piso_nuevo' | 'salida_sin_nota' | 'entregado';
+    status: 'con_nota' | 'en_piso_registrado' | 'en_piso_nuevo' | 'salida_sin_nota' | 'entregado' | 'mantenimiento_sin_nota';
     floorData?: {
         status: string;
         mechanic: string;
@@ -59,6 +59,11 @@ const STATUS_CONFIG: Record<string, { stripe: string; icon: string; iconBg: stri
         icon: "text-slate-400",
         iconBg: "bg-slate-100",
     },
+    mantenimiento_sin_nota: {
+        stripe: "bg-teal-400",
+        icon: "text-teal-600",
+        iconBg: "bg-teal-50",
+    },
     entregado: {
         stripe: "bg-blue-400",
         icon: "text-blue-500",
@@ -68,6 +73,12 @@ const STATUS_CONFIG: Record<string, { stripe: string; icon: string; iconBg: stri
 
 function StatusBadges({ v }: { v: RecentVehicle }) {
     switch (v.status) {
+        case 'mantenimiento_sin_nota':
+            return (
+                <span className="flex items-center gap-1 text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200 px-1.5 py-0.5 rounded-full">
+                    <Wrench size={9} /> Cortesía / Garantía (Sin nota)
+                </span>
+            );
         case 'salida_sin_nota':
             return (
                 <span className="flex items-center gap-1 text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded-full">
@@ -120,7 +131,7 @@ function VehicleRow({ v, index, onExpediente, onContextMenu }: {
     onContextMenu: (e: React.MouseEvent, v: RecentVehicle) => void;
 }) {
     const cfg = STATUS_CONFIG[v.status] ?? STATUS_CONFIG['en_piso_nuevo'];
-    const isExited = v.status === 'salida_sin_nota' || v.status === 'entregado';
+    const isExited = v.status === 'salida_sin_nota' || v.status === 'entregado' || v.status === 'mantenimiento_sin_nota';
 
     return (
         <motion.div
@@ -329,6 +340,7 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
             if (vPlate === cleanPlate) {
                 let newStatus: any = v.status;
                 if (status === 'SALIDA_SIN_NOTA') newStatus = 'salida_sin_nota';
+                if (status === 'MANTENIMIENTO_SIN_NOTA') newStatus = 'mantenimiento_sin_nota';
                 if (status === 'ENTREGADO') newStatus = 'entregado';
                 if (status === 'EN_REPARACION') newStatus = v.note ? 'con_nota' : 'en_piso_registrado';
 
@@ -366,16 +378,17 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
         }
     };
 
-    // Filtro activo vs todos: 'activos' solo incluye autos que NO tienen nota y NO han salido
+    // Filtro activo vs todos: 'activos' solo incluye autos que NO tienen nota y NO han salido/concluido
     const displayVehicles = vehicles.filter(v => {
         if (filterMode === 'activos') {
-            return v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota';
+            return v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota' && v.status !== 'mantenimiento_sin_nota';
         }
         return true;
     });
 
-    const activosCount = vehicles.filter(v => v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota').length;
+    const activosCount = vehicles.filter(v => v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota' && v.status !== 'mantenimiento_sin_nota').length;
     const conNotaCount = vehicles.filter(v => v.status === 'con_nota').length;
+    const cortesiasCount = vehicles.filter(v => v.status === 'mantenimiento_sin_nota').length;
     const salidasCount = vehicles.filter(v => v.status === 'salida_sin_nota').length;
 
     return (
@@ -419,6 +432,12 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
                                 <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
                                 {conNotaCount} con nota
                             </span>
+                            {cortesiasCount > 0 && (
+                                <span className="flex items-center gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-teal-400 inline-block" />
+                                    {cortesiasCount} cortesías
+                                </span>
+                            )}
                             {salidasCount > 0 && (
                                 <span className="flex items-center gap-1">
                                     <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />
@@ -545,17 +564,7 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
                     </div>
 
                     <div className="py-1">
-                        {contextMenu.vehicle.status !== 'salida_sin_nota' ? (
-                            <button
-                                onClick={() => {
-                                    handleSetFloorStatus(contextMenu.vehicle!.vehicle.plates, 'SALIDA_SIN_NOTA', 'Salida sin reparación/nota');
-                                }}
-                                className="w-full px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 transition-colors text-left"
-                            >
-                                <LogOut size={14} className="text-rose-500 flex-shrink-0" />
-                                <span>Salida sin reparación / nota</span>
-                            </button>
-                        ) : (
+                        {(contextMenu.vehicle.status === 'salida_sin_nota' || contextMenu.vehicle.status === 'mantenimiento_sin_nota') ? (
                             <button
                                 onClick={() => {
                                     handleSetFloorStatus(contextMenu.vehicle!.vehicle.plates, 'EN_REPARACION', 'Reingreso a piso');
@@ -565,6 +574,28 @@ export default function RecentVehiclesFeed({ onExpedienteSearch }: RecentVehicle
                                 <RotateCcw size={14} className="text-amber-500 flex-shrink-0" />
                                 <span>Reincorporar a Piso</span>
                             </button>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => {
+                                        handleSetFloorStatus(contextMenu.vehicle!.vehicle.plates, 'MANTENIMIENTO_SIN_NOTA', 'Mantenimiento de cortesía incluido / Garantía');
+                                    }}
+                                    className="w-full px-4 py-2.5 text-xs font-bold text-teal-700 hover:bg-teal-50 flex items-center gap-2.5 transition-colors text-left"
+                                >
+                                    <Wrench size={14} className="text-teal-600 flex-shrink-0" />
+                                    <span>Mantenimiento cortesía (sin nota)</span>
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        handleSetFloorStatus(contextMenu.vehicle!.vehicle.plates, 'SALIDA_SIN_NOTA', 'Salida sin reparación / Presupuesto no aceptado');
+                                    }}
+                                    className="w-full px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 transition-colors text-left"
+                                >
+                                    <LogOut size={14} className="text-rose-500 flex-shrink-0" />
+                                    <span>Salida sin reparación / nota</span>
+                                </button>
+                            </>
                         )}
 
                         {contextMenu.vehicle.status !== 'entregado' && (

@@ -223,9 +223,11 @@ export async function GET() {
             const inventoryDayTs = new Date(dateTs).setHours(0, 0, 0, 0);
             const noteDayTs = latestNote ? new Date(latestNote.dateTs).setHours(0, 0, 0, 0) : 0;
 
-            let status: 'con_nota' | 'en_piso_registrado' | 'en_piso_nuevo' | 'salida_sin_nota' | 'entregado';
+            let status: 'con_nota' | 'en_piso_registrado' | 'en_piso_nuevo' | 'salida_sin_nota' | 'entregado' | 'mantenimiento_sin_nota';
             if (pisoInfo && pisoInfo.status === 'SALIDA_SIN_NOTA') {
                 status = 'salida_sin_nota';
+            } else if (pisoInfo && pisoInfo.status === 'MANTENIMIENTO_SIN_NOTA') {
+                status = 'mantenimiento_sin_nota';
             } else if (pisoInfo && pisoInfo.status === 'ENTREGADO') {
                 status = 'entregado';
             } else if (latestNote && noteDayTs >= inventoryDayTs) {

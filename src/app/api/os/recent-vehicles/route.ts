@@ -312,7 +312,7 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { plate, status, reason, mechanic, newPart, newExternalService, newLogEntry } = body;
+        const { plate, status, reason, mechanic, parts, externalServices, newPart, newExternalService, newLogEntry } = body;
         if (!plate) {
             return NextResponse.json({ error: 'Missing plate' }, { status: 400 });
         }
@@ -320,6 +320,8 @@ export async function POST(req: Request) {
         await updateVehicleFloorStatus(plate, status || '', {
             exitReason: reason,
             mechanic,
+            parts,
+            externalServices,
             newPart,
             newExternalService,
             newLogEntry

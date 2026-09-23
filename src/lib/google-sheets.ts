@@ -549,6 +549,8 @@ export const updateVehicleFloorStatus = async (
     options?: {
         mechanic?: string;
         exitReason?: string;
+        parts?: any[];
+        externalServices?: any[];
         newPart?: any;
         newExternalService?: any;
         newLogEntry?: any;
@@ -574,7 +576,9 @@ export const updateVehicleFloorStatus = async (
             if (options?.mechanic !== undefined) existingRow.set("Mecanico", options.mechanic);
             if (options?.exitReason !== undefined) existingRow.set("Motivo_Salida", options.exitReason);
 
-            if (options?.newPart) {
+            if (options?.parts !== undefined) {
+                existingRow.set("Refacciones_JSON", JSON.stringify(options.parts));
+            } else if (options?.newPart) {
                 let parts: any[] = [];
                 try {
                     const raw = existingRow.get("Refacciones_JSON");
@@ -584,7 +588,9 @@ export const updateVehicleFloorStatus = async (
                 existingRow.set("Refacciones_JSON", JSON.stringify(parts));
             }
 
-            if (options?.newExternalService) {
+            if (options?.externalServices !== undefined) {
+                existingRow.set("Servicios_Externos_JSON", JSON.stringify(options.externalServices));
+            } else if (options?.newExternalService) {
                 let services: any[] = [];
                 try {
                     const raw = existingRow.get("Servicios_Externos_JSON");

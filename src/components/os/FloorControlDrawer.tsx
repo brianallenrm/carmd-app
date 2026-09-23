@@ -252,6 +252,38 @@ export default function FloorControlDrawer({
         }
     };
 
+    // Delete Part
+    const handleDeletePart = async (partId: string | number) => {
+        const nextParts = parts.filter(p => p.id !== partId);
+        setParts(nextParts);
+
+        try {
+            await fetch("/api/os/recent-vehicles", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    plate: cleanPlate,
+                    status: currentStatus,
+                    mechanic: selectedMechanics.join(", "),
+                    parts: nextParts,
+                }),
+            });
+
+            if (onVehicleUpdated) {
+                onVehicleUpdated({
+                    ...vehicle,
+                    floorData: {
+                        ...(vehicle.floorData || {}),
+                        parts: nextParts,
+                        partsCount: nextParts.length,
+                    },
+                });
+            }
+        } catch (e) {
+            console.error("Error al eliminar refacción:", e);
+        }
+    };
+
     // Add External Service
     const handleSaveExternal = async () => {
         if (!newExtDesc.trim()) return;
@@ -295,6 +327,38 @@ export default function FloorControlDrawer({
             }
         } catch (e) {
             console.error("Error al guardar servicio externo:", e);
+        }
+    };
+
+    // Delete External Service
+    const handleDeleteExternal = async (extId: string | number) => {
+        const nextExts = externals.filter(e => e.id !== extId);
+        setExternals(nextExts);
+
+        try {
+            await fetch("/api/os/recent-vehicles", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    plate: cleanPlate,
+                    status: currentStatus,
+                    mechanic: selectedMechanics.join(", "),
+                    externalServices: nextExts,
+                }),
+            });
+
+            if (onVehicleUpdated) {
+                onVehicleUpdated({
+                    ...vehicle,
+                    floorData: {
+                        ...(vehicle.floorData || {}),
+                        externalServices: nextExts,
+                        externalCount: nextExts.length,
+                    },
+                });
+            }
+        } catch (e) {
+            console.error("Error al eliminar servicio externo:", e);
         }
     };
 
@@ -757,18 +821,27 @@ export default function FloorControlDrawer({
                                                     </div>
                                                 </div>
 
-                                                <div className="text-right flex-shrink-0">
-                                                    <p className="text-xs font-black text-slate-900">
-                                                        ${(Number(p.cost) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-                                                    </p>
-                                                    {p.photoUrl && (
-                                                        <button
-                                                            onClick={() => setZoomImage(p.photoUrl!)}
-                                                            className="text-[10px] text-[#f16315] font-bold hover:underline"
-                                                        >
-                                                            Ver ticket
-                                                        </button>
-                                                    )}
+                                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                                    <div className="text-right">
+                                                        <p className="text-xs font-black text-slate-900">
+                                                            ${(Number(p.cost) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                                                        </p>
+                                                        {p.photoUrl && (
+                                                            <button
+                                                                onClick={() => setZoomImage(p.photoUrl!)}
+                                                                className="text-[10px] text-[#f16315] font-bold hover:underline block"
+                                                            >
+                                                                Ver ticket
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleDeletePart(p.id)}
+                                                        className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors ml-1"
+                                                        title="Eliminar refacción"
+                                                    >
+                                                        <Trash2 size={13} />
+                                                    </button>
                                                 </div>
                                             </div>
                                         ))}
@@ -868,9 +941,18 @@ export default function FloorControlDrawer({
                                                         Proveedor: <span className="font-semibold text-slate-600">{e.vendor || "Externo"}</span>
                                                     </p>
                                                 </div>
-                                                <p className="text-xs font-black text-slate-900">
-                                                    ${(Number(e.cost) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-                                                </p>
+                                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                                    <p className="text-xs font-black text-slate-900">
+                                                        ${(Number(e.cost) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                                                    </p>
+                                                    <button
+                                                        onClick={() => handleDeleteExternal(e.id)}
+                                                        className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors ml-1"
+                                                        title="Eliminar servicio"
+                                                    >
+                                                        <Trash2 size={13} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
 

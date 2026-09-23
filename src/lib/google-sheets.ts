@@ -176,8 +176,8 @@ export const lookupVehicleByPlate = async (plate: string) => {
     const formatState = (state: string) => {
         if (!state) return "";
         // Standardize common states
-        if (/cdmx|ciudad de/i.test(state)) return "CDMX";
-        if (/estado de m|mex|edo/i.test(state)) return "Edo. Méx.";
+        if (/cdmx|ciudad de/i.test(state)) return "Ciudad de México";
+        if (/estado de m|mex|edo/i.test(state)) return "Estado de México";
         return toTitleCase(state);
     };
 

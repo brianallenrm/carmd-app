@@ -86,8 +86,8 @@ export function formatMexicanAddress({
 
     let formattedState = "";
     if (rawState) {
-        if (isCdmx) formattedState = "CDMX";
-        else if (isEdomex) formattedState = "Edo. Méx.";
+        if (isCdmx) formattedState = "Ciudad de México";
+        else if (isEdomex) formattedState = "Estado de México";
         else formattedState = toTitleCase(rawState);
     }
 

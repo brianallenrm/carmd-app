@@ -4,20 +4,20 @@ import { GoogleGenAI } from '@google/genai';
 // Initialize Google Gen AI Client
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
-// Target Model
+// Target Model: Gemini 3.6 Flash
 const FALLBACK_MODELS = [
-    'gemini-3.5-flash-lite',
     'gemini-3.6-flash',
     'gemini-3.5-flash',
     'gemini-3-flash',
-    'gemini-2.5-flash'
+    'gemini-2.5-flash',
+    'gemini-3.5-flash-lite'
 ];
 
 async function generateClinicalInsightsWithFallback(systemInstruction: string, promptText: string) {
     let lastError: any = null;
     for (const model of FALLBACK_MODELS) {
         try {
-            console.log(`[Expediente AI] Intentando análisis con modelo: ${model}`);
+            console.log(`[Expediente AI] Generando diagnóstico con modelo: ${model}`);
             const result = await ai.models.generateContent({
                 model,
                 contents: promptText,
@@ -221,6 +221,7 @@ ESTRUCTURA EXACTA DEL JSON DE RESPUESTA:
       "estado": "actual"
     }
   ],
+  "accionHoy": "string directo y empático para el asesor (ej: Realizar Afinación Mayor y cambiar bujías; llevan +25,000 km de uso)",
   "puntosClave": [
     {
       "tipo": "diagnostico", // 'diagnostico' | 'recomendacion' | 'garantia'
@@ -236,7 +237,7 @@ ESTRUCTURA EXACTA DEL JSON DE RESPUESTA:
   "oportunidadComercial": "Ofrecer afinación completa con bujías de platino e inspección de puntos de seguridad."
 }`;
 
-        console.log(`[Expediente AI API] Enviando solicitud a Gemini 3.5 Flash Lite para placas: ${vehicle?.plates || 'N/A'}`);
+        console.log(`[Expediente AI API] Enviando solicitud a Gemini 3.6 Flash para placas: ${vehicle?.plates || 'N/A'}`);
         const aiResponse = await generateClinicalInsightsWithFallback(systemInstruction, userPrompt);
         const rawText = aiResponse.text?.trim() || '{}';
         const cleanJson = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();

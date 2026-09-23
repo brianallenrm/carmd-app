@@ -6,7 +6,8 @@ import {
     Sparkles, AlertTriangle, CheckCircle, Clock, Zap,
     ChevronDown, ChevronUp, RefreshCw, Disc, Droplet,
     Wrench, Shield, Target, Lightbulb, ArrowRight,
-    HelpCircle, Flame, ShieldAlert, Cpu
+    HelpCircle, Flame, ShieldAlert, Cpu, CheckCircle2,
+    Calendar, AlertCircle
 } from "lucide-react";
 
 interface ComponentStatus {
@@ -39,6 +40,7 @@ interface ClinicalInsights {
     estadoSalud: 'urgente' | 'proxima' | 'al_dia' | 'sin_registro' | 'primer_ingreso';
     tituloEstado: string;
     subtituloEstado: string;
+    accionHoy?: string;
     porcentajeDesgaste?: number;
     kmTranscurridos?: number | null;
     mesesTranscurridos?: number | null;
@@ -136,79 +138,94 @@ export default function ExpedienteAICopilot({ historyData }: ExpedienteAICopilot
         return null;
     }
 
-    // Health badge styles
-    const getHealthColors = (estado?: string) => {
+    // Modern color themes (friendly, warm, clear)
+    const getTheme = (estado?: string) => {
         switch (estado) {
             case 'urgente':
                 return {
-                    bg: 'bg-red-50',
-                    border: 'border-red-200',
-                    text: 'text-red-800',
-                    badge: 'bg-red-500 text-white',
-                    bar: 'bg-red-500',
+                    bgGradient: 'from-rose-50/70 via-red-50/40 to-white',
+                    border: 'border-rose-200/80',
+                    pillBg: 'bg-rose-100 text-rose-800 border-rose-200',
+                    barColor: 'bg-gradient-to-r from-orange-500 to-rose-500',
+                    iconBg: 'bg-rose-500 text-white',
+                    textColor: 'text-rose-950',
+                    actionBg: 'bg-rose-50 border-rose-200/80 text-rose-900',
+                    actionBadge: 'bg-rose-500 text-white',
                     icon: ShieldAlert
                 };
             case 'proxima':
                 return {
-                    bg: 'bg-amber-50',
-                    border: 'border-amber-200',
-                    text: 'text-amber-800',
-                    badge: 'bg-amber-500 text-white',
-                    bar: 'bg-amber-500',
+                    bgGradient: 'from-amber-50/70 via-orange-50/40 to-white',
+                    border: 'border-amber-200/80',
+                    pillBg: 'bg-amber-100 text-amber-900 border-amber-200',
+                    barColor: 'bg-gradient-to-r from-amber-400 to-orange-500',
+                    iconBg: 'bg-amber-500 text-white',
+                    textColor: 'text-amber-950',
+                    actionBg: 'bg-amber-50 border-amber-200/80 text-amber-900',
+                    actionBadge: 'bg-amber-500 text-white',
                     icon: AlertTriangle
                 };
             case 'al_dia':
                 return {
-                    bg: 'bg-emerald-50',
-                    border: 'border-emerald-200',
-                    text: 'text-emerald-800',
-                    badge: 'bg-emerald-500 text-white',
-                    bar: 'bg-emerald-500',
-                    icon: CheckCircle
+                    bgGradient: 'from-emerald-50/70 via-teal-50/40 to-white',
+                    border: 'border-emerald-200/80',
+                    pillBg: 'bg-emerald-100 text-emerald-900 border-emerald-200',
+                    barColor: 'bg-gradient-to-r from-teal-400 to-emerald-500',
+                    iconBg: 'bg-emerald-500 text-white',
+                    textColor: 'text-emerald-950',
+                    actionBg: 'bg-emerald-50 border-emerald-200/80 text-emerald-900',
+                    actionBadge: 'bg-emerald-500 text-white',
+                    icon: CheckCircle2
                 };
             case 'primer_ingreso':
                 return {
-                    bg: 'bg-indigo-50',
-                    border: 'border-indigo-200',
-                    text: 'text-indigo-800',
-                    badge: 'bg-indigo-600 text-white',
-                    bar: 'bg-indigo-600',
+                    bgGradient: 'from-indigo-50/70 via-blue-50/40 to-white',
+                    border: 'border-indigo-200/80',
+                    pillBg: 'bg-indigo-100 text-indigo-900 border-indigo-200',
+                    barColor: 'bg-indigo-500',
+                    iconBg: 'bg-indigo-600 text-white',
+                    textColor: 'text-indigo-950',
+                    actionBg: 'bg-indigo-50 border-indigo-200/80 text-indigo-900',
+                    actionBadge: 'bg-indigo-600 text-white',
                     icon: Zap
                 };
             case 'sin_registro':
             default:
                 return {
-                    bg: 'bg-slate-50',
+                    bgGradient: 'from-slate-50/80 via-gray-50/50 to-white',
                     border: 'border-slate-200',
-                    text: 'text-slate-700',
-                    badge: 'bg-slate-600 text-white',
-                    bar: 'bg-slate-500',
+                    pillBg: 'bg-slate-100 text-slate-800 border-slate-200',
+                    barColor: 'bg-slate-400',
+                    iconBg: 'bg-slate-600 text-white',
+                    textColor: 'text-slate-900',
+                    actionBg: 'bg-slate-50 border-slate-200 text-slate-800',
+                    actionBadge: 'bg-slate-600 text-white',
                     icon: HelpCircle
                 };
         }
     };
 
-    const healthStyle = getHealthColors(insights?.estadoSalud);
+    const theme = getTheme(insights?.estadoSalud);
 
     return (
-        <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-200 mb-6">
-            {/* Header / Bar */}
-            <div className="p-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between gap-4 select-none">
+        <div className="w-full bg-white rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-sm transition-all overflow-hidden mb-6">
+            {/* Friendly, Clean Header */}
+            <div className="px-6 py-4 bg-gradient-to-r from-slate-50/80 via-white to-orange-50/30 border-b border-slate-100 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-[#f16315] text-white rounded-xl shadow-md shadow-orange-500/20 flex items-center justify-center">
+                    <div className="p-2.5 bg-orange-100/70 text-[#f16315] rounded-2xl flex items-center justify-center shadow-xs">
                         <Sparkles size={18} className={loading ? "animate-spin" : ""} />
                     </div>
                     <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-xs md:text-sm font-black tracking-wider uppercase">
-                                Diagnóstico Clínico IA
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-black text-slate-900 tracking-tight">
+                                Diagnóstico Inteligente del Auto
                             </h3>
-                            <span className="flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-white/10 text-orange-400 border border-white/10 tracking-widest">
-                                <Cpu size={10} /> Gemini 3.5 Flash Lite
+                            <span className="hidden sm:inline-flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-orange-50 text-[#f16315] border border-orange-200/60 tracking-wider">
+                                <Cpu size={10} /> Gemini 3.6 Flash
                             </span>
                         </div>
-                        <p className="text-[10px] text-slate-400 font-medium">
-                            Análisis multi-nota de lubricación, componentes y ciclo de mantenimiento
+                        <p className="text-xs text-slate-500 font-medium">
+                            Historial clínico y recomendaciones claras para el mostrador
                         </p>
                     </div>
                 </div>
@@ -217,16 +234,16 @@ export default function ExpedienteAICopilot({ historyData }: ExpedienteAICopilot
                     <button
                         onClick={fetchInsights}
                         disabled={loading}
-                        className="p-1.5 md:px-2.5 md:py-1 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-bold transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                        className="px-3 py-1.5 rounded-xl bg-slate-100/80 hover:bg-slate-200/70 text-slate-600 text-xs font-bold transition-all flex items-center gap-1.5 disabled:opacity-50"
                         title="Reanalizar expediente"
                     >
-                        <RefreshCw size={13} className={loading ? "animate-spin text-[#f16315]" : ""} />
-                        <span className="hidden md:inline">Actualizar</span>
+                        <RefreshCw size={12} className={loading ? "animate-spin text-[#f16315]" : ""} />
+                        <span className="hidden sm:inline">Actualizar</span>
                     </button>
                     <button
                         onClick={() => setExpanded(!expanded)}
-                        className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 transition-colors"
-                        title={expanded ? "Minimizar" : "Expandir"}
+                        className="p-1.5 rounded-xl bg-slate-100/80 hover:bg-slate-200/70 text-slate-600 transition-colors"
+                        title={expanded ? "Ocultar detalles" : "Ver detalles"}
                     >
                         {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </button>
@@ -240,152 +257,156 @@ export default function ExpedienteAICopilot({ historyData }: ExpedienteAICopilot
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.25 }}
+                        transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                     >
-                        {/* Loading Skeleton */}
+                        {/* Shimmer Skeleton Loader */}
                         {loading && !insights ? (
                             <div className="p-6 space-y-4">
-                                <div className="animate-pulse flex flex-col gap-3">
-                                    <div className="h-16 bg-slate-100 rounded-xl w-full" />
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                        <div className="h-24 bg-slate-100 rounded-xl" />
-                                        <div className="h-24 bg-slate-100 rounded-xl" />
-                                        <div className="h-24 bg-slate-100 rounded-xl" />
+                                <div className="animate-pulse space-y-3">
+                                    <div className="h-20 bg-slate-100 rounded-2xl w-full" />
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        <div className="h-20 bg-slate-100 rounded-2xl" />
+                                        <div className="h-20 bg-slate-100 rounded-2xl" />
+                                        <div className="h-20 bg-slate-100 rounded-2xl" />
+                                        <div className="h-20 bg-slate-100 rounded-2xl" />
                                     </div>
-                                    <div className="h-12 bg-slate-100 rounded-xl w-full" />
+                                    <div className="h-14 bg-slate-100 rounded-2xl w-full" />
                                 </div>
-                                <div className="text-center py-2">
-                                    <span className="text-xs text-slate-400 font-bold uppercase tracking-wider animate-pulse flex items-center justify-center gap-2">
-                                        <Sparkles size={14} className="text-[#f16315]" />
-                                        Consultando historial clínico con Gemini 3.5 Flash Lite...
-                                    </span>
+                                <div className="text-center py-2 text-xs text-slate-400 font-bold uppercase tracking-wider flex items-center justify-center gap-2">
+                                    <Sparkles size={14} className="text-[#f16315] animate-spin" />
+                                    Analizando notas e historial con Gemini 3.6 Flash...
                                 </div>
                             </div>
                         ) : error ? (
                             <div className="p-6">
-                                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-                                    <AlertTriangle size={18} className="flex-shrink-0" />
+                                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl text-sm text-red-700">
+                                    <AlertCircle size={18} className="flex-shrink-0" />
                                     <div className="flex-grow">
-                                        <p className="font-bold">Error en el análisis de IA</p>
+                                        <p className="font-bold">No se pudo generar el diagnóstico automático</p>
                                         <p className="text-xs mt-0.5 text-red-600">{error}</p>
                                     </div>
                                     <button
                                         onClick={fetchInsights}
-                                        className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-xs font-bold transition-colors"
+                                        className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-800 rounded-xl text-xs font-bold transition-colors"
                                     >
                                         Reintentar
                                     </button>
                                 </div>
                             </div>
                         ) : insights ? (
-                            <div className="p-5 md:p-6 space-y-6">
-                                {/* 1. Hero Health Bar */}
-                                <div className={`p-4 md:p-5 rounded-xl border ${healthStyle.border} ${healthStyle.bg} transition-all`}>
-                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                                        <div className="flex items-start gap-3">
-                                            <div className={`p-2 rounded-xl ${healthStyle.badge} mt-0.5 flex-shrink-0 shadow-sm`}>
-                                                <healthStyle.icon size={20} />
+                            <div className="p-6 space-y-6">
+
+                                {/* ⭐ 1. THE HERO CARD: "¿QUÉ LE TOCA HOY AL AUTO?" ⭐ */}
+                                {insights.accionHoy && (
+                                    <div className={`p-5 rounded-2xl border ${theme.border} bg-gradient-to-r ${theme.bgGradient} flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs`}>
+                                        <div className="flex items-start gap-3.5">
+                                            <div className={`p-2.5 rounded-2xl ${theme.iconBg} shadow-sm flex-shrink-0 mt-0.5`}>
+                                                <theme.icon size={22} />
                                             </div>
                                             <div>
-                                                <h4 className={`text-base md:text-lg font-black tracking-tight ${healthStyle.text}`}>
-                                                    {insights.tituloEstado}
-                                                </h4>
-                                                <p className="text-xs md:text-sm text-slate-600 font-medium mt-0.5">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${theme.actionBadge}`}>
+                                                        Recomendación de Hoy
+                                                    </span>
+                                                    <span className="text-xs font-bold text-slate-400">•</span>
+                                                    <span className="text-xs font-bold text-slate-600">
+                                                        {insights.tituloEstado}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm md:text-base font-black text-slate-900 mt-1 leading-snug">
+                                                    {insights.accionHoy}
+                                                </p>
+                                                <p className="text-xs text-slate-500 font-medium mt-0.5">
                                                     {insights.subtituloEstado}
                                                 </p>
                                             </div>
                                         </div>
 
-                                        {/* Metadata Pills */}
-                                        <div className="flex items-center gap-2 flex-wrap">
+                                        {/* Quick Metrics Badges */}
+                                        <div className="flex items-center gap-2 flex-wrap flex-shrink-0 self-end md:self-center">
                                             {insights.kmTranscurridos !== null && insights.kmTranscurridos !== undefined && (
-                                                <span className="px-2.5 py-1 bg-white/80 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 shadow-sm flex items-center gap-1">
-                                                    <Flame size={12} className="text-[#f16315]" />
+                                                <span className="px-3 py-1.5 bg-white border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 shadow-xs flex items-center gap-1.5">
+                                                    <Flame size={13} className="text-[#f16315]" />
                                                     +{insights.kmTranscurridos.toLocaleString('es-MX')} km
                                                 </span>
                                             )}
                                             {insights.mesesTranscurridos !== null && insights.mesesTranscurridos !== undefined && (
-                                                <span className="px-2.5 py-1 bg-white/80 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 shadow-sm flex items-center gap-1">
-                                                    <Clock size={12} className="text-slate-500" />
+                                                <span className="px-3 py-1.5 bg-white border border-slate-200/80 rounded-xl text-xs font-bold text-slate-700 shadow-xs flex items-center gap-1.5">
+                                                    <Clock size={13} className="text-slate-400" />
                                                     {insights.mesesTranscurridos} {insights.mesesTranscurridos === 1 ? 'mes' : 'meses'}
                                                 </span>
                                             )}
                                         </div>
                                     </div>
+                                )}
 
-                                    {/* Progress wear bar */}
-                                    {insights.porcentajeDesgaste !== undefined && insights.modo === 'con_afinacion' && (
-                                        <div className="mt-4 pt-3 border-t border-slate-200/60">
-                                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1.5">
-                                                <span>Desgaste del Ciclo de Afinación</span>
-                                                <span className="font-bold text-slate-700">{insights.porcentajeDesgaste}% del límite</span>
-                                            </div>
-                                            <div className="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden">
-                                                <div
-                                                    className={`h-full ${healthStyle.bar} transition-all duration-500 rounded-full`}
-                                                    style={{ width: `${Math.min(100, Math.max(5, insights.porcentajeDesgaste))}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* 2. Component Health Matrix (Micro-Cards) */}
+                                {/* ⭐ 2. COMPONENT PILLS / MICRO-CARDS (Easy 3-second scan) ⭐ */}
                                 {insights.componentes && insights.componentes.length > 0 && (
                                     <div>
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.15em]">
-                                                Trazabilidad de Componentes & Sistemas
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider">
+                                                Estado de Componentes Clave
                                             </h4>
-                                            <div className="h-px bg-slate-100 flex-grow" />
+                                            <span className="text-[10px] text-slate-400 font-bold">
+                                                Revisión rápida de mostrador
+                                            </span>
                                         </div>
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                             {insights.componentes.map((comp) => {
                                                 const IconComp = getIconComponent(comp.icono);
-                                                const levelStyles = {
-                                                    alerta: 'bg-red-50/60 border-red-200 text-red-700',
-                                                    advertencia: 'bg-amber-50/60 border-amber-200 text-amber-700',
-                                                    ok: 'bg-emerald-50/60 border-emerald-200 text-emerald-700',
-                                                    neutral: 'bg-slate-50 border-slate-200 text-slate-600'
-                                                }[comp.nivel] || 'bg-slate-50 border-slate-200 text-slate-600';
+                                                
+                                                // Pill styles based on severity
+                                                const cardStyle = {
+                                                    alerta: 'bg-rose-50/40 border-rose-200/80 hover:border-rose-300',
+                                                    advertencia: 'bg-amber-50/40 border-amber-200/80 hover:border-amber-300',
+                                                    ok: 'bg-emerald-50/40 border-emerald-200/80 hover:border-emerald-300',
+                                                    neutral: 'bg-slate-50/60 border-slate-200/80 hover:border-slate-300'
+                                                }[comp.nivel] || 'bg-slate-50 border-slate-200';
 
-                                                const badgeStyles = {
-                                                    alerta: 'bg-red-100 text-red-800 border-red-200',
-                                                    advertencia: 'bg-amber-100 text-amber-800 border-amber-200',
-                                                    ok: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                                                const badgeStyle = {
+                                                    alerta: 'bg-rose-100 text-rose-800 border-rose-200',
+                                                    advertencia: 'bg-amber-100 text-amber-900 border-amber-200',
+                                                    ok: 'bg-emerald-100 text-emerald-900 border-emerald-200',
                                                     neutral: 'bg-slate-100 text-slate-700 border-slate-200'
+                                                }[comp.nivel];
+
+                                                const iconColor = {
+                                                    alerta: 'bg-rose-100 text-rose-600',
+                                                    advertencia: 'bg-amber-100 text-amber-600',
+                                                    ok: 'bg-emerald-100 text-emerald-600',
+                                                    neutral: 'bg-slate-100 text-slate-500'
                                                 }[comp.nivel];
 
                                                 return (
                                                     <div
                                                         key={comp.id}
-                                                        className="p-3.5 bg-white rounded-xl border border-slate-200/80 shadow-sm hover:border-orange-200 transition-all flex flex-col justify-between"
+                                                        className={`p-4 rounded-2xl border transition-all ${cardStyle} flex flex-col justify-between`}
                                                     >
                                                         <div>
                                                             <div className="flex items-center justify-between gap-2 mb-2">
                                                                 <div className="flex items-center gap-2">
-                                                                    <div className={`p-1.5 rounded-lg border ${levelStyles}`}>
-                                                                        <IconComp size={14} />
+                                                                    <div className={`p-1.5 rounded-xl ${iconColor}`}>
+                                                                        <IconComp size={15} />
                                                                     </div>
-                                                                    <span className="text-xs font-black text-slate-800 uppercase">
+                                                                    <span className="text-xs font-black text-slate-800 uppercase tracking-tight">
                                                                         {comp.nombre}
                                                                     </span>
                                                                 </div>
-                                                                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${badgeStyles}`}>
+                                                                <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${badgeStyle}`}>
                                                                     {comp.estado}
                                                                 </span>
                                                             </div>
-                                                            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                                                            <p className="text-xs text-slate-600 font-medium leading-relaxed">
                                                                 {comp.detalle}
                                                             </p>
                                                         </div>
 
                                                         {comp.ultimaNota && (
-                                                            <div className="mt-2.5 pt-2 border-t border-slate-100 text-[10px] text-slate-400 font-bold flex items-center justify-between">
-                                                                <span>Última referencia:</span>
-                                                                <span className="font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
+                                                            <div className="mt-3 pt-2 border-t border-slate-200/60 text-[10px] text-slate-400 font-bold flex items-center justify-between">
+                                                                <span>Último registro:</span>
+                                                                <span className="font-mono text-slate-700 bg-white px-1.5 py-0.5 rounded border border-slate-200">
                                                                     Nota #{comp.ultimaNota}
                                                                 </span>
                                                             </div>
@@ -397,13 +418,19 @@ export default function ExpedienteAICopilot({ historyData }: ExpedienteAICopilot
                                     </div>
                                 )}
 
-                                {/* 3. Maintenance Cycle Stepper */}
+                                {/* ⭐ 3. MAINTENANCE CYCLE TIMELINE (Clean & Linear) ⭐ */}
                                 {insights.stepperCiclo && insights.stepperCiclo.length > 0 && insights.modo === 'con_afinacion' && (
-                                    <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/80">
-                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">
-                                            Ciclo de Vida de Mantenimiento (CarMD 10k km)
-                                        </h4>
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 relative">
+                                    <div className="p-5 bg-slate-50/70 rounded-2xl border border-slate-200/70">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h4 className="text-xs font-black uppercase text-slate-500 tracking-wider">
+                                                Ciclo de Mantenimiento (CarMD 10,000 km)
+                                            </h4>
+                                            <span className="text-[10px] text-slate-400 font-bold">
+                                                Incluye preventivos de cortesía
+                                            </span>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                             {insights.stepperCiclo.map((step, idx) => {
                                                 const isCompleted = step.estado === 'completado';
                                                 const isActual = step.estado === 'actual';
@@ -411,15 +438,15 @@ export default function ExpedienteAICopilot({ historyData }: ExpedienteAICopilot
                                                 return (
                                                     <div
                                                         key={idx}
-                                                        className={`p-3 rounded-lg border transition-all ${
+                                                        className={`p-3.5 rounded-xl border transition-all ${
                                                             isActual
-                                                                ? "bg-white border-[#f16315] shadow-sm shadow-orange-500/10"
+                                                                ? "bg-white border-orange-300 shadow-xs"
                                                                 : isCompleted
-                                                                    ? "bg-white/80 border-slate-200"
-                                                                    : "bg-slate-100/50 border-slate-200/50 opacity-60"
+                                                                    ? "bg-white/90 border-slate-200"
+                                                                    : "bg-slate-100/60 border-slate-200/60 opacity-60"
                                                         }`}
                                                     >
-                                                        <div className="flex items-center gap-2 mb-1">
+                                                        <div className="flex items-center gap-2 mb-1.5">
                                                             <div className={`w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center ${
                                                                 isActual
                                                                     ? "bg-[#f16315] text-white"
@@ -427,16 +454,16 @@ export default function ExpedienteAICopilot({ historyData }: ExpedienteAICopilot
                                                                         ? "bg-emerald-500 text-white"
                                                                         : "bg-slate-300 text-slate-600"
                                                             }`}>
-                                                                {isCompleted ? <CheckCircle size={12} /> : step.paso}
+                                                                {isCompleted ? <CheckCircle2 size={13} /> : step.paso}
                                                             </div>
-                                                            <span className="text-xs font-black text-slate-800 truncate">
+                                                            <span className="text-xs font-black text-slate-800">
                                                                 {step.titulo}
                                                             </span>
                                                         </div>
-                                                        <div className="text-[10px] text-slate-500 font-medium pl-7">
-                                                            {step.notaFolio && <div>Nota #{step.notaFolio}</div>}
+                                                        <div className="text-[11px] text-slate-500 font-medium pl-7 space-y-0.5">
+                                                            {step.notaFolio && <div className="font-bold text-slate-700">Nota #{step.notaFolio}</div>}
                                                             {step.km ? <div>{step.km.toLocaleString('es-MX')} km</div> : null}
-                                                            {step.fecha && <div className="text-slate-400">{step.fecha}</div>}
+                                                            {step.fecha && <div className="text-slate-400 text-[10px]">{step.fecha}</div>}
                                                         </div>
                                                     </div>
                                                 );
@@ -445,51 +472,26 @@ export default function ExpedienteAICopilot({ historyData }: ExpedienteAICopilot
                                     </div>
                                 )}
 
-                                {/* 4. Executive Bullet Points */}
+                                {/* ⭐ 4. PUNTOS CLAVE PARA EL ASESOR ⭐ */}
                                 {insights.puntosClave && insights.puntosClave.length > 0 && (
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.15em]">
-                                                Puntos Clave para el Asesor
-                                            </h4>
-                                            <div className="h-px bg-slate-100 flex-grow" />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            {insights.puntosClave.map((pt, idx) => {
-                                                const IconPt = getIconComponent(pt.icono);
-                                                return (
-                                                    <div
-                                                        key={idx}
-                                                        className="p-3 bg-slate-50 border border-slate-200/60 rounded-xl flex items-start gap-3 text-xs md:text-sm text-slate-700 leading-relaxed font-medium"
-                                                    >
-                                                        <div className="p-1.5 rounded-lg bg-orange-100 text-[#f16315] mt-0.5 flex-shrink-0">
-                                                            <IconPt size={14} />
-                                                        </div>
-                                                        <span className="pt-0.5">{pt.texto}</span>
+                                    <div className="space-y-2">
+                                        {insights.puntosClave.map((pt, idx) => {
+                                            const IconPt = getIconComponent(pt.icono);
+                                            return (
+                                                <div
+                                                    key={idx}
+                                                    className="p-3.5 bg-orange-50/40 border border-orange-100 rounded-2xl flex items-start gap-3 text-xs md:text-sm text-slate-700 leading-relaxed font-medium"
+                                                >
+                                                    <div className="p-1.5 rounded-xl bg-orange-100 text-[#f16315] mt-0.5 flex-shrink-0">
+                                                        <IconPt size={15} />
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
+                                                    <span className="pt-0.5">{pt.texto}</span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
 
-                                {/* 5. Commercial Opportunity Banner */}
-                                {insights.oportunidadComercial && (
-                                    <div className="p-3.5 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl flex items-center gap-3">
-                                        <div className="p-2 bg-[#f16315] text-white rounded-lg flex-shrink-0">
-                                            <Lightbulb size={16} />
-                                        </div>
-                                        <div className="flex-grow">
-                                            <p className="text-[10px] font-black text-[#f16315] uppercase tracking-wider">
-                                                Oportunidad de Servicio CarMD
-                                            </p>
-                                            <p className="text-xs font-bold text-slate-800 mt-0.5">
-                                                {insights.oportunidadComercial}
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         ) : null}
                     </motion.div>

@@ -1146,25 +1146,6 @@ export default function FloorControlDrawer({
                             })}
                         </div>
 
-                        {/* Mensaje de Cara al Cliente (Preview del Car Tracker) */}
-                        {(() => {
-                            const stage = getFloorStage(currentStatus);
-                            return (
-                                <div className="p-3 bg-slate-900 text-white rounded-xl shadow-sm border border-slate-800 space-y-1">
-                                    <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                                        <span className="flex items-center gap-1.5 text-orange-400">
-                                            <Sparkles size={11} />
-                                            Vista del Cliente en Car Tracker:
-                                        </span>
-                                        <span>Etapa #{stage.step || "—"}</span>
-                                    </div>
-                                    <p className="text-[11px] text-slate-200 italic leading-snug">
-                                        "{stage.clientMessage}"
-                                    </p>
-                                </div>
-                            );
-                        })()}
-
                         {/* Bloque Separado: Resoluciones de Salida y Casos Especiales */}
                         <div className="pt-2 border-t border-slate-200/80">
                             <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider block mb-1.5">

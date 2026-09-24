@@ -117,8 +117,17 @@ export default function FloorControlDrawer({
     const [editExtPhotoUrl, setEditExtPhotoUrl] = useState("");
 
     // Ticket Photo Upload states
+    // Ticket Photo Upload & AI Analysis states
     const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+    const [isAnalyzingTicket, setIsAnalyzingTicket] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
+    const [aiDetectedBadge, setAiDetectedBadge] = useState<{
+        target: 'newPart' | 'editPart' | 'newExt' | 'editExt';
+        supplier?: string | null;
+        description?: string | null;
+        cost?: number | null;
+        modelUsed?: string;
+    } | null>(null);
 
     // Lightbox image viewer
     const [zoomImage, setZoomImage] = useState<string | null>(null);
@@ -145,17 +154,25 @@ export default function FloorControlDrawer({
     const plates = vehicle.vehicle?.plates || "";
     const cleanPlate = plates.toUpperCase().replace(/[^A-Z0-9]/g, "");
 
-    // Helper to upload ticket photos via R2
+    // Helper to upload ticket photos via R2 and analyze with Gemini Vision AI
     const handleUploadPhotoFile = async (
         e: React.ChangeEvent<HTMLInputElement>,
         onSuccess: (url: string) => void,
-        tag: string = "ticket"
+        tag: string = "ticket",
+        aiContext?: {
+            type: "refaccion" | "rectificacion";
+            target: "newPart" | "editPart" | "newExt" | "editExt";
+        }
     ) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
         setIsUploadingPhoto(true);
         setUploadError(null);
+        if (aiContext) {
+            setIsAnalyzingTicket(true);
+            setAiDetectedBadge(null);
+        }
 
         try {
             const { blob, actualFormat } = await compressImage(file, {
@@ -170,28 +187,83 @@ export default function FloorControlDrawer({
             const platePrefix = cleanPlate || "TICKET";
             const filename = `${platePrefix}_ticket_${tag}_${Date.now()}.${ext}`;
 
-            const res = await fetch("/api/photos/upload", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ image: base64, filename }),
-            });
+            // 1. Concurrently call Gemini Vision AI to extract supplier, description and cost
+            const aiPromise = aiContext ? (async () => {
+                try {
+                    const aiRes = await fetch("/api/os/tickets/analyze", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            image: base64,
+                            mimeType: actualFormat,
+                            type: aiContext.type
+                        })
+                    });
+                    if (aiRes.ok) {
+                        const aiData = await aiRes.json();
+                        if (aiData.success && aiData.data) {
+                            const { supplier, description, cost } = aiData.data;
+                            if (aiContext.target === "newPart") {
+                                if (supplier) setNewPartSupplier(supplier);
+                                if (description) setNewPartDesc(description);
+                                if (cost !== null && cost !== undefined) setNewPartCost(String(cost));
+                            } else if (aiContext.target === "editPart") {
+                                if (supplier) setEditPartSupplier(supplier);
+                                if (description) setEditPartDesc(description);
+                                if (cost !== null && cost !== undefined) setEditPartCost(String(cost));
+                            } else if (aiContext.target === "newExt") {
+                                if (supplier) setNewExtVendor(supplier);
+                                if (description) setNewExtDesc(description);
+                                if (cost !== null && cost !== undefined) setNewExtCost(String(cost));
+                            } else if (aiContext.target === "editExt") {
+                                if (supplier) setEditExtVendor(supplier);
+                                if (description) setEditExtDesc(description);
+                                if (cost !== null && cost !== undefined) setEditExtCost(String(cost));
+                            }
+                            setAiDetectedBadge({
+                                target: aiContext.target,
+                                supplier,
+                                description,
+                                cost,
+                                modelUsed: aiData.modelUsed
+                            });
+                        }
+                    }
+                } catch (aiErr) {
+                    console.warn("[Ticket AI] Error en análisis automático:", aiErr);
+                } finally {
+                    setIsAnalyzingTicket(false);
+                }
+            })() : Promise.resolve();
 
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.error || `HTTP ${res.status}`);
-            }
+            // 2. Concurrently upload image to Cloudflare R2
+            const uploadPromise = (async () => {
+                const res = await fetch("/api/photos/upload", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ image: base64, filename }),
+                });
 
-            const data = await res.json();
-            if (data.url) {
-                onSuccess(data.url);
-            } else {
-                throw new Error("No se recibió la URL de la imagen");
-            }
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || `HTTP ${res.status}`);
+                }
+
+                const data = await res.json();
+                if (data.url) {
+                    onSuccess(data.url);
+                } else {
+                    throw new Error("No se recibió la URL de la imagen");
+                }
+            })();
+
+            await Promise.all([uploadPromise, aiPromise]);
         } catch (err: any) {
             console.error("Error al procesar/subir foto de ticket:", err);
             setUploadError(err.message || "Error al subir la imagen");
         } finally {
             setIsUploadingPhoto(false);
+            setIsAnalyzingTicket(false);
             e.target.value = "";
         }
     };
@@ -298,6 +370,7 @@ export default function FloorControlDrawer({
         setNewPartSupplier("");
         setNewPartPhotoUrl("");
         setShowAddPart(false);
+        setAiDetectedBadge(null);
 
         try {
             await fetch("/api/os/recent-vehicles", {
@@ -385,6 +458,7 @@ export default function FloorControlDrawer({
         setParts(nextParts);
         setEditingPartId(null);
         setEditPartPhotoUrl("");
+        setAiDetectedBadge(null);
 
         try {
             await fetch("/api/os/recent-vehicles", {
@@ -433,6 +507,7 @@ export default function FloorControlDrawer({
         setNewExtVendor("");
         setNewExtPhotoUrl("");
         setShowAddExt(false);
+        setAiDetectedBadge(null);
 
         try {
             await fetch("/api/os/recent-vehicles", {
@@ -500,6 +575,7 @@ export default function FloorControlDrawer({
         setEditExtCost(String(e.cost || ""));
         setEditExtVendor(e.vendor || "");
         setEditExtPhotoUrl(e.photoUrl || "");
+        setAiDetectedBadge(null);
     };
 
     const handleUpdateExternal = async (extId: string | number) => {
@@ -520,6 +596,7 @@ export default function FloorControlDrawer({
         setExternals(nextExts);
         setEditingExtId(null);
         setEditExtPhotoUrl("");
+        setAiDetectedBadge(null);
 
         try {
             await fetch("/api/os/recent-vehicles", {
@@ -1003,7 +1080,7 @@ export default function FloorControlDrawer({
                                                         </div>
                                                     </button>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-xs font-bold text-slate-800 truncate">Ticket listo</p>
+                                                        <p className="text-xs font-bold text-slate-800 truncate">Ticket adjunto</p>
                                                         <button
                                                             type="button"
                                                             onClick={() => {
@@ -1036,7 +1113,7 @@ export default function FloorControlDrawer({
                                                                 capture="environment"
                                                                 disabled={isUploadingPhoto}
                                                                 className="hidden"
-                                                                onChange={(e) => handleUploadPhotoFile(e, (url) => setNewPartPhotoUrl(url), "refaccion")}
+                                                                onChange={(e) => handleUploadPhotoFile(e, (url) => setNewPartPhotoUrl(url), "refaccion", { type: "refaccion", target: "newPart" })}
                                                             />
                                                         </label>
                                                         <label className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl border-2 border-dashed text-xs font-bold transition-all cursor-pointer ${isUploadingPhoto ? 'opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400' : 'border-slate-200 bg-white text-slate-700 hover:border-[#f16315] hover:text-[#f16315]'}`}>
@@ -1047,19 +1124,46 @@ export default function FloorControlDrawer({
                                                                 accept="image/*"
                                                                 disabled={isUploadingPhoto}
                                                                 className="hidden"
-                                                                onChange={(e) => handleUploadPhotoFile(e, (url) => setNewPartPhotoUrl(url), "refaccion")}
+                                                                onChange={(e) => handleUploadPhotoFile(e, (url) => setNewPartPhotoUrl(url), "refaccion", { type: "refaccion", target: "newPart" })}
                                                             />
                                                         </label>
                                                     </div>
                                                     {isUploadingPhoto && (
                                                         <div className="flex items-center justify-center gap-2 p-2 bg-amber-50 rounded-lg text-amber-800 text-xs font-medium animate-pulse">
                                                             <Loader2 size={13} className="animate-spin text-[#f16315]" />
-                                                            <span>Comprimiendo y subiendo ticket a la nube...</span>
+                                                            <span>Subiendo ticket a la nube...</span>
                                                         </div>
                                                     )}
                                                     {uploadError && (
                                                         <p className="text-[11px] text-rose-500 font-semibold px-1">{uploadError}</p>
                                                     )}
+                                                </div>
+                                            )}
+
+                                            {/* AI Status / Result feedback */}
+                                            {isAnalyzingTicket && (
+                                                <div className="flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-purple-200/70 rounded-lg text-purple-900 text-xs font-semibold animate-pulse shadow-sm">
+                                                    <Sparkles size={14} className="animate-spin text-purple-600 shrink-0" />
+                                                    <span>Leyendo ticket con IA (Gemini 3.5)...</span>
+                                                </div>
+                                            )}
+
+                                            {aiDetectedBadge?.target === "newPart" && !isAnalyzingTicket && (
+                                                <div className="flex items-center justify-between gap-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 text-[11px] font-medium shadow-sm">
+                                                    <div className="flex items-center gap-1.5 min-w-0">
+                                                        <Sparkles size={13} className="text-emerald-600 shrink-0" />
+                                                        <span className="truncate">
+                                                            <strong>IA detectó:</strong> {aiDetectedBadge.supplier ? `${aiDetectedBadge.supplier} • ` : ""}{aiDetectedBadge.description || ""}{aiDetectedBadge.cost ? ` • $${aiDetectedBadge.cost}` : ""}
+                                                        </span>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setAiDetectedBadge(null)}
+                                                        className="text-emerald-700 hover:text-emerald-900 p-0.5 rounded text-[10px] font-bold shrink-0"
+                                                        title="Cerrar aviso"
+                                                    >
+                                                        ✕
+                                                    </button>
                                                 </div>
                                             )}
                                         </div>
@@ -1187,7 +1291,7 @@ export default function FloorControlDrawer({
                                                                             capture="environment"
                                                                             disabled={isUploadingPhoto}
                                                                             className="hidden"
-                                                                            onChange={(e) => handleUploadPhotoFile(e, (url) => setEditPartPhotoUrl(url), "refaccion")}
+                                                                            onChange={(e) => handleUploadPhotoFile(e, (url) => setEditPartPhotoUrl(url), "refaccion", { type: "refaccion", target: "editPart" })}
                                                                         />
                                                                     </label>
                                                                     <label className={`flex items-center justify-center gap-1.5 p-2 rounded-xl border-2 border-dashed text-xs font-bold transition-all cursor-pointer ${isUploadingPhoto ? 'opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400' : 'border-slate-200 bg-white text-slate-700 hover:border-[#f16315] hover:text-[#f16315]'}`}>
@@ -1198,7 +1302,7 @@ export default function FloorControlDrawer({
                                                                             accept="image/*"
                                                                             disabled={isUploadingPhoto}
                                                                             className="hidden"
-                                                                            onChange={(e) => handleUploadPhotoFile(e, (url) => setEditPartPhotoUrl(url), "refaccion")}
+                                                                            onChange={(e) => handleUploadPhotoFile(e, (url) => setEditPartPhotoUrl(url), "refaccion", { type: "refaccion", target: "editPart" })}
                                                                         />
                                                                     </label>
                                                                 </div>
@@ -1210,7 +1314,34 @@ export default function FloorControlDrawer({
                                                                 )}
                                                             </div>
                                                         )}
-                                                    </div>
+
+                                                            {/* AI Status / Result feedback */}
+                                                            {isAnalyzingTicket && (
+                                                                <div className="flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-purple-200/70 rounded-lg text-purple-900 text-xs font-semibold animate-pulse shadow-sm">
+                                                                    <Sparkles size={14} className="animate-spin text-purple-600 shrink-0" />
+                                                                    <span>Leyendo ticket con IA (Gemini 3.5)...</span>
+                                                                </div>
+                                                            )}
+
+                                                            {aiDetectedBadge?.target === "editPart" && !isAnalyzingTicket && (
+                                                                <div className="flex items-center justify-between gap-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 text-[11px] font-medium shadow-sm">
+                                                                    <div className="flex items-center gap-1.5 min-w-0">
+                                                                        <Sparkles size={13} className="text-emerald-600 shrink-0" />
+                                                                        <span className="truncate">
+                                                                            <strong>IA detectó:</strong> {aiDetectedBadge.supplier ? `${aiDetectedBadge.supplier} • ` : ""}{aiDetectedBadge.description || ""}{aiDetectedBadge.cost ? ` • $${aiDetectedBadge.cost}` : ""}
+                                                                        </span>
+                                                                    </div>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setAiDetectedBadge(null)}
+                                                                        className="text-emerald-700 hover:text-emerald-900 p-0.5 rounded text-[10px] font-bold shrink-0"
+                                                                        title="Cerrar aviso"
+                                                                    >
+                                                                        ✕
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     <div className="flex justify-end gap-2 pt-1">
                                                         <button
                                                             type="button"
@@ -1428,7 +1559,7 @@ export default function FloorControlDrawer({
                                                                 capture="environment"
                                                                 disabled={isUploadingPhoto}
                                                                 className="hidden"
-                                                                onChange={(e) => handleUploadPhotoFile(e, (url) => setNewExtPhotoUrl(url), "rectificacion")}
+                                                                onChange={(e) => handleUploadPhotoFile(e, (url) => setNewExtPhotoUrl(url), "rectificacion", { type: "rectificacion", target: "newExt" })}
                                                             />
                                                         </label>
                                                         <label className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl border-2 border-dashed text-xs font-bold transition-all cursor-pointer ${isUploadingPhoto ? 'opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400' : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-500 hover:text-indigo-600'}`}>
@@ -1439,7 +1570,7 @@ export default function FloorControlDrawer({
                                                                 accept="image/*"
                                                                 disabled={isUploadingPhoto}
                                                                 className="hidden"
-                                                                onChange={(e) => handleUploadPhotoFile(e, (url) => setNewExtPhotoUrl(url), "rectificacion")}
+                                                                onChange={(e) => handleUploadPhotoFile(e, (url) => setNewExtPhotoUrl(url), "rectificacion", { type: "rectificacion", target: "newExt" })}
                                                             />
                                                         </label>
                                                     </div>
@@ -1452,6 +1583,33 @@ export default function FloorControlDrawer({
                                                     {uploadError && (
                                                         <p className="text-[11px] text-rose-500 font-semibold px-1">{uploadError}</p>
                                                     )}
+                                                </div>
+                                            )}
+
+                                            {/* AI Status / Result feedback */}
+                                            {isAnalyzingTicket && (
+                                                <div className="flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-purple-200/70 rounded-lg text-purple-900 text-xs font-semibold animate-pulse shadow-sm">
+                                                    <Sparkles size={14} className="animate-spin text-purple-600 shrink-0" />
+                                                    <span>Leyendo comprobante con IA (Gemini 3.5)...</span>
+                                                </div>
+                                            )}
+
+                                            {aiDetectedBadge?.target === "newExt" && !isAnalyzingTicket && (
+                                                <div className="flex items-center justify-between gap-2 p-2 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900 text-[11px] font-medium shadow-sm">
+                                                    <div className="flex items-center gap-1.5 min-w-0">
+                                                        <Sparkles size={13} className="text-indigo-600 shrink-0" />
+                                                        <span className="truncate">
+                                                            <strong>IA detectó:</strong> {aiDetectedBadge.supplier ? `${aiDetectedBadge.supplier} • ` : ""}{aiDetectedBadge.description || ""}{aiDetectedBadge.cost ? ` • $${aiDetectedBadge.cost}` : ""}
+                                                        </span>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setAiDetectedBadge(null)}
+                                                        className="text-indigo-700 hover:text-indigo-900 p-0.5 rounded text-[10px] font-bold shrink-0"
+                                                        title="Cerrar aviso"
+                                                    >
+                                                        ✕
+                                                    </button>
                                                 </div>
                                             )}
                                         </div>
@@ -1578,7 +1736,7 @@ export default function FloorControlDrawer({
                                                                             capture="environment"
                                                                             disabled={isUploadingPhoto}
                                                                             className="hidden"
-                                                                            onChange={(e) => handleUploadPhotoFile(e, (url) => setEditExtPhotoUrl(url), "rectificacion")}
+                                                                            onChange={(e) => handleUploadPhotoFile(e, (url) => setEditExtPhotoUrl(url), "rectificacion", { type: "rectificacion", target: "editExt" })}
                                                                         />
                                                                     </label>
                                                                     <label className={`flex items-center justify-center gap-1.5 p-2 rounded-xl border-2 border-dashed text-xs font-bold transition-all cursor-pointer ${isUploadingPhoto ? 'opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400' : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-500 hover:text-indigo-600'}`}>
@@ -1589,7 +1747,7 @@ export default function FloorControlDrawer({
                                                                             accept="image/*"
                                                                             disabled={isUploadingPhoto}
                                                                             className="hidden"
-                                                                            onChange={(e) => handleUploadPhotoFile(e, (url) => setEditExtPhotoUrl(url), "rectificacion")}
+                                                                            onChange={(e) => handleUploadPhotoFile(e, (url) => setEditExtPhotoUrl(url), "rectificacion", { type: "rectificacion", target: "editExt" })}
                                                                         />
                                                                     </label>
                                                                 </div>
@@ -1599,6 +1757,33 @@ export default function FloorControlDrawer({
                                                                         <span>Subiendo comprobante a la nube...</span>
                                                                     </div>
                                                                 )}
+                                                            </div>
+                                                        )}
+
+                                                        {/* AI Status / Result feedback */}
+                                                        {isAnalyzingTicket && (
+                                                            <div className="flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-purple-200/70 rounded-lg text-purple-900 text-xs font-semibold animate-pulse shadow-sm">
+                                                                <Sparkles size={14} className="animate-spin text-purple-600 shrink-0" />
+                                                                <span>Leyendo comprobante con IA (Gemini 3.5)...</span>
+                                                            </div>
+                                                        )}
+
+                                                        {aiDetectedBadge?.target === "editExt" && !isAnalyzingTicket && (
+                                                            <div className="flex items-center justify-between gap-2 p-2 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900 text-[11px] font-medium shadow-sm">
+                                                                <div className="flex items-center gap-1.5 min-w-0">
+                                                                    <Sparkles size={13} className="text-indigo-600 shrink-0" />
+                                                                    <span className="truncate">
+                                                                        <strong>IA detectó:</strong> {aiDetectedBadge.supplier ? `${aiDetectedBadge.supplier} • ` : ""}{aiDetectedBadge.description || ""}{aiDetectedBadge.cost ? ` • $${aiDetectedBadge.cost}` : ""}
+                                                                    </span>
+                                                                </div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setAiDetectedBadge(null)}
+                                                                    className="text-indigo-700 hover:text-indigo-900 p-0.5 rounded text-[10px] font-bold shrink-0"
+                                                                    title="Cerrar aviso"
+                                                                >
+                                                                    ✕
+                                                                </button>
                                                             </div>
                                                         )}
                                                     </div>

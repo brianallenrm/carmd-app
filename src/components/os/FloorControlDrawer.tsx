@@ -10,6 +10,12 @@ import {
     Loader2, RotateCw
 } from "lucide-react";
 import { compressImage, blobToBase64 } from "@/lib/image-utils";
+import {
+    WORKSHOP_PIPELINE,
+    RESOLUTION_STATUSES,
+    getFloorStage,
+    FloorStageConfig
+} from "@/types/floor-pipeline";
 
 export interface PartItem {
     id: string | number;
@@ -53,18 +59,6 @@ const DEFAULT_MECHANICS = [
     "Juan Pablo",
     "Rubén",
     "Josué",
-];
-
-const FLOOR_STATUS_OPTIONS = [
-    { value: "EN_RAMPA", label: "En rampa / trabajo", color: "bg-amber-500 text-white border-amber-500", icon: "🔧" },
-    { value: "EN_DIAGNOSTICO", label: "En diagnóstico", color: "bg-blue-500 text-white border-blue-500", icon: "🔍" },
-    { value: "ESPERANDO_PIEZAS", label: "Esperando refacciones", color: "bg-purple-500 text-white border-purple-500", icon: "📦" },
-    { value: "TORNO", label: "En rectificación / maquinado", color: "bg-indigo-500 text-white border-indigo-500", icon: "⚙️" },
-    { value: "LAVADO", label: "En lavado", color: "bg-cyan-500 text-white border-cyan-500", icon: "🧼" },
-    { value: "LISTO_ENTREGA", label: "Listo para entrega", color: "bg-emerald-500 text-white border-emerald-500", icon: "🏁" },
-    { value: "MANTENIMIENTO_SIN_NOTA", label: "Cortesía / Garantía (Sin nota)", color: "bg-teal-600 text-white border-teal-600", icon: "🛠️" },
-    { value: "SALIDA_SIN_NOTA", label: "Salida sin reparación", color: "bg-slate-500 text-white border-slate-500", icon: "🚪" },
-    { value: "ENTREGADO", label: "Entregado al cliente", color: "bg-emerald-600 text-white border-emerald-600", icon: "✅" },
 ];
 
 export default function FloorControlDrawer({
@@ -1012,29 +1006,169 @@ export default function FloorControlDrawer({
                         </div>
                     </div>
 
-                    {/* Estatus Operativo de Piso */}
-                    <div>
-                        <label className="text-xs font-black text-slate-700 uppercase tracking-wider block mb-2">
-                            Fase / Estatus en Taller
-                        </label>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                            {FLOOR_STATUS_OPTIONS.map(opt => {
-                                const isCurrent = currentStatus === opt.value;
+                    {/* Estatus Operativo de Piso / Car Tracker */}
+                    <div className="space-y-3 bg-slate-50/70 p-3.5 sm:p-4 rounded-2xl border border-slate-200/80">
+                        {/* Header con avance general */}
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <div>
+                                <label className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                    <Sparkles size={13} className="text-[#f16315]" />
+                                    Fase / Progreso (Car Tracker)
+                                </label>
+                                <p className="text-[10px] text-slate-400 mt-0.5">
+                                    Toca la etapa para avanzar el auto en el pipeline
+                                </p>
+                            </div>
+
+                            {/* Badge de la etapa activa */}
+                            {(() => {
+                                const stage = getFloorStage(currentStatus);
+                                return (
+                                    <span className={`text-[11px] font-black px-2.5 py-1 rounded-full border flex items-center gap-1.5 shadow-sm ${stage.badgeBg} ${stage.badgeText} ${stage.badgeBorder}`}>
+                                        <span>{stage.icon}</span>
+                                        <span>{stage.label}</span>
+                                        {!stage.isResolution && (
+                                            <span className="font-mono text-[10px] opacity-80">
+                                                · {stage.progress}%
+                                            </span>
+                                        )}
+                                    </span>
+                                );
+                            })()}
+                        </div>
+
+                        {/* Barra de Progreso del Pipeline */}
+                        {(() => {
+                            const stage = getFloorStage(currentStatus);
+                            if (stage.isResolution) return null;
+                            return (
+                                <div className="space-y-1">
+                                    <div className="flex justify-between text-[10px] font-bold text-slate-400">
+                                        <span>Avance del servicio</span>
+                                        <span className="text-[#f16315]">{stage.progress}% completado</span>
+                                    </div>
+                                    <div className="h-2 w-full bg-slate-200/70 rounded-full overflow-hidden p-0.5">
+                                        <div
+                                            className="h-full bg-gradient-to-r from-blue-500 via-[#f16315] to-emerald-500 rounded-full transition-all duration-300"
+                                            style={{ width: `${stage.progress}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        })()}
+
+                        {/* Las 7 Etapas Activas del Pipeline (Secuenciales) */}
+                        <div className="space-y-1.5">
+                            {WORKSHOP_PIPELINE.map((stage) => {
+                                const isCurrent = currentStatus === stage.id;
+                                const activeStage = getFloorStage(currentStatus);
+                                const isPast =
+                                    !activeStage.isResolution &&
+                                    activeStage.step !== undefined &&
+                                    stage.step !== undefined &&
+                                    stage.step < activeStage.step;
+
                                 return (
                                     <button
-                                        key={opt.value}
-                                        onClick={() => handleChangeStatus(opt.value)}
-                                        className={`px-2.5 py-2 rounded-xl text-[11px] font-bold text-left transition-all border flex items-center gap-1.5 ${
+                                        key={stage.id}
+                                        type="button"
+                                        onClick={() => handleChangeStatus(stage.id)}
+                                        className={`w-full p-2.5 rounded-xl text-left transition-all border flex items-center justify-between gap-3 ${
                                             isCurrent
-                                                ? `${opt.color} shadow-sm`
+                                                ? `${stage.activeBg} ${stage.activeText} ${stage.activeBorder} shadow-sm font-bold ring-2 ring-orange-400/30`
+                                                : isPast
+                                                ? "bg-emerald-50/70 text-emerald-900 border-emerald-200/80 hover:bg-emerald-50"
                                                 : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                                         }`}
                                     >
-                                        <span>{opt.icon}</span>
-                                        <span className="truncate">{opt.label}</span>
+                                        <div className="flex items-center gap-2.5 min-w-0">
+                                            {/* Indicador de paso */}
+                                            <span
+                                                className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black flex-shrink-0 ${
+                                                    isCurrent
+                                                        ? "bg-white/20 text-white"
+                                                        : isPast
+                                                        ? "bg-emerald-200 text-emerald-800"
+                                                        : "bg-slate-100 text-slate-500"
+                                                }`}
+                                            >
+                                                {isPast ? <Check size={12} /> : stage.step}
+                                            </span>
+
+                                            <span className="text-sm flex-shrink-0">{stage.icon}</span>
+
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-bold truncate leading-tight">
+                                                    {stage.label}
+                                                </p>
+                                                {isCurrent && (
+                                                    <p className="text-[10px] text-white/80 mt-0.5 truncate">
+                                                        Etapa activa actualmente en taller
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <span
+                                            className={`text-[10px] font-mono font-bold flex-shrink-0 px-2 py-0.5 rounded-md ${
+                                                isCurrent
+                                                    ? "bg-white/20 text-white"
+                                                    : "bg-slate-100 text-slate-500"
+                                            }`}
+                                        >
+                                            {stage.progress}%
+                                        </span>
                                     </button>
                                 );
                             })}
+                        </div>
+
+                        {/* Mensaje de Cara al Cliente (Preview del Car Tracker) */}
+                        {(() => {
+                            const stage = getFloorStage(currentStatus);
+                            return (
+                                <div className="p-3 bg-slate-900 text-white rounded-xl shadow-sm border border-slate-800 space-y-1">
+                                    <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                                        <span className="flex items-center gap-1.5 text-orange-400">
+                                            <Sparkles size={11} />
+                                            Vista del Cliente en Car Tracker:
+                                        </span>
+                                        <span>Etapa #{stage.step || "—"}</span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-200 italic leading-snug">
+                                        "{stage.clientMessage}"
+                                    </p>
+                                </div>
+                            );
+                        })()}
+
+                        {/* Bloque Separado: Resoluciones de Salida y Casos Especiales */}
+                        <div className="pt-2 border-t border-slate-200/80">
+                            <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider block mb-1.5">
+                                Resoluciones de Salida / Casos Especiales
+                            </label>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                                {RESOLUTION_STATUSES.map((res) => {
+                                    const isCurrent = currentStatus === res.id;
+                                    return (
+                                        <button
+                                            key={res.id}
+                                            type="button"
+                                            onClick={() => handleChangeStatus(res.id)}
+                                            className={`p-2 rounded-xl text-left transition-all border flex items-center gap-2 ${
+                                                isCurrent
+                                                    ? `${res.activeBg} ${res.activeText} ${res.activeBorder} shadow-sm font-bold ring-2 ring-slate-400/30`
+                                                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                                            }`}
+                                        >
+                                            <span className="text-sm flex-shrink-0">{res.icon}</span>
+                                            <span className="text-[11px] font-bold truncate leading-tight">
+                                                {res.label}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
 

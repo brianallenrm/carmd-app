@@ -476,7 +476,7 @@ export const saveChatMessage = async (phone: string, sender: 'client' | 'assista
 
 export interface PisoRecord {
     plate: string;
-    status: string; // 'EN_REPARACION' | 'SALIDA_SIN_NOTA' | 'ENTREGADO' | 'EN_RAMPA' | 'ESPERANDO_PIEZAS' | 'TORNO' | 'LAVADO' | 'LISTO_ENTREGA'
+    status: string; // 'EN_DIAGNOSTICO' | 'ESPERANDO_PIEZAS' | 'EN_RAMPA' | 'TORNO' | 'PRUEBAS_CALIDAD' | 'LAVADO' | 'LISTO_ENTREGA' | 'ENTREGADO' | 'MANTENIMIENTO_SIN_NOTA' | 'SALIDA_SIN_NOTA'
     mechanic: string;
     exitReason: string;
     lastUpdate: string;

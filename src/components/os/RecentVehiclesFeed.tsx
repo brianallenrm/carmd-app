@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import FloorControlDrawer from "./FloorControlDrawer";
+import { getFloorStage } from "@/types/floor-pipeline";
 
 interface RecentVehicle {
     idx: number;
@@ -77,7 +78,7 @@ function StatusBadges({ v }: { v: RecentVehicle }) {
         case 'mantenimiento_sin_nota':
             return (
                 <span className="flex items-center gap-1 text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200 px-1.5 py-0.5 rounded-full">
-                    <Wrench size={9} /> Cortesía / Garantía (Sin nota)
+                    <Wrench size={9} /> Garantía / Mantenimiento Preventivo
                 </span>
             );
         case 'salida_sin_nota':
@@ -171,6 +172,21 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect, mode = 'f
                                 {v.vehicle.plates}
                             </span>
                             <StatusBadges v={v} />
+
+                            {/* Badge de Fase Operativa de Piso (Car Tracker) */}
+                            {v.floorData?.status && (() => {
+                                const stage = getFloorStage(v.floorData.status);
+                                return (
+                                    <span
+                                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 shadow-2xs ${stage.badgeBg} ${stage.badgeText} ${stage.badgeBorder}`}
+                                        title={`Fase Car Tracker: ${stage.label}`}
+                                    >
+                                        <span>{stage.icon}</span>
+                                        <span>{stage.shortLabel}</span>
+                                    </span>
+                                );
+                            })()}
+
                             {v.floorData?.mechanic && (
                                 <span className="text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 px-1.5 py-0.5 rounded-full">
                                     👨‍🔧 {v.floorData.mechanic}
@@ -653,12 +669,12 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                             <>
                                 <button
                                     onClick={() => {
-                                        handleSetFloorStatus(contextMenu.vehicle!.vehicle.plates, 'MANTENIMIENTO_SIN_NOTA', 'Mantenimiento de cortesía incluido / Garantía');
+                                        handleSetFloorStatus(contextMenu.vehicle!.vehicle.plates, 'MANTENIMIENTO_SIN_NOTA', 'Garantía / Mantenimiento Preventivo');
                                     }}
                                     className="w-full px-4 py-2.5 text-xs font-bold text-teal-700 hover:bg-teal-50 flex items-center gap-2.5 transition-colors text-left"
                                 >
                                     <Wrench size={14} className="text-teal-600 flex-shrink-0" />
-                                    <span>Mantenimiento cortesía (sin nota)</span>
+                                    <span>Garantía / Mantenimiento Preventivo</span>
                                 </button>
 
                                 <button

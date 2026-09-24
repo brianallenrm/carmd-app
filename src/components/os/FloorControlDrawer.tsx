@@ -814,23 +814,42 @@ export default function FloorControlDrawer({
 
     return (
         <>
-            {/* Backdrop */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={onClose}
-                className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 transition-opacity"
-            />
+            {/* Backdrop — en piso mode el modal ya cubre todo, solo se usa en full mode */}
+            {mode !== 'piso' && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={onClose}
+                    className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 transition-opacity"
+                />
+            )}
 
-            {/* Slide-over Drawer */}
+            {/* 
+                piso mode  → full-screen modal que sube desde abajo (inset-0 = cobertura total, sin filtraciones iOS)
+                full mode  → panel lateral desde la derecha (comportamiento original) 
+            */}
             <motion.div
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
-                transition={{ type: "spring", damping: 28, stiffness: 280 }}
-                className="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-white shadow-2xl flex flex-col overflow-hidden"
+                initial={mode === 'piso' ? { y: "100%" } : { x: "100%" }}
+                animate={mode === 'piso' ? { y: 0 } : { x: 0 }}
+                exit={mode === 'piso' ? { y: "100%" } : { x: "100%" }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                className={
+                    mode === 'piso'
+                        ? "fixed inset-0 z-[60] bg-white flex flex-col overflow-hidden"
+                        : "fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-white shadow-2xl flex flex-col overflow-hidden"
+                }
             >
+                {/* Handle de arrastre (solo modo piso — indica que se puede deslizar para cerrar) */}
+                {mode === 'piso' && (
+                    <div
+                        onClick={onClose}
+                        className="flex-shrink-0 flex justify-center items-center h-6 bg-slate-50 cursor-pointer active:bg-slate-100 transition-colors"
+                        title="Toca para cerrar"
+                    >
+                        <div className="w-10 h-1 bg-slate-300 rounded-full" />
+                    </div>
+                )}
                 {/* Header */}
                 <div className="px-3.5 py-3 sm:p-5 border-b border-slate-100 bg-slate-50/70 flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
@@ -2038,7 +2057,7 @@ export default function FloorControlDrawer({
                         setZoomImage(null);
                         setZoomRotation(0);
                     }}
-                    className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-3 sm:p-4 backdrop-blur-md animate-in fade-in duration-150"
+                    className="fixed inset-0 z-[70] bg-black/90 flex items-center justify-center p-3 sm:p-4 backdrop-blur-md animate-in fade-in duration-150"
                 >
                     <div
                         onClick={(e) => e.stopPropagation()}

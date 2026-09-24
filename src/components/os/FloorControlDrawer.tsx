@@ -249,14 +249,20 @@ export default function FloorControlDrawer({
 
             const base64 = await blobToBase64(blob);
             const ext = actualFormat === "image/webp" ? "webp" : "jpg";
-            const platePrefix = cleanPlate || "TICKET";
-            const filename = `${platePrefix}_ticket_${tag}_${Date.now()}.${ext}`;
+            const platePrefix = cleanPlate || "SIN_PLACA";
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, "0");
+            const dd = String(now.getDate()).padStart(2, "0");
+            const datePrefix = `${yyyy}-${mm}-${dd}`;
+            const filename = `${datePrefix}_${tag}_${Date.now()}.${ext}`;
+            const folder = `tickets/${platePrefix}`;
 
-            // Step 1: Upload image to Cloudflare R2
+            // Step 1: Upload image to Cloudflare R2 inside tickets/[PLACAS]/
             const res = await fetch("/api/photos/upload", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ image: base64, filename }),
+                body: JSON.stringify({ image: base64, filename, folder }),
             });
 
             if (!res.ok) {

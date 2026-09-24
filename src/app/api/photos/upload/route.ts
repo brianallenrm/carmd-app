@@ -11,7 +11,7 @@ export const maxDuration = 30;
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { image, filename } = body;
+        const { image, filename, folder } = body;
 
         if (!image || !filename) {
             return NextResponse.json({ error: 'Missing image or filename' }, { status: 400 });
@@ -43,8 +43,11 @@ export async function POST(request: NextRequest) {
         const base64Data = matches[2];
         const buffer = Buffer.from(base64Data, 'base64');
 
-        // Upload to R2
-        const key = `inventarios/${filename}`;
+        // Upload to R2 with folder prefix (defaults to 'inventarios' for backwards compatibility)
+        const cleanFolder = folder
+            ? String(folder).trim().replace(/^\/+|\/+$/g, '')
+            : 'inventarios';
+        const key = `${cleanFolder}/${filename}`;
 
         await s3.send(new PutObjectCommand({
             Bucket: R2_BUCKET_NAME,

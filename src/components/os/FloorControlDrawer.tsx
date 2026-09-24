@@ -845,32 +845,37 @@ export default function FloorControlDrawer({
                     </div>
                 )}
                 {/* Header */}
-                <div className="px-3.5 py-3 sm:p-5 border-b border-slate-100 bg-slate-50/70 flex items-start justify-between gap-3">
+                <div className="px-4 py-3.5 sm:px-6 sm:py-4 border-b border-slate-100 bg-white flex items-start justify-between gap-3 shadow-2xs">
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                            <span className="font-mono font-black text-sm tracking-wider bg-slate-900 text-white px-2.5 py-0.5 rounded-lg border border-slate-700 shadow-sm">
+                        {/* Modelo y Año en grande + Placa al mismo nivel de relevancia */}
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                            <h2 className="text-base sm:text-lg font-black text-slate-900 uppercase tracking-tight leading-tight">
+                                {vehicle.vehicle?.brand || "Auto"} {vehicle.vehicle?.model || ""} {vehicle.vehicle?.year || ""}
+                            </h2>
+                            <span className="font-mono font-black text-xs sm:text-sm tracking-wider bg-slate-900 text-white px-2.5 py-1 rounded-lg border border-slate-800 shadow-xs flex-shrink-0">
                                 {plates}
                             </span>
-                            <span className="text-xs font-black text-slate-500 uppercase truncate max-w-[180px]">
-                                {vehicle.vehicle?.year} {vehicle.vehicle?.brand} {vehicle.vehicle?.model}
-                            </span>
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-medium flex-wrap">
-                            <span className="flex items-center gap-1">
-                                <Gauge size={11} className="text-slate-400" />
+
+                        {/* Metadatos técnicos rápidos */}
+                        <div className="flex items-center gap-2 sm:gap-2.5 text-[11px] text-slate-500 font-medium mt-1.5 flex-wrap">
+                            <span className="flex items-center gap-1 bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                                <Gauge size={12} className="text-slate-400" />
                                 {vehicle.vehicle?.km ? `${vehicle.vehicle.km.toLocaleString()} km` : "Sin km"}
                             </span>
-                            <span className="flex items-center gap-1">
-                                <Fuel size={11} className="text-slate-400" />
+                            <span className="flex items-center gap-1 bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                                <Fuel size={12} className="text-slate-400" />
                                 {vehicle.vehicle?.gas ? `${vehicle.vehicle.gas} tanque` : "—"}
                             </span>
-                            <span>• Ingresó: {vehicle.dateDisplay || "Hoy"}</span>
+                            <span className="text-slate-400">
+                                • Ingresó: <strong className="text-slate-600 font-semibold">{vehicle.dateDisplay || "Hoy"}</strong>
+                            </span>
                         </div>
                     </div>
 
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-xl transition-colors flex-shrink-0"
+                        className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors flex-shrink-0 -mr-1"
                         title="Cerrar panel"
                     >
                         <X size={20} />
@@ -880,46 +885,64 @@ export default function FloorControlDrawer({
                 {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-4 sm:space-y-6">
 
-                    {/* Cliente & Motivo Card */}
-                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-orange-100 text-[#f16315] flex items-center justify-center font-black text-xs">
-                                    <User size={15} />
+                    {/* Cliente & Motivo Card — Rediseño visual premium */}
+                    <div className="bg-gradient-to-b from-white to-slate-50/80 rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 shadow-xs space-y-3.5">
+                        {/* Fila Cliente & Asesor */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-400 to-[#f16315] text-white flex items-center justify-center font-black text-sm shadow-sm shadow-orange-500/20 flex-shrink-0">
+                                    <User size={18} />
                                 </div>
-                                <div>
-                                    <p className="text-xs font-bold text-slate-800 leading-tight">
+                                <div className="min-w-0">
+                                    <p className="text-sm font-black text-slate-900 truncate leading-tight">
                                         {vehicle.client?.name || "Cliente general"}
                                     </p>
-                                    <p className="text-[11px] text-slate-400">
-                                        Asesor: {vehicle.advisor || "Taller"}
-                                    </p>
+                                    {vehicle.client?.phone ? (
+                                        <p className="text-[11px] font-mono font-medium text-slate-500 mt-0.5">
+                                            Tel: {vehicle.client.phone}
+                                        </p>
+                                    ) : (
+                                        <p className="text-[11px] text-slate-400 mt-0.5">
+                                            Sin teléfono registrado
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
-                            {mode !== 'piso' && waUrl && (
-                                <a
-                                    href={waUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition-all shadow-sm"
-                                >
-                                    <Phone size={13} />
-                                    <span>WhatsApp</span>
-                                </a>
-                            )}
+                            {/* Asesor y botón WhatsApp */}
+                            <div className="flex items-center gap-2 self-start sm:self-center flex-wrap">
+                                <span className="text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200/90 px-2.5 py-1 rounded-xl flex items-center gap-1.5 shadow-2xs">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
+                                    <span>Asesor:</span>
+                                    <strong className="text-amber-950 font-black">{vehicle.advisor || "Taller"}</strong>
+                                </span>
+
+                                {mode !== 'piso' && waUrl && (
+                                    <a
+                                        href={waUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition-all shadow-2xs"
+                                    >
+                                        <Phone size={12} />
+                                        <span>WhatsApp</span>
+                                    </a>
+                                )}
+                            </div>
                         </div>
 
-                        {vehicle.motivo && (
-                            <div className="text-xs bg-white rounded-xl p-3 border border-slate-100">
-                                <span className="font-bold text-slate-500 uppercase text-[10px] tracking-wider block mb-0.5">
-                                    Motivo de ingreso reportado:
-                                </span>
-                                <p className="text-slate-700 italic">
-                                    "{vehicle.motivo}"
+                        {/* Motivo de ingreso reportado */}
+                        <div>
+                            <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
+                                <FileText size={12} className="text-[#f16315]" />
+                                <span>Motivo de Ingreso Reportado</span>
+                            </div>
+                            <div className="bg-white rounded-xl p-3 border-l-4 border-l-[#f16315] border border-slate-200/80 shadow-2xs">
+                                <p className="text-xs text-slate-800 font-medium leading-relaxed italic">
+                                    {vehicle.motivo ? `"${vehicle.motivo}"` : "Sin motivo específico registrado al momento de recepción."}
                                 </p>
                             </div>
-                        )}
+                        </div>
                     </div>
 
                     {/* Mecánicos Asignados (Multi-select) */}

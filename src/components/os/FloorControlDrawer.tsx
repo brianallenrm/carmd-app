@@ -1997,7 +1997,7 @@ export default function FloorControlDrawer({
 
                 {/* Footer Action Bar */}
                 <div className="p-4 bg-white border-t border-slate-100 flex items-center gap-3">
-                    {onExpedienteSearch && (
+                    {mode !== 'piso' && onExpedienteSearch && (
                         <button
                             onClick={() => {
                                 onExpedienteSearch(plates);

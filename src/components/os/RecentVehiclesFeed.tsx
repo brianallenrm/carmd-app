@@ -128,7 +128,7 @@ function StatusBadges({ v }: { v: RecentVehicle }) {
 function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect, mode = 'full' }: {
     v: RecentVehicle;
     index: number;
-    onExpediente: (plates: string) => void;
+    onExpediente?: (plates: string) => void;
     onContextMenu: (e: React.MouseEvent, v: RecentVehicle) => void;
     onSelect: (v: RecentVehicle) => void;
     mode?: 'full' | 'piso';
@@ -272,17 +272,19 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect, mode = 'f
                         )
                     )}
 
-                    {/* Expediente */}
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onExpediente(v.vehicle.plates);
-                        }}
-                        className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition-colors border border-indigo-200"
-                    >
-                        <History size={13} />
-                        <span>Expediente</span>
-                    </button>
+                    {/* Expediente (Solo en modo administrativo / no piso) */}
+                    {mode !== 'piso' && onExpediente && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onExpediente(v.vehicle.plates);
+                            }}
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition-colors border border-indigo-200"
+                        >
+                            <History size={13} />
+                            <span>Expediente</span>
+                        </button>
+                    )}
 
                     {/* Botón 3 puntos / opciones de piso */}
                     <button
@@ -302,7 +304,7 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect, mode = 'f
 }
 
 interface RecentVehiclesFeedProps {
-    onExpedienteSearch: (plates: string) => void;
+    onExpedienteSearch?: (plates: string) => void;
     initialFilterMode?: 'todos' | 'activos';
     mode?: 'full' | 'piso';
 }
@@ -674,18 +676,21 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                             </button>
                         )}
 
-                        <div className="h-px bg-slate-100 my-1" />
-
-                        <button
-                            onClick={() => {
-                                onExpedienteSearch(contextMenu.vehicle!.vehicle.plates);
-                                setContextMenu(prev => ({ ...prev, visible: false }));
-                            }}
-                            className="w-full px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2.5 transition-colors text-left"
-                        >
-                            <History size={14} className="text-indigo-500 flex-shrink-0" />
-                            <span>Ver Expediente Histórico</span>
-                        </button>
+                        {mode !== 'piso' && onExpedienteSearch && (
+                            <>
+                                <div className="h-px bg-slate-100 my-1" />
+                                <button
+                                    onClick={() => {
+                                        onExpedienteSearch(contextMenu.vehicle!.vehicle.plates);
+                                        setContextMenu(prev => ({ ...prev, visible: false }));
+                                    }}
+                                    className="w-full px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2.5 transition-colors text-left"
+                                >
+                                    <History size={14} className="text-indigo-500 flex-shrink-0" />
+                                    <span>Ver Expediente Histórico</span>
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
                 </>

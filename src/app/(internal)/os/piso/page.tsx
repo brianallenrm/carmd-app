@@ -1,25 +1,16 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import Link from "next/link";
 import {
     Wrench,
     Car,
     ClipboardList,
-    History,
     RefreshCw
 } from "lucide-react";
 import RecentVehiclesFeed from "@/components/os/RecentVehiclesFeed";
-import VehicleHistoryTool from "@/components/os/VehicleHistoryTool";
 
 export default function PisoTallerPage() {
-    const expedienteSectionRef = useRef<HTMLDivElement>(null);
-
-    const handleExpedienteSearch = (plates: string) => {
-        expedienteSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-        window.dispatchEvent(new CustomEvent("carmd:expediente-search", { detail: { query: plates } }));
-    };
-
     const handleRefresh = () => {
         window.dispatchEvent(new CustomEvent("carmd:refresh-recent-vehicles"));
     };
@@ -100,25 +91,10 @@ export default function PisoTallerPage() {
                 {/* Feed de Vehículos en modo piso operativo */}
                 <div className="bg-white rounded-2xl sm:rounded-[28px] border border-slate-200/80 shadow-sm p-2.5 sm:p-6 md:p-8">
                     <RecentVehiclesFeed
-                        onExpedienteSearch={handleExpedienteSearch}
                         initialFilterMode="activos"
                         mode="piso"
                     />
                 </div>
-
-                {/* Sección Expediente del Vehículo */}
-                <section ref={expedienteSectionRef} className="pt-2">
-                    <div className="flex items-center gap-3 mb-3">
-                        <h2 className="text-[10px] sm:text-[11px] font-black text-indigo-700 uppercase tracking-[0.2em] bg-indigo-50 px-2.5 py-1 rounded-md flex items-center gap-1.5">
-                            <History size={12} />
-                            Consulta de Expediente
-                        </h2>
-                        <div className="h-px bg-slate-200 flex-grow" />
-                    </div>
-                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 sm:p-6">
-                        <VehicleHistoryTool />
-                    </div>
-                </section>
             </main>
         </div>
     );

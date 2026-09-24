@@ -125,12 +125,13 @@ function StatusBadges({ v }: { v: RecentVehicle }) {
 }
 
 
-function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect }: {
+function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect, mode = 'full' }: {
     v: RecentVehicle;
     index: number;
     onExpediente: (plates: string) => void;
     onContextMenu: (e: React.MouseEvent, v: RecentVehicle) => void;
     onSelect: (v: RecentVehicle) => void;
+    mode?: 'full' | 'piso';
 }) {
     const cfg = STATUS_CONFIG[v.status] ?? STATUS_CONFIG['en_piso_nuevo'];
     const isExited = v.status === 'salida_sin_nota' || v.status === 'entregado' || v.status === 'mantenimiento_sin_nota';
@@ -217,42 +218,58 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect }: {
                 </div>
 
                 {/* Action buttons */}
-                <div className="grid grid-cols-2 xs:grid-cols-3 sm:flex items-center gap-2 flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
+                <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t border-slate-100 sm:border-0">
+                    {/* Botón directo Ficha de Piso en modo piso para uso ágil en celular */}
+                    {mode === 'piso' && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onSelect(v);
+                            }}
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-[#f16315] hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition-colors shadow-sm shadow-orange-200"
+                        >
+                            <Wrench size={13} />
+                            <span>Ficha</span>
+                        </button>
+                    )}
+
                     {/* Inventario */}
                     <Link
                         href={`/os/admin/receptions`}
                         target="_blank"
                         onClick={(e) => e.stopPropagation()}
-                        className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold transition-colors border border-slate-200"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition-colors border border-slate-200"
                     >
                         <ClipboardList size={13} />
-                        Inventario
+                        <span>Inventario</span>
                     </Link>
 
-                    {/* Nota: ver si ya existe, o generar */}
-                    {v.status === 'con_nota' ? (
-                        <a
-                            href={`/os/note-preview?folio=${v.note!.folio}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition-colors border border-emerald-200"
-                        >
-                            <FileText size={13} />
-                            <span className="hidden md:inline">Ver </span>Nota #{v.note!.folio}
-                        </a>
-                    ) : (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                localStorage.setItem('carmd:prefill:note', v.prefillJson);
-                                window.open('/os', '_blank');
-                            }}
-                            className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#f16315] hover:bg-orange-600 text-white rounded-lg text-xs font-bold transition-colors shadow-sm shadow-orange-200"
-                        >
-                            <PlusCircle size={13} />
-                            Generar Nota
-                        </button>
+                    {/* Nota: ver si ya existe, o generar (Solo en modo full/administrativo) */}
+                    {mode !== 'piso' && (
+                        v.status === 'con_nota' ? (
+                            <a
+                                href={`/os/note-preview?folio=${v.note!.folio}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition-colors border border-emerald-200"
+                            >
+                                <FileText size={13} />
+                                <span className="hidden md:inline">Ver </span>Nota #{v.note!.folio}
+                            </a>
+                        ) : (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    localStorage.setItem('carmd:prefill:note', v.prefillJson);
+                                    window.open('/os', '_blank');
+                                }}
+                                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#f16315] hover:bg-orange-600 text-white rounded-lg text-xs font-bold transition-colors shadow-sm shadow-orange-200"
+                            >
+                                <PlusCircle size={13} />
+                                Generar Nota
+                            </button>
+                        )
                     )}
 
                     {/* Expediente */}
@@ -261,10 +278,10 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect }: {
                             e.stopPropagation();
                             onExpediente(v.vehicle.plates);
                         }}
-                        className="flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition-colors border border-indigo-200"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition-colors border border-indigo-200"
                     >
                         <History size={13} />
-                        Expediente
+                        <span>Expediente</span>
                     </button>
 
                     {/* Botón 3 puntos / opciones de piso */}
@@ -273,7 +290,7 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect }: {
                             e.stopPropagation();
                             onContextMenu(e, v);
                         }}
-                        className="flex items-center justify-center p-2 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs font-bold transition-colors border border-slate-200"
+                        className="p-2 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl text-xs font-bold transition-colors border border-slate-200 flex-shrink-0"
                         title="Opciones de piso (o clic derecho)"
                     >
                         <MoreVertical size={14} />
@@ -287,9 +304,10 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect }: {
 interface RecentVehiclesFeedProps {
     onExpedienteSearch: (plates: string) => void;
     initialFilterMode?: 'todos' | 'activos';
+    mode?: 'full' | 'piso';
 }
 
-export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMode = 'todos' }: RecentVehiclesFeedProps) {
+export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMode = 'todos', mode = 'full' }: RecentVehiclesFeedProps) {
     const [vehicles, setVehicles] = useState<RecentVehicle[]>([]);
     const [filterMode, setFilterMode] = useState<'todos' | 'activos'>(initialFilterMode);
     const [selectedDrawerVehicle, setSelectedDrawerVehicle] = useState<RecentVehicle | null>(null);
@@ -326,6 +344,15 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
         return () => clearInterval(interval);
     }, [load]);
 
+    // Escuchar evento personalizado para refrescar datos desde header
+    useEffect(() => {
+        const handleCustomRefresh = () => {
+            load();
+        };
+        window.addEventListener("carmd:refresh-recent-vehicles", handleCustomRefresh);
+        return () => window.removeEventListener("carmd:refresh-recent-vehicles", handleCustomRefresh);
+    }, [load]);
+
     // Cerrar menú contextual al hacer clic fuera
     useEffect(() => {
         const handleWindowClick = () => {
@@ -336,8 +363,8 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
     }, []);
 
     const handleContextMenu = (e: React.MouseEvent, vehicle: RecentVehicle) => {
-        const x = Math.min(e.clientX, window.innerWidth - 270);
-        const y = Math.min(e.clientY, window.innerHeight - 240);
+        const x = Math.max(10, Math.min(e.clientX, window.innerWidth - 270));
+        const y = Math.max(10, Math.min(e.clientY, window.innerHeight - 280));
         setContextMenu({
             visible: true,
             x,
@@ -394,15 +421,23 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
         }
     };
 
-    // Filtro activo vs todos: 'activos' solo incluye autos que NO tienen nota y NO han salido/concluido
+    // Filtro activo vs todos: en piso, activos son los autos que NO han salido ni entregados (siguen físicamente en taller)
     const displayVehicles = vehicles.filter(v => {
         if (filterMode === 'activos') {
+            if (mode === 'piso') {
+                return v.status !== 'salida_sin_nota' && v.status !== 'entregado';
+            }
             return v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota' && v.status !== 'mantenimiento_sin_nota';
         }
         return true;
     });
 
-    const activosCount = vehicles.filter(v => v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota' && v.status !== 'mantenimiento_sin_nota').length;
+    const activosCount = vehicles.filter(v => {
+        if (mode === 'piso') {
+            return v.status !== 'salida_sin_nota' && v.status !== 'entregado';
+        }
+        return v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota' && v.status !== 'mantenimiento_sin_nota';
+    }).length;
     const conNotaCount = vehicles.filter(v => v.status === 'con_nota').length;
     const cortesiasCount = vehicles.filter(v => v.status === 'mantenimiento_sin_nota').length;
     const salidasCount = vehicles.filter(v => v.status === 'salida_sin_nota').length;
@@ -525,6 +560,7 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                                 onExpediente={onExpedienteSearch}
                                 onContextMenu={handleContextMenu}
                                 onSelect={(veh) => setSelectedDrawerVehicle(veh)}
+                                mode={mode}
                             />
                         ))}
 
@@ -561,16 +597,22 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                 </AnimatePresence>
             )}
 
-            {/* Menú Contextual Flotante (Clic derecho) */}
+            {/* Menú Contextual Flotante (Clic derecho o botón 3 puntos) */}
             {contextMenu.visible && contextMenu.vehicle && (
-                <div
-                    className="fixed z-50 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 w-64 text-left animate-in fade-in zoom-in-95 duration-100"
-                    style={{
-                        top: contextMenu.y,
-                        left: contextMenu.x,
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                >
+                <>
+                    {/* Backdrop para cerrar al tocar fuera en pantallas táctiles */}
+                    <div
+                        className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[0.5px]"
+                        onClick={() => setContextMenu(prev => ({ ...prev, visible: false }))}
+                    />
+                    <div
+                        className="fixed z-50 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 w-64 text-left animate-in fade-in zoom-in-95 duration-100"
+                        style={{
+                            top: contextMenu.y,
+                            left: contextMenu.x,
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
                     <div className="px-4 py-2 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
                         <p className="text-xs font-black text-slate-800 uppercase truncate">
                             {contextMenu.vehicle.vehicle.brand} {contextMenu.vehicle.vehicle.model}
@@ -654,6 +696,7 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                         </button>
                     </div>
                 </div>
+                </>
             )}
 
             {/* Drawer de Control de Piso */}
@@ -672,6 +715,7 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                             ));
                         }}
                         onExpedienteSearch={onExpedienteSearch}
+                        mode={mode}
                     />
                 )}
             </AnimatePresence>

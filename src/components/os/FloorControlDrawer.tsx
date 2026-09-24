@@ -43,6 +43,7 @@ interface FloorControlDrawerProps {
     vehicle: any | null; // RecentVehicle
     onVehicleUpdated?: (updatedVehicle: any) => void;
     onExpedienteSearch?: (plates: string) => void;
+    mode?: 'full' | 'piso';
 }
 
 const DEFAULT_MECHANICS = [
@@ -72,6 +73,7 @@ export default function FloorControlDrawer({
     vehicle,
     onVehicleUpdated,
     onExpedienteSearch,
+    mode = 'full',
 }: FloorControlDrawerProps) {
     const [activeTab, setActiveTab] = useState<"refacciones" | "externos" | "bitacora">("refacciones");
     const [saving, setSaving] = useState(false);
@@ -882,7 +884,7 @@ export default function FloorControlDrawer({
                                 </div>
                             </div>
 
-                            {waUrl && (
+                            {mode !== 'piso' && waUrl && (
                                 <a
                                     href={waUrl}
                                     target="_blank"
@@ -971,7 +973,7 @@ export default function FloorControlDrawer({
                                         value={customMechanicInput}
                                         onChange={(e) => setCustomMechanicInput(e.target.value)}
                                         onKeyDown={(e) => e.key === "Enter" && handleAddCustomMechanic()}
-                                        className="px-2.5 py-1 text-xs border border-slate-300 rounded-lg w-28 focus:outline-none focus:border-[#f16315]"
+                                        className="px-2.5 py-1 text-base sm:text-xs border border-slate-300 rounded-lg w-28 focus:outline-none focus:border-[#f16315]"
                                         autoFocus
                                     />
                                     <button
@@ -1133,7 +1135,7 @@ export default function FloorControlDrawer({
                                             placeholder="Descripción (ej. Balatas delanteras)"
                                             value={newPartDesc}
                                             onChange={(e) => setNewPartDesc(e.target.value)}
-                                            className="w-full text-xs p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#f16315]"
+                                            className="w-full text-base sm:text-xs p-2.5 sm:p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#f16315]"
                                         />
                                         <div className="grid grid-cols-2 gap-2">
                                             <input
@@ -1141,14 +1143,14 @@ export default function FloorControlDrawer({
                                                 placeholder="Costo $ MXN"
                                                 value={newPartCost}
                                                 onChange={(e) => setNewPartCost(e.target.value)}
-                                                className="text-xs p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#f16315]"
+                                                className="text-base sm:text-xs p-2.5 sm:p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#f16315]"
                                             />
                                             <input
                                                 type="text"
                                                 placeholder="Proveedor (Autozone, etc.)"
                                                 value={newPartSupplier}
                                                 onChange={(e) => setNewPartSupplier(e.target.value)}
-                                                className="text-xs p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#f16315]"
+                                                className="text-base sm:text-xs p-2.5 sm:p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#f16315]"
                                             />
                                         </div>
                                         {/* Subir foto ticket */}
@@ -1293,7 +1295,7 @@ export default function FloorControlDrawer({
                                                         placeholder="Descripción (ej. Balatas delanteras)"
                                                         value={editPartDesc}
                                                         onChange={(e) => setEditPartDesc(e.target.value)}
-                                                        className="w-full text-xs p-2 bg-white border border-amber-200 rounded-lg focus:outline-none focus:border-[#f16315]"
+                                                        className="w-full text-base sm:text-xs p-2.5 sm:p-2 bg-white border border-amber-200 rounded-lg focus:outline-none focus:border-[#f16315]"
                                                     />
                                                     <div className="grid grid-cols-2 gap-2">
                                                         <input
@@ -1301,14 +1303,14 @@ export default function FloorControlDrawer({
                                                             placeholder="Costo $ MXN"
                                                             value={editPartCost}
                                                             onChange={(e) => setEditPartCost(e.target.value)}
-                                                            className="text-xs p-2 bg-white border border-amber-200 rounded-lg focus:outline-none focus:border-[#f16315]"
+                                                            className="text-base sm:text-xs p-2.5 sm:p-2 bg-white border border-amber-200 rounded-lg focus:outline-none focus:border-[#f16315]"
                                                         />
                                                         <input
                                                             type="text"
                                                             placeholder="Proveedor (AutoZone, etc.)"
                                                             value={editPartSupplier}
                                                             onChange={(e) => setEditPartSupplier(e.target.value)}
-                                                            className="text-xs p-2 bg-white border border-amber-200 rounded-lg focus:outline-none focus:border-[#f16315]"
+                                                            className="text-base sm:text-xs p-2.5 sm:p-2 bg-white border border-amber-200 rounded-lg focus:outline-none focus:border-[#f16315]"
                                                         />
                                                     </div>
 
@@ -1544,7 +1546,7 @@ export default function FloorControlDrawer({
                                             placeholder="Descripción (ej. Rectificado de discos, cabeza de motor)"
                                             value={newExtDesc}
                                             onChange={(e) => setNewExtDesc(e.target.value)}
-                                            className="w-full text-xs p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
+                                            className="w-full text-base sm:text-xs p-2.5 sm:p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
                                         />
                                         <div className="grid grid-cols-2 gap-2">
                                             <input
@@ -1552,14 +1554,14 @@ export default function FloorControlDrawer({
                                                 placeholder="Costo $ MXN"
                                                 value={newExtCost}
                                                 onChange={(e) => setNewExtCost(e.target.value)}
-                                                className="text-xs p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
+                                                className="text-base sm:text-xs p-2.5 sm:p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
                                             />
                                             <input
                                                 type="text"
                                                 placeholder="Proveedor (Rectificación Don Pepe, etc.)"
                                                 value={newExtVendor}
                                                 onChange={(e) => setNewExtVendor(e.target.value)}
-                                                className="text-xs p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
+                                                className="text-base sm:text-xs p-2.5 sm:p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
                                             />
                                         </div>
 
@@ -1704,7 +1706,7 @@ export default function FloorControlDrawer({
                                                         placeholder="Descripción (ej. Rectificado de discos)"
                                                         value={editExtDesc}
                                                         onChange={(ev) => setEditExtDesc(ev.target.value)}
-                                                        className="w-full text-xs p-2 bg-white border border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-500"
+                                                        className="w-full text-base sm:text-xs p-2.5 sm:p-2 bg-white border border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-500"
                                                     />
                                                     <div className="grid grid-cols-2 gap-2">
                                                         <input
@@ -1712,14 +1714,14 @@ export default function FloorControlDrawer({
                                                             placeholder="Costo $ MXN"
                                                             value={editExtCost}
                                                             onChange={(ev) => setEditExtCost(ev.target.value)}
-                                                            className="text-xs p-2 bg-white border border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-500"
+                                                            className="text-base sm:text-xs p-2.5 sm:p-2 bg-white border border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-500"
                                                         />
                                                         <input
                                                             type="text"
                                                             placeholder="Proveedor (Rectificación Don Pepe, etc.)"
                                                             value={editExtVendor}
                                                             onChange={(ev) => setEditExtVendor(ev.target.value)}
-                                                            className="text-xs p-2 bg-white border border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-500"
+                                                            className="text-base sm:text-xs p-2.5 sm:p-2 bg-white border border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-500"
                                                         />
                                                     </div>
 
@@ -1943,7 +1945,7 @@ export default function FloorControlDrawer({
                                         value={newLogText}
                                         onChange={(e) => setNewLogText(e.target.value)}
                                         onKeyDown={(e) => e.key === "Enter" && handleSaveLog()}
-                                        className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#f16315]"
+                                        className="w-full text-base sm:text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#f16315]"
                                     />
                                     <div className="flex justify-end">
                                         <button
@@ -2008,13 +2010,23 @@ export default function FloorControlDrawer({
                         </button>
                     )}
 
-                    <button
-                        onClick={handleGoToNote}
-                        className="flex-1 py-2.5 px-4 bg-[#f16315] hover:bg-orange-600 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md shadow-orange-300"
-                    >
-                        <FileText size={15} />
-                        <span>Generar Nota con Todo Precargado</span>
-                    </button>
+                    {mode === 'piso' ? (
+                        <button
+                            onClick={onClose}
+                            className="flex-1 py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md active:scale-[0.99]"
+                        >
+                            <Check size={16} className="text-emerald-400" />
+                            <span>Listo / Cerrar Ficha</span>
+                        </button>
+                    ) : (
+                        <button
+                            onClick={handleGoToNote}
+                            className="flex-1 py-2.5 px-4 bg-[#f16315] hover:bg-orange-600 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md shadow-orange-300"
+                        >
+                            <FileText size={15} />
+                            <span>Generar Nota con Todo Precargado</span>
+                        </button>
+                    )}
                 </div>
             </motion.div>
 

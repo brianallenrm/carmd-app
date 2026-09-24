@@ -175,7 +175,7 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect, mode = 'f
 
                             {/* Badge de Fase Operativa de Piso (Car Tracker) */}
                             {(() => {
-                                const effectiveStatus = (v.status === 'con_nota' || v.status === 'entregado' || Boolean(v.note))
+                                const effectiveStatus = (v.status === 'con_nota' || v.status === 'entregado')
                                     ? 'ENTREGADO'
                                     : v.floorData?.status;
 
@@ -417,7 +417,7 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                 if (status === 'SALIDA_SIN_NOTA') newStatus = 'salida_sin_nota';
                 if (status === 'MANTENIMIENTO_SIN_NOTA') newStatus = 'mantenimiento_sin_nota';
                 if (status === 'ENTREGADO') newStatus = 'entregado';
-                if (status === 'EN_REPARACION') newStatus = v.note ? 'con_nota' : 'en_piso_registrado';
+                if (status === 'EN_REPARACION') newStatus = v.status === 'con_nota' ? 'con_nota' : (v.status === 'en_piso_nuevo' ? 'en_piso_nuevo' : 'en_piso_registrado');
 
                 return {
                     ...v,

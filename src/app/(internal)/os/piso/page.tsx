@@ -63,33 +63,25 @@ export default function PisoTallerPage() {
             </header>
 
             {/* Contenido Principal */}
-            <main className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-3.5 sm:py-6 md:py-8 space-y-4 sm:space-y-6">
+            <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-2.5 sm:py-6 md:py-8 space-y-3 sm:space-y-6">
                 
                 {/* Banner de Ayuda Rápida Móvil */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-3.5 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                        <div className="p-2 bg-orange-50 text-[#f16315] rounded-xl flex-shrink-0 mt-0.5">
-                            <Car size={18} />
-                        </div>
-                        <div>
-                            <h2 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-wide">
-                                Autos Activos en Rampa y Taller
-                            </h2>
-                            <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-snug">
-                                Toca cualquier auto para asignar mecánicos, registrar refacciones, fotos de tickets o maquinados.
-                            </p>
-                        </div>
+                <div className="bg-white rounded-2xl border border-slate-200/80 px-3.5 py-3 shadow-sm flex items-center gap-3">
+                    <div className="p-2 bg-orange-50 text-[#f16315] rounded-xl flex-shrink-0">
+                        <Car size={16} />
                     </div>
-
-                    <div className="flex items-center gap-2 self-start sm:self-center">
-                        <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-slate-200">
-                            💡 Toca el botón ⋮ para cambiar estatus
-                        </span>
+                    <div className="min-w-0 flex-1">
+                        <h2 className="text-xs font-black text-slate-800 uppercase tracking-wide leading-tight">
+                            Autos en Rampa y Taller
+                        </h2>
+                        <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">
+                            Toca un auto para ver su ficha · Usa <strong>⋮</strong> para cambiar estatus
+                        </p>
                     </div>
                 </div>
 
                 {/* Feed de Vehículos en modo piso operativo */}
-                <div className="bg-white rounded-2xl sm:rounded-[28px] border border-slate-200/80 shadow-sm p-2.5 sm:p-6 md:p-8">
+                <div className="bg-white rounded-2xl sm:rounded-[28px] border border-slate-200/80 shadow-sm p-2 sm:p-6 md:p-8">
                     <RecentVehiclesFeed
                         initialFilterMode="activos"
                         mode="piso"

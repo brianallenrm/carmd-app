@@ -153,18 +153,18 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect, mode = 'f
             {/* Status stripe */}
             <div className={`h-1 w-full ${cfg.stripe}`} />
 
-            <div className="p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
 
                 {/* Vehicle & Client info */}
                 <div className="flex items-start gap-3 flex-grow min-w-0">
-                    <div className={`p-2.5 rounded-xl flex-shrink-0 ${cfg.iconBg}`}>
-                        <Car size={18} className={cfg.icon} />
+                    <div className={`p-2 rounded-xl flex-shrink-0 ${cfg.iconBg}`}>
+                        <Car size={16} className={cfg.icon} />
                     </div>
 
                     <div className="min-w-0 flex-grow">
                         {/* Vehicle */}
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-slate-800 text-sm">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-slate-800 text-sm leading-tight">
                                 {v.vehicle.brand} {v.vehicle.model} {v.vehicle.year}
                             </span>
                             <span className="font-mono text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200 tracking-wide">
@@ -190,14 +190,14 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect, mode = 'f
                         </div>
 
                         {/* Motivo + meta */}
-                        <div className="flex items-center gap-3 mt-1 flex-wrap">
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
                             {v.motivo && (
                                 <div className="flex items-center gap-1 text-xs text-slate-500 min-w-0">
                                     <Wrench size={10} className="flex-shrink-0 text-slate-400" />
-                                    <span className="italic">{v.motivo}</span>
+                                    <span className="italic truncate max-w-[160px]">{v.motivo}</span>
                                 </div>
                             )}
-                            <div className="flex items-center gap-3 text-[10px] text-slate-400">
+                            <div className="flex items-center gap-2 text-[10px] text-slate-400">
                                 {v.vehicle.km > 0 && (
                                     <span className="flex items-center gap-1">
                                         <Gauge size={10} /> {fmtKm(v.vehicle.km)}
@@ -217,36 +217,45 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect, mode = 'f
                     </div>
                 </div>
 
-                {/* Action buttons */}
-                <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t border-slate-100 sm:border-0">
-                    {/* Botón directo Ficha de Piso en modo piso para uso ágil en celular */}
-                    {mode === 'piso' && (
+                {/* Action buttons — piso mode: solo Ficha + ⋮ (Inventario está en el header) */}
+                {mode === 'piso' ? (
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onSelect(v);
                             }}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-[#f16315] hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition-colors shadow-sm shadow-orange-200"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#f16315] hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition-colors shadow-sm shadow-orange-200 min-h-[40px]"
                         >
-                            <Wrench size={13} />
-                            <span>Ficha</span>
+                            <Wrench size={14} />
+                            <span>Ver Ficha</span>
                         </button>
-                    )}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onContextMenu(e, v);
+                            }}
+                            className="p-2.5 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors border border-slate-200 flex-shrink-0 min-h-[40px] min-w-[40px] flex items-center justify-center"
+                            title="Cambiar estatus"
+                        >
+                            <MoreVertical size={15} />
+                        </button>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t border-slate-100 sm:border-0">
+                        {/* Inventario (solo en modo full) */}
+                        <Link
+                            href={`/os/admin/receptions`}
+                            target="_blank"
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition-colors border border-slate-200"
+                        >
+                            <ClipboardList size={13} />
+                            <span>Inventario</span>
+                        </Link>
 
-                    {/* Inventario */}
-                    <Link
-                        href={`/os/admin/receptions`}
-                        target="_blank"
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition-colors border border-slate-200"
-                    >
-                        <ClipboardList size={13} />
-                        <span>Inventario</span>
-                    </Link>
-
-                    {/* Nota: ver si ya existe, o generar (Solo en modo full/administrativo) */}
-                    {mode !== 'piso' && (
-                        v.status === 'con_nota' ? (
+                        {/* Nota: ver si ya existe, o generar */}
+                        {v.status === 'con_nota' ? (
                             <a
                                 href={`/os/note-preview?folio=${v.note!.folio}`}
                                 target="_blank"
@@ -269,35 +278,35 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect, mode = 'f
                                 <PlusCircle size={13} />
                                 Generar Nota
                             </button>
-                        )
-                    )}
+                        )}
 
-                    {/* Expediente (Solo en modo administrativo / no piso) */}
-                    {mode !== 'piso' && onExpediente && (
+                        {/* Expediente */}
+                        {onExpediente && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onExpediente(v.vehicle.plates);
+                                }}
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition-colors border border-indigo-200"
+                            >
+                                <History size={13} />
+                                <span>Expediente</span>
+                            </button>
+                        )}
+
+                        {/* Botón 3 puntos */}
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                onExpediente(v.vehicle.plates);
+                                onContextMenu(e, v);
                             }}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition-colors border border-indigo-200"
+                            className="p-2 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl text-xs font-bold transition-colors border border-slate-200 flex-shrink-0"
+                            title="Opciones de piso (o clic derecho)"
                         >
-                            <History size={13} />
-                            <span>Expediente</span>
+                            <MoreVertical size={14} />
                         </button>
-                    )}
-
-                    {/* Botón 3 puntos / opciones de piso */}
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onContextMenu(e, v);
-                        }}
-                        className="p-2 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl text-xs font-bold transition-colors border border-slate-200 flex-shrink-0"
-                        title="Opciones de piso (o clic derecho)"
-                    >
-                        <MoreVertical size={14} />
-                    </button>
-                </div>
+                    </div>
+                )}
             </div>
         </motion.div>
     );
@@ -494,22 +503,22 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-slate-400 hidden sm:inline">
-                        💡 Clic en un coche para detalles de piso • Clic derecho para opciones
-                    </span>
                     {lastRefresh && (
                         <span className="text-[10px] text-slate-400">
                             Actualizado {lastRefresh.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
                         </span>
                     )}
-                    <button
-                        onClick={load}
-                        disabled={loading}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors font-medium disabled:opacity-50"
-                    >
-                        <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
-                        Actualizar
-                    </button>
+                    {/* El botón de refrescar en modo piso lo maneja el header de la página */}
+                    {mode !== 'piso' && (
+                        <button
+                            onClick={load}
+                            disabled={loading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors font-medium disabled:opacity-50"
+                        >
+                            <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+                            Actualizar
+                        </button>
+                    )}
                 </div>
             </div>
 

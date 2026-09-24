@@ -123,15 +123,79 @@ export default function FloorControlDrawer({
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [aiDetectedBadge, setAiDetectedBadge] = useState<{
         target: 'newPart' | 'editPart' | 'newExt' | 'editExt';
+        status?: 'success' | 'empty' | 'error';
         supplier?: string | null;
         description?: string | null;
         cost?: number | null;
+        message?: string;
         modelUsed?: string;
     } | null>(null);
 
     // Lightbox image viewer
     const [zoomImage, setZoomImage] = useState<string | null>(null);
     const [zoomRotation, setZoomRotation] = useState<number>(0);
+
+    // Helper to render AI status / result badge
+    const renderAiBadge = (target: "newPart" | "editPart" | "newExt" | "editExt") => {
+        if (!aiDetectedBadge || aiDetectedBadge.target !== target || isAnalyzingTicket) return null;
+
+        if (aiDetectedBadge.status === "empty") {
+            return (
+                <div className="flex items-center justify-between gap-2 p-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-[11px] font-medium shadow-sm">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                        <AlertCircle size={13} className="text-amber-600 shrink-0" />
+                        <span className="truncate">{aiDetectedBadge.message || "No se detectaron datos legibles. Llénalos a mano."}</span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setAiDetectedBadge(null)}
+                        className="text-amber-700 hover:text-amber-900 p-0.5 rounded text-[10px] font-bold shrink-0"
+                        title="Cerrar aviso"
+                    >
+                        ✕
+                    </button>
+                </div>
+            );
+        }
+
+        if (aiDetectedBadge.status === "error") {
+            return (
+                <div className="flex items-center justify-between gap-2 p-2 bg-rose-50 border border-rose-200 rounded-lg text-rose-900 text-[11px] font-medium shadow-sm">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                        <AlertCircle size={13} className="text-rose-600 shrink-0" />
+                        <span className="truncate">{aiDetectedBadge.message || "Error al conectar con IA. Llénalos a mano."}</span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setAiDetectedBadge(null)}
+                        className="text-rose-700 hover:text-rose-900 p-0.5 rounded text-[10px] font-bold shrink-0"
+                        title="Cerrar aviso"
+                    >
+                        ✕
+                    </button>
+                </div>
+            );
+        }
+
+        return (
+            <div className="flex items-center justify-between gap-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 text-[11px] font-medium shadow-sm">
+                <div className="flex items-center gap-1.5 min-w-0">
+                    <Sparkles size={13} className="text-emerald-600 shrink-0" />
+                    <span className="truncate">
+                        <strong>IA detectó:</strong> {aiDetectedBadge.supplier ? `${aiDetectedBadge.supplier} • ` : ""}{aiDetectedBadge.description || ""}{aiDetectedBadge.cost ? ` • $${aiDetectedBadge.cost}` : ""}
+                    </span>
+                </div>
+                <button
+                    type="button"
+                    onClick={() => setAiDetectedBadge(null)}
+                    className="text-emerald-700 hover:text-emerald-900 p-0.5 rounded text-[10px] font-bold shrink-0"
+                    title="Cerrar aviso"
+                >
+                    ✕
+                </button>
+            </div>
+        );
+    };
 
     // Sync from vehicle prop
     useEffect(() => {
@@ -175,10 +239,11 @@ export default function FloorControlDrawer({
         }
 
         try {
+            // Optimized compression: 1200x1200 at 0.70 is fast to upload on mobile and pin-sharp for OCR
             const { blob, actualFormat } = await compressImage(file, {
-                maxWidth: 1600,
-                maxHeight: 1600,
-                quality: 0.75,
+                maxWidth: 1200,
+                maxHeight: 1200,
+                quality: 0.70,
                 format: "image/webp",
             });
 
@@ -187,83 +252,111 @@ export default function FloorControlDrawer({
             const platePrefix = cleanPlate || "TICKET";
             const filename = `${platePrefix}_ticket_${tag}_${Date.now()}.${ext}`;
 
-            // 1. Concurrently call Gemini Vision AI to extract supplier, description and cost
-            const aiPromise = aiContext ? (async () => {
+            // Step 1: Upload image to Cloudflare R2
+            const res = await fetch("/api/photos/upload", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ image: base64, filename }),
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || `HTTP ${res.status}`);
+            }
+
+            const data = await res.json();
+            if (!data.url) {
+                throw new Error("No se recibió la URL de la imagen");
+            }
+
+            // Immediately set photo URL in UI so preview is visible right away
+            onSuccess(data.url);
+            setIsUploadingPhoto(false);
+
+            // Step 2: Concurrently analyze with Gemini Vision AI using the uploaded URL
+            // (Uses negligible mobile data, as the phone only sends the lightweight URL payload)
+            if (aiContext) {
                 try {
                     const aiRes = await fetch("/api/os/tickets/analyze", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            image: base64,
-                            mimeType: actualFormat,
+                            imageUrl: data.url,
                             type: aiContext.type
                         })
                     });
+
                     if (aiRes.ok) {
                         const aiData = await aiRes.json();
                         if (aiData.success && aiData.data) {
                             const { supplier, description, cost } = aiData.data;
-                            if (aiContext.target === "newPart") {
-                                if (supplier) setNewPartSupplier(supplier);
-                                if (description) setNewPartDesc(description);
-                                if (cost !== null && cost !== undefined) setNewPartCost(String(cost));
-                            } else if (aiContext.target === "editPart") {
-                                if (supplier) setEditPartSupplier(supplier);
-                                if (description) setEditPartDesc(description);
-                                if (cost !== null && cost !== undefined) setEditPartCost(String(cost));
-                            } else if (aiContext.target === "newExt") {
-                                if (supplier) setNewExtVendor(supplier);
-                                if (description) setNewExtDesc(description);
-                                if (cost !== null && cost !== undefined) setNewExtCost(String(cost));
-                            } else if (aiContext.target === "editExt") {
-                                if (supplier) setEditExtVendor(supplier);
-                                if (description) setEditExtDesc(description);
-                                if (cost !== null && cost !== undefined) setEditExtCost(String(cost));
+                            const hasData = Boolean(supplier || description || (cost !== null && cost !== undefined));
+
+                            if (hasData) {
+                                if (aiContext.target === "newPart") {
+                                    if (supplier) setNewPartSupplier(supplier);
+                                    if (description) setNewPartDesc(description);
+                                    if (cost !== null && cost !== undefined) setNewPartCost(String(cost));
+                                } else if (aiContext.target === "editPart") {
+                                    if (supplier) setEditPartSupplier(supplier);
+                                    if (description) setEditPartDesc(description);
+                                    if (cost !== null && cost !== undefined) setEditPartCost(String(cost));
+                                } else if (aiContext.target === "newExt") {
+                                    if (supplier) setNewExtVendor(supplier);
+                                    if (description) setNewExtDesc(description);
+                                    if (cost !== null && cost !== undefined) setNewExtCost(String(cost));
+                                } else if (aiContext.target === "editExt") {
+                                    if (supplier) setEditExtVendor(supplier);
+                                    if (description) setEditExtDesc(description);
+                                    if (cost !== null && cost !== undefined) setEditExtCost(String(cost));
+                                }
+
+                                setAiDetectedBadge({
+                                    target: aiContext.target,
+                                    status: "success",
+                                    supplier,
+                                    description,
+                                    cost,
+                                    modelUsed: aiData.modelUsed
+                                });
+                            } else {
+                                setAiDetectedBadge({
+                                    target: aiContext.target,
+                                    status: "empty",
+                                    message: aiData.data.notes || "No se detectaron datos legibles en el ticket. Puedes llenarlos manualmente."
+                                });
                             }
+                        } else {
                             setAiDetectedBadge({
                                 target: aiContext.target,
-                                supplier,
-                                description,
-                                cost,
-                                modelUsed: aiData.modelUsed
+                                status: "empty",
+                                message: "No se pudieron extraer datos del ticket. Puedes llenarlos manualmente."
                             });
                         }
+                    } else {
+                        setAiDetectedBadge({
+                            target: aiContext.target,
+                            status: "error",
+                            message: "No se pudo completar el análisis del ticket. Puedes ingresar los datos a mano."
+                        });
                     }
-                } catch (aiErr) {
+                } catch (aiErr: any) {
                     console.warn("[Ticket AI] Error en análisis automático:", aiErr);
+                    setAiDetectedBadge({
+                        target: aiContext.target,
+                        status: "error",
+                        message: "Fallo de conexión al analizar el ticket con IA. Puedes ingresar los datos a mano."
+                    });
                 } finally {
                     setIsAnalyzingTicket(false);
                 }
-            })() : Promise.resolve();
-
-            // 2. Concurrently upload image to Cloudflare R2
-            const uploadPromise = (async () => {
-                const res = await fetch("/api/photos/upload", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ image: base64, filename }),
-                });
-
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => ({}));
-                    throw new Error(errData.error || `HTTP ${res.status}`);
-                }
-
-                const data = await res.json();
-                if (data.url) {
-                    onSuccess(data.url);
-                } else {
-                    throw new Error("No se recibió la URL de la imagen");
-                }
-            })();
-
-            await Promise.all([uploadPromise, aiPromise]);
+            }
         } catch (err: any) {
             console.error("Error al procesar/subir foto de ticket:", err);
             setUploadError(err.message || "Error al subir la imagen");
+            setIsAnalyzingTicket(false);
         } finally {
             setIsUploadingPhoto(false);
-            setIsAnalyzingTicket(false);
             e.target.value = "";
         }
     };
@@ -1148,24 +1241,7 @@ export default function FloorControlDrawer({
                                                 </div>
                                             )}
 
-                                            {aiDetectedBadge?.target === "newPart" && !isAnalyzingTicket && (
-                                                <div className="flex items-center justify-between gap-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 text-[11px] font-medium shadow-sm">
-                                                    <div className="flex items-center gap-1.5 min-w-0">
-                                                        <Sparkles size={13} className="text-emerald-600 shrink-0" />
-                                                        <span className="truncate">
-                                                            <strong>IA detectó:</strong> {aiDetectedBadge.supplier ? `${aiDetectedBadge.supplier} • ` : ""}{aiDetectedBadge.description || ""}{aiDetectedBadge.cost ? ` • $${aiDetectedBadge.cost}` : ""}
-                                                        </span>
-                                                    </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setAiDetectedBadge(null)}
-                                                        className="text-emerald-700 hover:text-emerald-900 p-0.5 rounded text-[10px] font-bold shrink-0"
-                                                        title="Cerrar aviso"
-                                                    >
-                                                        ✕
-                                                    </button>
-                                                </div>
-                                            )}
+                                            {renderAiBadge("newPart")}
                                         </div>
                                         <div className="flex justify-end gap-2 pt-1">
                                             <button
@@ -1323,24 +1399,7 @@ export default function FloorControlDrawer({
                                                                 </div>
                                                             )}
 
-                                                            {aiDetectedBadge?.target === "editPart" && !isAnalyzingTicket && (
-                                                                <div className="flex items-center justify-between gap-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 text-[11px] font-medium shadow-sm">
-                                                                    <div className="flex items-center gap-1.5 min-w-0">
-                                                                        <Sparkles size={13} className="text-emerald-600 shrink-0" />
-                                                                        <span className="truncate">
-                                                                            <strong>IA detectó:</strong> {aiDetectedBadge.supplier ? `${aiDetectedBadge.supplier} • ` : ""}{aiDetectedBadge.description || ""}{aiDetectedBadge.cost ? ` • $${aiDetectedBadge.cost}` : ""}
-                                                                        </span>
-                                                                    </div>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setAiDetectedBadge(null)}
-                                                                        className="text-emerald-700 hover:text-emerald-900 p-0.5 rounded text-[10px] font-bold shrink-0"
-                                                                        title="Cerrar aviso"
-                                                                    >
-                                                                        ✕
-                                                                    </button>
-                                                                </div>
-                                                            )}
+                                                            {renderAiBadge("editPart")}
                                                         </div>
                                                     <div className="flex justify-end gap-2 pt-1">
                                                         <button
@@ -1594,24 +1653,7 @@ export default function FloorControlDrawer({
                                                 </div>
                                             )}
 
-                                            {aiDetectedBadge?.target === "newExt" && !isAnalyzingTicket && (
-                                                <div className="flex items-center justify-between gap-2 p-2 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900 text-[11px] font-medium shadow-sm">
-                                                    <div className="flex items-center gap-1.5 min-w-0">
-                                                        <Sparkles size={13} className="text-indigo-600 shrink-0" />
-                                                        <span className="truncate">
-                                                            <strong>IA detectó:</strong> {aiDetectedBadge.supplier ? `${aiDetectedBadge.supplier} • ` : ""}{aiDetectedBadge.description || ""}{aiDetectedBadge.cost ? ` • $${aiDetectedBadge.cost}` : ""}
-                                                        </span>
-                                                    </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setAiDetectedBadge(null)}
-                                                        className="text-indigo-700 hover:text-indigo-900 p-0.5 rounded text-[10px] font-bold shrink-0"
-                                                        title="Cerrar aviso"
-                                                    >
-                                                        ✕
-                                                    </button>
-                                                </div>
-                                            )}
+                                            {renderAiBadge("newExt")}
                                         </div>
 
                                         <div className="flex justify-end gap-2 pt-1">
@@ -1768,24 +1810,7 @@ export default function FloorControlDrawer({
                                                             </div>
                                                         )}
 
-                                                        {aiDetectedBadge?.target === "editExt" && !isAnalyzingTicket && (
-                                                            <div className="flex items-center justify-between gap-2 p-2 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900 text-[11px] font-medium shadow-sm">
-                                                                <div className="flex items-center gap-1.5 min-w-0">
-                                                                    <Sparkles size={13} className="text-indigo-600 shrink-0" />
-                                                                    <span className="truncate">
-                                                                        <strong>IA detectó:</strong> {aiDetectedBadge.supplier ? `${aiDetectedBadge.supplier} • ` : ""}{aiDetectedBadge.description || ""}{aiDetectedBadge.cost ? ` • $${aiDetectedBadge.cost}` : ""}
-                                                                    </span>
-                                                                </div>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => setAiDetectedBadge(null)}
-                                                                    className="text-indigo-700 hover:text-indigo-900 p-0.5 rounded text-[10px] font-bold shrink-0"
-                                                                    title="Cerrar aviso"
-                                                                >
-                                                                    ✕
-                                                                </button>
-                                                            </div>
-                                                        )}
+                                                        {renderAiBadge("editExt")}
                                                     </div>
 
                                                     <div className="flex justify-end gap-2 pt-1">

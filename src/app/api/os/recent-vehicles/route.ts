@@ -265,7 +265,9 @@ export async function GET() {
                 advisor: row.get('¿Quién elaboró el inventario?') || '',
                 status,
                 floorData: pisoInfo ? {
-                    status: pisoInfo.status,
+                    status: (status === 'con_nota' || Boolean(latestNote && noteDayTs >= inventoryDayTs))
+                        ? 'ENTREGADO'
+                        : pisoInfo.status,
                     mechanic: pisoInfo.mechanic,
                     exitReason: pisoInfo.exitReason,
                     lastUpdate: pisoInfo.lastUpdate,
@@ -275,6 +277,17 @@ export async function GET() {
                     parts: pisoInfo.parts,
                     externalServices: pisoInfo.externalServices,
                     log: pisoInfo.log
+                } : (status === 'con_nota' || Boolean(latestNote && noteDayTs >= inventoryDayTs)) ? {
+                    status: 'ENTREGADO',
+                    mechanic: '',
+                    exitReason: '',
+                    lastUpdate: '',
+                    partsCount: 0,
+                    externalCount: 0,
+                    logCount: 0,
+                    parts: [],
+                    externalServices: [],
+                    log: []
                 } : null,
                 note: latestNote
                     ? { folio: latestNote.folio, total: latestNote.total, services: latestNote.services }

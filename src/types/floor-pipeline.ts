@@ -124,15 +124,10 @@ export const WORKSHOP_PIPELINE: FloorStageConfig[] = [
         activeBorder: "border-emerald-600",
         clientMessage: "¡Tu auto está 100% terminado! Ya puedes pasar a recogerlo a CarMD."
     },
-];
-
-/**
- * Resoluciones finales / Desenlaces del servicio (Separadas del pipeline activo)
- */
-export const RESOLUTION_STATUSES: FloorStageConfig[] = [
     {
         id: "ENTREGADO",
-        label: "Entregado al cliente",
+        step: 8,
+        label: "Entregado",
         shortLabel: "Entregado",
         icon: "✅",
         progress: 100,
@@ -142,9 +137,14 @@ export const RESOLUTION_STATUSES: FloorStageConfig[] = [
         activeBg: "bg-slate-900",
         activeText: "text-white",
         activeBorder: "border-slate-900",
-        clientMessage: "Vehículo entregado con éxito al cliente.",
-        isResolution: true,
+        clientMessage: "¡Vehículo entregado con éxito al cliente! Gracias por confiar en CarMD."
     },
+];
+
+/**
+ * Resoluciones finales / Desenlaces especiales del servicio
+ */
+export const RESOLUTION_STATUSES: FloorStageConfig[] = [
     {
         id: "MANTENIMIENTO_SIN_NOTA",
         label: "Garantía / Mantenimiento Preventivo",

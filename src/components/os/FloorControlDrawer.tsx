@@ -198,7 +198,12 @@ export default function FloorControlDrawer({
         if (!vehicle) return;
 
         const fData = vehicle.floorData || {};
-        setCurrentStatus(fData.status || (vehicle.status === 'salida_sin_nota' ? 'SALIDA_SIN_NOTA' : vehicle.status === 'mantenimiento_sin_nota' ? 'MANTENIMIENTO_SIN_NOTA' : vehicle.status === 'entregado' ? 'ENTREGADO' : 'EN_RAMPA'));
+        const isConNota = vehicle.status === 'con_nota' || Boolean(vehicle.note);
+        setCurrentStatus(
+            isConNota
+                ? 'ENTREGADO'
+                : (fData.status || (vehicle.status === 'salida_sin_nota' ? 'SALIDA_SIN_NOTA' : vehicle.status === 'mantenimiento_sin_nota' ? 'MANTENIMIENTO_SIN_NOTA' : vehicle.status === 'entregado' ? 'ENTREGADO' : 'EN_RAMPA'))
+        );
 
         const mechRaw = fData.mechanic || "";
         const mechs = mechRaw.split(",").map((s: string) => s.trim()).filter(Boolean);

@@ -174,8 +174,13 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect, mode = 'f
                             <StatusBadges v={v} />
 
                             {/* Badge de Fase Operativa de Piso (Car Tracker) */}
-                            {v.floorData?.status && (() => {
-                                const stage = getFloorStage(v.floorData.status);
+                            {(() => {
+                                const effectiveStatus = (v.status === 'con_nota' || v.status === 'entregado' || Boolean(v.note))
+                                    ? 'ENTREGADO'
+                                    : v.floorData?.status;
+
+                                if (!effectiveStatus) return null;
+                                const stage = getFloorStage(effectiveStatus);
                                 return (
                                     <span
                                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 shadow-2xs ${stage.badgeBg} ${stage.badgeText} ${stage.badgeBorder}`}

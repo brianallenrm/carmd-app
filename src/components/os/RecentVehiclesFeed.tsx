@@ -421,23 +421,15 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
         }
     };
 
-    // Filtro activo vs todos: en piso, activos son los autos que NO han salido ni entregados (siguen físicamente en taller)
+    // Filtro activo vs todos: 'activos' solo incluye autos que NO tienen nota y NO han salido/concluido
     const displayVehicles = vehicles.filter(v => {
         if (filterMode === 'activos') {
-            if (mode === 'piso') {
-                return v.status !== 'salida_sin_nota' && v.status !== 'entregado';
-            }
             return v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota' && v.status !== 'mantenimiento_sin_nota';
         }
         return true;
     });
 
-    const activosCount = vehicles.filter(v => {
-        if (mode === 'piso') {
-            return v.status !== 'salida_sin_nota' && v.status !== 'entregado';
-        }
-        return v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota' && v.status !== 'mantenimiento_sin_nota';
-    }).length;
+    const activosCount = vehicles.filter(v => v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota' && v.status !== 'mantenimiento_sin_nota').length;
     const conNotaCount = vehicles.filter(v => v.status === 'con_nota').length;
     const cortesiasCount = vehicles.filter(v => v.status === 'mantenimiento_sin_nota').length;
     const salidasCount = vehicles.filter(v => v.status === 'salida_sin_nota').length;

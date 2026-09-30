@@ -131,6 +131,20 @@ export default function FloorControlDrawer({
     const [zoomImage, setZoomImage] = useState<string | null>(null);
     const [zoomRotation, setZoomRotation] = useState<number>(0);
 
+    // Multi-part detection modal state
+    const [multiPartModal, setMultiPartModal] = useState<{
+        isOpen: boolean;
+        target: "newPart" | "newExt";
+        supplier: string;
+        photoUrl: string;
+        items: Array<{
+            id: string;
+            description: string;
+            cost: number;
+            selected: boolean;
+        }>;
+    } | null>(null);
+
     // Helper to render AI status / result badge
     const renderAiBadge = (target: "newPart" | "editPart" | "newExt" | "editExt") => {
         if (!aiDetectedBadge || aiDetectedBadge.target !== target || isAnalyzingTicket) return null;
@@ -296,8 +310,49 @@ export default function FloorControlDrawer({
                     if (aiRes.ok) {
                         const aiData = await aiRes.json();
                         if (aiData.success && aiData.data) {
-                            const { supplier, description, cost } = aiData.data;
+                            const { supplier, description, cost, items } = aiData.data;
                             const hasData = Boolean(supplier || description || (cost !== null && cost !== undefined));
+
+                            // Si se detectaron múltiples partidas (> 1) y el usuario está agregando una nueva refacción o servicio
+                            const validItems = Array.isArray(items) && items.length > 1
+                                ? items.filter((it: any) => it.description && it.cost > 0)
+                                : [];
+
+                            if (validItems.length > 1 && (aiContext.target === "newPart" || aiContext.target === "newExt")) {
+                                setMultiPartModal({
+                                    isOpen: true,
+                                    target: aiContext.target,
+                                    supplier: supplier || (aiContext.target === "newPart" ? "Refaccionaria" : "Torno / Externo"),
+                                    photoUrl: data.url,
+                                    items: validItems.map((it: any, i: number) => ({
+                                        id: `item-${Date.now()}-${i}`,
+                                        description: it.description,
+                                        cost: Number(it.cost) || 0,
+                                        selected: true
+                                    }))
+                                });
+
+                                // También pre-llenamos el formulario individual como respaldo
+                                if (aiContext.target === "newPart") {
+                                    if (supplier) setNewPartSupplier(supplier);
+                                    if (description) setNewPartDesc(description);
+                                    if (cost !== null && cost !== undefined) setNewPartCost(String(cost));
+                                } else if (aiContext.target === "newExt") {
+                                    if (supplier) setNewExtVendor(supplier);
+                                    if (description) setNewExtDesc(description);
+                                    if (cost !== null && cost !== undefined) setNewExtCost(String(cost));
+                                }
+
+                                setAiDetectedBadge({
+                                    target: aiContext.target,
+                                    status: "success",
+                                    supplier,
+                                    description: `${validItems.length} conceptos detectados en ticket`,
+                                    cost,
+                                    modelUsed: aiData.modelUsed
+                                });
+                                return;
+                            }
 
                             if (hasData) {
                                 if (aiContext.target === "newPart") {
@@ -448,6 +503,135 @@ export default function FloorControlDrawer({
         } finally {
             setSaving(false);
         }
+    };
+
+    // Handlers for Multi-Part Ticket Breakdown
+    const handleToggleMultiPart = (id: string) => {
+        if (!multiPartModal) return;
+        setMultiPartModal({
+            ...multiPartModal,
+            items: multiPartModal.items.map(it =>
+                it.id === id ? { ...it, selected: !it.selected } : it
+            )
+        });
+    };
+
+    const handleConfirmMultiParts = async () => {
+        if (!multiPartModal) return;
+        const selected = multiPartModal.items.filter(it => it.selected && it.description.trim() && it.cost > 0);
+        if (selected.length === 0) return;
+
+        if (multiPartModal.target === "newPart") {
+            const newItems: PartItem[] = selected.map((it, idx) => ({
+                id: `${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 7)}`,
+                description: it.description.trim(),
+                cost: it.cost,
+                supplier: multiPartModal.supplier.trim() || "Local",
+                photoUrl: multiPartModal.photoUrl || undefined,
+                date: new Date().toISOString(),
+            }));
+
+            const nextParts = [...parts, ...newItems];
+            setParts(nextParts);
+            setNewPartDesc("");
+            setNewPartCost("");
+            setNewPartSupplier("");
+            setNewPartPhotoUrl("");
+            setShowAddPart(false);
+            setMultiPartModal(null);
+
+            try {
+                await fetch("/api/os/recent-vehicles", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        plate: cleanPlate,
+                        status: currentStatus,
+                        mechanic: selectedMechanics.join(", "),
+                        parts: nextParts,
+                    }),
+                });
+
+                if (onVehicleUpdated) {
+                    onVehicleUpdated({
+                        ...vehicle,
+                        floorData: {
+                            ...(vehicle.floorData || {}),
+                            parts: nextParts,
+                            partsCount: nextParts.length,
+                        },
+                    });
+                }
+            } catch (e) {
+                console.error("Error al guardar múltiples refacciones:", e);
+            }
+        } else {
+            const newItems: ExternalServiceItem[] = selected.map((it, idx) => ({
+                id: `${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 7)}`,
+                description: it.description.trim(),
+                cost: it.cost,
+                vendor: multiPartModal.supplier.trim() || "Torno / Externo",
+                photoUrl: multiPartModal.photoUrl || undefined,
+                date: new Date().toISOString(),
+            }));
+
+            const nextExternals = [...externals, ...newItems];
+            setExternals(nextExternals);
+            setNewExtDesc("");
+            setNewExtCost("");
+            setNewExtVendor("");
+            setNewExtPhotoUrl("");
+            setShowAddExt(false);
+            setMultiPartModal(null);
+
+            try {
+                await fetch("/api/os/recent-vehicles", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        plate: cleanPlate,
+                        status: currentStatus,
+                        mechanic: selectedMechanics.join(", "),
+                        externalServices: nextExternals,
+                    }),
+                });
+
+                if (onVehicleUpdated) {
+                    onVehicleUpdated({
+                        ...vehicle,
+                        floorData: {
+                            ...(vehicle.floorData || {}),
+                            externalServices: nextExternals,
+                            externalCount: nextExternals.length,
+                        },
+                    });
+                }
+            } catch (e) {
+                console.error("Error al guardar múltiples servicios externos:", e);
+            }
+        }
+    };
+
+    const handleConsolidateMultiParts = () => {
+        if (!multiPartModal) return;
+        const selected = multiPartModal.items.filter(it => it.selected);
+        const combinedDesc = selected.map(it => it.description).join(", ");
+        const totalCost = selected.reduce((sum, it) => sum + it.cost, 0);
+
+        if (multiPartModal.target === "newPart") {
+            setNewPartSupplier(multiPartModal.supplier);
+            setNewPartDesc(combinedDesc);
+            setNewPartCost(totalCost > 0 ? String(totalCost) : "");
+            setNewPartPhotoUrl(multiPartModal.photoUrl);
+            setShowAddPart(true);
+        } else {
+            setNewExtVendor(multiPartModal.supplier);
+            setNewExtDesc(combinedDesc);
+            setNewExtCost(totalCost > 0 ? String(totalCost) : "");
+            setNewExtPhotoUrl(multiPartModal.photoUrl);
+            setShowAddExt(true);
+        }
+        setMultiPartModal(null);
     };
 
     // Add Part
@@ -2192,6 +2376,190 @@ export default function FloorControlDrawer({
                     )}
                 </div>
             </motion.div>
+
+            {/* Modal para Desglose de Múltiples Conceptos de Ticket */}
+            {multiPartModal && multiPartModal.isOpen && (
+                <div
+                    onClick={() => setMultiPartModal(null)}
+                    className="fixed inset-0 z-[65] bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150"
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]"
+                    >
+                        {/* Header del Modal */}
+                        <div className="p-3.5 sm:p-4 bg-slate-900 text-white flex items-center justify-between">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="p-2 bg-[#f16315] text-white rounded-xl flex-shrink-0 shadow-sm">
+                                    <Sparkles size={16} />
+                                </div>
+                                <div className="min-w-0">
+                                    <h3 className="text-sm font-black uppercase tracking-wide truncate">
+                                        Desglose de Ticket Detectado
+                                    </h3>
+                                    <p className="text-[11px] text-slate-300 truncate">
+                                        Comercio: <strong className="text-white font-bold">{multiPartModal.supplier || "Comprobante"}</strong>
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setMultiPartModal(null)}
+                                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors flex-shrink-0"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        {/* Contenido / Checklist */}
+                        <div className="p-3.5 sm:p-4 overflow-y-auto space-y-3 flex-1">
+                            {/* Banner de Ayuda Rápida */}
+                            <div className="flex items-start gap-2.5 p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-amber-900 text-xs">
+                                <AlertCircle size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="font-bold">
+                                        Se detectaron {multiPartModal.items.length} conceptos en este ticket
+                                    </p>
+                                    <p className="text-[11px] text-amber-800/90 mt-0.5">
+                                        Marca qué conceptos corresponden a este auto. Si alguna pieza era de otro vehículo, simplemente desmárcala.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Vista previa miniatura del ticket */}
+                            {multiPartModal.photoUrl && (
+                                <div className="flex items-center gap-2.5 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setZoomImage(multiPartModal.photoUrl);
+                                            setZoomRotation(0);
+                                        }}
+                                        className="relative w-12 h-12 rounded-lg overflow-hidden border border-slate-300 flex-shrink-0 group cursor-pointer"
+                                        title="Toca para ver ticket completo"
+                                    >
+                                        <img
+                                            src={multiPartModal.photoUrl}
+                                            alt="Ticket"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                        />
+                                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                            <ZoomIn size={14} className="text-white" />
+                                        </div>
+                                    </button>
+                                    <div className="text-[11px] text-slate-500 min-w-0">
+                                        <span className="font-bold text-slate-700 block truncate">
+                                            Foto del comprobante vinculada
+                                        </span>
+                                        <span className="text-[10px] text-slate-400">
+                                            Todas las partidas seleccionadas compartirán este ticket
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Lista de Conceptos con Checkbox */}
+                            <div className="space-y-2">
+                                <label className="text-[11px] font-black uppercase text-slate-400 tracking-wider block">
+                                    Partidas encontradas:
+                                </label>
+
+                                {multiPartModal.items.map((item, idx) => {
+                                    const isChecked = item.selected;
+                                    return (
+                                        <div
+                                            key={item.id || idx}
+                                            onClick={() => handleToggleMultiPart(item.id)}
+                                            className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                                                isChecked
+                                                    ? "bg-orange-50/70 border-orange-300 text-slate-900 shadow-2xs"
+                                                    : "bg-slate-50/70 border-slate-200 text-slate-400 opacity-60"
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isChecked}
+                                                    onChange={() => handleToggleMultiPart(item.id)}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="w-4 h-4 rounded text-[#f16315] focus:ring-[#f16315] border-slate-300 flex-shrink-0 cursor-pointer"
+                                                />
+                                                <div className="min-w-0 flex-1">
+                                                    <p className={`text-xs font-bold truncate leading-tight ${isChecked ? "text-slate-800" : "text-slate-400 line-through"}`}>
+                                                        {item.description}
+                                                    </p>
+                                                    <p className="text-[10px] text-slate-400 mt-0.5">
+                                                        Partida #{idx + 1}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="text-right flex-shrink-0">
+                                                <span className={`text-xs font-mono font-black ${isChecked ? "text-[#f16315]" : "text-slate-400"}`}>
+                                                    ${item.cost.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Footer con Totales y Botones de Acción */}
+                        <div className="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200 space-y-2.5">
+                            {/* Resumen Total Seleccionado */}
+                            {(() => {
+                                const selectedItems = multiPartModal.items.filter(it => it.selected);
+                                const totalSelected = selectedItems.reduce((acc, it) => acc + it.cost, 0);
+
+                                return (
+                                    <div className="flex items-center justify-between text-xs">
+                                        <span className="font-bold text-slate-600">
+                                            Total seleccionado ({selectedItems.length} de {multiPartModal.items.length}):
+                                        </span>
+                                        <span className="font-mono font-black text-sm text-slate-900">
+                                            ${totalSelected.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                                        </span>
+                                    </div>
+                                );
+                            })()}
+
+                            {/* Botón Principal: Cargar partidas individuales */}
+                            <div className="flex flex-col gap-2">
+                                <button
+                                    type="button"
+                                    onClick={handleConfirmMultiParts}
+                                    disabled={multiPartModal.items.filter(it => it.selected).length === 0}
+                                    className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm"
+                                >
+                                    <Check size={15} />
+                                    <span>
+                                        Cargar {multiPartModal.items.filter(it => it.selected).length} partidas individuales
+                                    </span>
+                                </button>
+
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={handleConsolidateMultiParts}
+                                        className="flex-1 py-2 px-3 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded-xl text-[11px] font-bold transition-all truncate"
+                                        title="Junta los conceptos en un solo renglón con la suma del costo"
+                                    >
+                                        Dejar como 1 solo paquete combinado
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setMultiPartModal(null)}
+                                        className="py-2 px-3 text-slate-400 hover:text-slate-600 text-[11px] font-bold"
+                                    >
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal Zoom Lightbox para foto de tickets */}
             {zoomImage && (

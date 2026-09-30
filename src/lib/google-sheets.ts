@@ -613,8 +613,8 @@ export const updateVehicleFloorStatus = async (
             await existingRow.save();
             return { success: true, updated: true };
         } else {
-            const parts = options?.newPart ? [options.newPart] : [];
-            const externalServices = options?.newExternalService ? [options.newExternalService] : [];
+            const parts = options?.parts !== undefined ? options.parts : (options?.newPart ? [options.newPart] : []);
+            const externalServices = options?.externalServices !== undefined ? options.externalServices : (options?.newExternalService ? [options.newExternalService] : []);
             const log = options?.newLogEntry ? [options.newLogEntry] : [];
 
             await sheet.addRow({

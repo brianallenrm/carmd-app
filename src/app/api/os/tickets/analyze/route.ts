@@ -20,7 +20,7 @@ Tu objetivo SIEMPRE es extraer los datos principales del comprobante presentado,
 1. "supplier": Nombre del comercio, refaccionaria, taller, torno, tienda o negocio emisor (ej: "AutoZone", "Refaccionaria California", "Rolcar", "Torno Don Pepe", "Ferretería Calzada", "Helados Santa Clara", "OXXO", etc.). Normaliza el nombre comercial conocido si aplica.
 2. "description": Resumen conciso y útil de los artículos, piezas, insumos o servicios adquiridos (ej: "Balatas delanteras cerámicas", "Rectificación de discos delanteros", "Tornillos y abrazaderas", "Helado sencillo y agua"). Si hay varios ítems, resúmelos de forma clara para el técnico.
 3. "cost": Monto total final pagado (TOTAL / IMPORTE PAGADO) como número con decimales (ej: 850, 1420.50). Si no está explícito el total, usa la suma de las partidas. NUNCA incluyas signo de pesos ni comas.
-4. "items": Lista de conceptos legibles con descripción y costo.
+4. "items": Arreglo detallado con TODOS y cada uno de los conceptos o partidas individuales legibles en el ticket, con su descripción y costo numérico. Formato: [{"description": string, "cost": number}]. Si el ticket tiene 2 o más partidas (ej: "Limpieza de bolsa mediana", "Premium blancos"), sepáralas obligatoriamente aquí con su costo individual. Si solo hay 1 partida, inclúyela también.
 5. "confidence": "high" | "medium" | "low"
 6. "notes": Breve apunte relevante si el comprobante no es automotriz o si la imagen está borrosa o cortada.
 
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Sanitización y normalización de costo
+        // Sanitización y normalización de costo total
         let sanitizedCost: number | null = null;
         if (parsedData.cost !== undefined && parsedData.cost !== null) {
             const num = typeof parsedData.cost === 'number'
@@ -146,6 +146,31 @@ export async function POST(request: NextRequest) {
             }
         }
 
+        // Sanitización y normalización de conceptos individuales (items)
+        let sanitizedItems: Array<{ description: string; cost: number }> = [];
+        if (Array.isArray(parsedData.items)) {
+            sanitizedItems = parsedData.items
+                .map((it: any) => {
+                    const desc = it && it.description
+                        ? String(it.description).trim()
+                        : (typeof it === 'string' ? it.trim() : '');
+                    const rawCost = it?.cost !== undefined ? it.cost : it?.price;
+                    const c = typeof rawCost === 'number'
+                        ? rawCost
+                        : parseFloat(String(rawCost || '').replace(/[^0-9.]/g, ''));
+                    return {
+                        description: desc,
+                        cost: isNaN(c) || c <= 0 ? 0 : Math.round(c * 100) / 100
+                    };
+                })
+                .filter((it: any) => it.description.length > 0 && it.cost > 0);
+        }
+
+        // Si sanitizedCost no se detectó pero hay items válidos, usar la suma de las partidas
+        if ((!sanitizedCost || sanitizedCost <= 0) && sanitizedItems.length > 0) {
+            sanitizedCost = Math.round(sanitizedItems.reduce((acc, it) => acc + it.cost, 0) * 100) / 100;
+        }
+
         return NextResponse.json({
             success: true,
             modelUsed,
@@ -153,7 +178,7 @@ export async function POST(request: NextRequest) {
                 supplier: parsedData.supplier ? String(parsedData.supplier).trim() : null,
                 description: parsedData.description ? String(parsedData.description).trim() : null,
                 cost: sanitizedCost,
-                items: Array.isArray(parsedData.items) ? parsedData.items : [],
+                items: sanitizedItems,
                 confidence: parsedData.confidence || 'medium',
                 notes: parsedData.notes || null
             }

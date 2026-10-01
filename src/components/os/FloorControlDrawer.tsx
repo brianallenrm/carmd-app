@@ -7,9 +7,10 @@ import {
     DollarSign, Image as ImageIcon, Plus, Check, ChevronRight,
     ExternalLink, FileText, History, ZoomIn, ZoomOut, AlertCircle,
     RotateCcw, Sparkles, Fuel, Gauge, Trash2, Pencil, Camera,
-    Loader2, RotateCw
+    Loader2, RotateCw, Copy, Share2
 } from "lucide-react";
 import { compressImage, blobToBase64 } from "@/lib/image-utils";
+import { generateTrackerToken } from "@/lib/tracker-token";
 import {
     WORKSHOP_PIPELINE,
     RESOLUTION_STATUSES,
@@ -144,6 +145,16 @@ export default function FloorControlDrawer({
             selected: boolean;
         }>;
     } | null>(null);
+
+    // Car Tracker sharing states
+    const [copiedLink, setCopiedLink] = useState(false);
+    const [currentOrigin, setCurrentOrigin] = useState("https://carmd.com.mx");
+
+    useEffect(() => {
+        if (typeof window !== "undefined" && window.location.origin) {
+            setCurrentOrigin(window.location.origin);
+        }
+    }, []);
 
     // Helper to render AI status / result badge
     const renderAiBadge = (target: "newPart" | "editPart" | "newExt" | "editExt") => {
@@ -996,6 +1007,23 @@ export default function FloorControlDrawer({
     const phoneClean = (vehicle.client?.phone || "").replace(/\D/g, "");
     const waUrl = phoneClean ? `https://wa.me/52${phoneClean}` : null;
 
+    const trackerToken = vehicle?.floorData?.token || generateTrackerToken(cleanPlate, vehicle?.dateRaw || '');
+    const trackerUrl = `${currentOrigin}/status/${trackerToken}`;
+    const clientFirstName = (vehicle.client?.name || "").trim().split(" ")[0] || "Cliente";
+    const carName = `${vehicle.vehicle?.brand || ""} ${vehicle.vehicle?.model || ""}`.trim();
+    const shareMessage = `Hola ${clientFirstName}, te comparto tu enlace exclusivo de CarMD para seguir en vivo el avance y estatus de tu ${carName} (${cleanPlate}):\n\n${trackerUrl}\n\n¡Seguimos trabajando en tu auto! 🚗🔧`;
+    const waTrackerUrl = phoneClean
+        ? `https://wa.me/52${phoneClean}?text=${encodeURIComponent(shareMessage)}`
+        : null;
+
+    const handleCopyTrackerLink = () => {
+        if (typeof navigator !== "undefined" && navigator.clipboard) {
+            navigator.clipboard.writeText(trackerUrl);
+            setCopiedLink(true);
+            setTimeout(() => setCopiedLink(false), 2000);
+        }
+    };
+
     return (
         <>
             {/* Backdrop — en piso mode el modal ya cubre todo, solo se usa en full mode */}
@@ -1118,6 +1146,72 @@ export default function FloorControlDrawer({
                                         <span>WhatsApp</span>
                                     </a>
                                 )}
+                            </div>
+                        </div>
+
+                        {/* Car Tracker del Cliente (Enlace Único) */}
+                        <div className="bg-gradient-to-r from-orange-50/90 via-amber-50/70 to-orange-50/90 border border-orange-200/90 rounded-2xl p-3.5 space-y-2.5">
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5">
+                                    <Sparkles size={14} className="text-[#f16315]" />
+                                    <span className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                                        Car Tracker del Cliente
+                                    </span>
+                                </div>
+                                <span className="text-[10px] font-mono font-bold text-orange-900 bg-orange-100/90 px-2 py-0.5 rounded-full border border-orange-200">
+                                    {trackerToken}
+                                </span>
+                            </div>
+
+                            <p className="text-[11px] text-slate-600 leading-snug">
+                                Enlace único y seguro para que el cliente consulte el avance en vivo desde su celular.
+                            </p>
+
+                            <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                                {waTrackerUrl ? (
+                                    <a
+                                        href={waTrackerUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs"
+                                    >
+                                        <Phone size={13} />
+                                        <span>Enviar por WhatsApp</span>
+                                    </a>
+                                ) : (
+                                    <span className="text-[11px] text-slate-400 italic">
+                                        Sin WhatsApp registrado
+                                    </span>
+                                )}
+
+                                <button
+                                    type="button"
+                                    onClick={handleCopyTrackerLink}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                >
+                                    {copiedLink ? (
+                                        <>
+                                            <Check size={13} className="text-emerald-600" />
+                                            <span className="text-emerald-700">¡Copiado!</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Copy size={13} />
+                                            <span>Copiar Link</span>
+                                        </>
+                                    )}
+                                </button>
+
+                                <a
+                                    href={trackerUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 px-2.5 py-1.5 text-slate-500 hover:text-slate-800 hover:bg-white/80 rounded-xl text-xs font-bold transition-all"
+                                    title="Ver pantalla del cliente en nueva pestaña"
+                                >
+                                    <ExternalLink size={13} />
+                                    <span>Ver como Cliente</span>
+                                </a>
                             </div>
                         </div>
 

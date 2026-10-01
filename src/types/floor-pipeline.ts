@@ -208,3 +208,62 @@ export function getFloorStage(statusId?: string): FloorStageConfig {
     const found = ALL_FLOOR_STATUSES.find(s => s.id === upper);
     return found || WORKSHOP_PIPELINE[2]; // Fallback EN_RAMPA
 }
+
+export interface CarTrackerStep extends FloorStageConfig {
+    isCompleted: boolean;
+    isCurrent: boolean;
+    isPending: boolean;
+}
+
+export interface CarTrackerData {
+    token: string;
+    plate: string;
+    vehicle: {
+        brand: string;
+        model: string;
+        year: string;
+        plates: string;
+        km: number;
+        kmDisplay: string;
+        gas: string;
+        vin?: string;
+    };
+    reception: {
+        dateDisplay: string;
+        dateRaw?: string;
+        timeRaw?: string;
+        dateTs: number;
+        timeAgo: string;
+        motivo: string;
+        advisor: string;
+        inventoryFolio?: string;
+        hasInventoryPdf: boolean;
+    };
+    client: {
+        firstName: string;
+    };
+    tracking: {
+        status: string;
+        currentStage: FloorStageConfig;
+        lastUpdate: string;
+        lastUpdateDisplay: string;
+        lastUpdateAgo: string;
+        pipeline: CarTrackerStep[];
+        isResolution: boolean;
+    };
+    activityLog: Array<{
+        id: string | number;
+        text: string;
+        timestamp: string;
+        timeDisplay?: string;
+    }>;
+    workshop: {
+        name: string;
+        address: string;
+        fullAddress: string;
+        googleMapsUrl: string;
+        wazeUrl: string;
+        schedule: string;
+    };
+    rawReceptionData?: any;
+}

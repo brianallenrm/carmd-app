@@ -1,5 +1,15 @@
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
+import { generateTrackerToken, isValidTrackerToken } from './tracker-token';
+import { CarTrackerData, getFloorStage } from '@/types/floor-pipeline';
+import {
+    parseDate,
+    formatDateDisplay,
+    timeAgo,
+    extractFirstName,
+    buildCustomerPipeline,
+    getWorkshopInfo
+} from './tracker-helpers';
 
 // Config variables
 import { GOOGLE_SHEETS_CONFIG } from './constants';
@@ -631,6 +641,251 @@ export const updateVehicleFloorStatus = async (
         }
     } catch (e) {
         console.error("Error updating vehicle floor status:", e);
+        throw e;
+    }
+};
+
+/**
+ * Consulta la información pública y segura de seguimiento para el Car Tracker.
+ * Acepta tanto un token único ('tk_...') como una placa ('ABC1234').
+ * No expone costos de mayoreo, precios de refacciones internas ni notas privadas.
+ */
+export const getVehicleTrackerData = async (query: string): Promise<CarTrackerData | null> => {
+    if (!query) return null;
+    const trimmed = query.trim();
+    const isToken = isValidTrackerToken(trimmed);
+    const cleanPlateQuery = trimmed.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+    try {
+        const doc = await getInventoryDoc();
+        const inventorySheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.TAB_NAME];
+        const pisoSheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.INVENTORY.PISO_TAB || 'CONTROL_PISO'];
+
+        if (!inventorySheet) return null;
+
+        const [allInventoryRows, pisoRows] = await Promise.all([
+            inventorySheet.getRows(),
+            pisoSheet ? pisoSheet.getRows() : Promise.resolve([])
+        ]);
+
+        let targetInventoryRow: any = null;
+        let targetPisoRow: any = null;
+        let resolvedToken = isToken ? trimmed : '';
+
+        if (isToken) {
+            // 1. Buscar coincidencia en pisoRows por Token_Seguimiento
+            targetPisoRow = pisoRows.find(r => (r.get('Token_Seguimiento') || '').trim() === trimmed);
+            if (targetPisoRow) {
+                const rowPlate = (targetPisoRow.get('Placa') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                targetInventoryRow = allInventoryRows.find(r => {
+                    const p = (r.get('Placas:') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    return p === rowPlate;
+                });
+            }
+
+            // 2. Si no está en pisoRows directo, buscar por token determinista en inventoryRows
+            if (!targetInventoryRow) {
+                for (const r of allInventoryRows) {
+                    const p = (r.get('Placas:') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    if (!p) continue;
+                    const d = r.get('FECHA') || '';
+                    const computed = generateTrackerToken(p, d);
+                    if (computed.toLowerCase() === trimmed.toLowerCase()) {
+                        targetInventoryRow = r;
+                        targetPisoRow = pisoRows.find(pr => {
+                            const pp = (pr.get('Placa') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                            return pp === p;
+                        });
+                        break;
+                    }
+                }
+            }
+        } else {
+            // La consulta es por placa
+            const matchingInventory = allInventoryRows.filter(r => {
+                const p = (r.get('Placas:') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                return p === cleanPlateQuery;
+            });
+
+            if (matchingInventory.length > 0) {
+                matchingInventory.sort((a, b) => {
+                    const tsA = parseDate(a.get('FECHA'), a.get('Hora de ingreso:'));
+                    const tsB = parseDate(b.get('FECHA'), b.get('Hora de ingreso:'));
+                    return tsB - tsA;
+                });
+                targetInventoryRow = matchingInventory[0];
+            }
+
+            targetPisoRow = pisoRows.find(pr => {
+                const pp = (pr.get('Placa') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                return pp === cleanPlateQuery;
+            });
+
+            resolvedToken = targetPisoRow?.get('Token_Seguimiento') ||
+                generateTrackerToken(cleanPlateQuery, targetInventoryRow?.get('FECHA') || '');
+        }
+
+        if (!targetInventoryRow && !targetPisoRow) {
+            return null;
+        }
+
+        const plates = (targetInventoryRow?.get('Placas:') || targetPisoRow?.get('Placa') || cleanPlateQuery).toUpperCase();
+        const cleanPlate = plates.replace(/[^A-Z0-9]/g, '');
+        const dateRaw = targetInventoryRow?.get('FECHA') || '';
+        const timeRaw = targetInventoryRow?.get('Hora de ingreso:') || '';
+        const dateTs = parseDate(dateRaw, timeRaw);
+
+        if (!resolvedToken) {
+            resolvedToken = generateTrackerToken(cleanPlate, dateRaw);
+        }
+
+        const currentStatus = targetPisoRow?.get('Estatus') || 'EN_RAMPA';
+        const lastUpdateIso = targetPisoRow?.get('Ultima_Actualizacion') || (dateTs ? new Date(dateTs).toISOString() : new Date().toISOString());
+        const lastUpdateTs = new Date(lastUpdateIso).getTime() || dateTs || Date.now();
+
+        const currentStage = getFloorStage(currentStatus);
+        const pipeline = buildCustomerPipeline(currentStatus);
+
+        let logs: any[] = [];
+        try {
+            const rawLog = targetPisoRow?.get('Bitacora_JSON');
+            if (rawLog && rawLog.startsWith('[')) logs = JSON.parse(rawLog);
+        } catch {}
+
+        const activityLog = logs.map((l: any, idx: number) => {
+            const ts = l.timestamp ? new Date(l.timestamp).getTime() : 0;
+            return {
+                id: l.id || idx + 1,
+                text: l.text || '',
+                timestamp: l.timestamp || '',
+                timeDisplay: ts ? formatDateDisplay(ts) : ''
+            };
+        });
+
+        const km = parseInt((targetInventoryRow?.get('Kilometraje:') || '').replace(/[^0-9]/g, '')) || 0;
+        const clientFullName = targetInventoryRow?.get('Nombre COMPLETO o Empresa:') || '';
+
+        // Formatear rawReceptionData para que el cliente pueda abrir el ReceptionPDF
+        const rawReceptionData = targetInventoryRow ? {
+            id: resolvedToken,
+            date: dateRaw,
+            folio: `REC-${cleanPlate}`,
+            client: {
+                name: clientFullName,
+                phone: targetInventoryRow.get('Teléfono (whatsapp):') || targetInventoryRow.get('Teléfono casa / oficina:') || '',
+                email: targetInventoryRow.get('Dirección de correo electrónico') || '',
+                address: targetInventoryRow.get('Domicilio Calle y NUMERO:') || '',
+                colonia: targetInventoryRow.get('Colonia:') || '',
+                municipality: targetInventoryRow.get('Deleg. o Municipio:') || '',
+                state: targetInventoryRow.get('Estado:') || ''
+            },
+            vehicle: {
+                brand: targetInventoryRow.get('Marca:') || '',
+                model: targetInventoryRow.get('Sub marca:') || '',
+                year: targetInventoryRow.get('Modelo (año):') || '',
+                plates,
+                serialNumber: targetInventoryRow.get('Número de serie:') || '',
+                vin: targetInventoryRow.get('Número de serie:') || '',
+                motor: targetInventoryRow.get('Tipo de Motor:') || '',
+                km: String(km),
+                gas: targetInventoryRow.get('¿Cuál es el nivel de gasolina?') || ''
+            },
+            inventory: (() => {
+                const inventoryStr = targetInventoryRow.get('¿El vehículo cuenta con la siguiente herramienta/objetos?') || '';
+                const invObj: Record<string, boolean> = {};
+                const known = ['birlo', 'cables', 'reflejantes', 'herramienta', 'gato', 'llanta', 'maletin', 'extintor', 'cds', 'radio', 'antena', 'encendedor'];
+                const items = inventoryStr.split(',').map((s: string) => s.trim().toLowerCase());
+                known.forEach(k => { if (items.includes(k)) invObj[k] = true; });
+                return invObj;
+            })(),
+            functional: (() => {
+                const rawFunc = targetInventoryRow.get('Datos Inspección Visual') || '';
+                try { return JSON.parse(rawFunc); } catch { return {}; }
+            })(),
+            service: {
+                advisorName: targetInventoryRow.get('¿Quién elaboró el inventario?') || '',
+                hasValuables: targetInventoryRow.get('¿Deja algún objeto de valor?')?.includes('Sí') || false,
+                valuablesDescription: targetInventoryRow.get('¿Deja algún objeto de valor?')?.replace('Sí: ', '') || '',
+                comments: targetInventoryRow.get('Detalles de daños') || '',
+                serviceType: targetInventoryRow.get('Motivo de Ingreso') || targetInventoryRow.get('Presupuesto Solicitado:') || ''
+            },
+            photos: (() => {
+                const photosStr = targetInventoryRow.get('Adjuntar fotos de daños físicos del vehículo') || '';
+                const photosObj: Record<string, any> = {};
+                if (photosStr.includes('http')) {
+                    photosStr.split('|').forEach((entry: string) => {
+                        const colonIdx = entry.indexOf(':');
+                        if (colonIdx > 0) {
+                            const id = entry.substring(0, colonIdx);
+                            const rest = entry.substring(colonIdx + 1);
+                            const hashIdx = rest.lastIndexOf('#');
+                            let url = rest;
+                            let notes = '';
+                            if (hashIdx > 10) {
+                                url = rest.substring(0, hashIdx);
+                                notes = rest.substring(hashIdx + 1);
+                            }
+                            if (url.startsWith('http')) {
+                                photosObj[id] = { id, label: id, previewUrl: url, driveUrl: url, notes };
+                            }
+                        }
+                    });
+                }
+                return photosObj;
+            })(),
+            company: {
+                name: "Rivera Moya B.A.",
+                rfc: "RIMB960505SXA",
+                address: "Calle Palacio de Iturbide No. 233 Col. Metropolitana 2da. Secc. Cd. Nezahualcoyotl, Estado de Mexico C.P. 57740",
+                phone: "",
+                whatsapp: "56 1026 9599",
+                email: "contacto@carmd.com.mx",
+                website: "carmd.com.mx"
+            }
+        } : null;
+
+        return {
+            token: resolvedToken,
+            plate: cleanPlate,
+            vehicle: {
+                brand: targetInventoryRow?.get('Marca:') || 'Vehículo',
+                model: targetInventoryRow?.get('Sub marca:') || '',
+                year: targetInventoryRow?.get('Modelo (año):') || '',
+                plates,
+                km,
+                kmDisplay: km > 0 ? `${km.toLocaleString('es-MX')} km` : '—',
+                gas: targetInventoryRow?.get('¿Cuál es el nivel de gasolina?') || 'Medio',
+                vin: targetInventoryRow?.get('Número de serie:') || ''
+            },
+            reception: {
+                dateDisplay: formatDateDisplay(dateTs),
+                dateRaw,
+                timeRaw,
+                dateTs,
+                timeAgo: timeAgo(dateTs),
+                motivo: targetInventoryRow?.get('Motivo de Ingreso') || targetInventoryRow?.get('Presupuesto Solicitado:') || 'Revisión técnica general',
+                advisor: targetInventoryRow?.get('¿Quién elaboró el inventario?') || targetPisoRow?.get('Mecanico') || 'Equipo Técnico CarMD',
+                inventoryFolio: targetInventoryRow ? `REC-${cleanPlate}` : undefined,
+                hasInventoryPdf: Boolean(targetInventoryRow)
+            },
+            client: {
+                firstName: extractFirstName(clientFullName)
+            },
+            tracking: {
+                status: currentStatus,
+                currentStage,
+                lastUpdate: lastUpdateIso,
+                lastUpdateDisplay: formatDateDisplay(lastUpdateTs),
+                lastUpdateAgo: timeAgo(lastUpdateTs),
+                pipeline,
+                isResolution: Boolean(currentStage.isResolution)
+            },
+            activityLog,
+            workshop: getWorkshopInfo(),
+            rawReceptionData
+        };
+    } catch (e) {
+        console.error('[getVehicleTrackerData Error]', e);
         throw e;
     }
 };

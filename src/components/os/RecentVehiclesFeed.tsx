@@ -6,15 +6,18 @@ import {
     Car, User, Clock, FileText, ClipboardList, History,
     Loader2, AlertTriangle, RefreshCw, Gauge, Fuel,
     CheckCircle, PlusCircle, ChevronRight, ChevronLeft, Wrench, UserCheck, UserPlus,
-    MoreVertical, LogOut, RotateCcw, CheckCircle2, ShieldAlert
+    MoreVertical, LogOut, RotateCcw, CheckCircle2, ShieldAlert, Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import FloorControlDrawer from "./FloorControlDrawer";
 import { getFloorStage } from "@/types/floor-pipeline";
+import { generateTrackerToken } from "@/lib/tracker-token";
 
 interface RecentVehicle {
     idx: number;
     inventoryId: number;
+    dateRaw?: string;
+    timeRaw?: string;
     dateDisplay: string;
     dateTs: number;
     timeAgo: string;
@@ -675,6 +678,23 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                         >
                             <ClipboardList size={14} className="text-[#f16315] flex-shrink-0" />
                             <span>Abrir Ficha de Piso</span>
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                const cleanP = (contextMenu.vehicle!.vehicle.plates || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+                                const tk = generateTrackerToken(cleanP, contextMenu.vehicle!.dateRaw || "");
+                                const origin = typeof window !== "undefined" ? window.location.origin : "https://carmd.com.mx";
+                                const url = `${origin}/status/${tk}`;
+                                if (typeof navigator !== "undefined" && navigator.clipboard) {
+                                    navigator.clipboard.writeText(url);
+                                }
+                                setContextMenu(prev => ({ ...prev, visible: false }));
+                            }}
+                            className="w-full px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition-colors text-left"
+                        >
+                            <Sparkles size={14} className="text-[#f16315] flex-shrink-0" />
+                            <span>Copiar Link Car Tracker</span>
                         </button>
 
                         <div className="h-px bg-slate-100 my-1" />

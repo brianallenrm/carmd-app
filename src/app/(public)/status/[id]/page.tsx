@@ -31,13 +31,11 @@ export default function CarTrackerPage() {
 
     const [data, setData] = useState<CarTrackerData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [, startTransition] = useTransition();
 
-    const fetchTracker = async (isManual = false) => {
+    const fetchTracker = async () => {
         if (!token) return;
-        if (isManual) setRefreshing(true);
         try {
             const res = await fetch(`/api/tracker/${token}`, {
                 cache: "no-store",
@@ -65,21 +63,18 @@ export default function CarTrackerPage() {
             setError("Problema de conexión con el taller. Reintentando...");
         } finally {
             setLoading(false);
-            if (isManual) {
-                setTimeout(() => setRefreshing(false), 500);
-            }
         }
     };
 
     // Initial load
     useEffect(() => {
-        fetchTracker(false);
+        fetchTracker();
     }, [token]);
 
     // Live auto-polling every 30 seconds
     useEffect(() => {
         const interval = setInterval(() => {
-            fetchTracker(false);
+            fetchTracker();
         }, 30000);
         return () => clearInterval(interval);
     }, [token]);
@@ -170,33 +165,15 @@ export default function CarTrackerPage() {
 
     return (
         <div className="min-h-screen bg-slate-100/70 text-slate-900 flex flex-col antialiased">
-            {/* Header Sticky */}
-            <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
-                <div className="max-w-xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                        <BrandLogo size="sm" variant="light" />
-                        <span className="w-px h-4 bg-slate-200" />
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+            {/* Header Limpio y Elegante (Solo Logo y Leyenda Car Tracker) */}
+            <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
+                <div className="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
+                    <BrandLogo size="sm" variant="light" />
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-orange-50/80 border border-orange-200/70 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#f16315]" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[#f16315]">
                             Car Tracker
                         </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        {/* Indicador EN VIVO */}
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-200/90 rounded-full text-emerald-800 text-[10px] font-black">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            <span>EN VIVO</span>
-                        </div>
-
-                        {/* Botón Refrescar */}
-                        <button
-                            onClick={() => fetchTracker(true)}
-                            disabled={refreshing}
-                            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
-                            title="Actualizar estatus"
-                        >
-                            <RefreshCw size={14} className={refreshing ? "animate-spin text-[#f16315]" : ""} />
-                        </button>
                     </div>
                 </div>
             </header>
@@ -226,23 +203,20 @@ export default function CarTrackerPage() {
                     </div>
                 </div>
 
-                {/* HERO CARD OSCURO: Telemetría y Estatus Flagship */}
+                {/* HERO CARD EN TONOS CLAROS: Telemetría y Estatus Flagship */}
                 <motion.div
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white rounded-3xl p-5 sm:p-6 border border-slate-800/90 shadow-xl relative overflow-hidden space-y-5"
+                    className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm space-y-4"
                 >
-                    {/* Glow decorativo de fondo */}
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-
                     {/* Header del Vehículo */}
-                    <div className="flex items-start justify-between gap-3 relative z-10">
+                    <div className="flex items-start justify-between gap-3">
                         <div>
                             <span className="text-[10px] font-black tracking-widest text-[#f16315] uppercase flex items-center gap-1.5">
                                 <Car size={13} />
                                 {vehicle.brand}
                             </span>
-                            <h2 className="text-2xl font-black text-white tracking-tight mt-0.5">
+                            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
                                 {vehicle.model}
                             </h2>
                             <p className="text-xs text-slate-400 font-medium mt-0.5">
@@ -252,7 +226,7 @@ export default function CarTrackerPage() {
 
                         {/* Avance Numérico */}
                         <div className="text-right">
-                            <span className="text-3xl font-black text-white font-mono tracking-tight">
+                            <span className="text-3xl font-black text-slate-900 font-mono tracking-tight">
                                 {currentStage.progress}%
                             </span>
                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
@@ -261,53 +235,53 @@ export default function CarTrackerPage() {
                         </div>
                     </div>
 
-                    {/* Barra de Progreso Luminous */}
-                    <div className="space-y-1.5 relative z-10">
-                        <div className="h-2 w-full bg-slate-800/80 rounded-full overflow-hidden p-0.5 border border-slate-700/60">
+                    {/* Barra de Progreso */}
+                    <div className="space-y-1.5">
+                        <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
                             <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: `${currentStage.progress}%` }}
                                 transition={{ duration: 0.8, ease: "easeOut" }}
-                                className="h-full bg-gradient-to-r from-blue-500 via-[#f16315] to-emerald-400 rounded-full shadow-sm shadow-orange-500/50"
+                                className="h-full bg-gradient-to-r from-blue-500 via-[#f16315] to-emerald-500 rounded-full"
                             />
                         </div>
                     </div>
 
-                    {/* Showcase de la Etapa Activa */}
-                    <div className="bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 space-y-3 relative z-10 backdrop-blur-xs">
+                    {/* Showcase de la Etapa Activa (Tonos Claros Cálidos) */}
+                    <div className="bg-orange-50/60 border border-orange-200/80 rounded-2xl p-4 space-y-3">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-2xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-2xl flex-shrink-0 shadow-inner">
+                            <div className="w-11 h-11 rounded-2xl bg-white border border-orange-200/80 text-2xl flex items-center justify-center flex-shrink-0 shadow-xs">
                                 {currentStage.icon}
                             </div>
                             <div className="min-w-0 flex-1">
                                 <span className="text-[9px] font-black uppercase tracking-widest text-[#f16315] block">
-                                    Etapa Activa Ahora
+                                    Etapa Activa en Taller
                                 </span>
-                                <h3 className="text-base font-black text-white tracking-tight leading-tight">
+                                <h3 className="text-base font-black text-slate-900 tracking-tight leading-tight">
                                     {currentStage.label}
                                 </h3>
                             </div>
                         </div>
 
-                        {/* Speech Bubble: clientMessage */}
-                        <div className="bg-slate-900/90 border-l-4 border-l-[#f16315] border border-slate-800 p-3 rounded-xl">
-                            <p className="text-xs text-slate-200 font-medium leading-relaxed">
+                        {/* Mensaje de Tranquilidad al Cliente (clientMessage) */}
+                        <div className="bg-white rounded-xl p-3 border border-orange-200/70 shadow-2xs">
+                            <p className="text-xs text-slate-700 font-medium leading-relaxed">
                                 {currentStage.clientMessage}
                             </p>
                         </div>
                     </div>
 
-                    {/* Sincronización en vivo */}
-                    <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 pt-1 border-t border-slate-800/80 relative z-10">
+                    {/* Sincronización */}
+                    <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 pt-1 border-t border-slate-100">
                         <span className="flex items-center gap-1.5">
                             <Clock size={11} className="text-[#f16315]" />
                             {tracking.lastUpdateDisplay ? `Actualizado: ${tracking.lastUpdateDisplay}` : "Sincronizado con rampa"}
                         </span>
-                        <span className="text-slate-500">{tracking.lastUpdateAgo}</span>
+                        <span className="text-slate-400">{tracking.lastUpdateAgo}</span>
                     </div>
                 </motion.div>
 
-                {/* TIMELINE CONECTADO (En lugar de las 8 cajas repetitivas) */}
+                {/* TIMELINE CONECTADO (En Tonos Claros) */}
                 <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-5 space-y-4">
                     <div className="flex items-center justify-between">
                         <div>
@@ -386,30 +360,30 @@ export default function CarTrackerPage() {
                     </div>
                 </div>
 
-                {/* BANNER INTERACTIVO: INVENTARIO Y FOTOS DE RECEPCIÓN */}
+                {/* BANNER INTERACTIVO: INVENTARIO Y FOTOS DE RECEPCIÓN (En Tonos Claros) */}
                 {reception.hasInventoryPdf && (
                     <Link
                         href={`/status/${data.token}/inventario`}
-                        className="block bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-5 border border-slate-800 shadow-md group hover:border-orange-500/50 transition-all"
+                        className="block bg-white hover:bg-slate-50 text-slate-900 rounded-3xl p-5 border border-slate-200/90 shadow-sm transition-all group"
                     >
                         <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-11 h-11 rounded-2xl bg-orange-500/20 border border-orange-500/40 text-[#f16315] flex items-center justify-center flex-shrink-0">
+                                <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/70 text-[#f16315] flex items-center justify-center flex-shrink-0">
                                     <Camera size={20} />
                                 </div>
                                 <div className="min-w-0">
                                     <span className="text-[9px] font-black uppercase tracking-widest text-[#f16315] block">
                                         Evidencia y Resguardo
                                     </span>
-                                    <h3 className="text-sm font-black text-white tracking-tight truncate">
+                                    <h3 className="text-sm font-black text-slate-900 tracking-tight truncate">
                                         Inventario y Fotos de Recepción
                                     </h3>
-                                    <p className="text-[11px] text-slate-300 mt-0.5 line-clamp-1">
+                                    <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">
                                         {photoCount > 0 ? `${photoCount} fotos de daños ` : ""}• Herramienta • Estado inicial
                                     </p>
                                 </div>
                             </div>
-                            <div className="p-2 bg-white/10 rounded-xl text-white group-hover:bg-[#f16315] transition-colors flex-shrink-0">
+                            <div className="p-2 bg-slate-100 text-slate-600 rounded-xl group-hover:bg-[#f16315] group-hover:text-white transition-colors flex-shrink-0">
                                 <ChevronRight size={18} />
                             </div>
                         </div>

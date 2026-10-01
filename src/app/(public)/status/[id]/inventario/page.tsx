@@ -288,7 +288,7 @@ export default function MobileReceptionInventoryPage() {
                                         onClick={() => setSelectedPhoto({ url, title: photo.title, notes })}
                                         className="group relative bg-slate-50 rounded-2xl overflow-hidden border border-slate-200/90 shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col"
                                     >
-                                        <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-900">
+                                        <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-100">
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img
                                                 src={url}

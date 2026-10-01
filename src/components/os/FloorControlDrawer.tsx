@@ -216,7 +216,7 @@ export default function FloorControlDrawer({
         setCurrentStatus(
             isConNota
                 ? 'ENTREGADO'
-                : (fData.status || (vehicle.status === 'salida_sin_nota' ? 'SALIDA_SIN_NOTA' : vehicle.status === 'mantenimiento_sin_nota' ? 'MANTENIMIENTO_SIN_NOTA' : 'EN_RAMPA'))
+                : (fData.status || (vehicle.status === 'salida_sin_nota' ? 'SALIDA_SIN_NOTA' : vehicle.status === 'mantenimiento_sin_nota' ? 'MANTENIMIENTO_SIN_NOTA' : vehicle.status === 'diagnostico_sin_nota' ? 'DIAGNOSTICO_SIN_NOTA' : 'EN_RAMPA'))
         );
 
         const mechRaw = fData.mechanic || "";
@@ -485,6 +485,7 @@ export default function FloorControlDrawer({
             let mappedStatus = vehicle.status;
             if (newStat === "SALIDA_SIN_NOTA") mappedStatus = "salida_sin_nota";
             else if (newStat === "MANTENIMIENTO_SIN_NOTA") mappedStatus = "mantenimiento_sin_nota";
+            else if (newStat === "DIAGNOSTICO_SIN_NOTA") mappedStatus = "diagnostico_sin_nota";
             else if (newStat === "ENTREGADO") mappedStatus = "entregado";
             else mappedStatus = vehicle.status === 'con_nota' ? "con_nota" : (vehicle.status === 'en_piso_nuevo' ? 'en_piso_nuevo' : 'en_piso_registrado');
 

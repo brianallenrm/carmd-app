@@ -22,7 +22,7 @@ interface RecentVehicle {
     vehicle: { brand: string; model: string; year: string; plates: string; km: number; gas: string };
     motivo: string;
     advisor: string;
-    status: 'con_nota' | 'en_piso_registrado' | 'en_piso_nuevo' | 'salida_sin_nota' | 'entregado' | 'mantenimiento_sin_nota';
+    status: 'con_nota' | 'en_piso_registrado' | 'en_piso_nuevo' | 'salida_sin_nota' | 'entregado' | 'mantenimiento_sin_nota' | 'diagnostico_sin_nota';
     floorData?: {
         status: string;
         mechanic: string;
@@ -66,6 +66,11 @@ const STATUS_CONFIG: Record<string, { stripe: string; icon: string; iconBg: stri
         icon: "text-teal-600",
         iconBg: "bg-teal-50",
     },
+    diagnostico_sin_nota: {
+        stripe: "bg-indigo-400",
+        icon: "text-indigo-600",
+        iconBg: "bg-indigo-50",
+    },
     entregado: {
         stripe: "bg-blue-400",
         icon: "text-blue-500",
@@ -75,6 +80,12 @@ const STATUS_CONFIG: Record<string, { stripe: string; icon: string; iconBg: stri
 
 function StatusBadges({ v }: { v: RecentVehicle }) {
     switch (v.status) {
+        case 'diagnostico_sin_nota':
+            return (
+                <span className="flex items-center gap-1 text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded-full">
+                    <ClipboardList size={9} /> Diagnóstico sin nota
+                </span>
+            );
         case 'mantenimiento_sin_nota':
             return (
                 <span className="flex items-center gap-1 text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200 px-1.5 py-0.5 rounded-full">
@@ -135,7 +146,7 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect, mode = 'f
     mode?: 'full' | 'piso';
 }) {
     const cfg = STATUS_CONFIG[v.status] ?? STATUS_CONFIG['en_piso_nuevo'];
-    const isExited = v.status === 'salida_sin_nota' || v.status === 'entregado' || v.status === 'mantenimiento_sin_nota';
+    const isExited = v.status === 'salida_sin_nota' || v.status === 'entregado' || v.status === 'mantenimiento_sin_nota' || v.status === 'diagnostico_sin_nota';
 
     return (
         <motion.div
@@ -416,6 +427,7 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                 let newStatus: any = v.status;
                 if (status === 'SALIDA_SIN_NOTA') newStatus = 'salida_sin_nota';
                 if (status === 'MANTENIMIENTO_SIN_NOTA') newStatus = 'mantenimiento_sin_nota';
+                if (status === 'DIAGNOSTICO_SIN_NOTA') newStatus = 'diagnostico_sin_nota';
                 if (status === 'ENTREGADO') newStatus = 'entregado';
                 if (status === 'EN_REPARACION') newStatus = v.status === 'con_nota' ? 'con_nota' : (v.status === 'en_piso_nuevo' ? 'en_piso_nuevo' : 'en_piso_registrado');
 
@@ -456,14 +468,15 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
     // Filtro activo vs todos: 'activos' solo incluye autos que NO tienen nota y NO han salido/concluido
     const displayVehicles = vehicles.filter(v => {
         if (filterMode === 'activos') {
-            return v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota' && v.status !== 'mantenimiento_sin_nota';
+            return v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota' && v.status !== 'mantenimiento_sin_nota' && v.status !== 'diagnostico_sin_nota';
         }
         return true;
     });
 
-    const activosCount = vehicles.filter(v => v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota' && v.status !== 'mantenimiento_sin_nota').length;
+    const activosCount = vehicles.filter(v => v.status !== 'salida_sin_nota' && v.status !== 'entregado' && v.status !== 'con_nota' && v.status !== 'mantenimiento_sin_nota' && v.status !== 'diagnostico_sin_nota').length;
     const conNotaCount = vehicles.filter(v => v.status === 'con_nota').length;
     const cortesiasCount = vehicles.filter(v => v.status === 'mantenimiento_sin_nota').length;
+    const diagnosticosCount = vehicles.filter(v => v.status === 'diagnostico_sin_nota').length;
     const salidasCount = vehicles.filter(v => v.status === 'salida_sin_nota').length;
 
     return (
@@ -511,6 +524,12 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                                 <span className="flex items-center gap-1">
                                     <span className="w-2 h-2 rounded-full bg-teal-400 inline-block" />
                                     {cortesiasCount} cortesías
+                                </span>
+                            )}
+                            {diagnosticosCount > 0 && (
+                                <span className="flex items-center gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-indigo-400 inline-block" />
+                                    {diagnosticosCount} diag. sin nota
                                 </span>
                             )}
                             {salidasCount > 0 && (
@@ -660,7 +679,7 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
 
                         <div className="h-px bg-slate-100 my-1" />
 
-                        {(contextMenu.vehicle.status === 'salida_sin_nota' || contextMenu.vehicle.status === 'mantenimiento_sin_nota') ? (
+                        {(contextMenu.vehicle.status === 'salida_sin_nota' || contextMenu.vehicle.status === 'mantenimiento_sin_nota' || contextMenu.vehicle.status === 'diagnostico_sin_nota') ? (
                             <button
                                 onClick={() => {
                                     handleSetFloorStatus(contextMenu.vehicle!.vehicle.plates, 'EN_REPARACION', 'Reingreso a piso');
@@ -672,6 +691,16 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                             </button>
                         ) : (
                             <>
+                                <button
+                                    onClick={() => {
+                                        handleSetFloorStatus(contextMenu.vehicle!.vehicle.plates, 'DIAGNOSTICO_SIN_NOTA', 'Diagnóstico sin nota');
+                                    }}
+                                    className="w-full px-4 py-2.5 text-xs font-bold text-indigo-700 hover:bg-indigo-50 flex items-center gap-2.5 transition-colors text-left"
+                                >
+                                    <ClipboardList size={14} className="text-indigo-600 flex-shrink-0" />
+                                    <span>Diagnóstico sin nota</span>
+                                </button>
+
                                 <button
                                     onClick={() => {
                                         handleSetFloorStatus(contextMenu.vehicle!.vehicle.plates, 'MANTENIMIENTO_SIN_NOTA', 'Garantía / Mantenimiento Preventivo');

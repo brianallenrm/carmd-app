@@ -146,6 +146,21 @@ export const WORKSHOP_PIPELINE: FloorStageConfig[] = [
  */
 export const RESOLUTION_STATUSES: FloorStageConfig[] = [
     {
+        id: "DIAGNOSTICO_SIN_NOTA",
+        label: "Diagnóstico sin nota",
+        shortLabel: "Diag. sin nota",
+        icon: "📋",
+        progress: 100,
+        badgeBg: "bg-indigo-50",
+        badgeText: "text-indigo-800",
+        badgeBorder: "border-indigo-200",
+        activeBg: "bg-indigo-700",
+        activeText: "text-white",
+        activeBorder: "border-indigo-700",
+        clientMessage: "Diagnóstico técnico finalizado y entregado al cliente.",
+        isResolution: true,
+    },
+    {
         id: "MANTENIMIENTO_SIN_NOTA",
         label: "Garantía / Mantenimiento Preventivo",
         shortLabel: "Garantía / Preventivo",

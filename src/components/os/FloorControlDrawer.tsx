@@ -984,7 +984,7 @@ export default function FloorControlDrawer({
                 ...basePrefill,
                 parts: mappedParts,
                 services: mappedServices,
-                notes: selectedMechanics.length > 0 ? `Mecánico(s) asignado(s): ${selectedMechanics.join(", ")}` : "",
+                notes: selectedMechanics.length > 0 ? `Técnico(s) asignado(s): ${selectedMechanics.join(", ")}` : "",
             };
 
             localStorage.setItem("carmd:prefill:note", JSON.stringify(fullPrefill));
@@ -1234,7 +1234,7 @@ export default function FloorControlDrawer({
                         <div className="flex items-center justify-between mb-2">
                             <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                                 <Wrench size={13} className="text-[#f16315]" />
-                                Mecánico(s) Responsable(s)
+                                Técnico(s) Responsable(s)
                             </label>
                             {selectedMechanics.length > 0 && (
                                 <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">

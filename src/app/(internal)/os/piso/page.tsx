@@ -39,11 +39,11 @@ export default function PisoTallerPage() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        {/* Botón Refrescar Rampa */}
+                        {/* Botón Refrescar Piso */}
                         <button
                             onClick={handleRefresh}
                             className="p-2 sm:px-3 sm:py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5"
-                            title="Actualizar listado de rampa"
+                            title="Actualizar listado de piso"
                         >
                             <RefreshCw size={14} className="text-slate-600" />
                             <span className="hidden sm:inline">Actualizar</span>
@@ -72,7 +72,7 @@ export default function PisoTallerPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                         <h2 className="text-xs font-black text-slate-800 uppercase tracking-wide leading-tight">
-                            Autos en Rampa y Taller
+                            Autos en Piso y Taller
                         </h2>
                         <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">
                             Toca un auto para ver su ficha · Usa <strong>⋮</strong> para cambiar estatus

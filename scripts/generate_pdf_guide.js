@@ -331,13 +331,13 @@ const htmlContent = `<!DOCTYPE html>
         <div class="doc-meta">Control de Piso • Manual para Alejandra</div>
       </div>
 
-      <h1>Guía Visual de Control de Piso (/os/piso)</h1>
+      <h1>Guía Visual de Control de Piso</h1>
       <div class="subtitle">Manual ilustrado con pantalla real para la operación diaria en taller desde el celular.</div>
 
       <div class="important-banner">
         <div class="icon">💡</div>
         <div>
-          <p><strong>Tu función principal en el taller:</strong> Eres el enlace del taller físico con el sistema. <strong>Tú no tienes que hacer notas ni cobrar.</strong> Tu trabajo es mantener la rampa actualizada (asignar mecánicos, mover etapas y tomarle foto a los tickets). Con eso, Administración puede generar notas en 1 segundo sin errores.</p>
+          <p><strong>Tu función principal en el taller:</strong> Eres el enlace del taller físico con el sistema. <strong>Tú no tienes que hacer notas ni cobrar.</strong> Tu trabajo es mantener el piso actualizado (asignar técnicos, mover etapas y tomarle foto a los tickets). Con eso, Administración puede generar notas en 1 segundo sin errores.</p>
         </div>
       </div>
 
@@ -348,12 +348,12 @@ const htmlContent = `<!DOCTYPE html>
         </div>
         <div class="step-content">
           <span class="step-badge orange">Paso 1</span>
-          <h2 class="step-title">La Pantalla Principal (/os/piso)</h2>
+          <h2 class="step-title">La Pantalla Principal</h2>
           <p style="font-size: 11.5px; color: #475569; margin-bottom: 6px;">Al entrar en tu celular, verás el tablero en vivo con todos los autos que están hoy en CarMD.</p>
 
           <div class="bullet-list">
             <div class="bullet-item">
-              <span class="tag">Pestaña</span> <strong>SOLO EN TALLER:</strong> Te muestra el número exacto de autos que están físicamente en rampa o patio hoy (en la foto: 7 autos).
+              <span class="tag">Pestaña</span> <strong>SOLO EN TALLER:</strong> Te muestra el número exacto de autos que están físicamente en piso hoy (en la foto: 7 autos).
             </div>
             <div class="bullet-item">
               <span class="tag">Tarjetas</span> <strong>Identificación al instante:</strong>
@@ -363,7 +363,7 @@ const htmlContent = `<!DOCTYPE html>
               <br>• <strong>Gasolina, KM y Hora:</strong> Datos registrados a su llegada.
             </div>
             <div class="bullet-item">
-              <span class="tag">Botón Naranja</span> <strong>[ 🔧 Ver Ficha ]:</strong> Da un toque aquí para entrar a asignarle mecánicos, mover su fase o cargar refacciones.
+              <span class="tag">Botón Naranja</span> <strong>[ 🔧 Ver Ficha ]:</strong> Da un toque aquí para entrar a asignarle técnicos, mover su fase o cargar refacciones.
             </div>
             <div class="bullet-item">
               <span class="tag">Botón [ ⋮ ]</span> <strong>Cambio Rápido:</strong> Si tienes prisa, puedes cambiar el estatus del auto desde afuera sin entrar a la ficha.
@@ -387,26 +387,26 @@ const htmlContent = `<!DOCTYPE html>
           <span class="brand-badge">CarMD OS</span>
           <span class="brand-name">Ficha del Auto</span>
         </div>
-        <div class="doc-meta">Mecánicos y Etapas del Servicio</div>
+        <div class="doc-meta">Técnicos y Etapas del Servicio</div>
       </div>
 
       <!-- PASO 2 -->
       <div class="step-section">
         <div class="phone-frame">
-          <img class="phone-screen" src="${imgMecanicos}" alt="Asignar Mecánicos">
+          <img class="phone-screen" src="${imgMecanicos}" alt="Asignar Técnicos">
         </div>
         <div class="step-content">
           <span class="step-badge orange">Paso 2</span>
-          <h2 class="step-title">Asignar a los Mecánicos Responsables</h2>
-          <p style="font-size: 11.5px; color: #475569; margin-bottom: 4px;">Al tocar <strong>"Ver Ficha"</strong>, verás los datos del cliente y los botones con los nombres del equipo de mecánicos.</p>
+          <h2 class="step-title">Asignar a los Técnicos Responsables</h2>
+          <p style="font-size: 11.5px; color: #475569; margin-bottom: 4px;">Al tocar <strong>"Ver Ficha"</strong>, verás los datos del cliente y los botones con los nombres del equipo de técnicos.</p>
 
           <div class="bullet-list">
             <div class="bullet-item">
-              <strong>¿Cómo asignarlos?</strong> Solo da un toque sobre el nombre del mecánico que va a trabajar el auto (ej: <strong>Jesús</strong>, <strong>Israel</strong>).
+              <strong>¿Cómo asignarlos?</strong> Solo da un toque sobre el nombre del técnico que va a trabajar el auto (ej: <strong>Jesús</strong>, <strong>Israel</strong>).
               <br>El botón se pondrá en color naranja con una palomita <span style="color:#f16315; font-weight:800;">✓</span>.
             </div>
             <div class="bullet-item">
-              <strong>¿Trabajan en pareja?</strong> Puedes seleccionar 2 o más mecánicos (en la foto: <em>Jesús + Israel</em>).
+              <strong>¿Trabajan en pareja?</strong> Puedes seleccionar 2 o más técnicos (en la foto: <em>Jesús + Israel</em>).
             </div>
             <div class="bullet-item">
               <strong>Botón [+ Otro]:</strong> Si apoya un técnico externo o nuevo que no esté en la barra rápida.
@@ -441,13 +441,13 @@ const htmlContent = `<!DOCTYPE html>
               </tr>
               <tr>
                 <td><strong>2</strong></td>
-                <td>📦 <strong>Esperando Refacciones</strong></td>
-                <td>Presupuesto aceptado; esperando que el proveedor traiga piezas.</td>
+                <td>📦 <strong>En espera</strong></td>
+                <td>En espera de surtir refacciones.</td>
               </tr>
               <tr>
                 <td><strong>3</strong></td>
-                <td>🔧 <strong>En Rampa / Trabajo</strong></td>
-                <td>Mecánicos desarmando, reparando o montando en rampa.</td>
+                <td>🔧 <strong>Proceso de reparación</strong></td>
+                <td>Proceso de reparación.</td>
               </tr>
               <tr>
                 <td><strong>4</strong></td>
@@ -457,12 +457,12 @@ const htmlContent = `<!DOCTYPE html>
               <tr>
                 <td><strong>5</strong></td>
                 <td>🧪 <strong>Pruebas / Calidad</strong></td>
-                <td>Reparación terminada; salieron a probarlo a la calle.</td>
+                <td>Reparación terminada; recorrido de prueba.</td>
               </tr>
               <tr>
                 <td><strong>6</strong></td>
-                <td>🧼 <strong>En Lavado y Detallado</strong></td>
-                <td>Mecánica lista; auto en estética y limpieza.</td>
+                <td>🧼 <strong>Limpieza</strong></td>
+                <td>Restauración concluida / Lavado.</td>
               </tr>
               <tr>
                 <td><strong>7</strong></td>
@@ -504,11 +504,11 @@ const htmlContent = `<!DOCTYPE html>
         <div class="step-content">
           <span class="step-badge green">Paso 4</span>
           <h2 class="step-title">Subir Tickets con la Cámara (¡IA en 3 seg!)</h2>
-          <p style="font-size: 11.5px; color: #475569; margin-bottom: 4px;">Cada vez que el repartidor o un mecánico traiga un comprobante físico:</p>
+          <p style="font-size: 11.5px; color: #475569; margin-bottom: 4px;">Cada vez que el repartidor o un técnico traiga un comprobante físico:</p>
 
           <div class="bullet-list">
             <div class="bullet-item">
-              <strong>1.</strong> Entra a la pestaña <strong>"Refacciones"</strong> (o <strong>"Rectif."</strong> si es de torno).
+              <strong>1.</strong> Entra a la pestaña <strong>"Refacciones"</strong> (o <strong>"Rectif."</strong> si es de rectificadora).
             </div>
             <div class="bullet-item">
               <strong>2.</strong> Toca el botón naranja <strong>"+ Agregar refacción"</strong>.
@@ -521,7 +521,7 @@ const htmlContent = `<!DOCTYPE html>
               <br><strong>¡La Inteligencia Artificial hace la magia!:</strong>
               <br>• Escribe el Proveedor (ej. <em>AutoZone</em>, <em>California</em>, <em>Rolcar</em>).
               <br>• Escribe la refacción en la Descripción.
-              <br>• Pone el Costo exacto pagado en pesos.
+              <br>• Coloca el Costo exacto pagado en pesos.
               <br>• Vincula la foto del ticket para cualquier duda o garantía futura.
             </div>
             <div class="bullet-item">
@@ -539,14 +539,14 @@ const htmlContent = `<!DOCTYPE html>
         <div class="step-content">
           <span class="step-badge orange">Paso 5</span>
           <h2 class="step-title">¿Y si el ticket trae VARIAS compras?</h2>
-          <p style="font-size: 11.5px; color: #475569; margin-bottom: 4px;">Si el ticket trae 2 o más partidas (ej. piezas de dos coches, o un refresco / compra personal), se abre esta ventanita:</p>
+          <p style="font-size: 11.5px; color: #475569; margin-bottom: 4px;">Si el ticket trae 2 o más refacciones (ej. refacciones de dos coches distintos o conceptos separados), se abre esta ventanita:</p>
 
           <div class="bullet-list">
             <div class="bullet-item">
               <strong>1. Desmarca lo que NO sea del auto:</strong> Solo toca la casilla azul para desmarcarla. El total se descuenta solo y esa pieza no se le cargará al cliente.
             </div>
             <div class="bullet-item">
-              <strong>2. Clic al botón verde:</strong> Toca <strong>[ ✓ CARGAR PARTIDAS INDIVIDUALES ]</strong>. Se crean las partidas por separado con su costo exacto y ambas comparten la misma foto del comprobante.
+              <strong>2. Clic al botón verde:</strong> Toca <strong>[ ✓ CARGAR REFACCIONES INDIVIDUALES ]</strong>. Se crean las refacciones por separado con su costo exacto y ambas comparten la misma foto del comprobante.
             </div>
             <div class="bullet-item">
               <strong>Tip Girar 90°:</strong> Si la foto del ticket salió de lado, tócala para abrirla en grande y usa el botón <strong>"Girar 90°"</strong> para rotarla y leerla derechita.
@@ -598,7 +598,7 @@ const htmlContent = `<!DOCTYPE html>
             <strong>📋 Diagnóstico sin nota:</strong> Si la unidad solo vino a revisión técnica o diagnóstico inicial sin generar nota de cobro en taller.
           </div>
           <div class="bullet-item">
-            <strong>🛠️ Garantía / Mantenimiento Preventivo:</strong> Si el auto vino por una revisión de cortesía o ajuste sin cobro, márcalo así para que salga de la rampa activa sin exigir nota.
+            <strong>🛠️ Garantía / Mantenimiento Preventivo:</strong> Si el auto vino por una revisión de cortesía o ajuste sin cobro, márcalo así para que salga del piso activo sin exigir nota.
           </div>
           <div class="bullet-item">
             <strong>🚪 Salida sin reparación:</strong> Si el cliente no autorizó el presupuesto y se retira con su coche.
@@ -613,12 +613,12 @@ const htmlContent = `<!DOCTYPE html>
           <div class="rule-box">
             <div class="rule-num">1</div>
             <div class="rule-title">Auto que llega</div>
-            <div class="rule-desc">Abres su ficha y tocas el nombre de los mecánicos asignados (Jesús, Israel, etc.).</div>
+            <div class="rule-desc">Abres su ficha y tocas el nombre de los técnicos asignados (Jesús, Israel, etc.).</div>
           </div>
           <div class="rule-box">
             <div class="rule-num">2</div>
-            <div class="rule-title">Auto en rampa</div>
-            <div class="rule-desc">Vas actualizando su fase con un tap (esperando piezas, en rampa, calidad, lavado).</div>
+            <div class="rule-title">Auto en piso</div>
+            <div class="rule-desc">Vas actualizando su fase con un tap (en espera, proceso de reparación, calidad, limpieza).</div>
           </div>
           <div class="rule-box">
             <div class="rule-num">3</div>

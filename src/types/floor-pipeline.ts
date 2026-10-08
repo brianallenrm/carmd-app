@@ -37,8 +37,8 @@ export const WORKSHOP_PIPELINE: FloorStageConfig[] = [
     {
         id: "ESPERANDO_PIEZAS",
         step: 2,
-        label: "Esperando Refacciones",
-        shortLabel: "Refacciones",
+        label: "En espera",
+        shortLabel: "En espera",
         icon: "📦",
         progress: 30,
         badgeBg: "bg-purple-50",
@@ -47,13 +47,13 @@ export const WORKSHOP_PIPELINE: FloorStageConfig[] = [
         activeBg: "bg-purple-600",
         activeText: "text-white",
         activeBorder: "border-purple-600",
-        clientMessage: "Presupuesto autorizado. Refacciones solicitadas en camino con proveedores."
+        clientMessage: "Presupuesto autorizado. En espera de surtir refacciones."
     },
     {
         id: "EN_RAMPA",
         step: 3,
-        label: "En Rampa / Trabajo Activo",
-        shortLabel: "En Rampa",
+        label: "Proceso de reparación",
+        shortLabel: "En reparación",
         icon: "🔧",
         progress: 60,
         badgeBg: "bg-orange-50",
@@ -62,7 +62,7 @@ export const WORKSHOP_PIPELINE: FloorStageConfig[] = [
         activeBg: "bg-[#f16315]",
         activeText: "text-white",
         activeBorder: "border-orange-500",
-        clientMessage: "Tus mecánicos están instalando piezas y trabajando en rampa."
+        clientMessage: "Tus técnicos están trabajando en el proceso de reparación en piso."
     },
     {
         id: "TORNO",
@@ -92,13 +92,13 @@ export const WORKSHOP_PIPELINE: FloorStageConfig[] = [
         activeBg: "bg-amber-600",
         activeText: "text-white",
         activeBorder: "border-amber-600",
-        clientMessage: "Reparación terminada. Realizando pruebas de funcionamiento y control de calidad."
+        clientMessage: "Reparación terminada. Realizando recorrido de prueba y control de calidad."
     },
     {
         id: "LAVADO",
         step: 6,
-        label: "En Lavado y Detallado",
-        shortLabel: "Lavado",
+        label: "Limpieza",
+        shortLabel: "Limpieza",
         icon: "🧼",
         progress: 95,
         badgeBg: "bg-cyan-50",
@@ -107,7 +107,7 @@ export const WORKSHOP_PIPELINE: FloorStageConfig[] = [
         activeBg: "bg-cyan-600",
         activeText: "text-white",
         activeBorder: "border-cyan-600",
-        clientMessage: "Tu vehículo está en área de estética y limpieza para entrega."
+        clientMessage: "Restauración concluida. Tu vehículo está en área de limpieza y detallado."
     },
     {
         id: "LISTO_ENTREGA",

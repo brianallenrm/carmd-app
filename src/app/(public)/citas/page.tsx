@@ -609,7 +609,7 @@ export default function BookingPage() {
                              <AlertCircle size={16} /> Unidad no admitida para servicio
                            </div>
                            <p className="text-xs text-white/70 leading-relaxed">
-                             Por normativas de seguridad en nuestras instalaciones y lineamientos de nuestra aseguradora de taller, no tenemos permitido el ingreso ni resguardo de vehículos clasificados con factura de aseguradora/salvamento o de importación sin soporte oficial.
+                             Por políticas de calidad y lineamientos internos de seguridad técnica, no tenemos permitido el ingreso ni resguardo de vehículos clasificados con factura de aseguradora/salvamento, reconstruidos o de importación sin soporte oficial.
                            </p>
                            <div className="pt-1">
                              <Link href="/terminos" target="_blank" className="text-amber-400 text-xs underline font-bold hover:text-amber-300">

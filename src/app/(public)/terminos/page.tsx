@@ -87,7 +87,7 @@ export default function TermsConditions() {
                 <h2 className="text-2xl font-black uppercase tracking-tight">4. Criterios de Admisión e Integridad Vehicular</h2>
               </div>
               <p>
-                Para preservar los estándares de seguridad industrial, especificaciones de planta y garantizar la trazabilidad de los diagnósticos, CarMD se reserva el derecho de admisión de vehículos que presenten:
+                Para preservar los estándares de seguridad técnica, especificaciones de planta y garantizar diagnósticos certeros y reparaciones efectivas, CarMD se reserva el derecho de admisión de vehículos que presenten:
               </p>
               <ul className="space-y-3 list-disc list-inside text-sm text-white/70">
                 <li><strong className="text-white">Antecedentes de siniestro severo:</strong> daños por inundación, conatos de incendio o facturación de salvamento/pérdida total.</li>

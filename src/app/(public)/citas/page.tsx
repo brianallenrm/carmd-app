@@ -21,7 +21,9 @@ import {
   Wrench,
   ClipboardList,
   MessageCircle,
-  MapPin
+  MapPin,
+  HelpCircle,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -52,6 +54,7 @@ export default function BookingPage() {
     year: "",
     km: "",
     vin: "",
+    origin: "",
     date: "",
     time: "",
     problem: "",
@@ -61,6 +64,7 @@ export default function BookingPage() {
   const [error, setError] = useState("");
   const [isReturningClient, setIsReturningClient] = useState(false);
   const [previousKm, setPreviousKm] = useState("");
+  const [showOriginHelp, setShowOriginHelp] = useState(false);
 
   // --- Step 1: Secure Pre-fill Logic ---
   const handleVerifyPlate = async () => {
@@ -107,7 +111,8 @@ export default function BookingPage() {
           model: userData.vehicle?.replace(brandMatch || "", "").trim() || "",
           year: userData.year || "",
           vin: userData.vin || "",
-          km: userData.km || ""
+          km: userData.km || "",
+          origin: "nacional"
         });
         setIsReturningClient(true);
         setPreviousKm(userData.km || "");
@@ -328,6 +333,22 @@ export default function BookingPage() {
                     <h1 className="text-5xl md:text-7xl font-black tracking-tighter uppercase leading-none">AGENDA TU <span className="text-[#f16315]">CITA</span></h1>
                     <p className="text-white/40 text-lg font-bold uppercase tracking-[0.2em]">Ingresa tu placa para comenzar</p>
                  </div>
+
+                 {/* Criterios de Admisión y Garantía (Banner Informativo) */}
+                 <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-6 sm:p-7 max-w-2xl mx-auto backdrop-blur-md space-y-3">
+                   <div className="flex items-center gap-3">
+                     <div className="p-2 rounded-xl bg-[#f16315]/10 border border-[#f16315]/20 text-[#f16315] shrink-0">
+                       <ShieldCheck size={20} />
+                     </div>
+                     <h4 className="text-white text-xs font-black uppercase tracking-[0.15em]">
+                       Criterios de Admisión y Garantía Oficial
+                     </h4>
+                   </div>
+                   <p className="text-white/60 text-xs sm:text-[13px] leading-relaxed font-medium text-justify">
+                     Con el objetivo de garantizar diagnósticos certeros y especificaciones de fábrica, en CarMD recibimos vehículos nuevos y seminuevos de cualquier gama vendidos formalmente en México. Por políticas de calidad y seguridad técnica, no intervenimos unidades con factura de aseguradora (salvamento o pérdida total), autos reconstruidos ni vehículos importados.
+                   </p>
+                 </div>
+
                 <div className="bg-white/5 border border-white/10 p-12 rounded-[50px] space-y-8 backdrop-blur-xl">
                   <input 
                     type="text" 
@@ -464,6 +485,141 @@ export default function BookingPage() {
                        />
                     </div>
 
+                    {/* Procedencia e Historial Vehicular (Filtro Activo) */}
+                    <div className="space-y-3 md:col-span-2 pt-4 border-t border-white/5">
+                       <div className="flex items-center justify-between ml-2">
+                         <label className="text-[10px] font-black uppercase tracking-widest text-white/30 flex items-center gap-1.5">
+                           <ShieldCheck size={12} className="text-[#f16315]" /> Procedencia e Historial del Vehículo
+                         </label>
+                         <button
+                           type="button"
+                           onClick={() => setShowOriginHelp(!showOriginHelp)}
+                           className="text-[#f16315]/80 hover:text-[#f16315] text-[11px] font-bold flex items-center gap-1 transition-colors group cursor-pointer"
+                         >
+                           <HelpCircle size={13} className="group-hover:scale-110 transition-transform" />
+                           <span>{showOriginHelp ? "Ocultar ayuda" : "¿Cómo saber cuál es el mío?"}</span>
+                         </button>
+                       </div>
+
+                       {/* Tarjeta Desplegable de Ayuda */}
+                       <AnimatePresence>
+                         {showOriginHelp && (
+                           <motion.div
+                             initial={{ opacity: 0, height: 0, scale: 0.98 }}
+                             animate={{ opacity: 1, height: "auto", scale: 1 }}
+                             exit={{ opacity: 0, height: 0, scale: 0.98 }}
+                             transition={{ duration: 0.25, ease: "easeOut" }}
+                             className="overflow-hidden"
+                           >
+                             <div className="bg-white/[0.04] border border-white/10 p-5 rounded-3xl space-y-4 text-xs backdrop-blur-xl">
+                               <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                                 <span className="font-black uppercase tracking-wider text-white text-[11px] flex items-center gap-1.5">
+                                   <HelpCircle size={14} className="text-[#f16315]" /> Guía de Identificación Vehicular
+                                 </span>
+                                 <button
+                                   type="button"
+                                   onClick={() => setShowOriginHelp(false)}
+                                   className="text-white/30 hover:text-white p-1"
+                                 >
+                                   <X size={14} />
+                                 </button>
+                               </div>
+
+                               <div className="space-y-3">
+                                 <div className="bg-black/40 p-3.5 rounded-2xl border border-white/5 space-y-1">
+                                   <div className="font-bold text-white flex items-center gap-1.5">
+                                     <span className="text-base">🇲🇽</span> Elige "Auto Mexicano / Nacional" si:
+                                   </div>
+                                   <p className="text-white/60 leading-relaxed pl-6">
+                                     Tu auto (ya sea <strong className="text-white">nuevo o seminuevo</strong>) se vendió originalmente en una agencia autorizada en México (Ford, VW, Nissan, BMW, etc.) y mantiene un historial normal. Si lo compraste usado a un particular o lote de seminuevos pero el coche es de distribución nacional sin pérdida total, <strong className="text-[#f16315]">esta es tu opción</strong>.
+                                   </p>
+                                 </div>
+
+                                 <div className="bg-black/40 p-3.5 rounded-2xl border border-amber-500/20 space-y-1">
+                                   <div className="font-bold text-amber-300 flex items-center gap-1.5">
+                                     <span className="text-base">⚠️</span> Elige "Auto Americano o de Aseguradora" si:
+                                   </div>
+                                   <p className="text-white/60 leading-relaxed pl-6">
+                                     El auto cuenta con <strong className="text-amber-200">factura de aseguradora</strong> por haber sido catalogado como pérdida total (inundación, choque severo o robo), es reconstruido o fue traído del extranjero (versiones americanas sin catálogo de agencia en México).
+                                   </p>
+                                 </div>
+                               </div>
+                             </div>
+                           </motion.div>
+                         )}
+                       </AnimatePresence>
+                       
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, origin: "nacional" })}
+                            className={`p-4 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                              formData.origin === "nacional"
+                                ? "bg-[#f16315]/10 border-[#f16315] text-white shadow-lg shadow-[#f16315]/10"
+                                : "bg-black/40 border-white/10 text-white/60 hover:border-white/20"
+                            }`}
+                          >
+                            <div className="space-y-0.5">
+                              <div className="text-xs font-black uppercase tracking-wider text-white">
+                                🇲🇽 Auto Mexicano / Nacional
+                              </div>
+                              <div className="text-[11px] text-white/40 font-medium">
+                                Vendido originalmente en México (nuevo o usado de particular/lote)
+                              </div>
+                            </div>
+                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ml-2 ${
+                              formData.origin === "nacional" ? "border-[#f16315] bg-[#f16315] text-black" : "border-white/20"
+                            }`}>
+                              {formData.origin === "nacional" && <CheckCircle2 size={14} className="text-black" />}
+                            </div>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, origin: "salvamento" })}
+                            className={`p-4 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                              formData.origin === "salvamento"
+                                ? "bg-amber-500/10 border-amber-500 text-amber-200"
+                                : "bg-black/40 border-white/10 text-white/60 hover:border-white/20"
+                            }`}
+                          >
+                            <div className="space-y-0.5">
+                              <div className="text-xs font-black uppercase tracking-wider text-white">
+                                ⚠️ Auto Americano o de Aseguradora
+                              </div>
+                              <div className="text-[11px] text-white/40 font-medium">
+                                Pérdida total, reconstruido, salvamento o traído de EE.UU.
+                              </div>
+                            </div>
+                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ml-2 ${
+                              formData.origin === "salvamento" ? "border-amber-500 bg-amber-500 text-black" : "border-white/20"
+                            }`}>
+                              {formData.origin === "salvamento" && <AlertCircle size={14} className="text-black" />}
+                            </div>
+                          </button>
+                       </div>
+
+                       {formData.origin === "salvamento" && (
+                         <motion.div
+                           initial={{ opacity: 0, y: -5 }}
+                           animate={{ opacity: 1, y: 0 }}
+                           className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 space-y-2 mt-2"
+                         >
+                           <div className="flex items-center gap-2 font-black text-amber-400 uppercase tracking-wider text-xs">
+                             <AlertCircle size={16} /> Unidad no admitida para servicio
+                           </div>
+                           <p className="text-xs text-white/70 leading-relaxed">
+                             Por normativas de seguridad en nuestras instalaciones y lineamientos de nuestra aseguradora de taller, no tenemos permitido el ingreso ni resguardo de vehículos clasificados con factura de aseguradora/salvamento o de importación sin soporte oficial.
+                           </p>
+                           <div className="pt-1">
+                             <Link href="/terminos" target="_blank" className="text-amber-400 text-xs underline font-bold hover:text-amber-300">
+                               Ver Criterios de Admisión e Integridad Vehicular en Términos →
+                             </Link>
+                           </div>
+                         </motion.div>
+                       )}
+                    </div>
+
                     {/* Client Info */}
                     <div className="space-y-2 md:col-span-2 pt-4 border-t border-white/5">
                        <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-2">Nombre del Propietario</label>
@@ -500,10 +656,14 @@ export default function BookingPage() {
 
                  <button 
                   onClick={() => setStep(3)}
-                  disabled={!formData.brand || !formData.model || !formData.phone || !formData.name || (formData.brand === 'OTRA' && !formData.customBrand) || (formData.model === 'OTRO' && !formData.customModel)}
-                  className="w-full bg-[#f16315] py-6 rounded-3xl font-black uppercase tracking-widest shadow-xl shadow-[#f16315]/20 disabled:opacity-20"
+                  disabled={!formData.brand || !formData.model || !formData.phone || !formData.name || formData.origin !== 'nacional' || (formData.brand === 'OTRA' && !formData.customBrand) || (formData.model === 'OTRO' && !formData.customModel)}
+                  className="w-full bg-[#f16315] py-6 rounded-3xl font-black uppercase tracking-widest shadow-xl shadow-[#f16315]/20 disabled:opacity-20 transition-all"
                  >
-                   Agenda tu Cita
+                   {formData.origin === "salvamento" 
+                     ? "Unidad No Admitida por Normativa" 
+                     : formData.origin === "" 
+                       ? "Selecciona la Procedencia del Auto" 
+                       : "Continuar a Selección de Fecha"}
                  </button>
               </motion.div>
             )}
@@ -609,6 +769,8 @@ export default function BookingPage() {
                        </div>
                        <div>KM:</div>
                        <div className="text-right text-white">{formData.km} KM</div>
+                       <div>Procedencia:</div>
+                       <div className="text-right text-emerald-400">Mexicano / Nacional</div>
                     </div>
                  </div>
                  <button onClick={submitBooking} disabled={!formData.problem || loading} className="w-full bg-[#f16315] py-8 rounded-[40px] font-black uppercase tracking-[0.3em] text-xl shadow-2xl shadow-[#f16315]/50">

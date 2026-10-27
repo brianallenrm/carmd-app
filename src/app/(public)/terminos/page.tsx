@@ -81,10 +81,28 @@ export default function TermsConditions() {
               </ul>
             </section>
 
+            <section className="bg-amber-500/5 border border-amber-500/20 p-10 rounded-[40px] space-y-6">
+              <div className="flex items-center gap-3 text-amber-500">
+                <ShieldCheck size={24} />
+                <h2 className="text-2xl font-black uppercase tracking-tight">4. Criterios de Admisión e Integridad Vehicular</h2>
+              </div>
+              <p>
+                Para preservar los estándares de seguridad industrial, especificaciones de planta y garantizar la trazabilidad de los diagnósticos, CarMD se reserva el derecho de admisión de vehículos que presenten:
+              </p>
+              <ul className="space-y-3 list-disc list-inside text-sm text-white/70">
+                <li><strong className="text-white">Antecedentes de siniestro severo:</strong> daños por inundación, conatos de incendio o facturación de salvamento/pérdida total.</li>
+                <li><strong className="text-white">Unidades de importación (no nacionales):</strong> vehículos que no cuenten con homologación y catálogo oficial de refacciones para el mercado mexicano.</li>
+                <li><strong className="text-white">Vulneración técnica:</strong> alteraciones no certificadas en arneses eléctricos, reprogramaciones no autorizadas o modificaciones estructurales.</li>
+              </ul>
+              <p className="border-t border-white/5 pt-4 text-xs italic text-white/40">
+                El ingreso de cualquier unidad queda sujeto a la inspección visual inicial y validación técnica por parte de nuestro equipo de ingeniería.
+              </p>
+            </section>
+
             <section className="bg-red-500/5 border border-red-500/20 p-10 rounded-[40px] space-y-6">
               <div className="flex items-center gap-3 text-red-500">
                 <AlertTriangle size={24} />
-                <h2 className="text-2xl font-black uppercase tracking-tight">4. Limitación de Responsabilidad</h2>
+                <h2 className="text-2xl font-black uppercase tracking-tight">5. Limitación de Responsabilidad</h2>
               </div>
               <p>
                 El servicio de valuación vehicular no incluye la revisión de números de serie ni verificación legal ante autoridades. 
@@ -95,7 +113,7 @@ export default function TermsConditions() {
             <section className="bg-orange-500/5 border border-orange-500/20 p-10 rounded-[40px] space-y-6">
               <div className="flex items-center gap-3 text-orange-500">
                 <ShieldCheck size={24} />
-                <h2 className="text-2xl font-black uppercase tracking-tight">5. Fallas Internas y Vicios Ocultos</h2>
+                <h2 className="text-2xl font-black uppercase tracking-tight">6. Fallas Internas y Vicios Ocultos</h2>
               </div>
               <p>
                 CarMD no asume responsabilidad alguna por incendios, cortocircuitos o daños mecánicos que ocurran de manera espontánea debido a condiciones preexistentes del vehículo, cableado degradado o vicios ocultos, mientras la unidad se encuentre en nuestras instalaciones y antes de que se inicie cualquier intervención técnica. 

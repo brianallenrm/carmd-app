@@ -58,9 +58,9 @@ const DEFAULT_INSPECTORS = [
 ];
 
 const STEPS = [
-    { id: 1, title: "Ruedas y Motor", icon: Disc },
-    { id: 2, title: "Tablero y Limpieza", icon: Camera },
-    { id: 3, title: "Firmas de Salida", icon: UserCheck },
+    { id: 1, title: "1. Ruedas", icon: Disc },
+    { id: 2, title: "2. Tablero", icon: Camera },
+    { id: 3, title: "3. Firmas", icon: UserCheck },
 ];
 
 function CalidadWizardContent() {
@@ -402,6 +402,76 @@ function CalidadWizardContent() {
 
     const backUrl = fromParam === "control" ? "/os/centrodecontrol" : "/os/piso";
 
+    const renderCommitmentStatement = () => {
+        const tech = data.technician?.trim();
+        const asst = data.assistantTechnician?.trim();
+        const hasAssistant = asst && asst !== "Sin Auxiliar (Solo)" && asst !== "Sin Auxiliar" && asst !== "Solo";
+        const insp = data.inspector?.trim();
+
+        const roleForInsp = (name?: string) => (name?.toLowerCase() === "alejandra" ? "Inspectora de Salida" : "Inspector de Salida");
+
+        // Caso especial: Mismo técnico e inspector, sin auxiliar
+        if (tech && insp && tech.toLowerCase() === insp.toLowerCase() && !hasAssistant) {
+            return (
+                <span>
+                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{insp}</strong> (Técnico e Inspector), certifico haber realizado y verificado personalmente el torque de las 4 ruedas y puntos de seguridad de esta unidad, asumiendo la responsabilidad directa por la protección y tranquilidad de las personas a bordo.
+                </span>
+            );
+        }
+
+        // Caso 3 personas: Técnico + Auxiliar + Inspector
+        if (tech && hasAssistant && insp) {
+            return (
+                <span>
+                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico), <strong className="text-slate-900">{asst}</strong> (Auxiliar Técnico) y <strong className="text-slate-900">{insp}</strong> ({roleForInsp(insp)}), certificamos haber realizado y verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+                </span>
+            );
+        }
+
+        // Caso 2 personas: Técnico + Inspector (Sin auxiliar)
+        if (tech && insp) {
+            return (
+                <span>
+                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico) y <strong className="text-slate-900">{insp}</strong> ({roleForInsp(insp)}), certificamos haber realizado y verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+                </span>
+            );
+        }
+
+        // Caso 2 personas: Técnico + Auxiliar (sin inspector asignado aún)
+        if (tech && hasAssistant) {
+            return (
+                <span>
+                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico) y <strong className="text-slate-900">{asst}</strong> (Auxiliar), certificamos haber realizado físicamente el torque de 4 ruedas y la revisión técnica de esta unidad.
+                </span>
+            );
+        }
+
+        // Caso 1 persona: Solo Inspector
+        if (insp) {
+            return (
+                <span>
+                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{insp}</strong> ({roleForInsp(insp)}), certifico haber verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+                </span>
+            );
+        }
+
+        // Caso 1 persona: Solo Técnico
+        if (tech) {
+            return (
+                <span>
+                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico), certifico haber realizado el torque de 4 ruedas y la revisión técnica de esta unidad.
+                </span>
+            );
+        }
+
+        // Fallback cuando aún no seleccionan a nadie
+        return (
+            <span>
+                <strong>Compromiso de entrega:</strong> El equipo responsable certifica haber verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+            </span>
+        );
+    };
+
     // Si no se proporcionó placa en URL
     if (!cleanPlate) {
         return (
@@ -490,10 +560,10 @@ function CalidadWizardContent() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800">
+        <div className="min-h-screen bg-slate-50 text-slate-800 w-full overflow-x-hidden">
             {/* Header Luminoso Nativo Móvil */}
-            <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-                <div className="max-w-md mx-auto px-3.5 py-2.5 flex items-center justify-between gap-2.5">
+            <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-xs w-full">
+                <div className="w-full max-w-lg mx-auto px-3.5 py-2.5 flex items-center justify-between gap-2.5">
                     <Link
                         href={backUrl}
                         className="p-2 text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors flex-shrink-0"
@@ -527,8 +597,8 @@ function CalidadWizardContent() {
                 </div>
 
                 {/* Segmented Control de 3 Pasos (Estilo iOS Nativo) */}
-                <div className="max-w-md mx-auto px-3.5 pb-2.5 pt-0.5">
-                    <div className="bg-slate-100 p-1 rounded-xl grid grid-cols-3 gap-1">
+                <div className="w-full max-w-lg mx-auto px-3.5 pb-2.5 pt-0.5">
+                    <div className="bg-slate-100 p-1 rounded-xl flex items-center gap-1 w-full">
                         {STEPS.map((step) => {
                             const isCurrent = currentStep === step.id;
                             const isPast = currentStep > step.id;
@@ -538,7 +608,7 @@ function CalidadWizardContent() {
                                     key={step.id}
                                     type="button"
                                     onClick={() => goToStep(step.id)}
-                                    className={`py-1.5 px-1.5 rounded-lg text-center transition-all flex items-center justify-center gap-1 text-[11px] select-none ${
+                                    className={`flex-1 py-1.5 px-1 rounded-lg text-center transition-all flex items-center justify-center gap-1 text-[11px] min-w-0 select-none ${
                                         isCurrent
                                             ? "bg-white text-slate-900 font-black shadow-xs"
                                             : isPast
@@ -565,7 +635,7 @@ function CalidadWizardContent() {
 
             {/* Mensajes de Alerta / Error */}
             {errorMessage && (
-                <div className="max-w-md mx-auto px-3.5 mt-2.5">
+                <div className="w-full max-w-lg mx-auto px-3.5 mt-2.5">
                     <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-2.5 text-xs text-red-900 shadow-xs animate-in fade-in duration-150">
                         <AlertTriangle size={15} className="text-red-600 flex-shrink-0 mt-0.5" />
                         <span className="flex-1 text-[11px] leading-snug">{errorMessage}</span>
@@ -581,7 +651,7 @@ function CalidadWizardContent() {
             )}
 
             {/* Contenedor Principal del Wizard */}
-            <main className="max-w-md mx-auto px-3.5 pt-2.5 pb-28">
+            <main className="w-full max-w-lg mx-auto px-3.5 pt-2.5 pb-28">
                 <AnimatePresence mode="wait" initial={false}>
                     {/* ========================================================== */}
                     {/* PASO 1: SEGURIDAD CRÍTICA Y 4 RUEDAS                      */}
@@ -1098,13 +1168,13 @@ function CalidadWizardContent() {
                                         value={data.notes || ""}
                                         onChange={(e) => setData((p) => ({ ...p, notes: e.target.value }))}
                                         placeholder="Ej: Foco de sensor de oxígeno preexistente..."
-                                        className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f16315]"
+                                        className="w-full text-base sm:text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f16315]"
                                     />
                                 </div>
 
-                                {/* Declaración de Compromiso */}
+                                {/* Declaración de Compromiso Compartido */}
                                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] text-slate-700 leading-snug">
-                                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{data.inspector || "Inspector"}</strong>, certifico haber realizado físicamente la revisión de torque de ruedas y seguridad para garantizar la protección y tranquilidad de las personas a bordo.
+                                    {renderCommitmentStatement()}
                                 </div>
                             </div>
                         </motion.div>
@@ -1113,8 +1183,8 @@ function CalidadWizardContent() {
             </main>
 
             {/* Barra Inferior Fija para Móvil (Sticky Bottom Action Bar) */}
-            <footer className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3.5 py-2.5 z-30 shadow-lg">
-                <div className="max-w-md mx-auto flex items-center justify-between gap-2.5">
+            <footer className="fixed bottom-0 left-0 right-0 w-full bg-white/95 backdrop-blur-md border-t border-slate-200 px-3.5 py-2.5 z-30 shadow-lg">
+                <div className="w-full max-w-lg mx-auto flex items-center justify-between gap-2.5">
                     {/* Botón Izquierdo / Resumen */}
                     {currentStep === 1 ? (
                         <div className="text-xs">

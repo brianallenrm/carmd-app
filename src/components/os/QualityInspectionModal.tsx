@@ -44,6 +44,13 @@ interface QualityInspectionModalProps {
 }
 
 const DEFAULT_INSPECTORS = ["Alejandra", "Alejandro", "Daniel"];
+const DEFAULT_ASSISTANTS = [
+    "Sin Auxiliar (Solo)",
+    "Josué",
+    "Juan Pablo",
+    "Rubén",
+    "Israel"
+];
 
 export default function QualityInspectionModal({
     isOpen,
@@ -232,6 +239,69 @@ export default function QualityInspectionModal({
 
     const missingCriticalCount = criticalItems.filter((i) => !i.ok).length;
     const canApprove = missingCriticalCount === 0 && Boolean(data.inspector?.trim());
+
+    const renderCommitmentStatement = () => {
+        const tech = data.technician?.trim();
+        const asst = data.assistantTechnician?.trim();
+        const hasAssistant = asst && asst !== "Sin Auxiliar (Solo)" && asst !== "Sin Auxiliar" && asst !== "Solo";
+        const insp = data.inspector?.trim();
+
+        const roleForInsp = (name?: string) => (name?.toLowerCase() === "alejandra" ? "Inspectora de Salida" : "Inspector de Salida");
+
+        if (tech && insp && tech.toLowerCase() === insp.toLowerCase() && !hasAssistant) {
+            return (
+                <span>
+                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{insp}</strong> (Técnico e Inspector), certifico haber realizado y verificado personalmente el torque de las 4 ruedas y puntos de seguridad de esta unidad, asumiendo la responsabilidad directa por la protección y tranquilidad de las personas a bordo.
+                </span>
+            );
+        }
+
+        if (tech && hasAssistant && insp) {
+            return (
+                <span>
+                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico), <strong className="text-slate-900">{asst}</strong> (Auxiliar Técnico) y <strong className="text-slate-900">{insp}</strong> ({roleForInsp(insp)}), certificamos haber realizado y verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+                </span>
+            );
+        }
+
+        if (tech && insp) {
+            return (
+                <span>
+                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico) y <strong className="text-slate-900">{insp}</strong> ({roleForInsp(insp)}), certificamos haber realizado y verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+                </span>
+            );
+        }
+
+        if (tech && hasAssistant) {
+            return (
+                <span>
+                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico) y <strong className="text-slate-900">{asst}</strong> (Auxiliar), certificamos haber realizado físicamente el torque de 4 ruedas y la revisión técnica de esta unidad.
+                </span>
+            );
+        }
+
+        if (insp) {
+            return (
+                <span>
+                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{insp}</strong> ({roleForInsp(insp)}), certifico haber verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+                </span>
+            );
+        }
+
+        if (tech) {
+            return (
+                <span>
+                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico), certifico haber realizado el torque de 4 ruedas y la revisión técnica de esta unidad.
+                </span>
+            );
+        }
+
+        return (
+            <span>
+                <strong>Compromiso de entrega:</strong> El equipo responsable certifica haber verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+            </span>
+        );
+    };
 
     const handleSave = async (approved: boolean) => {
         setIsSaving(true);
@@ -574,6 +644,34 @@ export default function QualityInspectionModal({
                             </div>
                         </div>
 
+                        {/* Auxiliar Técnico */}
+                        <div>
+                            <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">
+                                Auxiliar técnico (apoyo en montaje):
+                            </span>
+                            <div className="flex flex-wrap gap-1">
+                                {DEFAULT_ASSISTANTS.map((asst) => {
+                                    const isSel = data.assistantTechnician === asst;
+                                    return (
+                                        <button
+                                            key={asst}
+                                            type="button"
+                                            onClick={() => setData((p) => ({ ...p, assistantTechnician: asst }))}
+                                            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                isSel
+                                                    ? asst === "Sin Auxiliar (Solo)"
+                                                        ? "bg-purple-600 text-white shadow-xs"
+                                                        : "bg-slate-900 text-white shadow-xs"
+                                                    : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+                                            }`}
+                                        >
+                                            {asst}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
                         {/* Inspector de Calidad */}
                         <div>
                             <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">
@@ -612,7 +710,7 @@ export default function QualityInspectionModal({
 
                         {/* Declaración de Compromiso */}
                         <div className="p-2.5 bg-slate-100 rounded-xl text-[10px] text-slate-700 border border-slate-200 leading-snug">
-                            <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{data.inspector || "Inspector"}</strong>, certifico haber realizado físicamente la revisión de torque de ruedas y seguridad para garantizar la protección y tranquilidad de las personas a bordo.
+                            {renderCommitmentStatement()}
                         </div>
                     </div>
                 </div>

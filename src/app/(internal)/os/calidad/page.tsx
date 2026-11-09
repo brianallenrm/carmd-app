@@ -6,7 +6,6 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     ShieldCheck,
-    ShieldAlert,
     AlertTriangle,
     CheckCircle2,
     CircleDashed,
@@ -21,13 +20,12 @@ import {
     Droplet,
     Activity,
     Wind,
-    Car,
     ArrowLeft,
     ArrowRight,
     Wrench,
     FileText,
-    ExternalLink,
-    RefreshCw
+    Car,
+    X
 } from "lucide-react";
 import {
     QualityInspectionData,
@@ -60,9 +58,9 @@ const DEFAULT_INSPECTORS = [
 ];
 
 const STEPS = [
-    { id: 1, title: "Seguridad y Ruedas", shortTitle: "1. Birlos y Niveles", icon: Disc },
-    { id: 2, title: "Tablero y Estética", shortTitle: "2. Tablero / Limpieza", icon: Camera },
-    { id: 3, title: "Firmas y Salida", shortTitle: "3. Responsabilidad", icon: UserCheck },
+    { id: 1, title: "Ruedas y Motor", icon: Disc },
+    { id: 2, title: "Tablero y Limpieza", icon: Camera },
+    { id: 3, title: "Firmas de Salida", icon: UserCheck },
 ];
 
 function CalidadWizardContent() {
@@ -151,12 +149,10 @@ function CalidadWizardContent() {
                         const serverQa = match.floorData?.qualityInspection;
                         if (serverQa && serverQa.timestamp) {
                             setData((prev) => {
-                                // Si no hay datos marcados en el borrador, tomar del servidor
                                 const hasDraftData = prev.critical.wheelsTorqued || Boolean(prev.dashboardPhotoUrl);
                                 return hasDraftData ? prev : serverQa;
                             });
                         } else if (match.floorData?.mechanic) {
-                            // Pre-seleccionar mecánico asignado si viene de piso
                             const mechs = match.floorData.mechanic.split(",").map((s: string) => s.trim());
                             if (mechs.length > 0) {
                                 setData((prev) => ({
@@ -323,11 +319,11 @@ function CalidadWizardContent() {
 
     const criticalItems = [
         { label: "Torque en las 4 ruedas", ok: wheelsAllOk },
-        { label: "Nivel de aceite y tapón hermético", ok: data.critical.oilAndFilterOk },
-        { label: "Líquido de frenos y pedal firme", ok: data.critical.brakeFluidAndPedalOk },
-        { label: "Anticongelante y tapón hermético", ok: data.critical.coolantCapOk },
-        { label: "Presión de 4 llantas + refacción", ok: data.critical.tirePressureOk },
-        { label: "Prueba de ruta sin ruidos ni testigos", ok: data.critical.roadTestAndDashboardOk },
+        { label: "Nivel de aceite y tapón", ok: data.critical.oilAndFilterOk },
+        { label: "Líquido de frenos y pedal", ok: data.critical.brakeFluidAndPedalOk },
+        { label: "Anticongelante y tapón", ok: data.critical.coolantCapOk },
+        { label: "Presión de llantas", ok: data.critical.tirePressureOk },
+        { label: "Prueba de ruta", ok: data.critical.roadTestAndDashboardOk },
     ];
 
     const missingCriticalCount = criticalItems.filter((i) => !i.ok).length;
@@ -341,7 +337,7 @@ function CalidadWizardContent() {
     // Navegación de pasos
     const goToStep = (newStep: number) => {
         if (newStep === 2 && !canPassStep1) {
-            setErrorMessage("Es obligatorio verificar las 4 ruedas y todos los puntos de seguridad crítica para avanzar.");
+            setErrorMessage("Verifica las 4 ruedas y puntos de seguridad para continuar.");
             return;
         }
         setErrorMessage(null);
@@ -353,7 +349,7 @@ function CalidadWizardContent() {
     // Guardar borrador o Aprobar Salida
     const handleSubmit = async (approve: boolean) => {
         if (approve && !canApprove) {
-            setErrorMessage("Debes verificar todos los puntos críticos y seleccionar al técnico e inspector antes de aprobar la salida.");
+            setErrorMessage("Debes verificar todos los puntos críticos y seleccionar al técnico e inspector antes de autorizar.");
             return;
         }
 
@@ -373,7 +369,6 @@ function CalidadWizardContent() {
                 qualityInspection: finalData,
             };
 
-            // Si se aprueba, se avanza automáticamente a Etapa 7 (LISTO_ENTREGA)
             if (approve) {
                 payload.status = "LISTO_ENTREGA";
                 if (data.technician) {
@@ -392,7 +387,6 @@ function CalidadWizardContent() {
                 throw new Error(errData.error || `Error HTTP ${res.status}`);
             }
 
-            // Limpiar borrador de localStorage
             try {
                 localStorage.removeItem(`carmd:qa:draft:${cleanPlate}`);
             } catch (e) {}
@@ -411,12 +405,12 @@ function CalidadWizardContent() {
     // Si no se proporcionó placa en URL
     if (!cleanPlate) {
         return (
-            <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
-                <div className="max-w-md w-full bg-white rounded-2xl p-6 shadow-xl border border-slate-200 text-center space-y-4">
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+                <div className="max-w-md w-full bg-white rounded-3xl p-6 shadow-xl border border-slate-200 text-center space-y-4">
                     <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center mx-auto">
                         <AlertTriangle size={24} />
                     </div>
-                    <h2 className="text-base font-black text-slate-900 uppercase">
+                    <h2 className="text-sm font-black text-slate-900 uppercase">
                         Placa No Especificada
                     </h2>
                     <p className="text-xs text-slate-600">
@@ -441,26 +435,26 @@ function CalidadWizardContent() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-emerald-200 text-center space-y-5"
+                    className="max-w-md w-full bg-white rounded-3xl p-6 shadow-2xl border border-emerald-200 text-center space-y-4"
                 >
-                    <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
-                        <CheckCircle2 size={42} />
+                    <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+                        <CheckCircle2 size={36} />
                     </div>
 
                     <div>
-                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                            Inspección Aprobada ✓
+                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                            Salida Aprobada ✓
                         </span>
-                        <h2 className="text-xl font-black text-slate-900 mt-2">
-                            ¡Vehículo Listo para Entrega!
+                        <h2 className="text-lg font-black text-slate-900 mt-2">
+                            ¡Listo para Entrega!
                         </h2>
-                        <p className="text-xs text-slate-600 mt-1">
+                        <p className="text-xs text-slate-600 mt-0.5">
                             Placas <strong className="font-mono text-slate-900">{cleanPlate}</strong> · Certificado por{" "}
                             <strong className="text-slate-900">{data.inspector}</strong>
                         </p>
                     </div>
 
-                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-left text-xs space-y-1.5 text-slate-700">
+                    <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-left text-xs space-y-1.5 text-slate-700">
                         <div className="flex justify-between">
                             <span className="text-slate-400">Torque de 4 ruedas:</span>
                             <span className="font-bold text-emerald-700">Verificado ✓</span>
@@ -481,19 +475,13 @@ function CalidadWizardContent() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-2 pt-2">
+                    <div className="flex flex-col gap-2 pt-1">
                         <Link
                             href={backUrl}
                             className="w-full py-3 bg-[#f16315] hover:bg-orange-600 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-orange-500/20 flex items-center justify-center gap-2"
                         >
                             <ArrowLeft size={16} />
-                            <span>Volver al Control de Piso</span>
-                        </Link>
-                        <Link
-                            href="/os/centrodecontrol"
-                            className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
-                        >
-                            Ir al Centro de Control
+                            <span>Volver a Control de Piso</span>
                         </Link>
                     </div>
                 </motion.div>
@@ -502,80 +490,72 @@ function CalidadWizardContent() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-100/70 pb-28">
-            {/* Header Sticky con Placa e Identidad */}
-            <header className="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
-                <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                        <Link
-                            href={backUrl}
-                            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors flex-shrink-0"
-                            title="Volver"
-                        >
-                            <ArrowLeft size={20} />
-                        </Link>
-                        <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                                <h1 className="text-sm font-black uppercase tracking-wider truncate">
-                                    Control de Calidad
-                                </h1>
-                                <span className="font-mono text-xs font-black bg-white/20 px-2 py-0.5 rounded text-white tracking-widest flex-shrink-0">
-                                    {cleanPlate}
-                                </span>
-                            </div>
-                            <p className="text-[11px] text-slate-400 truncate">
-                                {vehicleInfo ? `${vehicleInfo.brand || ""} ${vehicleInfo.model || ""} ${vehicleInfo.year || ""}` : "Filtro de Seguridad"}
-                                {vehicleInfo?.clientName ? ` · ${vehicleInfo.clientName}` : ""}
-                            </p>
+        <div className="min-h-screen bg-slate-50 text-slate-800">
+            {/* Header Luminoso Nativo Móvil */}
+            <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+                <div className="max-w-md mx-auto px-3.5 py-2.5 flex items-center justify-between gap-2.5">
+                    <Link
+                        href={backUrl}
+                        className="p-2 text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors flex-shrink-0"
+                        title="Volver"
+                    >
+                        <ArrowLeft size={18} />
+                    </Link>
+
+                    <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-mono text-xs font-black bg-orange-50 text-[#f16315] border border-orange-200/80 px-2 py-0.5 rounded-lg tracking-wider">
+                                {cleanPlate}
+                            </span>
+                            <h1 className="text-xs font-black text-slate-900 uppercase tracking-tight truncate">
+                                Control de Calidad
+                            </h1>
                         </div>
+                        <p className="text-[11px] text-slate-500 font-medium truncate mt-0.5">
+                            {vehicleInfo ? `${vehicleInfo.brand || ""} ${vehicleInfo.model || ""} ${vehicleInfo.year || ""}` : "Inspección de Salida"}
+                            {vehicleInfo?.clientName ? ` · ${vehicleInfo.clientName}` : ""}
+                        </p>
                     </div>
 
                     <Link
                         href={backUrl}
-                        className="text-[11px] font-bold text-slate-400 hover:text-white flex items-center gap-1 flex-shrink-0 px-2.5 py-1 rounded-lg bg-slate-800"
+                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors flex-shrink-0"
+                        title="Cerrar"
                     >
-                        <span>Cerrar</span>
+                        <X size={18} />
                     </Link>
                 </div>
 
-                {/* Stepper de 3 Pasos */}
-                <div className="bg-slate-800/90 border-t border-slate-700/80 px-4 py-2">
-                    <div className="max-w-2xl mx-auto grid grid-cols-3 gap-1.5">
+                {/* Segmented Control de 3 Pasos (Estilo iOS Nativo) */}
+                <div className="max-w-md mx-auto px-3.5 pb-2.5 pt-0.5">
+                    <div className="bg-slate-100 p-1 rounded-xl grid grid-cols-3 gap-1">
                         {STEPS.map((step) => {
                             const isCurrent = currentStep === step.id;
                             const isPast = currentStep > step.id;
-                            const IconComponent = step.icon;
 
                             return (
                                 <button
                                     key={step.id}
                                     type="button"
                                     onClick={() => goToStep(step.id)}
-                                    className={`py-1.5 px-2 rounded-xl text-left transition-all flex items-center gap-2 ${
+                                    className={`py-1.5 px-1.5 rounded-lg text-center transition-all flex items-center justify-center gap-1 text-[11px] select-none ${
                                         isCurrent
-                                            ? "bg-[#f16315] text-white shadow-sm font-black"
+                                            ? "bg-white text-slate-900 font-black shadow-xs"
                                             : isPast
-                                            ? "bg-slate-700/80 text-emerald-300 font-bold hover:bg-slate-700"
-                                            : "bg-slate-800 text-slate-400 hover:bg-slate-700/50"
+                                            ? "text-emerald-700 font-bold hover:bg-white/50"
+                                            : "text-slate-500 font-medium hover:bg-white/40"
                                     }`}
                                 >
-                                    <div
-                                        className={`w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black flex-shrink-0 ${
-                                            isCurrent
-                                                ? "bg-white/20 text-white"
-                                                : isPast
-                                                ? "bg-emerald-500/20 text-emerald-300"
-                                                : "bg-slate-700 text-slate-400"
-                                        }`}
-                                    >
-                                        {isPast ? <Check size={11} /> : step.id}
-                                    </div>
-                                    <span className="text-[11px] truncate hidden sm:inline">
-                                        {step.title}
+                                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 ${
+                                        isCurrent
+                                            ? "bg-[#f16315] text-white"
+                                            : isPast
+                                            ? "bg-emerald-600 text-white"
+                                            : "bg-slate-300 text-slate-700"
+                                    }`}>
+                                        {isPast ? <Check size={9} /> : step.id}
                                     </span>
-                                    <span className="text-[10px] truncate sm:hidden">
-                                        {step.shortTitle}
-                                    </span>
+                                    <span className="truncate">{step.title}</span>
                                 </button>
                             );
                         })}
@@ -585,13 +565,10 @@ function CalidadWizardContent() {
 
             {/* Mensajes de Alerta / Error */}
             {errorMessage && (
-                <div className="max-w-2xl mx-auto px-4 mt-3">
-                    <div className="p-3 bg-red-50 border-2 border-red-300 rounded-2xl flex items-start gap-2.5 text-xs text-red-900 shadow-sm animate-in fade-in duration-150">
-                        <AlertTriangle size={16} className="text-red-600 flex-shrink-0 mt-0.5" />
-                        <div className="flex-1">
-                            <span className="font-black block">Atención requerida</span>
-                            <span className="text-[11px] leading-snug">{errorMessage}</span>
-                        </div>
+                <div className="max-w-md mx-auto px-3.5 mt-2.5">
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-2.5 text-xs text-red-900 shadow-xs animate-in fade-in duration-150">
+                        <AlertTriangle size={15} className="text-red-600 flex-shrink-0 mt-0.5" />
+                        <span className="flex-1 text-[11px] leading-snug">{errorMessage}</span>
                         <button
                             type="button"
                             onClick={() => setErrorMessage(null)}
@@ -604,7 +581,7 @@ function CalidadWizardContent() {
             )}
 
             {/* Contenedor Principal del Wizard */}
-            <main className="max-w-2xl mx-auto px-3 sm:px-4 mt-3">
+            <main className="max-w-md mx-auto px-3.5 pt-2.5 pb-28">
                 <AnimatePresence mode="wait" initial={false}>
                     {/* ========================================================== */}
                     {/* PASO 1: SEGURIDAD CRÍTICA Y 4 RUEDAS                      */}
@@ -612,44 +589,42 @@ function CalidadWizardContent() {
                     {currentStep === 1 && (
                         <motion.div
                             key="step1"
-                            initial={{ opacity: 0, x: direction * 20 }}
+                            initial={{ opacity: 0, x: direction * 15 }}
                             animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -direction * 20 }}
-                            transition={{ duration: 0.15 }}
-                            className="space-y-3.5"
+                            exit={{ opacity: 0, x: -direction * 15 }}
+                            transition={{ duration: 0.12 }}
+                            className="space-y-3"
                         >
-                            {/* Banner de Compromiso de Seguridad */}
-                            <div className="bg-amber-50 border border-amber-200/90 rounded-2xl p-3.5 flex items-start gap-3 shadow-2xs">
-                                <div className="p-2 bg-amber-100 text-amber-800 rounded-xl flex-shrink-0 mt-0.5">
-                                    <ShieldCheck size={18} />
-                                </div>
+                            {/* Cintillo de Compromiso con la Seguridad */}
+                            <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 border border-orange-200/80 rounded-2xl p-3 flex items-start gap-2.5 shadow-2xs">
+                                <ShieldCheck size={18} className="text-[#f16315] flex-shrink-0 mt-0.5" />
                                 <div>
-                                    <h3 className="text-xs font-black text-amber-950 uppercase tracking-tight">
+                                    <h2 className="text-xs font-black text-slate-900 uppercase tracking-tight">
                                         Compromiso con la Seguridad
-                                    </h3>
-                                    <p className="text-[11px] text-amber-900 leading-relaxed mt-0.5 font-medium">
-                                        Recuerda que somos responsables de la seguridad y de las personas a bordo de este vehículo. Verifica con calma cada punto antes de autorizar la salida.
+                                    </h2>
+                                    <p className="text-[11px] text-slate-600 leading-snug mt-0.5">
+                                        Recuerda que somos responsables de las personas a bordo de este vehículo. Verifica con calma cada punto antes de autorizar.
                                     </p>
                                 </div>
                             </div>
 
                             {/* TARJETA MAESTRA: TORQUE DE BIRLOS EN LAS 4 RUEDAS */}
-                            <div className={`bg-white rounded-2xl p-4 border-2 transition-all shadow-sm ${
-                                wheelsAllOk ? "border-emerald-300 bg-emerald-50/20" : "border-red-200"
+                            <div className={`bg-white rounded-2xl p-3.5 border transition-all shadow-xs ${
+                                wheelsAllOk ? "border-emerald-300 ring-1 ring-emerald-300/40" : "border-slate-200"
                             }`}>
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="flex items-center gap-2.5">
-                                        <div className={`p-2.5 rounded-xl ${
-                                            wheelsAllOk ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"
+                                <div className="flex items-center justify-between mb-2.5">
+                                    <div className="flex items-center gap-2">
+                                        <div className={`p-2 rounded-xl ${
+                                            wheelsAllOk ? "bg-emerald-100 text-emerald-700" : "bg-orange-50 text-[#f16315]"
                                         }`}>
-                                            <Disc size={20} />
+                                            <Disc size={18} />
                                         </div>
                                         <div>
-                                            <h4 className="text-xs font-black uppercase tracking-tight text-slate-900">
-                                                Torque de Birlos en las 4 Ruedas
-                                            </h4>
-                                            <p className="text-[11px] text-slate-500">
-                                                Apretadas con torquímetro al libraje de fabricante
+                                            <h3 className="text-xs font-black uppercase text-slate-900 leading-tight">
+                                                Torque de Birlos (4 Ruedas)
+                                            </h3>
+                                            <p className="text-[10px] text-slate-400">
+                                                Apretadas con torquímetro / maneral
                                             </p>
                                         </div>
                                     </div>
@@ -657,43 +632,43 @@ function CalidadWizardContent() {
                                     <button
                                         type="button"
                                         onClick={toggleAllWheels}
-                                        className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1 ${
+                                        className={`px-2.5 py-1 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center gap-1 ${
                                             wheelsAllOk
-                                                ? "bg-emerald-600 text-white shadow-sm"
+                                                ? "bg-emerald-600 text-white shadow-xs"
                                                 : "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
                                         }`}
                                     >
-                                        {wheelsAllOk && <Check size={13} />}
+                                        {wheelsAllOk && <Check size={12} />}
                                         <span>{wheelsAllOk ? "4 Listas" : "Marcar 4"}</span>
                                     </button>
                                 </div>
 
-                                {/* Layout táctil del vehículo para las 4 ruedas */}
-                                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+                                {/* Cuadrícula 2x2 táctil de las 4 ruedas */}
+                                <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100">
                                     <WheelCard
-                                        label="Delantera Izquierda"
-                                        sublabel="Frente lado chofer"
+                                        label="Delantera Izq"
+                                        sublabel="Lado chofer"
                                         code="DEL-IZQ"
                                         active={data.critical.wheelsDetail.frontLeft}
                                         onClick={() => toggleWheel("frontLeft")}
                                     />
                                     <WheelCard
-                                        label="Delantera Derecha"
-                                        sublabel="Frente lado copiloto"
+                                        label="Delantera Der"
+                                        sublabel="Lado copiloto"
                                         code="DEL-DER"
                                         active={data.critical.wheelsDetail.frontRight}
                                         onClick={() => toggleWheel("frontRight")}
                                     />
                                     <WheelCard
-                                        label="Trasera Izquierda"
-                                        sublabel="Atrás lado chofer"
+                                        label="Trasera Izq"
+                                        sublabel="Lado chofer"
                                         code="TRAS-IZQ"
                                         active={data.critical.wheelsDetail.rearLeft}
                                         onClick={() => toggleWheel("rearLeft")}
                                     />
                                     <WheelCard
-                                        label="Trasera Derecha"
-                                        sublabel="Atrás lado copiloto"
+                                        label="Trasera Der"
+                                        sublabel="Lado copiloto"
                                         code="TRAS-DER"
                                         active={data.critical.wheelsDetail.rearRight}
                                         onClick={() => toggleWheel("rearRight")}
@@ -702,18 +677,18 @@ function CalidadWizardContent() {
                             </div>
 
                             {/* 5 PUNTOS CRÍTICOS MECÁNICOS ADICIONALES */}
-                            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-2.5">
+                            <div className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-2">
                                 <div className="flex items-center justify-between">
                                     <label className="text-[11px] font-black uppercase text-slate-700 tracking-wider flex items-center gap-1.5">
                                         <Wrench size={13} className="text-[#f16315]" />
-                                        Niveles bajo cofre y Prueba de Ruta
+                                        Niveles bajo cofre y Prueba
                                     </label>
-                                    <span className="text-[10px] font-bold text-slate-400">
+                                    <span className="text-[10px] text-slate-400 font-medium">
                                         Toca para confirmar
                                     </span>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div className="space-y-1.5">
                                     <CriticalCheckCard
                                         icon={Droplet}
                                         title="Aceite de Motor y Filtro"
@@ -745,38 +720,11 @@ function CalidadWizardContent() {
                                     <CriticalCheckCard
                                         icon={Activity}
                                         title="Prueba de Ruta y Testigos"
-                                        subtitle="Sin ruidos en marcha ni testigos prendidos en tablero"
+                                        subtitle="Sin ruidos en marcha ni testigos en tablero"
                                         active={data.critical.roadTestAndDashboardOk}
                                         onClick={() => toggleCritical("roadTestAndDashboardOk")}
-                                        className="sm:col-span-2"
                                     />
                                 </div>
-                            </div>
-
-                            {/* Resumen de validación del Paso 1 */}
-                            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
-                                <div className="text-xs">
-                                    {missingCriticalCount === 0 ? (
-                                        <span className="font-bold text-emerald-700 flex items-center gap-1.5">
-                                            <CheckCircle2 size={16} /> Todos los puntos críticos verificados ✓
-                                        </span>
-                                    ) : (
-                                        <span className="font-bold text-amber-800 flex items-center gap-1.5">
-                                            <AlertTriangle size={16} className="text-amber-600" />
-                                            Faltan {missingCriticalCount} puntos de seguridad
-                                        </span>
-                                    )}
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={() => goToStep(2)}
-                                    disabled={!canPassStep1}
-                                    className="px-4 py-2 bg-[#f16315] hover:bg-orange-600 disabled:opacity-40 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm"
-                                >
-                                    <span>Paso 2: Tablero</span>
-                                    <ArrowRight size={14} />
-                                </button>
                             </div>
                         </motion.div>
                     )}
@@ -787,27 +735,22 @@ function CalidadWizardContent() {
                     {currentStep === 2 && (
                         <motion.div
                             key="step2"
-                            initial={{ opacity: 0, x: direction * 20 }}
+                            initial={{ opacity: 0, x: direction * 15 }}
                             animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -direction * 20 }}
-                            transition={{ duration: 0.15 }}
-                            className="space-y-3.5"
+                            exit={{ opacity: 0, x: -direction * 15 }}
+                            transition={{ duration: 0.12 }}
+                            className="space-y-3"
                         >
                             {/* EVIDENCIA FOTOGRÁFICA DEL TABLERO */}
-                            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-xs font-black uppercase tracking-tight text-slate-900 flex items-center gap-1.5">
-                                            <Camera size={14} className="text-[#f16315]" />
-                                            Foto del Tablero Encendido
-                                        </h3>
-                                        <p className="text-[11px] text-slate-500">
-                                            Evidencia irrefutable de kilometraje y tablero sin testigos
-                                        </p>
-                                    </div>
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase">
-                                        Recomendado
-                                    </span>
+                            <div className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-2.5">
+                                <div>
+                                    <h3 className="text-xs font-black uppercase text-slate-900 flex items-center gap-1.5">
+                                        <Camera size={14} className="text-[#f16315]" />
+                                        Foto del Tablero Encendido
+                                    </h3>
+                                    <p className="text-[11px] text-slate-500 mt-0.5">
+                                        Certifica el kilometraje y que no hay testigos prendidos
+                                    </p>
                                 </div>
 
                                 <input
@@ -820,8 +763,8 @@ function CalidadWizardContent() {
                                 />
 
                                 {data.dashboardPhotoUrl ? (
-                                    <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center gap-3">
-                                        <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-black flex-shrink-0 border border-slate-300">
+                                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center gap-3">
+                                        <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-black flex-shrink-0 border border-slate-300">
                                             <img
                                                 src={data.dashboardPhotoUrl}
                                                 alt="Foto Tablero"
@@ -830,25 +773,22 @@ function CalidadWizardContent() {
                                             />
                                             {isUploadingPhoto && (
                                                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                                    <Loader2 size={18} className="text-white animate-spin" />
+                                                    <Loader2 size={16} className="text-white animate-spin" />
                                                 </div>
                                             )}
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-xs font-bold text-slate-900 flex items-center gap-1">
-                                                <CheckCircle2 size={13} className="text-emerald-600" />
-                                                Foto del tablero cargada con éxito
+                                            <p className="text-xs font-bold text-slate-900 flex items-center gap-1 truncate">
+                                                <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                                                Foto del tablero cargada ✓
                                             </p>
-                                            <p className="text-[10px] text-slate-500 mt-0.5">
-                                                Guardada en expediente del vehículo
-                                            </p>
-                                            <div className="flex items-center gap-2 mt-2">
+                                            <div className="flex items-center gap-2 mt-1.5">
                                                 <button
                                                     type="button"
                                                     onClick={() => setPhotoRotation((r) => (r + 90) % 360)}
                                                     className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-1 shadow-2xs"
                                                 >
-                                                    <RotateCw size={11} /> Girar 90°
+                                                    <RotateCw size={11} /> Girar
                                                 </button>
                                                 <button
                                                     type="button"
@@ -872,48 +812,45 @@ function CalidadWizardContent() {
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
                                         disabled={isUploadingPhoto}
-                                        className="w-full py-6 bg-slate-50 hover:bg-orange-50/50 border-2 border-dashed border-slate-300 hover:border-[#f16315] rounded-2xl text-xs font-bold text-slate-700 transition-all flex flex-col items-center justify-center gap-2 group"
+                                        className="w-full py-4 px-3 bg-orange-50/50 hover:bg-orange-50 border-2 border-dashed border-orange-300 rounded-2xl text-xs font-bold text-slate-700 transition-all flex items-center justify-center gap-2.5 group"
                                     >
                                         {isUploadingPhoto ? (
                                             <>
-                                                <Loader2 size={24} className="text-[#f16315] animate-spin" />
+                                                <Loader2 size={18} className="text-[#f16315] animate-spin" />
                                                 <span className="text-xs font-bold text-slate-800">
-                                                    Subiendo y optimizando foto...
+                                                    Subiendo foto del tablero...
                                                 </span>
                                             </>
                                         ) : (
                                             <>
-                                                <div className="p-3 bg-white rounded-full shadow-sm border border-slate-200 group-hover:scale-105 transition-transform text-[#f16315]">
-                                                    <Camera size={22} />
+                                                <div className="p-2 bg-white rounded-xl shadow-xs text-[#f16315] group-hover:scale-105 transition-transform">
+                                                    <Camera size={18} />
                                                 </div>
-                                                <span className="text-xs font-black uppercase text-slate-800">
-                                                    Tomar Foto con Celular (Tablero Encendido)
-                                                </span>
-                                                <span className="text-[10px] text-slate-400 font-normal">
-                                                    Toca aquí para abrir la cámara de tu teléfono
-                                                </span>
+                                                <div className="text-left">
+                                                    <span className="text-xs font-black block text-slate-900 leading-tight">
+                                                        Tomar Foto con Celular (Tablero Encendido)
+                                                    </span>
+                                                    <span className="text-[10px] text-slate-500 block">
+                                                        Toca aquí para abrir la cámara
+                                                    </span>
+                                                </div>
                                             </>
                                         )}
                                     </button>
                                 )}
 
                                 {photoError && (
-                                    <p className="text-[11px] text-red-600 font-bold">{photoError}</p>
+                                    <p className="text-[10px] text-red-600 font-bold">{photoError}</p>
                                 )}
                             </div>
 
                             {/* REVISIÓN DE LIMPIEZA Y CORTESÍA (ESTÉTICA) */}
-                            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+                            <div className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-xs font-black uppercase tracking-tight text-slate-900 flex items-center gap-1.5">
-                                            <Sparkles size={14} className="text-amber-500" />
-                                            Limpieza, Interiores y Entrega Impecable
-                                        </h3>
-                                        <p className="text-[11px] text-slate-500">
-                                            Garantiza la satisfacción visual del cliente al recibir su auto
-                                        </p>
-                                    </div>
+                                    <h3 className="text-xs font-black uppercase text-slate-900 flex items-center gap-1.5">
+                                        <Sparkles size={14} className="text-amber-500" />
+                                        Limpieza e Interiores
+                                    </h3>
                                     <button
                                         type="button"
                                         onClick={markAllAestheticOk}
@@ -923,10 +860,10 @@ function CalidadWizardContent() {
                                     </button>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div className="space-y-1.5">
                                     <AestheticCheckCard
                                         label="Cero grasa en volante, palanca y tapicería"
-                                        sub="Asientos y plásticos limpios"
+                                        sub="Asientos y plásticos libres de huellas"
                                         active={data.aesthetic.cleanInteriorNoGrease}
                                         onClick={() => toggleAesthetic("cleanInteriorNoGrease")}
                                     />
@@ -950,27 +887,6 @@ function CalidadWizardContent() {
                                     />
                                 </div>
                             </div>
-
-                            {/* Navegación Paso 2 */}
-                            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
-                                <button
-                                    type="button"
-                                    onClick={() => goToStep(1)}
-                                    className="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
-                                >
-                                    <ArrowLeft size={14} />
-                                    <span>Paso 1</span>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => goToStep(3)}
-                                    className="px-4 py-2 bg-[#f16315] hover:bg-orange-600 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm"
-                                >
-                                    <span>Paso 3: Firmas</span>
-                                    <ArrowRight size={14} />
-                                </button>
-                            </div>
                         </motion.div>
                     )}
 
@@ -980,30 +896,30 @@ function CalidadWizardContent() {
                     {currentStep === 3 && (
                         <motion.div
                             key="step3"
-                            initial={{ opacity: 0, x: direction * 20 }}
+                            initial={{ opacity: 0, x: direction * 15 }}
                             animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -direction * 20 }}
-                            transition={{ duration: 0.15 }}
-                            className="space-y-3.5"
+                            exit={{ opacity: 0, x: -direction * 15 }}
+                            transition={{ duration: 0.12 }}
+                            className="space-y-3"
                         >
-                            {/* TARJETA DE RESPONSABLES: 3 NIVELES DE AUDITORÍA */}
-                            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-4">
+                            {/* RESPONSABILIDADES: 3 NIVELES DE AUDITORÍA */}
+                            <div className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3.5">
                                 <div>
-                                    <h3 className="text-xs font-black uppercase tracking-tight text-slate-900 flex items-center gap-1.5">
+                                    <h3 className="text-xs font-black uppercase text-slate-900 flex items-center gap-1.5">
                                         <UserCheck size={15} className="text-[#f16315]" />
-                                        Asignación de Responsabilidades y Firmas
+                                        Responsables de la Salida
                                     </h3>
-                                    <p className="text-[11px] text-slate-500">
-                                        Queda sellado con fecha, hora y nombres para el expediente de garantía
+                                    <p className="text-[11px] text-slate-500 mt-0.5">
+                                        Registrado para el expediente del vehículo
                                     </p>
                                 </div>
 
                                 {/* 1. Técnico Responsable Principal */}
                                 <div>
-                                    <label className="text-[10px] font-black uppercase text-slate-600 tracking-wider block mb-1.5">
-                                        1. Técnico Responsable (Quien ejecutó la reparación):
+                                    <label className="text-[10px] font-black uppercase text-slate-600 tracking-wider block mb-1">
+                                        1. Técnico Responsable (Quien reparó):
                                     </label>
-                                    <div className="flex flex-wrap gap-1.5">
+                                    <div className="flex flex-wrap gap-1">
                                         {DEFAULT_TECHNICIANS.map((tech) => {
                                             const isSel = data.technician === tech;
                                             return (
@@ -1013,7 +929,7 @@ function CalidadWizardContent() {
                                                     onClick={() => setData((p) => ({ ...p, technician: tech }))}
                                                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
                                                         isSel
-                                                            ? "bg-slate-900 text-white shadow-sm"
+                                                            ? "bg-slate-900 text-white shadow-xs"
                                                             : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                                                     }`}
                                                 >
@@ -1037,7 +953,7 @@ function CalidadWizardContent() {
                                                     placeholder="Nombre..."
                                                     value={customTech}
                                                     onChange={(e) => setCustomTech(e.target.value)}
-                                                    className="px-2.5 py-1 text-xs border border-slate-300 rounded-lg w-28"
+                                                    className="px-2.5 py-1 text-xs border border-slate-300 rounded-lg w-24"
                                                 />
                                                 <button
                                                     type="button"
@@ -1058,10 +974,10 @@ function CalidadWizardContent() {
 
                                 {/* 2. Auxiliar Técnico */}
                                 <div>
-                                    <label className="text-[10px] font-black uppercase text-slate-600 tracking-wider block mb-1.5">
-                                        2. Auxiliar Técnico (Apoyo en montaje de ruedas o fluidos):
+                                    <label className="text-[10px] font-black uppercase text-slate-600 tracking-wider block mb-1">
+                                        2. Auxiliar Técnico (Apoyo en montaje):
                                     </label>
-                                    <div className="flex flex-wrap gap-1.5">
+                                    <div className="flex flex-wrap gap-1">
                                         {DEFAULT_ASSISTANTS.map((asst) => {
                                             const isSel = data.assistantTechnician === asst;
                                             return (
@@ -1071,7 +987,7 @@ function CalidadWizardContent() {
                                                     onClick={() => setData((p) => ({ ...p, assistantTechnician: asst }))}
                                                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
                                                         isSel
-                                                            ? "bg-indigo-600 text-white shadow-sm"
+                                                            ? "bg-indigo-600 text-white shadow-xs"
                                                             : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                                                     }`}
                                                 >
@@ -1095,7 +1011,7 @@ function CalidadWizardContent() {
                                                     placeholder="Nombre..."
                                                     value={customAssistant}
                                                     onChange={(e) => setCustomAssistant(e.target.value)}
-                                                    className="px-2.5 py-1 text-xs border border-slate-300 rounded-lg w-28"
+                                                    className="px-2.5 py-1 text-xs border border-slate-300 rounded-lg w-24"
                                                 />
                                                 <button
                                                     type="button"
@@ -1116,10 +1032,10 @@ function CalidadWizardContent() {
 
                                 {/* 3. Inspector / Visto Bueno de Salida */}
                                 <div>
-                                    <label className="text-[10px] font-black uppercase text-slate-600 tracking-wider block mb-1.5">
+                                    <label className="text-[10px] font-black uppercase text-slate-600 tracking-wider block mb-1">
                                         3. Inspector que Certifica Salida (Visto Bueno):
                                     </label>
-                                    <div className="flex flex-wrap gap-1.5">
+                                    <div className="flex flex-wrap gap-1">
                                         {DEFAULT_INSPECTORS.map((insp) => {
                                             const isSel = data.inspector === insp;
                                             return (
@@ -1129,7 +1045,7 @@ function CalidadWizardContent() {
                                                     onClick={() => setData((p) => ({ ...p, inspector: insp }))}
                                                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
                                                         isSel
-                                                            ? "bg-[#f16315] text-white shadow-sm shadow-orange-300"
+                                                            ? "bg-[#f16315] text-white shadow-xs shadow-orange-200"
                                                             : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                                                     }`}
                                                 >
@@ -1153,7 +1069,7 @@ function CalidadWizardContent() {
                                                     placeholder="Nombre..."
                                                     value={customInspector}
                                                     onChange={(e) => setCustomInspector(e.target.value)}
-                                                    className="px-2.5 py-1 text-xs border border-slate-300 rounded-lg w-28"
+                                                    className="px-2.5 py-1 text-xs border border-slate-300 rounded-lg w-24"
                                                 />
                                                 <button
                                                     type="button"
@@ -1181,57 +1097,100 @@ function CalidadWizardContent() {
                                         type="text"
                                         value={data.notes || ""}
                                         onChange={(e) => setData((p) => ({ ...p, notes: e.target.value }))}
-                                        placeholder="Ej: Se informó al cliente de foco de sensor de oxígeno preexistente..."
+                                        placeholder="Ej: Foco de sensor de oxígeno preexistente..."
                                         className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f16315]"
                                     />
                                 </div>
 
                                 {/* Declaración de Compromiso */}
-                                <div className="p-3 bg-slate-100 rounded-xl border border-slate-200 text-[11px] text-slate-700 leading-snug">
+                                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] text-slate-700 leading-snug">
                                     <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{data.inspector || "Inspector"}</strong>, certifico haber realizado físicamente la revisión de torque de ruedas y seguridad para garantizar la protección y tranquilidad de las personas a bordo.
-                                </div>
-                            </div>
-
-                            {/* Botones Finales de Guardado y Liberación */}
-                            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-2.5">
-                                <button
-                                    type="button"
-                                    onClick={() => handleSubmit(true)}
-                                    disabled={!canApprove || isSaving}
-                                    className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2"
-                                >
-                                    {isSaving ? (
-                                        <Loader2 size={16} className="animate-spin" />
-                                    ) : (
-                                        <ShieldCheck size={18} />
-                                    )}
-                                    <span>Firmar y Liberar a Listo para Entrega (Etapa 7)</span>
-                                </button>
-
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => goToStep(2)}
-                                        className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5"
-                                    >
-                                        <ArrowLeft size={14} />
-                                        <span>Paso 2</span>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        onClick={() => handleSubmit(false)}
-                                        disabled={isSaving}
-                                        className="flex-1 py-2.5 px-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-colors"
-                                    >
-                                        Guardar Solo como Borrador
-                                    </button>
                                 </div>
                             </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
             </main>
+
+            {/* Barra Inferior Fija para Móvil (Sticky Bottom Action Bar) */}
+            <footer className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3.5 py-2.5 z-30 shadow-lg">
+                <div className="max-w-md mx-auto flex items-center justify-between gap-2.5">
+                    {/* Botón Izquierdo / Resumen */}
+                    {currentStep === 1 ? (
+                        <div className="text-xs">
+                            {missingCriticalCount === 0 ? (
+                                <span className="font-bold text-emerald-700 flex items-center gap-1">
+                                    <CheckCircle2 size={15} /> 6/6 Listos
+                                </span>
+                            ) : (
+                                <span className="font-bold text-amber-800 text-[11px] flex items-center gap-1">
+                                    <AlertTriangle size={14} className="text-amber-600" />
+                                    Faltan {missingCriticalCount} puntos
+                                </span>
+                            )}
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => goToStep(currentStep - 1)}
+                            className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors flex items-center gap-1"
+                        >
+                            <ArrowLeft size={14} />
+                            <span>Paso {currentStep - 1}</span>
+                        </button>
+                    )}
+
+                    {/* Botón Principal Derecho */}
+                    {currentStep === 1 && (
+                        <button
+                            type="button"
+                            onClick={() => goToStep(2)}
+                            disabled={!canPassStep1}
+                            className="px-4 py-2.5 bg-[#f16315] hover:bg-orange-600 disabled:opacity-40 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm shadow-orange-500/20"
+                        >
+                            <span>Paso 2: Tablero</span>
+                            <ArrowRight size={14} />
+                        </button>
+                    )}
+
+                    {currentStep === 2 && (
+                        <button
+                            type="button"
+                            onClick={() => goToStep(3)}
+                            className="px-4 py-2.5 bg-[#f16315] hover:bg-orange-600 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm shadow-orange-500/20"
+                        >
+                            <span>Paso 3: Firmas</span>
+                            <ArrowRight size={14} />
+                        </button>
+                    )}
+
+                    {currentStep === 3 && (
+                        <div className="flex items-center gap-2 flex-1 justify-end">
+                            <button
+                                type="button"
+                                onClick={() => handleSubmit(false)}
+                                disabled={isSaving}
+                                className="px-2.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-[11px] font-bold transition-colors"
+                            >
+                                Borrador
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleSubmit(true)}
+                                disabled={!canApprove || isSaving}
+                                className="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5"
+                            >
+                                {isSaving ? (
+                                    <Loader2 size={15} className="animate-spin" />
+                                ) : (
+                                    <ShieldCheck size={16} />
+                                )}
+                                <span>Aprobar Salida</span>
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </footer>
         </div>
     );
 }
@@ -1239,7 +1198,7 @@ function CalidadWizardContent() {
 export default function CalidadPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
                 <Loader2 size={24} className="animate-spin text-[#f16315]" />
             </div>
         }>
@@ -1268,17 +1227,17 @@ function WheelCard({
     return (
         <div
             onClick={onClick}
-            className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between select-none ${
+            className={`p-2.5 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between select-none ${
                 active
                     ? "bg-emerald-50 border-emerald-400 text-emerald-950 shadow-2xs"
                     : "bg-slate-50/70 border-slate-200 text-slate-500 hover:bg-slate-100"
             }`}
         >
             <div className="min-w-0">
-                <span className="text-xs font-black uppercase tracking-tight block leading-tight">
+                <span className="text-[11px] font-black uppercase tracking-tight block leading-tight">
                     {code}
                 </span>
-                <span className="text-[11px] font-bold block truncate text-slate-800">
+                <span className="text-[10px] font-bold block truncate text-slate-800">
                     {label}
                 </span>
                 <span className="text-[9px] text-slate-400 block truncate">
@@ -1286,11 +1245,11 @@ function WheelCard({
                 </span>
             </div>
             {active ? (
-                <div className="p-1 rounded-full bg-emerald-100 text-emerald-700 flex-shrink-0">
-                    <CheckCircle2 size={20} />
+                <div className="p-0.5 rounded-full bg-emerald-100 text-emerald-700 flex-shrink-0">
+                    <CheckCircle2 size={18} />
                 </div>
             ) : (
-                <CircleDashed size={20} className="text-slate-300 flex-shrink-0" />
+                <CircleDashed size={18} className="text-slate-300 flex-shrink-0" />
             )}
         </div>
     );
@@ -1302,32 +1261,30 @@ function CriticalCheckCard({
     subtitle,
     active,
     onClick,
-    className = "",
 }: {
     icon: any;
     title: string;
     subtitle: string;
     active: boolean;
     onClick: () => void;
-    className?: string;
 }) {
     return (
         <div
             onClick={onClick}
-            className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between gap-2.5 select-none ${
+            className={`p-2.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-2.5 select-none ${
                 active
-                    ? "bg-emerald-50/70 border-emerald-400 text-emerald-950 shadow-2xs"
-                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-            } ${className}`}
+                    ? "bg-emerald-50/70 border-emerald-300 text-emerald-950 shadow-2xs"
+                    : "bg-slate-50/60 border-slate-200 text-slate-600 hover:bg-slate-100"
+            }`}
         >
             <div className="flex items-center gap-2.5 min-w-0">
-                <div className={`p-2 rounded-xl flex-shrink-0 ${
-                    active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
+                <div className={`p-1.5 rounded-xl flex-shrink-0 ${
+                    active ? "bg-emerald-100 text-emerald-700" : "bg-white text-slate-500 border border-slate-200"
                 }`}>
-                    <Icon size={16} />
+                    <Icon size={15} />
                 </div>
                 <div className="min-w-0">
-                    <span className="text-xs font-black block text-slate-900 leading-tight">
+                    <span className="text-xs font-bold block text-slate-900 leading-tight">
                         {title}
                     </span>
                     <span className="text-[10px] text-slate-500 block leading-tight mt-0.5">
@@ -1359,10 +1316,10 @@ function AestheticCheckCard({
     return (
         <div
             onClick={onClick}
-            className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-2 select-none ${
+            className={`p-2.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-2 select-none ${
                 active
-                    ? "bg-emerald-50/70 border-emerald-300 text-emerald-950"
-                    : "bg-slate-50/70 border-slate-200 text-slate-600 hover:bg-slate-100"
+                    ? "bg-emerald-50/70 border-emerald-300 text-emerald-950 shadow-2xs"
+                    : "bg-slate-50/60 border-slate-200 text-slate-600 hover:bg-slate-100"
             }`}
         >
             <div className="min-w-0">

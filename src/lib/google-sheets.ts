@@ -484,6 +484,8 @@ export const saveChatMessage = async (phone: string, sender: 'client' | 'assista
     }
 };
 
+import { QualityInspectionData } from "@/types/quality-inspection";
+
 export interface PisoRecord {
     plate: string;
     status: string; // 'EN_DIAGNOSTICO' | 'ESPERANDO_PIEZAS' | 'EN_RAMPA' | 'TORNO' | 'PRUEBAS_CALIDAD' | 'LAVADO' | 'LISTO_ENTREGA' | 'ENTREGADO' | 'MANTENIMIENTO_SIN_NOTA' | 'SALIDA_SIN_NOTA' | 'DIAGNOSTICO_SIN_NOTA'
@@ -493,6 +495,7 @@ export interface PisoRecord {
     parts: any[];
     externalServices: any[];
     log: any[];
+    qualityInspection?: QualityInspectionData | null;
 }
 
 /**
@@ -516,6 +519,7 @@ export const getPisoStatusMap = async (): Promise<Record<string, PisoRecord>> =>
             let parts: any[] = [];
             let externalServices: any[] = [];
             let log: any[] = [];
+            let qualityInspection: QualityInspectionData | null = null;
 
             try {
                 const partsStr = r.get("Refacciones_JSON");
@@ -532,6 +536,11 @@ export const getPisoStatusMap = async (): Promise<Record<string, PisoRecord>> =>
                 if (logStr && logStr.startsWith('[')) log = JSON.parse(logStr);
             } catch (e) {}
 
+            try {
+                const qaStr = r.get("Calidad_JSON");
+                if (qaStr && qaStr.startsWith('{')) qualityInspection = JSON.parse(qaStr);
+            } catch (e) {}
+
             map[cleanPlate] = {
                 plate: cleanPlate,
                 status: r.get("Estatus") || "EN_REPARACION",
@@ -541,6 +550,7 @@ export const getPisoStatusMap = async (): Promise<Record<string, PisoRecord>> =>
                 parts,
                 externalServices,
                 log,
+                qualityInspection,
             };
         }
         return map;
@@ -564,6 +574,7 @@ export const updateVehicleFloorStatus = async (
         newPart?: any;
         newExternalService?: any;
         newLogEntry?: any;
+        qualityInspection?: QualityInspectionData | null;
     }
 ) => {
     try {
@@ -620,6 +631,10 @@ export const updateVehicleFloorStatus = async (
                 existingRow.set("Bitacora_JSON", JSON.stringify(log));
             }
 
+            if (options?.qualityInspection !== undefined) {
+                existingRow.set("Calidad_JSON", options.qualityInspection ? JSON.stringify(options.qualityInspection) : "");
+            }
+
             await existingRow.save();
             return { success: true, updated: true };
         } else {
@@ -636,6 +651,7 @@ export const updateVehicleFloorStatus = async (
                 Refacciones_JSON: JSON.stringify(parts),
                 Servicios_Externos_JSON: JSON.stringify(externalServices),
                 Bitacora_JSON: JSON.stringify(log),
+                Calidad_JSON: options?.qualityInspection ? JSON.stringify(options.qualityInspection) : "",
             });
             return { success: true, created: true };
         }

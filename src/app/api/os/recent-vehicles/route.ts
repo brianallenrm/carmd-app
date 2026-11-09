@@ -278,7 +278,8 @@ export async function GET() {
                     logCount: pisoInfo.log.length,
                     parts: pisoInfo.parts,
                     externalServices: pisoInfo.externalServices,
-                    log: pisoInfo.log
+                    log: pisoInfo.log,
+                    qualityInspection: pisoInfo.qualityInspection || null,
                 } : (status === 'con_nota' || Boolean(latestNote && noteDayTs >= inventoryDayTs)) ? {
                     status: 'ENTREGADO',
                     mechanic: '',
@@ -289,7 +290,8 @@ export async function GET() {
                     logCount: 0,
                     parts: [],
                     externalServices: [],
-                    log: []
+                    log: [],
+                    qualityInspection: null,
                 } : null,
                 note: latestNote
                     ? { folio: latestNote.folio, total: latestNote.total, services: latestNote.services }
@@ -330,7 +332,7 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { plate, status, reason, mechanic, parts, externalServices, newPart, newExternalService, newLogEntry } = body;
+        const { plate, status, reason, mechanic, parts, externalServices, newPart, newExternalService, newLogEntry, qualityInspection } = body;
         if (!plate) {
             return NextResponse.json({ error: 'Missing plate' }, { status: 400 });
         }
@@ -342,7 +344,8 @@ export async function POST(req: Request) {
             externalServices,
             newPart,
             newExternalService,
-            newLogEntry
+            newLogEntry,
+            qualityInspection,
         });
         return NextResponse.json({ success: true });
     } catch (e: any) {

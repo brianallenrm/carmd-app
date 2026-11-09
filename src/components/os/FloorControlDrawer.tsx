@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    X, Car, User, Phone, Wrench, ShieldCheck, Clock,
+    X, Car, User, Phone, Wrench, ShieldCheck, ShieldAlert, Clock,
     DollarSign, Image as ImageIcon, Plus, Check, ChevronRight,
     ExternalLink, FileText, History, ZoomIn, ZoomOut, AlertCircle,
     RotateCcw, Sparkles, Fuel, Gauge, Trash2, Pencil, Camera,
@@ -17,6 +17,11 @@ import {
     getFloorStage,
     FloorStageConfig
 } from "@/types/floor-pipeline";
+import QualityInspectionModal from "./QualityInspectionModal";
+import {
+    QualityInspectionData,
+    isQualityInspectionApproved
+} from "@/types/quality-inspection";
 
 export interface PartItem {
     id: string | number;
@@ -78,6 +83,12 @@ export default function FloorControlDrawer({
     const [selectedMechanics, setSelectedMechanics] = useState<string[]>([]);
     const [customMechanicInput, setCustomMechanicInput] = useState("");
     const [showCustomMechanicInput, setShowCustomMechanicInput] = useState(false);
+
+    // Quality Inspection State (Control de Calidad y Salida)
+    const [qualityInspection, setQualityInspection] = useState<QualityInspectionData | null>(null);
+    const [showQualityModal, setShowQualityModal] = useState(false);
+    const [pendingEtapa7, setPendingEtapa7] = useState(false);
+    const [qualityBlockAlert, setQualityBlockAlert] = useState<string | null>(null);
 
     // Refacciones state
     const [parts, setParts] = useState<PartItem[]>([]);
@@ -237,6 +248,9 @@ export default function FloorControlDrawer({
         setParts(Array.isArray(fData.parts) ? fData.parts : []);
         setExternals(Array.isArray(fData.externalServices) ? fData.externalServices : []);
         setLogs(Array.isArray(fData.log) ? fData.log : []);
+        setQualityInspection(fData.qualityInspection || null);
+        setQualityBlockAlert(null);
+        setPendingEtapa7(false);
     }, [vehicle]);
 
     if (!isOpen || !vehicle) return null;
@@ -480,6 +494,15 @@ export default function FloorControlDrawer({
 
     // Update status
     const handleChangeStatus = async (newStat: string) => {
+        // Bloqueo estricto para Etapa 7: Control de Calidad obligatorio
+        if (newStat === "LISTO_ENTREGA" && !isQualityInspectionApproved(qualityInspection)) {
+            setPendingEtapa7(true);
+            setQualityBlockAlert("Para avanzar a 'Listo para Entrega' (Etapa 7), es obligatorio realizar y aprobar el Control de Calidad (torque de 4 ruedas, fluidos y prueba de ruta).");
+            setShowQualityModal(true);
+            return;
+        }
+
+        setQualityBlockAlert(null);
         setCurrentStatus(newStat);
         setSaving(true);
         try {
@@ -512,6 +535,56 @@ export default function FloorControlDrawer({
             }
         } catch (e) {
             console.error("Error al cambiar estatus:", e);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Handler para guardar inspección de calidad
+    const handleSaveQualityInspection = async (data: QualityInspectionData) => {
+        setSaving(true);
+        try {
+            const isApproved = isQualityInspectionApproved(data);
+            const advanceToEtapa7 = pendingEtapa7 && isApproved;
+
+            const res = await fetch("/api/os/recent-vehicles", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    plate: cleanPlate,
+                    qualityInspection: data,
+                    ...(advanceToEtapa7 ? { status: "LISTO_ENTREGA", mechanic: selectedMechanics.join(", ") } : {})
+                }),
+            });
+
+            if (!res.ok) {
+                throw new Error("Error al guardar inspección en servidor");
+            }
+
+            setQualityInspection(data);
+            if (advanceToEtapa7) {
+                setCurrentStatus("LISTO_ENTREGA");
+                setPendingEtapa7(false);
+                setQualityBlockAlert(null);
+            }
+
+            if (onVehicleUpdated) {
+                let mappedStatus = vehicle.status;
+                if (advanceToEtapa7) {
+                    mappedStatus = vehicle.status === 'con_nota' ? "con_nota" : (vehicle.status === 'en_piso_nuevo' ? 'en_piso_nuevo' : 'en_piso_registrado');
+                }
+                onVehicleUpdated({
+                    ...vehicle,
+                    status: mappedStatus,
+                    floorData: {
+                        ...(vehicle.floorData || {}),
+                        qualityInspection: data,
+                        ...(advanceToEtapa7 ? { status: "LISTO_ENTREGA" } : {}),
+                    },
+                });
+            }
+        } catch (e) {
+            console.error("Error al guardar inspección de calidad:", e);
         } finally {
             setSaving(false);
         }
@@ -1364,6 +1437,82 @@ export default function FloorControlDrawer({
                             );
                         })()}
 
+                        {/* Alerta de bloqueo si se intentó pasar a Etapa 7 sin control de calidad */}
+                        {qualityBlockAlert && (
+                            <div className="p-3 bg-red-50 border-2 border-red-300 rounded-xl flex items-start gap-2.5 text-xs text-red-950 shadow-xs animate-in fade-in duration-200">
+                                <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
+                                <div className="flex-1 min-w-0">
+                                    <span className="font-black block text-red-800">
+                                        Paso Bloqueado: Control de Calidad Requerido
+                                    </span>
+                                    <p className="text-[11px] text-red-700 mt-0.5 leading-snug">
+                                        {qualityBlockAlert}
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowQualityModal(true)}
+                                    className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 transition-colors shadow-xs"
+                                >
+                                    Inspeccionar
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Tarjeta Destacada: Control de Calidad y Salida */}
+                        {(() => {
+                            const isApproved = isQualityInspectionApproved(qualityInspection);
+                            return (
+                                <div className={`p-3 rounded-2xl border transition-all ${
+                                    isApproved
+                                        ? "bg-emerald-50/80 border-emerald-300/80 shadow-2xs"
+                                        : "bg-amber-50/90 border-amber-300/90 shadow-2xs"
+                                }`}>
+                                    <div className="flex items-start justify-between gap-2.5">
+                                        <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                                            <div className={`p-2 rounded-xl shrink-0 ${
+                                                isApproved ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                                            }`}>
+                                                {isApproved ? <ShieldCheck size={18} /> : <ShieldAlert size={18} />}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className="text-xs font-black text-slate-800 uppercase tracking-tight">
+                                                        Control de Calidad y Salida
+                                                    </span>
+                                                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                                                        isApproved
+                                                            ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                                            : "bg-amber-100 text-amber-900 border border-amber-200"
+                                                    }`}>
+                                                        {isApproved ? "Aprobado ✓" : "Pendiente"}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
+                                                    {isApproved
+                                                        ? `Aprobado por ${qualityInspection?.inspector || "Supervisor"}${qualityInspection?.technician ? ` · Técnico: ${qualityInspection.technician}` : ""}. 4 ruedas con torque verificado.`
+                                                        : "Filtro obligatorio antes de marcar Etapa 7 (Listo para Entrega). Verifica torque de 4 ruedas, fluidos y prueba de ruta."}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowQualityModal(true)}
+                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 shadow-sm ${
+                                                isApproved
+                                                    ? "bg-white text-emerald-800 border border-emerald-300 hover:bg-emerald-50"
+                                                    : "bg-[#f16315] hover:bg-orange-600 text-white shadow-orange-200"
+                                            }`}
+                                        >
+                                            <ShieldCheck size={14} />
+                                            <span>{isApproved ? "Ver Ficha" : "Revisar Auto"}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+
                         {/* Las 7 Etapas Activas del Pipeline (Secuenciales) */}
                         <div className="space-y-1.5">
                             {WORKSHOP_PIPELINE.map((stage) => {
@@ -1416,15 +1565,28 @@ export default function FloorControlDrawer({
                                             </div>
                                         </div>
 
-                                        <span
-                                            className={`text-[10px] font-mono font-bold flex-shrink-0 px-2 py-0.5 rounded-md ${
-                                                isCurrent
-                                                    ? "bg-white/20 text-white"
-                                                    : "bg-slate-100 text-slate-500"
-                                            }`}
-                                        >
-                                            {stage.progress}%
-                                        </span>
+                                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                                            {stage.id === "LISTO_ENTREGA" && (
+                                                isQualityInspectionApproved(qualityInspection) ? (
+                                                    <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-0.5">
+                                                        <Check size={10} /> Calidad OK
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-0.5">
+                                                        <ShieldAlert size={10} className="text-amber-600" /> Requiere Calidad
+                                                    </span>
+                                                )
+                                            )}
+                                            <span
+                                                className={`text-[10px] font-mono font-bold flex-shrink-0 px-2 py-0.5 rounded-md ${
+                                                    isCurrent
+                                                        ? "bg-white/20 text-white"
+                                                        : "bg-slate-100 text-slate-500"
+                                                }`}
+                                            >
+                                                {stage.progress}%
+                                            </span>
+                                        </div>
                                     </button>
                                 );
                             })}
@@ -2720,6 +2882,20 @@ export default function FloorControlDrawer({
                     </div>
                 </div>
             )}
+
+            {/* Modal de Control de Calidad y Salida */}
+            <QualityInspectionModal
+                isOpen={showQualityModal}
+                onClose={() => {
+                    setShowQualityModal(false);
+                    setPendingEtapa7(false);
+                }}
+                plate={plates}
+                vehicleName={`${vehicle?.vehicle?.brand || ""} ${vehicle?.vehicle?.model || ""} ${vehicle?.vehicle?.year || ""}`}
+                technicians={selectedMechanics.length > 0 ? selectedMechanics : DEFAULT_MECHANICS}
+                initialData={qualityInspection}
+                onSave={handleSaveQualityInspection}
+            />
         </>
     );
 }

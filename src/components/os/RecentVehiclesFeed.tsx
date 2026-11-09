@@ -6,12 +6,16 @@ import {
     Car, User, Clock, FileText, ClipboardList, History,
     Loader2, AlertTriangle, RefreshCw, Gauge, Fuel,
     CheckCircle, PlusCircle, ChevronRight, ChevronLeft, Wrench, UserCheck, UserPlus,
-    MoreVertical, LogOut, RotateCcw, CheckCircle2, ShieldAlert, Sparkles
+    MoreVertical, LogOut, RotateCcw, CheckCircle2, ShieldAlert, ShieldCheck, Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import FloorControlDrawer from "./FloorControlDrawer";
 import { getFloorStage } from "@/types/floor-pipeline";
 import { generateTrackerToken } from "@/lib/tracker-token";
+import {
+    QualityInspectionData,
+    isQualityInspectionApproved
+} from "@/types/quality-inspection";
 
 interface RecentVehicle {
     idx: number;
@@ -36,6 +40,7 @@ interface RecentVehicle {
         parts: any[];
         externalServices: any[];
         log: any[];
+        qualityInspection?: QualityInspectionData | null;
     } | null;
     note: { folio: string; total: number; services: string } | null;
     prefillJson: string;
@@ -216,6 +221,41 @@ function VehicleRow({ v, index, onExpediente, onContextMenu, onSelect, mode = 'f
                                     📦 {v.floorData?.partsCount} refacc.
                                 </span>
                             )}
+
+                            {/* Badge de Control de Calidad y Salida */}
+                            {(() => {
+                                const qData = v.floorData?.qualityInspection;
+                                const isApproved = isQualityInspectionApproved(qData);
+                                if (!v.floorData) return null;
+
+                                if (isApproved) {
+                                    return (
+                                        <span
+                                            className="text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs"
+                                            title={`Control de calidad aprobado por ${qData?.inspector || "Supervisor"}`}
+                                        >
+                                            <ShieldCheck size={11} className="text-emerald-600" />
+                                            <span>Calidad OK</span>
+                                        </span>
+                                    );
+                                } else if (
+                                    v.floorData.status === 'PRUEBAS_CALIDAD' ||
+                                    v.floorData.status === 'LAVADO' ||
+                                    v.floorData.status === 'LISTO_ENTREGA' ||
+                                    qData?.status === 'pendiente'
+                                ) {
+                                    return (
+                                        <span
+                                            className="text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs"
+                                            title="Pendiente de torque de 4 ruedas e inspección de salida"
+                                        >
+                                            <ShieldAlert size={11} className="text-amber-600" />
+                                            <span>Calidad Pendiente</span>
+                                        </span>
+                                    );
+                                }
+                                return null;
+                            })()}
                         </div>
 
                         {/* Client */}
@@ -746,6 +786,13 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                         {contextMenu.vehicle.status !== 'entregado' && (
                             <button
                                 onClick={() => {
+                                    const qData = contextMenu.vehicle?.floorData?.qualityInspection;
+                                    if (!isQualityInspectionApproved(qData)) {
+                                        // Requiere control de calidad antes de entrega
+                                        setSelectedDrawerVehicle(contextMenu.vehicle);
+                                        setContextMenu(prev => ({ ...prev, visible: false }));
+                                        return;
+                                    }
                                     handleSetFloorStatus(contextMenu.vehicle!.vehicle.plates, 'ENTREGADO', 'Entregado al cliente');
                                 }}
                                 className="w-full px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition-colors text-left"

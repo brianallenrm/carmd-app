@@ -4,6 +4,7 @@ export interface QualityInspectionData {
     status: 'aprobado' | 'pendiente';
     inspector: string;
     technician: string;
+    assistantTechnician?: string;
     timestamp: string;
 
     // 🚨 Bloque 1: Seguridad Crítica (Fallas Fatales - 0 Tolerancia)
@@ -34,12 +35,17 @@ export interface QualityInspectionData {
     notes?: string;
 }
 
-export const createDefaultQualityInspection = (plate: string, technician: string = ""): QualityInspectionData => ({
+export const createDefaultQualityInspection = (
+    plate: string,
+    technician: string = "",
+    assistantTechnician: string = ""
+): QualityInspectionData => ({
     id: `qa-${Date.now()}`,
     plate: plate.toUpperCase().replace(/[^A-Z0-9]/g, ''),
     status: 'pendiente',
     inspector: 'Daniel',
     technician: technician || '',
+    assistantTechnician: assistantTechnician || '',
     timestamp: new Date().toISOString(),
     critical: {
         wheelsTorqued: false,

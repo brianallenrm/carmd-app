@@ -788,8 +788,9 @@ export default function RecentVehiclesFeed({ onExpedienteSearch, initialFilterMo
                                 onClick={() => {
                                     const qData = contextMenu.vehicle?.floorData?.qualityInspection;
                                     if (!isQualityInspectionApproved(qData)) {
-                                        // Requiere control de calidad antes de entrega
-                                        setSelectedDrawerVehicle(contextMenu.vehicle);
+                                        // Requiere control de calidad antes de entrega -> abre la página de calidad
+                                        const p = contextMenu.vehicle!.vehicle.plates.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                                        window.location.href = `/os/calidad?plate=${p}&from=${mode === 'piso' ? 'piso' : 'control'}`;
                                         setContextMenu(prev => ({ ...prev, visible: false }));
                                         return;
                                     }

@@ -494,11 +494,11 @@ export default function FloorControlDrawer({
 
     // Update status
     const handleChangeStatus = async (newStat: string) => {
-        // Bloqueo estricto para Etapa 7: Control de Calidad obligatorio
+        // Bloqueo para Etapa 7: Control de Calidad requerido
         if (newStat === "LISTO_ENTREGA" && !isQualityInspectionApproved(qualityInspection)) {
             setPendingEtapa7(true);
-            setQualityBlockAlert("Para avanzar a 'Listo para Entrega' (Etapa 7), es obligatorio realizar y aprobar el Control de Calidad (torque de 4 ruedas, fluidos y prueba de ruta).");
-            setShowQualityModal(true);
+            setQualityBlockAlert("Para avanzar a 'Listo para Entrega' (Etapa 7), es necesario completar la inspección de calidad (torque de 4 ruedas y seguridad). Recuerda que somos responsables de las personas a bordo de este vehículo.");
+            window.location.href = `/os/calidad?plate=${cleanPlate}&from=${mode === 'piso' ? 'piso' : 'control'}`;
             return;
         }
 
@@ -1437,25 +1437,24 @@ export default function FloorControlDrawer({
                             );
                         })()}
 
-                        {/* Alerta de bloqueo si se intentó pasar a Etapa 7 sin control de calidad */}
+                        {/* Alerta si se intentó pasar a Etapa 7 sin control de calidad */}
                         {qualityBlockAlert && (
-                            <div className="p-3 bg-red-50 border-2 border-red-300 rounded-xl flex items-start gap-2.5 text-xs text-red-950 shadow-xs animate-in fade-in duration-200">
-                                <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
+                            <div className="p-3 bg-amber-50 border-2 border-amber-300 rounded-xl flex items-start gap-2.5 text-xs text-amber-950 shadow-xs animate-in fade-in duration-200">
+                                <ShieldCheck size={18} className="text-amber-700 shrink-0 mt-0.5" />
                                 <div className="flex-1 min-w-0">
-                                    <span className="font-black block text-red-800">
-                                        Paso Bloqueado: Control de Calidad Requerido
+                                    <span className="font-black block text-amber-900">
+                                        Control de Calidad Requerido
                                     </span>
-                                    <p className="text-[11px] text-red-700 mt-0.5 leading-snug">
+                                    <p className="text-[11px] text-amber-800 mt-0.5 leading-snug">
                                         {qualityBlockAlert}
                                     </p>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowQualityModal(true)}
-                                    className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 transition-colors shadow-xs"
+                                <a
+                                    href={`/os/calidad?plate=${cleanPlate}&from=${mode === 'piso' ? 'piso' : 'control'}`}
+                                    className="px-2.5 py-1.5 bg-[#f16315] hover:bg-orange-600 text-white rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 transition-colors shadow-xs"
                                 >
-                                    Inspeccionar
-                                </button>
+                                    Ir a Inspección
+                                </a>
                             </div>
                         )}
 
@@ -1491,14 +1490,13 @@ export default function FloorControlDrawer({
                                                 <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
                                                     {isApproved
                                                         ? `Aprobado por ${qualityInspection?.inspector || "Supervisor"}${qualityInspection?.technician ? ` · Técnico: ${qualityInspection.technician}` : ""}. 4 ruedas con torque verificado.`
-                                                        : "Filtro obligatorio antes de marcar Etapa 7 (Listo para Entrega). Verifica torque de 4 ruedas, fluidos y prueba de ruta."}
+                                                        : "Filtro antes de marcar Etapa 7 (Listo para Entrega). Recuerda que somos responsables de las personas a bordo."}
                                                 </p>
                                             </div>
                                         </div>
 
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowQualityModal(true)}
+                                        <a
+                                            href={`/os/calidad?plate=${cleanPlate}&from=${mode === 'piso' ? 'piso' : 'control'}`}
                                             className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 shadow-sm ${
                                                 isApproved
                                                     ? "bg-white text-emerald-800 border border-emerald-300 hover:bg-emerald-50"
@@ -1507,7 +1505,7 @@ export default function FloorControlDrawer({
                                         >
                                             <ShieldCheck size={14} />
                                             <span>{isApproved ? "Ver Ficha" : "Revisar Auto"}</span>
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                             );

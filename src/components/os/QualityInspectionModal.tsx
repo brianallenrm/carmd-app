@@ -43,7 +43,7 @@ interface QualityInspectionModalProps {
     onSave: (data: QualityInspectionData) => Promise<void> | void;
 }
 
-const DEFAULT_INSPECTORS = ["Daniel", "Alejandro", "Jesús", "Israel", "Brian Allen"];
+const DEFAULT_INSPECTORS = ["Alejandra", "Alejandro", "Daniel"];
 
 export default function QualityInspectionModal({
     isOpen,
@@ -286,10 +286,10 @@ export default function QualityInspectionModal({
 
                 {/* Banner de Aviso de Seguridad */}
                 <div className="p-3 bg-amber-50 border-b border-amber-200 flex items-start gap-2.5">
-                    <AlertTriangle size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                    <ShieldCheck size={18} className="text-amber-700 flex-shrink-0 mt-0.5" />
                     <div className="text-[11px] text-amber-900 leading-snug">
-                        <span className="font-bold block">Protocolo de Seguridad con Cero Tolerancia</span>
-                        Verifica físicamente cada punto de seguridad. Esta inspección queda firmada con tu nombre en el expediente del auto.
+                        <span className="font-bold block">Compromiso con la Seguridad</span>
+                        Recuerda que somos responsables de la seguridad y de las personas a bordo de este vehículo. Verifica con calma cada punto antes de autorizar la salida.
                     </div>
                 </div>
 
@@ -301,9 +301,9 @@ export default function QualityInspectionModal({
                     {/* ======================================================== */}
                     <div className="space-y-2.5">
                         <div className="flex items-center justify-between">
-                            <label className="text-[11px] font-black uppercase text-red-700 tracking-wider flex items-center gap-1.5">
-                                <AlertTriangle size={13} className="text-red-500" />
-                                1. Seguridad Crítica (Fallas Fatales)
+                            <label className="text-[11px] font-black uppercase text-amber-900 tracking-wider flex items-center gap-1.5">
+                                <AlertTriangle size={13} className="text-amber-600" />
+                                1. Puntos Críticos de Seguridad en Ruta
                             </label>
                             <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${missingCriticalCount === 0 ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-700"}`}>
                                 {missingCriticalCount === 0 ? "Todo Verificado ✓" : `Faltan ${missingCriticalCount}`}
@@ -610,9 +610,9 @@ export default function QualityInspectionModal({
                             />
                         </div>
 
-                        {/* Declaración Jurada Institucional */}
-                        <div className="p-2.5 bg-slate-100 rounded-xl text-[10px] text-slate-600 border border-slate-200 leading-snug">
-                            <strong>Declaración institucional:</strong> Yo, <strong className="text-slate-900">{data.inspector || "Inspector"}</strong>, certifico haber realizado físicamente el torque de ruedas y la inspección de seguridad de esta unidad antes de su liberación.
+                        {/* Declaración de Compromiso */}
+                        <div className="p-2.5 bg-slate-100 rounded-xl text-[10px] text-slate-700 border border-slate-200 leading-snug">
+                            <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{data.inspector || "Inspector"}</strong>, certifico haber realizado físicamente la revisión de torque de ruedas y seguridad para garantizar la protección y tranquilidad de las personas a bordo.
                         </div>
                     </div>
                 </div>

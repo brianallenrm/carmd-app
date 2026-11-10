@@ -20,6 +20,7 @@ import {
     Wrench,
     Disc,
     Droplet,
+    Battery,
     Activity,
     Wind,
     Eye,
@@ -230,9 +231,10 @@ export default function QualityInspectionModal({
 
     const criticalItems = [
         { label: "Torque de 4 ruedas", ok: wheelsAllOk },
-        { label: "Nivel de aceite y tapón", ok: data.critical.oilAndFilterOk },
+        { label: "Aceite de motor", ok: data.critical.oilAndFilterOk },
         { label: "Líquido de frenos y pedal firme", ok: data.critical.brakeFluidAndPedalOk },
-        { label: "Anticongelante y tapón hermético", ok: data.critical.coolantCapOk },
+        { label: "Anticongelante y tapón", ok: data.critical.coolantCapOk },
+        { label: "Acumulador y terminales", ok: Boolean(data.critical.batteryTerminalsOk) },
         { label: "Presión de llantas verificada", ok: data.critical.tirePressureOk },
         { label: "Prueba de ruta sin testigos", ok: data.critical.roadTestAndDashboardOk },
     ];
@@ -435,11 +437,11 @@ export default function QualityInspectionModal({
                             </div>
                         </div>
 
-                        {/* CUADRÍCULA DE OTROS 5 PUNTOS CRÍTICOS (ESTILO FUNCTIONAL INSPECTION) */}
+                        {/* CUADRÍCULA DE OTROS 6 PUNTOS CRÍTICOS (ESTILO FUNCTIONAL INSPECTION) */}
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             <CriticalCardToggle
                                 icon={Droplet}
-                                title="Aceite / Filtro"
+                                title="Aceite de Motor"
                                 subtitle="Nivel y tapón apretado"
                                 active={data.critical.oilAndFilterOk}
                                 onClick={() => toggleCritical("oilAndFilterOk")}
@@ -454,9 +456,16 @@ export default function QualityInspectionModal({
                             <CriticalCardToggle
                                 icon={Droplet}
                                 title="Anticongelante"
-                                subtitle="Tapón hermético"
+                                subtitle="Nivel en depósito y tapón"
                                 active={data.critical.coolantCapOk}
                                 onClick={() => toggleCritical("coolantCapOk")}
+                            />
+                            <CriticalCardToggle
+                                icon={Battery}
+                                title="Acumulador"
+                                subtitle="Sin sulfato y terminales"
+                                active={Boolean(data.critical.batteryTerminalsOk)}
+                                onClick={() => toggleCritical("batteryTerminalsOk")}
                             />
                             <CriticalCardToggle
                                 icon={Wind}
@@ -471,7 +480,6 @@ export default function QualityInspectionModal({
                                 subtitle="Sin ruidos ni testigos"
                                 active={data.critical.roadTestAndDashboardOk}
                                 onClick={() => toggleCritical("roadTestAndDashboardOk")}
-                                className="col-span-2 sm:col-span-2"
                             />
                         </div>
                     </div>
@@ -501,7 +509,7 @@ export default function QualityInspectionModal({
                                 onClick={() => toggleAesthetic("cleanInteriorNoGrease")}
                             />
                             <AestheticRowToggle
-                                label="Pertenencias de inventario devueltas"
+                                label="Pertenencias de inventario"
                                 active={data.aesthetic.belongingsReturned}
                                 onClick={() => toggleAesthetic("belongingsReturned")}
                             />
@@ -511,7 +519,7 @@ export default function QualityInspectionModal({
                                 onClick={() => toggleAesthetic("washAndVacuumDone")}
                             />
                             <AestheticRowToggle
-                                label="Herramienta, gato y refacción guardados"
+                                label="Birlo de seguridad y herramienta"
                                 active={data.aesthetic.toolsAndSpareSecured}
                                 onClick={() => toggleAesthetic("toolsAndSpareSecured")}
                             />

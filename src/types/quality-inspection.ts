@@ -19,6 +19,7 @@ export interface QualityInspectionData {
         oilAndFilterOk: boolean;
         brakeFluidAndPedalOk: boolean;
         coolantCapOk: boolean;
+        batteryTerminalsOk?: boolean;
         tirePressureOk: boolean;
         roadTestAndDashboardOk: boolean;
     };
@@ -58,6 +59,7 @@ export const createDefaultQualityInspection = (
         oilAndFilterOk: false,
         brakeFluidAndPedalOk: false,
         coolantCapOk: false,
+        batteryTerminalsOk: false,
         tirePressureOk: false,
         roadTestAndDashboardOk: false,
     },
@@ -92,6 +94,7 @@ export const isQualityInspectionApproved = (data?: QualityInspectionData | null)
         critical.oilAndFilterOk &&
         critical.brakeFluidAndPedalOk &&
         critical.coolantCapOk &&
+        critical.batteryTerminalsOk !== false &&
         critical.tirePressureOk &&
         critical.roadTestAndDashboardOk &&
         Boolean(data.inspector?.trim())

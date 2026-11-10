@@ -18,6 +18,7 @@ import {
     Check,
     Disc,
     Droplet,
+    Battery,
     Activity,
     Wind,
     ArrowLeft,
@@ -319,9 +320,10 @@ function CalidadWizardContent() {
 
     const criticalItems = [
         { label: "Torque en las 4 ruedas", ok: wheelsAllOk },
-        { label: "Nivel de aceite y tapón", ok: data.critical.oilAndFilterOk },
+        { label: "Aceite de motor", ok: data.critical.oilAndFilterOk },
         { label: "Líquido de frenos y pedal", ok: data.critical.brakeFluidAndPedalOk },
         { label: "Anticongelante y tapón", ok: data.critical.coolantCapOk },
+        { label: "Acumulador y terminales", ok: Boolean(data.critical.batteryTerminalsOk) },
         { label: "Presión de llantas", ok: data.critical.tirePressureOk },
         { label: "Prueba de ruta", ok: data.critical.roadTestAndDashboardOk },
     ];
@@ -761,8 +763,8 @@ function CalidadWizardContent() {
                                 <div className="space-y-1.5">
                                     <CriticalCheckCard
                                         icon={Droplet}
-                                        title="Aceite de Motor y Filtro"
-                                        subtitle="Nivel en varilla y tapón superior apretado"
+                                        title="Aceite de Motor"
+                                        subtitle="Nivel correcto y tapón apretado"
                                         active={data.critical.oilAndFilterOk}
                                         onClick={() => toggleCritical("oilAndFilterOk")}
                                     />
@@ -776,9 +778,16 @@ function CalidadWizardContent() {
                                     <CriticalCheckCard
                                         icon={Droplet}
                                         title="Anticongelante y Tapón"
-                                        subtitle="Nivel en depósito y tapón hermético cerrado"
+                                        subtitle="Nivel correcto en depósito y tapón apretado"
                                         active={data.critical.coolantCapOk}
                                         onClick={() => toggleCritical("coolantCapOk")}
+                                    />
+                                    <CriticalCheckCard
+                                        icon={Battery}
+                                        title="Acumulador y Terminales"
+                                        subtitle="Inspección visual: sin sulfatación y terminales firmes"
+                                        active={Boolean(data.critical.batteryTerminalsOk)}
+                                        onClick={() => toggleCritical("batteryTerminalsOk")}
                                     />
                                     <CriticalCheckCard
                                         icon={Wind}
@@ -938,7 +947,7 @@ function CalidadWizardContent() {
                                         onClick={() => toggleAesthetic("cleanInteriorNoGrease")}
                                     />
                                     <AestheticCheckCard
-                                        label="Pertenencias de inventario devueltas"
+                                        label="Pertenencias de inventario"
                                         sub="Objetos en cajuela y guantera en su lugar"
                                         active={data.aesthetic.belongingsReturned}
                                         onClick={() => toggleAesthetic("belongingsReturned")}
@@ -950,7 +959,7 @@ function CalidadWizardContent() {
                                         onClick={() => toggleAesthetic("washAndVacuumDone")}
                                     />
                                     <AestheticCheckCard
-                                        label="Herramienta, gato y birlo de seguridad"
+                                        label="Birlo de seguridad y herramienta"
                                         sub="Kit completo guardado en cajuela"
                                         active={data.aesthetic.toolsAndSpareSecured}
                                         onClick={() => toggleAesthetic("toolsAndSpareSecured")}
@@ -1190,7 +1199,7 @@ function CalidadWizardContent() {
                         <div className="text-xs">
                             {missingCriticalCount === 0 ? (
                                 <span className="font-bold text-emerald-700 flex items-center gap-1">
-                                    <CheckCircle2 size={15} /> 6/6 Listos
+                                    <CheckCircle2 size={15} /> {criticalItems.length}/{criticalItems.length} Listos
                                 </span>
                             ) : (
                                 <span className="font-bold text-amber-800 text-[11px] flex items-center gap-1">

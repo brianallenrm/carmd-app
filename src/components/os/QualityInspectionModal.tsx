@@ -248,12 +248,12 @@ export default function QualityInspectionModal({
         const hasAssistant = asst && asst !== "Sin Auxiliar (Solo)" && asst !== "Sin Auxiliar" && asst !== "Solo";
         const insp = data.inspector?.trim();
 
-        const roleForInsp = (name?: string) => (name?.toLowerCase() === "alejandra" ? "Inspectora de Salida" : "Inspector de Salida");
+        const roleForInsp = "Responsable de Salida";
 
         if (tech && insp && tech.toLowerCase() === insp.toLowerCase() && !hasAssistant) {
             return (
                 <span>
-                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{insp}</strong> (Técnico e Inspector), certifico haber realizado y verificado personalmente el torque de las 4 ruedas y puntos de seguridad de esta unidad, asumiendo la responsabilidad directa por la protección y tranquilidad de las personas a bordo.
+                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{insp}</strong> (Técnico y Responsable de Salida), certifico haber realizado y verificado personalmente el torque de las 4 ruedas y puntos de seguridad de esta unidad, asumiendo la responsabilidad directa por la protección y tranquilidad de las personas a bordo.
                 </span>
             );
         }
@@ -261,7 +261,7 @@ export default function QualityInspectionModal({
         if (tech && hasAssistant && insp) {
             return (
                 <span>
-                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico), <strong className="text-slate-900">{asst}</strong> (Auxiliar Técnico) y <strong className="text-slate-900">{insp}</strong> ({roleForInsp(insp)}), certificamos haber realizado y verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico), <strong className="text-slate-900">{asst}</strong> (Auxiliar Técnico) y <strong className="text-slate-900">{insp}</strong> ({roleForInsp}), certificamos haber realizado y verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
                 </span>
             );
         }
@@ -269,7 +269,7 @@ export default function QualityInspectionModal({
         if (tech && insp) {
             return (
                 <span>
-                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico) y <strong className="text-slate-900">{insp}</strong> ({roleForInsp(insp)}), certificamos haber realizado y verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico) y <strong className="text-slate-900">{insp}</strong> ({roleForInsp}), certificamos haber realizado y verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
                 </span>
             );
         }
@@ -285,7 +285,7 @@ export default function QualityInspectionModal({
         if (insp) {
             return (
                 <span>
-                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{insp}</strong> ({roleForInsp(insp)}), certifico haber verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{insp}</strong> ({roleForInsp}), certifico haber verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
                 </span>
             );
         }
@@ -519,7 +519,7 @@ export default function QualityInspectionModal({
                                 onClick={() => toggleAesthetic("washAndVacuumDone")}
                             />
                             <AestheticRowToggle
-                                label="Birlo de seguridad y herramienta"
+                                label="Birlo de seguridad (Listo para entrega en mano a propietario)"
                                 active={data.aesthetic.toolsAndSpareSecured}
                                 onClick={() => toggleAesthetic("toolsAndSpareSecured")}
                             />
@@ -680,10 +680,10 @@ export default function QualityInspectionModal({
                             </div>
                         </div>
 
-                        {/* Inspector de Calidad */}
+                        {/* Responsable que Certifica Salida */}
                         <div>
                             <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">
-                                Inspector que certifica la salida:
+                                Responsable que certifica la salida:
                             </span>
                             <div className="flex flex-wrap gap-1">
                                 {DEFAULT_INSPECTORS.map((insp) => {

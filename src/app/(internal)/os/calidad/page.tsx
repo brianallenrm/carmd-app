@@ -351,7 +351,7 @@ function CalidadWizardContent() {
     // Guardar borrador o Aprobar Salida
     const handleSubmit = async (approve: boolean) => {
         if (approve && !canApprove) {
-            setErrorMessage("Debes verificar todos los puntos críticos y seleccionar al técnico e inspector antes de autorizar.");
+            setErrorMessage("Debes verificar todos los puntos críticos y seleccionar al técnico y responsable de salida antes de autorizar.");
             return;
         }
 
@@ -410,36 +410,36 @@ function CalidadWizardContent() {
         const hasAssistant = asst && asst !== "Sin Auxiliar (Solo)" && asst !== "Sin Auxiliar" && asst !== "Solo";
         const insp = data.inspector?.trim();
 
-        const roleForInsp = (name?: string) => (name?.toLowerCase() === "alejandra" ? "Inspectora de Salida" : "Inspector de Salida");
+        const roleForInsp = "Responsable de Salida";
 
-        // Caso especial: Mismo técnico e inspector, sin auxiliar
+        // Caso especial: Mismo técnico y responsable de salida, sin auxiliar
         if (tech && insp && tech.toLowerCase() === insp.toLowerCase() && !hasAssistant) {
             return (
                 <span>
-                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{insp}</strong> (Técnico e Inspector), certifico haber realizado y verificado personalmente el torque de las 4 ruedas y puntos de seguridad de esta unidad, asumiendo la responsabilidad directa por la protección y tranquilidad de las personas a bordo.
+                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{insp}</strong> (Técnico y Responsable de Salida), certifico haber realizado y verificado personalmente el torque de las 4 ruedas y puntos de seguridad de esta unidad, asumiendo la responsabilidad directa por la protección y tranquilidad de las personas a bordo.
                 </span>
             );
         }
 
-        // Caso 3 personas: Técnico + Auxiliar + Inspector
+        // Caso 3 personas: Técnico + Auxiliar + Responsable de Salida
         if (tech && hasAssistant && insp) {
             return (
                 <span>
-                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico), <strong className="text-slate-900">{asst}</strong> (Auxiliar Técnico) y <strong className="text-slate-900">{insp}</strong> ({roleForInsp(insp)}), certificamos haber realizado y verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico), <strong className="text-slate-900">{asst}</strong> (Auxiliar Técnico) y <strong className="text-slate-900">{insp}</strong> ({roleForInsp}), certificamos haber realizado y verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
                 </span>
             );
         }
 
-        // Caso 2 personas: Técnico + Inspector (Sin auxiliar)
+        // Caso 2 personas: Técnico + Responsable de Salida (Sin auxiliar)
         if (tech && insp) {
             return (
                 <span>
-                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico) y <strong className="text-slate-900">{insp}</strong> ({roleForInsp(insp)}), certificamos haber realizado y verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+                    <strong>Compromiso de entrega:</strong> Nosotros, <strong className="text-slate-900">{tech}</strong> (Técnico Mecánico) y <strong className="text-slate-900">{insp}</strong> ({roleForInsp}), certificamos haber realizado y verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
                 </span>
             );
         }
 
-        // Caso 2 personas: Técnico + Auxiliar (sin inspector asignado aún)
+        // Caso 2 personas: Técnico + Auxiliar (sin responsable asignado aún)
         if (tech && hasAssistant) {
             return (
                 <span>
@@ -448,11 +448,11 @@ function CalidadWizardContent() {
             );
         }
 
-        // Caso 1 persona: Solo Inspector
+        // Caso 1 persona: Solo Responsable de Salida
         if (insp) {
             return (
                 <span>
-                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{insp}</strong> ({roleForInsp(insp)}), certifico haber verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
+                    <strong>Compromiso de entrega:</strong> Yo, <strong className="text-slate-900">{insp}</strong> ({roleForInsp}), certifico haber verificado físicamente el torque de 4 ruedas y puntos de seguridad de esta unidad, garantizando la protección y tranquilidad de las personas a bordo.
                 </span>
             );
         }
@@ -959,8 +959,8 @@ function CalidadWizardContent() {
                                         onClick={() => toggleAesthetic("washAndVacuumDone")}
                                     />
                                     <AestheticCheckCard
-                                        label="Birlo de seguridad y herramienta"
-                                        sub="Kit completo guardado en cajuela"
+                                        label="Birlo de seguridad"
+                                        sub="Listo para entrega en mano a propietario"
                                         active={data.aesthetic.toolsAndSpareSecured}
                                         onClick={() => toggleAesthetic("toolsAndSpareSecured")}
                                     />
@@ -1109,10 +1109,10 @@ function CalidadWizardContent() {
                                     </div>
                                 </div>
 
-                                {/* 3. Inspector / Visto Bueno de Salida */}
+                                {/* 3. Responsable / Visto Bueno de Salida */}
                                 <div>
                                     <label className="text-[10px] font-black uppercase text-slate-600 tracking-wider block mb-1">
-                                        3. Inspector que Certifica Salida (Visto Bueno):
+                                        3. Responsable que Certifica Salida (Visto Bueno):
                                     </label>
                                     <div className="flex flex-wrap gap-1">
                                         {DEFAULT_INSPECTORS.map((insp) => {
